@@ -267,7 +267,9 @@ var RILEY = (function () {
   // After a fight ends. won = the player won.
   function settle(mem, pr, won) {
     mem.fights++;
-    mem.lastStyle = describeStyle(pr) || mem.lastStyle;
+    // only ever describe the fight that just happened; an older style would
+    // make "LAST TIME YOU..." untrue (the playtest caught exactly that)
+    mem.lastStyle = describeStyle(pr);
     if (won) { mem.wins++; mem.lossStreak = 0; mem.ease = 0; }
     else { mem.lossStreak++; mem.ease = Math.min(MAX_EASE, mem.lossStreak); }
     return mem;
