@@ -8,7 +8,8 @@
 //
 // What it knows: the level layout (like a player who has opened the automap)
 // and what it can see or has recently seen. It does not know where demons are
-// until it has line of sight to them.
+// until it has line of sight to them, and it only goes after a secret wall once
+// it has looked at that wall up close (then presses E on it, if curious enough).
 //
 // Personas come from ProfileEngine's synthetic-persona package (Big Five
 // traits on a -1..1 scale plus risk tolerance and response speed); see
@@ -63,8 +64,10 @@ PlayBot.prototype.reset = function () {
   this.dodgeT = 0; this.dodgeDir = 1;
   this.useCool = 0; this.pressUse = false;
   this.banned = {}; // goal key -> time until which it is skipped
+  this.fightProgress = null; // { target, hp, since }: a fight that stops going anywhere gets dropped
   this.now = 0;
   this.tried = {};  // secret walls already tried
+  this.spotted = this.spotted || {}; // secret walls it has actually looked at (kept across retries, like a player's memory)
 };
 
 // ---- the map, as the player can know it -------------------------------------
@@ -142,6 +145,15 @@ PlayBot.prototype.perceive = function () {
       threats.push({ e: e, d: d, visible: this.known.get(e) === this.now });
     }
   }
+  // a secret wall only becomes a goal once it has been in view up close,
+  // so the find rate says something about how discoverable it is
+  for (var k in G.doors) {
+    var dr = G.doors[k];
+    if (!dr.secret || dr.found || this.spotted[k]) continue;
+    var cx = dr.x + 0.5, cy = dr.y + 0.5, ddx = cx - p.x, ddy = cy - p.y, dd = Math.sqrt(ddx * ddx + ddy * ddy);
+    if (dd > 8 || Math.abs(angDiff(Math.atan2(ddy, ddx), p.ang)) > 0.6) continue;
+    if (this.los(p.x, p.y, cx - ddx / dd * 0.55, cy - ddy / dd * 0.55)) { this.spotted[k] = true; this.log.secretsSpotted = (this.log.secretsSpotted || 0) + 1; }
+  }
   return threats;
 };
 
@@ -160,6 +172,7 @@ PlayBot.prototype.options = function (threats) {
     var sc = 1.2 + st.aggression * 0.8 - t.d * 0.04 + (t.e.kind === 'riley' ? 0.6 : 0) + (t.e.state !== 'idle' ? 0.4 : 0);
     if (hurt && t.e.kind !== 'riley') sc -= 0.6;
     if (dry && t.d > 3) sc -= 1.2; // only punch what is already in your face
+    if (self.banned['fight:' + t.e.id] > self.now) return;
     opts.push({ kind: 'fight', target: t.e, score: sc, key: 'fight' });
   });
 
@@ -186,10 +199,16 @@ PlayBot.prototype.options = function (threats) {
   }
 
   // suspicious walls (secret doors look different from their neighbours)
+  // secret areas behind walls already opened: step inside, it's why you opened them
+  G.secrets.forEach(function (sec) {
+    if (sec.found) return;
+    var key = 'area:' + sec.x + ',' + sec.y;
+    opts.push({ kind: 'item', target: { x: sec.x + 0.5, y: sec.y + 0.5 }, score: 0.5 + st.curiosity * 0.6, key: key, gx: sec.x, gy: sec.y });
+  });
   if (st.curiosity > 0.55) {
     for (var k in G.doors) {
       var dr = G.doors[k];
-      if (!dr.secret || dr.found || this.tried[k] || this.banned['secret:' + k] > this.now) continue;
+      if (!dr.secret || dr.found || !this.spotted[k] || this.tried[k] || this.banned['secret:' + k] > this.now) continue;
       opts.push({ kind: 'secret', door: dr, score: 0.3 + st.curiosity * 0.5, key: 'secret:' + k });
     }
   }
@@ -362,7 +381,19 @@ PlayBot.prototype.step = function (dt) {
   }
 
   switch (plan.kind) {
-    case 'fight': return this.fight(plan.target, dt);
+    case 'fight': {
+      // no damage dealt for 10 seconds (wedged, or out of reach): give it up for a while
+      var fp = this.fightProgress, tg = plan.target;
+      if (!fp || fp.target !== tg || tg.hp < fp.hp) this.fightProgress = fp = { target: tg, hp: tg.hp, since: this.now };
+      if (this.now - fp.since > 10) {
+        tg.id = tg.id || (this.nextId = (this.nextId || 0) + 1);
+        this.banned['fight:' + tg.id] = this.now + 12;
+        this.log.abandonedFights = (this.log.abandonedFights || 0) + 1;
+        this.fightProgress = null; this.plan = null; this.FB.setFire(false);
+        return this.setMove(null);
+      }
+      return this.fight(tg, dt);
+    }
     case 'boss': return this.goTo(function (x, y) {
       return self.los(x + 0.5, y + 0.5, plan.target.x, plan.target.y) && Math.hypot(x + 0.5 - plan.target.x, y + 0.5 - plan.target.y) < 9;
     }, dt, function () { p.ang = Math.atan2(plan.target.y - p.y, plan.target.x - p.x); self.known.set(plan.target, self.now); });
