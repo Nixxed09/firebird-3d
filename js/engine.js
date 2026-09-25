@@ -1619,8 +1619,9 @@
         seen[mapY * mw + mapX] = 1;
         var cid = cells[mapY * mw + mapX];
         if (cid === 0) continue;
-        if (DOOR_IDS[cid]) {
-          var dr = G.doors[mapX + ',' + mapY];
+        var dr = DOOR_IDS[cid] ? G.doors[mapX + ',' + mapY] : null;
+        // a closed secret wall sits flush like any wall; only a door is set back
+        if (dr && !(dr.secret && dr.open <= 0)) {
           var o = dr ? dr.open : 0;
           if (side === 0) {
             var t = (mapX + 0.5 - p.x) / rdx;

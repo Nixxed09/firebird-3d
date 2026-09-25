@@ -1167,17 +1167,22 @@ var ART = (function () {
   A.secretTex = function (baseId) {
     if (secretCache[baseId]) return secretCache[baseId];
     var base = A.tex[baseId] || A.tex[1], data = new Uint32Array(base.data);
-    function darken(i) {
-      var c = data[i];
-      data[i] = (0xff000000 | (((c >> 16) & 255) * 0.45) << 16 | (((c >> 8) & 255) * 0.45) << 8 | ((c & 255) * 0.45)) >>> 0;
+    // average brightness decides the crack: dark on light walls, light on dark ones
+    var sum = 0;
+    for (var i0 = 0; i0 < data.length; i0++) { var c0 = data[i0]; sum += ((c0 >> 16) & 255) + ((c0 >> 8) & 255) + (c0 & 255); }
+    var lightWall = sum / data.length / 3 > 70;
+    function mark(i) {
+      var c = data[i], r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+      if (lightWall) { r *= 0.35; g *= 0.35; b *= 0.35; }
+      else { r = r * 0.5 + 110; g = g * 0.5 + 95; b = b * 0.5 + 80; } // a pale seam on dark rock
+      data[i] = (0xff000000 | (r & 255) << 16 | (g & 255) << 8 | (b & 255)) >>> 0;
     }
     var x = 22;
-    for (var y = 8; y < 56; y++) { // a jagged hairline down the middle
+    for (var y = 6; y < 58; y++) { // a jagged seam down the middle, 2 texels wide so distance can't skip it
       x += (y % 7 === 0) ? 1 : (y % 11 === 0) ? -1 : 0;
-      darken(y * 64 + x);
-      if (y % 9 === 4) darken(y * 64 + x + 1);
+      mark(y * 64 + x); mark(y * 64 + x + 1);
     }
-    for (var k = 0; k < 6; k++) darken((30 + k) * 64 + x + 1 + k); // a short branch
+    for (var k = 0; k < 7; k++) mark((30 + k) * 64 + x + 2 + k); // a short branch
     secretCache[baseId] = { w: 64, h: 64, data: data };
     return secretCache[baseId];
   };

@@ -150,6 +150,7 @@ status. Run the level checker after changing a map.
 node tests/riley.test.js      # Riley's brain
 node tests/headless.test.js   # the real engine, playing scripted scenarios (incl. HUD/menu logic)
 node tests/levels.contract.test.js  # every map vs the Level Design Contract
+node tests/secret-visibility.js  # renders each secret wall: is the crack hint visible at 5 tiles?
 node tests/playtest.js        # bot personas play the whole episode -> captures/playtest-report.md
 node tests/snapshot.js        # renders fight frames to captures/*.png
 ```
