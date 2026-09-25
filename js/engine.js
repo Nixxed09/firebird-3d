@@ -174,8 +174,8 @@
 
   var WEAPONS = {
     fist: { ammo: null, rate: 0.5, melee: true, dmgMin: 8, dmgMax: 24, art: 'fist', sound: 'punch', sc: 3 },
-    pistol: { ammo: 'bullets', rate: 0.42, pellets: 1, spread: 0.025, dmgMin: 5, dmgMax: 15, art: 'pistol', sound: 'pistol', sc: 2 },
-    shotgun: { ammo: 'shells', rate: 0.95, pellets: 7, spread: 0.10, dmgMin: 5, dmgMax: 15, art: 'shotgun', sound: 'shotgun', sc: 2 }
+    pistol: { ammo: 'bullets', rate: 0.42, pellets: 1, spread: 0.025, dmgMin: 5, dmgMax: 15, art: 'pistol', sound: 'pistol', sc: 2, knock: 0.03, shake: 0.6 },
+    shotgun: { ammo: 'shells', rate: 0.95, pellets: 7, spread: 0.10, dmgMin: 5, dmgMax: 15, art: 'shotgun', sound: 'shotgun', sc: 2, knock: 0.045, shake: 2.2 }
   };
 
   var WEAPON_ORDER = ['fist', 'pistol', 'shotgun'];
@@ -301,6 +301,36 @@
     };
   }
 
+  // keys you have laid eyes on get a goal marker
+  function spotKeys() {
+    var p = G.p;
+    for (var i = 0; i < G.ents.length; i++) {
+      var e = G.ents[i];
+      if (e.kind !== 'pickup' || e.spotted || (e.item !== 'r' && e.item !== 'u')) continue;
+      if (dist2(e.x, e.y, p.x, p.y) < 196 && hasLOS(p.x, p.y, e.x, e.y)) e.spotted = true;
+    }
+  }
+
+  // Where the current goal is, but only once you've seen it: { x, y } or null.
+  function goalTarget() {
+    var info = G.info, p = G.p, k;
+    var need = info.keys.blue && !p.keys.blue ? 'u' : info.keys.red && !p.keys.red ? 'r' : null;
+    if (need) {
+      for (var i = 0; i < G.ents.length; i++) {
+        var e = G.ents[i];
+        if (e.kind === 'pickup' && e.item === need && !e.gone) return e.spotted ? { x: e.x, y: e.y } : null;
+      }
+      return null;
+    }
+    for (k in G.doors) {
+      var d = G.doors[k];
+      if (d.locked && !d.used && G.seen[d.y * G.mw + d.x]) return { x: d.x + 0.5, y: d.y + 0.5 };
+    }
+    var ex = G.exitCell;
+    if (!info.boss && ex && G.seen[ex.y * G.mw + ex.x]) return { x: ex.x + 0.5, y: ex.y + 0.5 };
+    return null;
+  }
+
   // the next thing to do, right now
   function currentObjective() {
     if (!G) return '';
@@ -362,6 +392,7 @@
     var doors = {};
     var ents = [];
     var secrets = [];
+    var exitCell = null;
     var old = gear || (keepGear && G ? snapshotGear(G.p) : null);
 
     var p = {
@@ -402,6 +433,7 @@
         else if (ch === 't') ents.push({ kind: 'torch', x: cx, y: cy, z: 0, h: 0.95, w: 0.34, bright: true, animT: rnd() });
         else if (ITEMS[ch]) ents.push({ kind: 'pickup', item: ch, x: cx, y: cy, z: 0, h: ITEMS[ch].h, w: ITEMS[ch].w });
         else if (ch === '*') secrets.push({ x: x, y: y, found: false });
+        if (ch === 'X') exitCell = { x: x, y: y };
       }
     }
 
@@ -430,8 +462,10 @@
       notice: null,         // big centered announcement
       hurtDirs: [],         // where recent hits came from
       hitT: 0, killT: 0, blockT: 0, // crosshair hit markers
+      shake: 0, hitstop: 0,  // screen shake (pixels) and the tiny freeze on a kill
       killer: null,
-      tipQueue: [], tipT: 3, usedMap: false, ranT: 0
+      tipQueue: [], tipT: 3, usedMap: false, ranT: 0,
+      exitCell: exitCell, spotT: 0
     };
     for (var bi = 0; bi < ents.length; bi++) if (ents[bi].kind === 'riley') G.boss = ents[bi];
     mode = 'game';
@@ -451,6 +485,10 @@
   function message(text, color, secs) {
     G.msgs.push({ text: text, t: secs || 3, color: color });
     if (G.msgs.length > 4) G.msgs.shift();
+  }
+
+  function shake(px) {
+    if (G && SETTINGS.v.shake) G.shake = Math.min(6, Math.max(G.shake, px));
   }
 
   function notice(text, color, secs) {
@@ -592,6 +630,7 @@
   function openDoor(d, byPlayer) {
     if (d.state === 'closed' || d.state === 'closing') {
       d.state = 'opening';
+      if (byPlayer) d.used = true;
       SND.play('doorOpen', playerDist(d.x + 0.5, d.y + 0.5));
       if (d.secret && !d.found) d.found = true; // sound of a secret wall grinding open
     } else if (byPlayer && d.state === 'open') {
@@ -723,7 +762,8 @@
     });
   }
 
-  function fireHitscan(ang, dmgMin, dmgMax, isMelee) {
+  // knock: how far a hit shoves the demon back (heavy demons shrug it off)
+  function fireHitscan(ang, dmgMin, dmgMax, isMelee, knock) {
     var p = G.p;
     var c = Math.cos(ang), s = Math.sin(ang);
     var wall = castRay(p.x, p.y, c, s, isMelee ? 1.4 : 40);
@@ -743,8 +783,13 @@
       damageMob(best, dmg);
       if (!best.barrel) {
         if (best.kind === 'riley' && best.shieldT > 0) G.blockT = 0.2;
-        else if (best.state === 'die') G.killT = 0.3;
+        else if (best.state === 'die') { G.killT = 0.3; G.hitstop = Math.max(G.hitstop, 0.045); }
         else G.hitT = Math.max(G.hitT, 0.14);
+        var def = MOBS[best.kind];
+        if (knock && !def.boss) {
+          var kb = knock * (def.hp > 200 ? 0.25 : 1);
+          slideMove(best, c * kb, s * kb, best.radius);
+        }
       }
       spawnPart(best.x - c * best.radius, best.y - s * best.radius, rndIn(0.3, 0.6),
         best.barrel || best.kind === 'riley' ? ['puffA', 'puffB'] : ['bloodA', 'bloodB'], 0.25);
@@ -766,6 +811,7 @@
     if (e.state === 'die' || e.state === 'dead') return;
     if (e.kind === 'riley' && rileyTakeHit(e, src)) return;
     e.hp -= dmg;
+    e.flashT = 0.07; // the white hit flash
     if (e.barrel) {
       e.blame = alive(src) ? src : null; // whoever sets it off owns the blast
       if (e.hp <= 0 && e.state !== 'boom') { e.state = 'boom'; e.st = 0.08; }
@@ -814,6 +860,7 @@
       }
     }
     makeNoise(e.x, e.y, 10);
+    shake(6 / (1 + playerDist(e.x, e.y) * 0.35));
     var pd = Math.sqrt(dist2(G.p.x, G.p.y, e.x, e.y));
     if (pd < R && hasLOS(e.x, e.y, G.p.x, G.p.y)) hurtPlayer(((R - pd) / R * 70) | 0, e);
   }
@@ -837,6 +884,7 @@
     dmg -= absorbed;
     p.hp -= dmg;
     p.dmgFlash = Math.min(0.65, p.dmgFlash + dmg / 55);
+    shake(Math.min(4, 1 + dmg / 8));
     p.painT = 0.6;
     if (p.hp <= 0) {
       p.hp = 0; p.dead = true; p.deadT = 0;
@@ -874,6 +922,7 @@
     e.animT += dt;
     e.st -= dt;
     e.cool -= dt;
+    e.flashT = (e.flashT || 0) - dt;
 
     // who are we after? another demon holding a grudge, or the player
     if (e.target && !alive(e.target)) { e.target = null; e.cool = Math.min(e.cool, 0.4); }
@@ -1148,6 +1197,7 @@
   function updateRiley(e, dt) {
     var p = G.p, pr = e.profile;
     e.animT += dt; e.st -= dt; e.talkT -= dt; e.shieldT -= dt; e.moveT -= dt;
+    e.flashT = (e.flashT || 0) - dt;
     for (var ck in e.cools) e.cools[ck] -= dt;
     e.losT -= dt;
     if (e.losT <= 0) { e.losT = 0.15; e.los = hasLOS(e.x, e.y, p.x, p.y); }
@@ -1233,6 +1283,7 @@
     var p = G.p;
     G.time += dt;
     flashT = Math.max(0, flashT - dt);
+    G.shake = Math.max(0, G.shake - dt * 14);
     p.dmgFlash = Math.max(0, p.dmgFlash - dt * 0.8);
     p.bonusFlash = Math.max(0, p.bonusFlash - dt * 1.5);
     p.painT = Math.max(0, p.painT - dt);
@@ -1244,16 +1295,22 @@
     G.hitT -= dt; G.killT -= dt; G.blockT -= dt;
     for (var hd = G.hurtDirs.length - 1; hd >= 0; hd--) if ((G.hurtDirs[hd].t -= dt * 0.9) <= 0) G.hurtDirs.splice(hd, 1);
     updateTips(dt);
+    G.spotT -= dt;
+    if (G.spotT <= 0) { G.spotT = 0.3; spotKeys(); }
 
     if (G.exitT >= 0) {
       G.exitT -= dt;
       if (G.exitT <= 0) {
         SETTINGS.unlock(Math.min(levelIndex + 1, LEVELS.length - 1));
+        var rec0 = { time: G.time, par: G.L.par, kills: G.stats.kills, totalKills: G.stats.totalKills,
+          items: G.stats.items, totalItems: G.stats.totalItems, secrets: G.stats.secrets, totalSecrets: G.stats.totalSecrets };
+        var rec = SETTINGS.record(levelIndex, rec0);
         interStats = {
           name: G.L.name, time: G.time, par: G.L.par,
           kills: G.stats.kills, totalKills: G.stats.totalKills,
           items: G.stats.items, totalItems: G.stats.totalItems,
-          secrets: G.stats.secrets, totalSecrets: G.stats.totalSecrets
+          secrets: G.stats.secrets, totalSecrets: G.stats.totalSecrets,
+          record: rec
         };
         mode = 'inter';
         return;
@@ -1333,16 +1390,16 @@
           p.fireT = 0;
           SND.play(wep.sound);
           if (p.weapon === 'shotgun') SND.play('pump');
-          if (!wep.melee) flashT = 0.09;
+          if (!wep.melee) { flashT = 0.09; shake(wep.shake); }
           // Riley counts every shot (and, in rileyTakeHit, each one that lands)
           if (rileyActive(G.boss)) RILEY.noteShot(G.boss.profile, p.weapon, playerDist(G.boss.x, G.boss.y));
           G.shotId++;
           G.firing = true;
           if (wep.melee) {
-            fireHitscan(p.ang, wep.dmgMin, wep.dmgMax, true);
+            fireHitscan(p.ang, wep.dmgMin, wep.dmgMax, true, 0.12);
           } else {
             for (var pl = 0; pl < wep.pellets; pl++) {
-              fireHitscan(p.ang + (rnd() - 0.5) * 2 * wep.spread, wep.dmgMin, wep.dmgMax, false);
+              fireHitscan(p.ang + (rnd() - 0.5) * 2 * wep.spread, wep.dmgMin, wep.dmgMax, false, wep.knock);
             }
           }
           G.firing = false;
@@ -1609,6 +1666,7 @@
       var x0 = Math.ceil(sx - wPix / 2), x1 = Math.floor(sx + wPix / 2);
       if (x1 < 0 || x0 >= W) continue;
       var fi2 = e3.bright ? 255 : lightFi(tY);
+      var hitFlash = e3.flashT > 0 && e3.state !== 'dead';
       var iw = img2.w, ih = img2.h, idata = img2.data;
       var yy0 = Math.max(0, Math.ceil(topY));
       var yy1 = Math.min(VH - 1, Math.floor(botY) - 1);
@@ -1621,12 +1679,17 @@
           if (texYf < 0) texYf = 0; if (texYf >= ih) texYf = ih - 1;
           var c2 = idata[texYf * iw + texXf];
           if (c2 === 0) continue;
-          fb[yy2 * W + xx] = shade(c2, fi2);
+          fb[yy2 * W + xx] = hitFlash ? (0xff000000 | ((c2 & 0xfefefe) >> 1) + 0x7f7f7f) >>> 0 : shade(c2, fi2);
         }
       }
     }
 
-    ctx.putImageData(viewImg, 0, 0);
+    var sk = G.shake;
+    if (sk > 0.3) {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, VH);
+      ctx.putImageData(viewImg, Math.round(rndIn(-sk, sk)), Math.round(rndIn(-sk, sk) * 0.6));
+    } else ctx.putImageData(viewImg, 0, 0);
   }
 
   function entImage(e) {
@@ -1670,7 +1733,7 @@
     var bobX = Math.sin(p.bobPhase) * 7 * p.bobAmp;
     var bobY = Math.abs(Math.cos(p.bobPhase)) * 5 * p.bobAmp;
     var gx = (W - gw) / 2 + bobX;
-    var gy = VH - gh + 10 + bobY;
+    var gy = VH - gh + 10 + bobY + G.shake * 0.8;
     // raise / lower slide
     if (p.lowerT > 0) gy += (1 - p.lowerT / 0.15) * gh;
     else if (p.raiseT > 0) gy += (p.raiseT / 0.15) * gh;
@@ -1823,6 +1886,33 @@
     }
   }
 
+  // a small diamond over the goal, or an arrow at the screen edge pointing at it
+  function renderGoalMarker() {
+    if (!SETTINGS.v.goalMarker) return;
+    var g = goalTarget();
+    if (!g) return;
+    var p = G.p, dx = g.x - p.x, dy = g.y - p.y, d = Math.sqrt(dx * dx + dy * dy);
+    if (d < 1.6) return;
+    var rel = Math.atan2(dy, dx) - p.ang;
+    rel = Math.atan2(Math.sin(rel), Math.cos(rel));
+    var col = (G.time * 2) % 1 < 0.7 ? '#ffd23e' : '#c89a20', y = 10;
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    if (Math.abs(rel) < 0.52) {
+      var sx = Math.round(W / 2 * (1 + Math.tan(rel) / 0.66));
+      ctx.moveTo(sx, y - 4); ctx.lineTo(sx + 4, y); ctx.lineTo(sx, y + 4); ctx.lineTo(sx - 4, y);
+      ctx.closePath(); ctx.fill();
+      ART.drawText(ctx, String(Math.round(d)), sx, y + 7, { color: col, shadow: true, center: true });
+    } else {
+      var right = rel > 0, ax = right ? W - 6 : 6;
+      ctx.moveTo(ax + (right ? 4 : -4), y + 30);
+      ctx.lineTo(ax - (right ? 3 : -3), y + 25);
+      ctx.lineTo(ax - (right ? 3 : -3), y + 35);
+      ctx.closePath(); ctx.fill();
+      ART.drawText(ctx, 'GOAL', right ? W - 12 : 12, y + 28, { color: col, shadow: true, right: right });
+    }
+  }
+
   function renderUsePrompt() {
     var u = usePrompt();
     if (!u) return;
@@ -1929,6 +2019,7 @@
     if (mapOpen) { renderAutomap(); renderMessages(); return; }
     if (!p.dead && G.started && !MENU.isOpen()) {
       renderHurtDirs();
+      renderGoalMarker();
       renderCrosshair();
       renderUsePrompt();
     }
@@ -1959,6 +2050,13 @@
         ctx.fillRect(ox + x * sc, oy + y * sc, Math.max(1, sc - 0.4), Math.max(1, sc - 0.4));
       }
     }
+    var goal = goalTarget();
+    if (goal && pulse) {
+      ctx.fillStyle = '#ffd23e';
+      var gx = ox + goal.x * sc, gy = oy + goal.y * sc;
+      ctx.fillRect(gx - 3, gy - 3, 7, 1); ctx.fillRect(gx - 3, gy + 3, 7, 1);
+      ctx.fillRect(gx - 3, gy - 3, 1, 7); ctx.fillRect(gx + 3, gy - 3, 1, 7);
+    }
     // you: a solid arrow
     var p = G.p, px = ox + p.x * sc, py = oy + p.y * sc, ca = Math.cos(p.ang), sa = Math.sin(p.ang);
     ctx.fillStyle = '#f8f4e0';
@@ -1978,7 +2076,7 @@
 
     // legend
     var lx = 6, ly = VH - 9;
-    [['#c8a030', 'DOOR'], ['#ff3a2a', 'RED DOOR'], ['#4a7aff', 'BLUE DOOR'], ['#58e068', 'EXIT'], ['#f8f4e0', 'YOU']].forEach(function (l) {
+    [['#c8a030', 'DOOR'], ['#ff3a2a', 'RED DOOR'], ['#4a7aff', 'BLUE DOOR'], ['#58e068', 'EXIT'], ['#ffd23e', 'GOAL'], ['#f8f4e0', 'YOU']].forEach(function (l) {
       ctx.fillStyle = l[0];
       ctx.fillRect(lx, ly, 5, 5);
       ART.drawText(ctx, l[1], lx + 8, ly, { color: '#a8a090' });
@@ -2072,14 +2170,23 @@
       return {
         label: open ? L.name : L.name.split(':')[0] + ': ???',
         disabled: function () { return !open; },
-        desc: (levelInfo(L).boss ? 'BOSS LEVEL.  ' : '') + 'PAR TIME ' + fmtTime(L.par) + '.  STARTS WITH A PISTOL.',
+        desc: function () {
+          var b = SETTINGS.best(i);
+          return (levelInfo(L).boss ? 'BOSS LEVEL.  ' : '') + 'PAR ' + fmtTime(L.par) +
+            (b && b.time !== null ? '   BEST ' + fmtTime(b.time) : '   NOT FINISHED YET') + '.  STARTS WITH A PISTOL.';
+        },
         action: function () { MENU.push(diffScreen(i)); }
       };
     });
     list.push({ label: 'BACK', action: function () { MENU.back(); } });
     return {
-      title: 'LEVEL SELECT', drawBg: menuBg, top: 50, gap: 15, descY: 140, items: list,
+      title: 'LEVEL SELECT', drawBg: menuBg, top: 46, gap: 14, descY: 142, items: list,
       drawExtra: function () {
+        var sel = MENU.selected(), idx = LEVELS.map(function (L) { return L.name; }).indexOf(sel && sel.label);
+        if (idx >= 0) {
+          var b = SETTINGS.best(idx), x = W / 2 - 74;
+          SETTINGS.MEDALS.forEach(function (m, k) { medal(ctx, x + k * 38, 124, m, !!(b && b.medals[m]), false); });
+        }
         if (SETTINGS.progress.unlocked < LEVELS.length - 1) ART.drawText(ctx, 'FINISH A LEVEL TO UNLOCK THE NEXT ONE.', W / 2, 156, { color: '#6a655c', center: true });
       }
     };
@@ -2097,12 +2204,14 @@
     }
     function toggle(key) { return function () { v[key] = !v[key]; SETTINGS.save(); }; }
     return {
-      title: 'OPTIONS', drawBg: menuBg, top: 46, gap: 13, descY: 150,
+      title: 'OPTIONS', drawBg: menuBg, top: 42, gap: 12, descY: 156,
       items: [
         { label: 'MOUSE SPEED', slider: [0, 10, function () { return v.sens; }], adjust: step('sens', 1, 10), desc: 'HOW FAST THE VIEW TURNS WHEN YOU MOVE THE MOUSE. LEFT AND RIGHT TO CHANGE.' },
         { label: 'SOUND VOLUME', slider: [0, 10, function () { return v.volume; }], adjust: step('volume', 0, 10), desc: 'LOUDNESS OF EVERYTHING. LEFT AND RIGHT TO CHANGE.' },
         { label: 'MUSIC', value: function () { return onOff(SND.isMusicOn()); }, adjust: function () { SND.setMusic(!SND.isMusicOn()); }, desc: 'PRESS M DURING PLAY TO TOGGLE IT TOO.' },
         { label: 'CROSSHAIR', value: function () { return onOff(v.crosshair); }, adjust: toggle('crosshair'), desc: 'A SMALL AIMING MARK. TURNS RED OVER A DEMON.' },
+        { label: 'GOAL MARKER', value: function () { return onOff(v.goalMarker); }, adjust: toggle('goalMarker'), desc: 'POINTS AT YOUR GOAL ONCE YOU HAVE SEEN IT. TURN OFF FOR CLASSIC EXPLORING.' },
+        { label: 'SCREEN SHAKE', value: function () { return onOff(v.shake); }, adjust: toggle('shake'), desc: 'THE VIEW KICKS ON SHOTS, HITS AND EXPLOSIONS.' },
         { label: 'TIPS', value: function () { return onOff(v.tips); }, adjust: function () { v.tips = !v.tips; if (v.tips) v.seenTips = {}; SETTINGS.save(); }, desc: 'SHORT HINTS THE FIRST TIME SOMETHING NEW HAPPENS. TURNING THEM ON SHOWS THEM ALL AGAIN.' },
         { label: 'DIFFICULTY', value: function () { return diff().name; }, adjust: step('difficulty', 0, 2), desc: function () { return diff().desc + ' CHANGES TAKE EFFECT RIGHT AWAY.'; } },
         { label: 'BACK', action: function () { MENU.back(); } }
@@ -2244,12 +2353,25 @@
     var beatPar = st.time <= st.par;
     ART.drawText(ctx, 'TIME ' + fmtTime(st.time), 90, 132, { scale: 2, color: beatPar && roll >= 1 ? '#ffd23e' : '#c8c0b0' });
     ART.drawText(ctx, 'PAR ' + fmtTime(st.par), 240, 132, { scale: 2, color: '#c8c0b0', right: true });
-    if (roll >= 1) ART.drawText(ctx, beatPar ? 'UNDER PAR!' : '', W / 2, 150, { color: '#ffd23e', center: true });
+    if (roll >= 1) {
+      var rec = st.record, x = W / 2 - 70;
+      SETTINGS.MEDALS.forEach(function (m, i) { medal(ctx, x + i * 38, 150, m, rec.medals.indexOf(m) >= 0, rec.fresh.indexOf(m) >= 0 && (t % 0.5) < 0.3); });
+      if (rec.newBest) ART.drawText(ctx, 'NEW BEST TIME!', W / 2, 142, { color: '#ffd23e', center: true });
+    }
 
     if (roll >= 1 && (t % 1) < 0.7) {
       var next = levelIndex + 1 < LEVELS.length ? 'CLICK OR PRESS ENTER FOR ' + LEVELS[levelIndex + 1].name : 'CLICK OR PRESS ENTER';
       ART.drawText(ctx, next, W / 2, 166, { color: '#f0d848', shadow: true, center: true });
     }
+  }
+
+  // a little medal chip: lit if earned, blinking if earned for the first time
+  function medal(c, x, y, name, lit, blink) {
+    ctx.fillStyle = lit ? (blink ? '#fff4c0' : '#ffd23e') : '#2e2a24';
+    ctx.fillRect(x, y, 34, 9);
+    ctx.fillStyle = lit ? '#803008' : '#14110d';
+    ctx.fillRect(x + 1, y + 1, 32, 7);
+    ART.drawText(ctx, name, x + 17, y + 2, { color: lit ? '#ffd23e' : '#4a463c', center: true });
   }
 
   function renderVictory(t) {
@@ -2288,7 +2410,10 @@
       if (!G.started && locked) begin();
       var menu = MENU.isOpen();
       var paused = !AUTO && (!locked || menu);
-      if (!paused) update(dt);
+      if (!paused) {
+        if (G.hitstop > 0) G.hitstop -= dt; // a beat of stillness when something dies
+        else update(dt);
+      }
       renderWorld();
       renderWeapon();
       renderHUD();
@@ -2348,7 +2473,7 @@
         switchWeapon: switchWeapon, cycleWeapon: cycleWeapon, quickSwitch: quickSwitch,
         useTarget: useTarget, usePrompt: usePrompt, useAction: useAction,
         objective: currentObjective, retryLevel: retryLevel, hurtPlayer: hurtPlayer,
-        aimTarget: aimTarget, onEnter: onEnter, DIFFS: DIFFS,
+        aimTarget: aimTarget, onEnter: onEnter, DIFFS: DIFFS, goalTarget: goalTarget,
         // draw one full frame (world, weapon, HUD, overlays) into the 320x200 buffer
         renderFrame: function (overlay) {
           renderWorld(); renderWeapon(); renderHUD();

@@ -393,4 +393,45 @@ test('the crosshair knows when it is over a demon', function () {
   assert.strictEqual(FB.aimTarget(), null);
 });
 
+test('the goal marker only points at things you have already seen', function () {
+  var G = freshLevel(0);
+  assert.strictEqual(FB.goalTarget(), null, 'nothing seen yet');
+  var key = G.ents.filter(function (e) { return e.item === 'u'; })[0];
+  G.p.x = key.x + 3; G.p.y = key.y; G.p.ang = Math.PI; // look at the blue key
+  run(0.5);
+  var g = FB.goalTarget();
+  assert.ok(g && g.x === key.x && g.y === key.y, 'marks the key once seen');
+  G.p.keys.blue = true; key.gone = true;
+  for (var i = 0; i < G.seen.length; i++) G.seen[i] = 1;
+  var door = FB.goalTarget();
+  assert.ok(door && Math.floor(door.x) === 23 && Math.floor(door.y) === 6, 'then the blue door: ' + JSON.stringify(door));
+  G.p.x = 23.5; G.p.y = 7.5; G.p.ang = -Math.PI / 2;
+  FB.useAction();
+  var ex = FB.goalTarget();
+  assert.ok(ex && Math.floor(ex.x) === 23 && Math.floor(ex.y) === 0, 'then the exit');
+});
+
+test('a shotgun blast flashes and shoves a demon back; heavy demons barely move', function () {
+  var G = freshLevel(1);
+  G.p.x = 14.5; G.p.y = 10.5; G.p.ang = 0; G.p.weapons.shotgun = true; G.p.ammo.shells = 10; G.p.weapon = 'shotgun';
+  var gn = makeTestMob('gnasher', 17.5, 10.5); gn.hp = 9999; gn.state = 'pain'; gn.st = 99;
+  G.ents.push(gn);
+  FB.setFire(true); FB.update(1 / 60); FB.setFire(false);
+  assert.ok(gn.flashT > 0, 'hit flash');
+  assert.ok(gn.x > 17.6, 'knocked back to ' + gn.x.toFixed(2));
+});
+
+test('finishing a level records the best time and medals', function () {
+  store = {};
+  var G = freshLevel(0);
+  G.stats.kills = G.stats.totalKills; G.stats.secrets = 0;
+  G.p.keys.blue = true;
+  G.p.x = 23.5; G.p.y = 1.5; G.p.ang = -Math.PI / 2;
+  FB.useAction();
+  run(1.2);
+  var b = SETTINGS.best(0);
+  assert.ok(b && b.time !== null && b.medals.PAR && b.medals.KILLS && !b.medals.SECRETS, JSON.stringify(b));
+  assert.ok(JSON.parse(store['firebird.progress.v1']).best[0], 'saved to the browser');
+});
+
 console.log(passed + ' headless engine tests passed');

@@ -6,7 +6,7 @@
 
 var SETTINGS = (function () {
   var KEY = 'firebird.settings.v1', PKEY = 'firebird.progress.v1';
-  var DEFAULTS = { sens: 5, volume: 7, crosshair: true, tips: true, difficulty: 1, seenTips: {} };
+  var DEFAULTS = { sens: 5, volume: 7, crosshair: true, tips: true, shake: true, goalMarker: true, difficulty: 1, seenTips: {} };
 
   function store() { try { return window.localStorage; } catch (e) { return null; } }
   function read(key) {
@@ -30,6 +30,9 @@ var SETTINGS = (function () {
 
   var progress = read(PKEY) || {};
   if (typeof progress.unlocked !== 'number') progress.unlocked = 0;
+  if (!progress.best || typeof progress.best !== 'object') progress.best = {};
+
+  var MEDALS = ['PAR', 'KILLS', 'ITEMS', 'SECRETS'];
 
   return {
     v: v,
@@ -38,7 +41,26 @@ var SETTINGS = (function () {
     // the furthest level the player may start from
     unlock: function (idx) {
       if (idx > progress.unlocked) { progress.unlocked = idx; write(PKEY, progress); }
-    }
+    },
+    // Keep the best time and every medal ever earned on a level.
+    // Returns { newBest, medals: [...earned this run], fresh: [...earned for the first time] }.
+    record: function (idx, st) {
+      var b = progress.best[idx] || { time: null, medals: {} };
+      var got = [];
+      if (st.time <= st.par) got.push('PAR');
+      if (st.kills >= st.totalKills) got.push('KILLS');
+      if (st.items >= st.totalItems) got.push('ITEMS');
+      if (st.secrets >= st.totalSecrets) got.push('SECRETS');
+      var fresh = got.filter(function (m) { return !b.medals[m]; });
+      var newBest = b.time === null || st.time < b.time;
+      if (newBest) b.time = Math.floor(st.time);
+      got.forEach(function (m) { b.medals[m] = true; });
+      progress.best[idx] = b;
+      write(PKEY, progress);
+      return { newBest: newBest, medals: got, fresh: fresh };
+    },
+    best: function (idx) { return progress.best[idx] || null; },
+    MEDALS: MEDALS
   };
 })();
 

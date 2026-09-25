@@ -57,6 +57,16 @@ Every level opens with a card showing its name and your goal.
   own (yellow = in hand, dim = no ammo). A faint key outline means this level
   has a key you haven't found yet.
 - **Automap (`Tab`):** your goal, stats, a legend, and colour-coded doors.
+- **Goal marker:** once you've *seen* your next goal (the keycard, then its
+  door, then the exit), a yellow diamond with the distance floats over it, or
+  an arrow at the screen edge points to it. Anything you haven't found stays
+  unmarked. Turn it off in Options for classic exploring.
+- **Hits feel like hits:** demons flash white and get shoved back by shots
+  (heavy ones barely budge), the view shakes on shots, hits and explosions
+  (Options → Screen shake), and the game freezes for a moment on every kill.
+- **Medals and best times:** finishing a level can earn PAR, KILLS, ITEMS and
+  SECRETS medals. Level Select shows your best time and the medals you've
+  earned, and the score screen lights up new ones.
 - **Tips:** short green hints appear the first time something new happens.
   Turn them off (or back on to see them again) in Options.
 - **Dying** tells you what got you and how to beat it. You retry the level
