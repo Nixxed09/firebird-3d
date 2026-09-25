@@ -1,0 +1,37 @@
+/* FIREBIRD 3D */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+}
+
+#wrap {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #120a06 0%, #000 75%);
+}
+
+#screen {
+  /* 320x200 buffer scaled up with chunky pixels, keeping the 8:5 shape */
+  width: min(100vw, 160vh);
+  aspect-ratio: 8 / 5;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  cursor: crosshair;
+  box-shadow: 0 0 80px rgba(255, 90, 16, 0.12);
+}
+
+#errbox {
+  display: none;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  padding: 8px 12px;
+  background: #400;
+  color: #fff;
+  font: 14px/1.4 monospace;
+  z-index: 10;
+}

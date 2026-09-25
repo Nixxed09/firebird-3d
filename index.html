@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIREBIRD 3D — NIX GAMES</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="screen" width="320" height="200"></canvas>
+  </div>
+  <div id="errbox"></div>
+  <script>
+    // If anything breaks, show it on screen instead of failing silently.
+    window.onerror = function (msg, src, line) {
+      var box = document.getElementById('errbox');
+      box.style.display = 'block';
+      box.textContent = 'GAME ERROR: ' + msg + ' (' + (src || '').split('/').pop() + ':' + line + ')';
+      return false;
+    };
+  </script>
+  <script src="js/art.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/riley.js"></script>
+  <script src="js/engine.js"></script>
+</body>
+</html>
