@@ -353,6 +353,28 @@ function aggregate(all) {
       return cleared + '/' + reached.length + ' cleared, ' + tries.toFixed(1) + ' tries' + (top ? ' (' + top + ')' : '');
     }).join(' | ') + ' | ' + eco.bullets + ' bullets + ' + eco.shells + ' shells = up to ' + eco.maxDamage + ' dmg vs ' + eco.monsterHp + ' hp |');
   });
+  // Secrets: found / available, counted on the attempt that cleared the level
+  // (a secret found on a failed try is lost with the retry, as in the game).
+  L.push('');
+  L.push('Secrets found (bots only go for a secret wall they have looked at up close):');
+  L.push('');
+  L.push('| Level | ' + DIFFS.map(function (d) { return DIFF_NAMES[d]; }).join(' | ') + ' | All |');
+  L.push('|---|' + DIFFS.map(function () { return '---'; }).join('|') + '|---|');
+  LEVELS.forEach(function (lvDef, li) {
+    var tally = function (eps) {
+      var f = 0, n = 0;
+      eps.forEach(function (x) {
+        var lv = x.run.levels[li];
+        if (!lv || !lv.secrets) return;
+        var a = lv.secrets.split('/');
+        f += +a[0]; n += +a[1];
+      });
+      return n ? f + '/' + n : '-';
+    };
+    L.push('| ' + lvDef.name + ' | ' + DIFFS.map(function (d) {
+      return tally(all.filter(function (x) { return x.difficulty === d; }));
+    }).join(' | ') + ' | ' + tally(all) + ' |');
+  });
   var stuck = all.filter(function (x) { return x.run.levels.some(function (lv) { return lv.result === 'stuck'; }); });
   L.push('');
   L.push('Stuck runs (a bot that stopped making progress for 8 minutes: a bot weakness or a level trap): ' + stuck.length + ' of ' + all.length + '.');
