@@ -301,11 +301,20 @@
     };
   }
 
-  // keys you have laid eyes on get a goal marker
+  // keys you have laid eyes on get a goal marker; first sightings teach
   function spotKeys() {
     var p = G.p;
+    var close = function (e, r) { return dist2(e.x, e.y, p.x, p.y) < r * r && hasLOS(p.x, p.y, e.x, e.y); };
     for (var i = 0; i < G.ents.length; i++) {
       var e = G.ents[i];
+      if (e.mob && !e.barrel && alive(e) && TIPS['meet_' + e.kind] && !SETTINGS.v.seenTips['meet_' + e.kind] && close(e, 11)) tip('meet_' + e.kind);
+      if (e.barrel && !e.gone && !SETTINGS.v.seenTips.barrel && close(e, 10)) {
+        for (var j = 0; j < G.ents.length; j++) {
+          var m = G.ents[j];
+          if (m.mob && !m.barrel && alive(m) && m.state !== 'idle' && dist2(m.x, m.y, e.x, e.y) < 4) { tip('barrel'); break; }
+        }
+      }
+      if (e.kind === 'torch' && levelIndex === 0 && G.time > 20 && close(e, 5)) tip('torches');
       if (e.kind !== 'pickup' || e.spotted || (e.item !== 'r' && e.item !== 'u')) continue;
       if (dist2(e.x, e.y, p.x, p.y) < 196 && hasLOS(p.x, p.y, e.x, e.y)) e.spotted = true;
     }
@@ -350,7 +359,12 @@
     lowAmmo: 'TIP: LOW ON AMMO? YOUR FIST (1) NEVER RUNS OUT, AND IT IS SILENT.',
     lowHealth: 'TIP: LOW HEALTH! BACK OFF AND LOOK FOR STIMPACKS AND MEDIKITS.',
     hurtDir: 'TIP: THE RED MARKS AROUND YOUR AIM POINT AT WHATEVER HIT YOU.',
-    secret: 'TIP: WALLS THAT LOOK DIFFERENT MAY HIDE SECRETS. PRESS E ON THEM.'
+    secret: 'TIP: WALLS THAT LOOK DIFFERENT MAY HIDE SECRETS. PRESS E ON THEM.',
+    torches: 'TIP: A PAIR OF TORCHES BESIDE A DOOR MEANS IT MATTERS. FOLLOW THEM.',
+    barrel: 'TIP: A DEMON IS NEXT TO A BARREL. SHOOT THE BARREL!',
+    meet_imp: 'TIP: IMPS THROW FIREBALLS. STRAFE WITH A AND D TO DODGE.',
+    meet_gnasher: 'TIP: GNASHERS CHARGE AND BITE. BACK AWAY WHILE YOU SHOOT.',
+    meet_knight: 'TIP: THE EMBER KNIGHT IS TOUGH. KEEP YOUR DISTANCE AND USE SHELLS.'
   };
   function tip(id) {
     if (!G || AUTO || !SETTINGS.v.tips || SETTINGS.v.seenTips[id]) return;
@@ -379,9 +393,17 @@
     startLevel(idx, false);
   }
 
-  // Dying restarts the level with the gear you walked in with.
+  // Dying restarts the level with the gear you walked in with, but never
+  // with less than a fresh start, so arriving low can't become a death spiral.
   function retryLevel() {
-    startLevel(levelIndex, false, G.startGear);
+    var g = G.startGear;
+    if (g) {
+      g = snapshotGear({ hp: g.hp, armor: g.armor, ammo: g.ammo, weapons: { shotgun: g.shotgun }, weapon: g.weapon });
+      g.hp = Math.max(g.hp, 100);
+      g.ammo.bullets = Math.max(g.ammo.bullets, 50);
+      if (g.shotgun) g.ammo.shells = Math.max(g.ammo.shells, 8);
+    }
+    startLevel(levelIndex, false, g);
   }
 
   function startLevel(idx, keepGear, gear) {
@@ -643,11 +665,16 @@
     return Math.sqrt(dist2(x, y, G.p.x, G.p.y));
   }
 
+  // Anyone whose body overlaps the doorway, not just whose centre is in it.
+  // (A door closing on half a demon wedged it there for good.)
+  function overlapsCell(x, y, r, cx, cy) {
+    return x + r > cx && x - r < cx + 1 && y + r > cy && y - r < cy + 1;
+  }
   function entityInDoor(d) {
-    if (Math.floor(G.p.x) === d.x && Math.floor(G.p.y) === d.y) return true;
+    if (overlapsCell(G.p.x, G.p.y, 0.28, d.x, d.y)) return true;
     for (var i = 0; i < G.ents.length; i++) {
       var e = G.ents[i];
-      if (e.mob && e.state !== 'dead' && Math.floor(e.x) === d.x && Math.floor(e.y) === d.y) return true;
+      if (e.mob && !e.barrel && e.state !== 'dead' && e.state !== 'die' && overlapsCell(e.x, e.y, e.radius, d.x, d.y)) return true;
     }
     return false;
   }

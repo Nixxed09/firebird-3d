@@ -79,6 +79,8 @@ test('gunfire wakes demons it can reach, but not through a closed door', functio
   // E1M1: stand by the start room's closed door, the shotgun room beyond it
   G.p.x = 8.5; G.p.y = 17.5; G.p.ang = Math.PI; // facing away, so nothing is woken by sight
   G.p.hp = 9999; G.p.raiseT = 0;
+  // a sleeping imp within earshot of the start room, beyond its closed door
+  var sleeper = mobs(G, 'imp')[0]; sleeper.x = 17.5; sleeper.y = 15.5; sleeper.state = 'idle';
   FB.setFire(true);
   run(0.1);
   FB.setFire(false);
@@ -365,7 +367,7 @@ test('dying retries the level with the gear you brought in, not a pistol start',
   assert.ok(FB.state() !== G && !p2.dead);
   assert.strictEqual(p2.ammo.shells, 20);
   assert.strictEqual(p2.weapon, 'shotgun');
-  assert.strictEqual(p2.hp, 70);
+  assert.strictEqual(p2.hp, 100, 'a retry heals to at least a fresh start');
 });
 
 test('the exit switch ends the level, unlocks the next, and the tally can be skipped', function () {
@@ -432,6 +434,35 @@ test('finishing a level records the best time and medals', function () {
   var b = SETTINGS.best(0);
   assert.ok(b && b.time !== null && b.medals.PAR && b.medals.KILLS && !b.medals.SECRETS, JSON.stringify(b));
   assert.ok(JSON.parse(store['firebird.progress.v1']).best[0], 'saved to the browser');
+});
+
+test('a door never closes on a demon standing half in the doorway', function () {
+  var G = freshLevel(1);
+  var d = G.doors['15,4'];
+  d.open = 1; d.state = 'open'; d.timer = 0;
+  var gn = makeTestMob('gnasher', 15.5, 5.2); // centre just outside, body overlapping the door cell
+  gn.state = 'pain'; gn.st = 99;
+  G.ents.push(gn);
+  G.p.x = 15.5; G.p.y = 9.5;
+  run(3);
+  assert.ok(d.open >= 0.9, 'door should stay open while the gnasher overlaps it (open ' + d.open.toFixed(2) + ')');
+});
+
+test('a retry never starts worse than a fresh start', function () {
+  FB.startLevel(0, false);
+  var p = FB.state().p;
+  p.hp = 12; p.ammo.bullets = 3; p.weapons.shotgun = true; p.ammo.shells = 0;
+  FB.startLevel(1, true);
+  var G = FB.state();
+  assert.strictEqual(G.p.hp, 12, 'you walk in as you were');
+  FB.hurtPlayer(500);
+  run(1.5);
+  FB.onEnter();
+  var p2 = FB.state().p;
+  assert.strictEqual(p2.hp, 100);
+  assert.strictEqual(p2.ammo.bullets, 50);
+  assert.strictEqual(p2.ammo.shells, 8);
+  assert.ok(p2.weapons.shotgun);
 });
 
 console.log(passed + ' headless engine tests passed');

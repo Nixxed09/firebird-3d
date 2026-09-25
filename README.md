@@ -137,11 +137,20 @@ now, and she picks one; she can never invent a move.
   letter is explained at the top of the file. The game checks your map at
   load and tells you if a row is the wrong length.
 
+## Level design
+
+Levels follow the shared Level Design Contract
+(`games/LEVEL_DESIGN_CONTRACT.md` in the Phoenix workspace). See
+[docs/LEVELS.md](docs/LEVELS.md) for this game's cue language, level briefs and
+status. Run the level checker after changing a map.
+
 ## Tests
 
 ```
 node tests/riley.test.js      # Riley's brain
 node tests/headless.test.js   # the real engine, playing scripted scenarios (incl. HUD/menu logic)
+node tests/levels.contract.test.js  # every map vs the Level Design Contract
+node tests/playtest.js        # bot personas play the whole episode -> captures/playtest-report.md
 node tests/snapshot.js        # renders fight frames to captures/*.png
 ```
 
