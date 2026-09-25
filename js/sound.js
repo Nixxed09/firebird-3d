@@ -5,7 +5,8 @@
 var SND = (function () {
 
   var ac = null, master = null, sfxG = null, musG = null;
-  var musicOn = true, musicRunning = false;
+  var musicOn = true, musicRunning = false, volume = 0.5;
+  try { musicOn = localStorage.getItem('firebird.music') !== 'off'; } catch (e) { }
 
   function init() {
     if (ac) { if (ac.state === 'suspended') ac.resume(); return true; }
@@ -13,10 +14,9 @@ var SND = (function () {
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return false;
       ac = new AC();
-      master = ac.createGain(); master.gain.value = 0.5; master.connect(ac.destination);
+      master = ac.createGain(); master.gain.value = volume; master.connect(ac.destination);
       sfxG = ac.createGain(); sfxG.gain.value = 0.9; sfxG.connect(master);
       musG = ac.createGain(); musG.gain.value = 0.3; musG.connect(master);
-      try { musicOn = localStorage.getItem('firebird.music') !== 'off'; } catch (e) { }
       return true;
     } catch (e) { return false; }
   }
@@ -281,11 +281,19 @@ var SND = (function () {
     if (musTimer) { clearTimeout(musTimer); musTimer = null; }
   }
 
-  function toggleMusic() {
-    musicOn = !musicOn;
+  function setMusic(on) {
+    musicOn = !!on;
     try { localStorage.setItem('firebird.music', musicOn ? 'on' : 'off'); } catch (e) { }
     if (musicOn) startMusic(); else stopMusic();
     return musicOn;
+  }
+
+  function toggleMusic() { return setMusic(!musicOn); }
+
+  // 0 = silent, 1 = loudest
+  function setVolume(v) {
+    volume = Math.max(0, Math.min(1, v)) * 0.72;
+    if (master) master.gain.value = volume;
   }
 
   return {
@@ -294,6 +302,8 @@ var SND = (function () {
     startMusic: startMusic,
     stopMusic: stopMusic,
     toggleMusic: toggleMusic,
+    setMusic: setMusic,
+    setVolume: setVolume,
     isMusicOn: function () { return musicOn; }
   };
 })();

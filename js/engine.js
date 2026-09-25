@@ -49,65 +49,125 @@
   var fireHeld = false;
   var mapOpen = false;
 
+  function clearInput() {
+    for (var k in keys) keys[k] = false;
+    fireHeld = false;
+  }
+
   document.addEventListener('keydown', function (e) {
     if (e.code === 'Tab' || e.code === 'Space' || e.code.slice(0, 5) === 'Arrow') e.preventDefault();
+    SND.init();
+    // menus get the keyboard first (and may use key repeat)
+    if (MENU.isOpen()) { SND.startMusic(); MENU.key(e.code); return; }
     if (e.repeat) return;
+    if (e.code === 'Escape' && mode === 'game' && G && G.started && !locked) { openPause(); return; }
     keys[e.code] = true;
-    if (e.code === 'Tab') mapOpen = !mapOpen;
+    if (e.code === 'Enter' || e.code === 'NumpadEnter' || (e.code === 'Space' && mode !== 'game')) { onEnter(); return; }
+    if (mode !== 'game' || !G) return;
+    if (e.code === 'Tab') { mapOpen = !mapOpen; G.usedMap = true; }
     if (e.code === 'KeyM') {
-      if (SND.init()) {
-        var on = SND.toggleMusic();
-        if (mode === 'game') message('MUSIC ' + (on ? 'ON' : 'OFF'));
-      }
+      var on = SND.toggleMusic();
+      message('MUSIC ' + (on ? 'ON' : 'OFF'));
     }
     if (e.code === 'ControlLeft' || e.code === 'ControlRight') fireHeld = true;
     if (e.code === 'Digit1') switchWeapon('fist');
     if (e.code === 'Digit2') switchWeapon('pistol');
     if (e.code === 'Digit3') switchWeapon('shotgun');
-    if (e.code === 'Enter' || e.code === 'NumpadEnter') onEnter();
+    if (e.code === 'KeyQ') quickSwitch();
   });
   document.addEventListener('keyup', function (e) {
     keys[e.code] = false;
     if (e.code === 'ControlLeft' || e.code === 'ControlRight') fireHeld = false;
   });
+  window.addEventListener('blur', clearInput);
 
-  var locked = false;
+  var locked = false, lockFailed = false;
   document.addEventListener('pointerlockchange', function () {
     locked = document.pointerLockElement === screenC;
-    if (!locked) fireHeld = false;
+    clearInput();
+    if (locked) { lockFailed = false; if (mode === 'game') MENU.close(); }
+    // losing the mouse mid-level (Esc, alt-tab) pauses the game
+    else if (mode === 'game' && G && G.started && !AUTO) openPause();
   });
+  document.addEventListener('pointerlockerror', function () { lockFailed = true; });
+
+  // screen pixel -> 320x200 game pixel
+  function toLow(e) {
+    var r = screenC.getBoundingClientRect();
+    return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H };
+  }
+
   document.addEventListener('mousemove', function (e) {
     if (locked && mode === 'game' && G && !G.p.dead) {
-      G.p.ang += e.movementX * 0.0022;
+      G.p.ang += e.movementX * 0.00044 * SETTINGS.v.sens;
+      return;
+    }
+    if (MENU.isOpen()) {
+      var pt = toLow(e);
+      setCursor(MENU.pointer(pt.x, pt.y) ? 'pointer' : 'default');
     }
   });
   screenC.addEventListener('mousedown', function (e) {
     SND.init(); SND.startMusic();
-    if (mode === 'title') { startGame(0); requestLock(); return; }
-    if (mode === 'game') {
-      if (!locked) { requestLock(); return; }
-      if (e.button === 0) fireHeld = true;
+    if (MENU.isOpen()) {
+      var pt = toLow(e);
+      if (e.button === 0) MENU.click(pt.x, pt.y);
+      return;
     }
-    if (mode === 'inter' || mode === 'victory' || (G && G.p.dead)) onEnter();
+    if (mode === 'game' && G) {
+      if (!locked) { beginPlay(); return; }
+      if (G.p.dead) { onEnter(); return; } // never carry this click into the new life as a shot
+      if (e.button === 0) fireHeld = true;
+      return;
+    }
+    onEnter();
   });
   document.addEventListener('mouseup', function (e) {
     if (e.button === 0) fireHeld = false;
   });
+  screenC.addEventListener('wheel', function (e) {
+    if (mode === 'game' && locked && G && !G.p.dead) {
+      e.preventDefault();
+      if (Math.abs(e.deltaY) > 0) cycleWeapon(e.deltaY > 0 ? 1 : -1);
+    }
+  }, { passive: false });
   screenC.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
+  var cursorNow = '';
+  function setCursor(c) {
+    if (c !== cursorNow && screenC.style) { screenC.style.cursor = c; cursorNow = c; }
+  }
+
   function requestLock() {
-    try { screenC.requestPointerLock(); } catch (e) { }
+    try {
+      var r = screenC.requestPointerLock();
+      if (r && r.catch) r.catch(function () { lockFailed = true; });
+    } catch (e) { lockFailed = true; }
+  }
+
+  function releaseLock() {
+    try { if (document.exitPointerLock) document.exitPointerLock(); } catch (e) { }
+  }
+
+  // leave the level card / pause and grab the mouse
+  function beginPlay() {
+    MENU.close();
+    requestLock();
   }
 
   function onEnter() {
     SND.init(); SND.startMusic();
-    if (mode === 'title') { startGame(0); }
-    else if (mode === 'inter') {
+    if (mode === 'inter') {
+      // the first press finishes the tally, the second moves on
+      if (!interDone()) { interSkip = true; return; }
       if (levelIndex + 1 >= LEVELS.length) { mode = 'victory'; SND.play('orb'); }
       else startLevel(levelIndex + 1, true);
     }
-    else if (mode === 'victory') { mode = 'title'; }
-    else if (mode === 'game' && G && G.p.dead) { startLevel(levelIndex, false); } // pistol start, like the classics
+    else if (mode === 'victory') { if (modeT > 1) toTitle(); }
+    else if (mode === 'game' && G) {
+      if (G.p.dead) { if (G.p.deadT > 1.2) retryLevel(); }
+      else if (!locked) beginPlay();
+    }
   }
 
   // ---- weapons ---------------------------------------------------------------
@@ -118,11 +178,62 @@
     shotgun: { ammo: 'shells', rate: 0.95, pellets: 7, spread: 0.10, dmgMin: 5, dmgMax: 15, art: 'shotgun', sound: 'shotgun', sc: 2 }
   };
 
-  function switchWeapon(name) {
-    if (mode !== 'game' || !G || G.p.dead) return;
+  var WEAPON_ORDER = ['fist', 'pistol', 'shotgun'];
+  var AMMO_NAMES = { bullets: 'BULLETS', shells: 'SHELLS' };
+
+  function hasAmmo(p, name) {
+    var w = WEAPONS[name];
+    return !w.ammo || p.ammo[w.ammo] > 0;
+  }
+
+  // the strongest weapon you own that can still fire
+  function bestWeapon(p) {
+    for (var i = WEAPON_ORDER.length - 1; i >= 0; i--) {
+      var n = WEAPON_ORDER[i];
+      if (p.weapons[n] && hasAmmo(p, n)) return n;
+    }
+    return 'fist';
+  }
+
+  // Returns true if a switch was started. Says why when it can't (unless quiet).
+  function switchWeapon(name, quiet) {
+    if (mode !== 'game' || !G || G.p.dead) return false;
     var p = G.p;
-    if (!p.weapons[name] || p.weapon === name || p.nextWeapon) return;
+    if (!p.weapons[name]) {
+      if (!quiet) message('YOU HAVEN\'T FOUND THE ' + name.toUpperCase() + ' YET.');
+      return false;
+    }
+    if (!hasAmmo(p, name)) {
+      if (!quiet) { message('NO ' + AMMO_NAMES[WEAPONS[name].ammo] + ' FOR THE ' + name.toUpperCase() + '.'); SND.play('noAmmo'); }
+      return false;
+    }
+    if (name === p.weapon) {
+      if (p.nextWeapon && !(p.lowerT > 0)) p.nextWeapon = null; // changed your mind in time
+      return false;
+    }
+    if (name === p.nextWeapon) return false;
+    p.prevWeapon = p.weapon;
     p.nextWeapon = name;
+    p.autoFist = false;
+    return true;
+  }
+
+  // mouse wheel: step through the weapons you own that have ammo
+  function cycleWeapon(dir) {
+    if (!G) return;
+    var p = G.p, cur = WEAPON_ORDER.indexOf(p.nextWeapon || p.weapon);
+    for (var k = 1; k < WEAPON_ORDER.length; k++) {
+      var n = WEAPON_ORDER[(cur + dir * k + WEAPON_ORDER.length * 2) % WEAPON_ORDER.length];
+      if (p.weapons[n] && hasAmmo(p, n)) { switchWeapon(n, true); return; }
+    }
+  }
+
+  // Q: back to the weapon you had before
+  function quickSwitch() {
+    if (!G) return;
+    var p = G.p;
+    if (p.prevWeapon && p.prevWeapon !== p.weapon && p.weapons[p.prevWeapon] && hasAmmo(p, p.prevWeapon)) switchWeapon(p.prevWeapon, true);
+    else cycleWeapon(-1);
   }
 
   // ---- game state ------------------------------------------------------------
@@ -173,11 +284,77 @@
     P: { img: 'orb', h: 0.3, w: 0.3, msg: 'PHOENIX ORB! YOU FEEL REBORN!', snd: 'orb' }
   };
 
+  // dmg scales what demons do to you; ammo scales what pickups give
+  var DIFFS = [
+    { name: 'ROOKIE', dmg: 0.5, ammo: 2, desc: 'DEMONS HIT HALF AS HARD AND AMMO IS DOUBLED. GREAT FOR A FIRST RUN.' },
+    { name: 'WARRIOR', dmg: 1, ammo: 1, desc: 'THE FIGHT AS IT WAS MEANT TO BE.' },
+    { name: 'INFERNO', dmg: 1.5, ammo: 1, desc: 'DEMONS HIT HARDER. FOR VETERANS WHO KNOW EVERY CORNER.' }
+  ];
+  function diff() { return DIFFS[SETTINGS.v.difficulty] || DIFFS[1]; }
+
+  // What the level asks of you, worked out from its map.
+  function levelInfo(L) {
+    var s = L.map.join('');
+    return {
+      boss: s.indexOf('Y') >= 0,
+      keys: { red: s.indexOf('R') >= 0 || s.indexOf('r') >= 0, blue: s.indexOf('U') >= 0 || s.indexOf('u') >= 0 }
+    };
+  }
+
+  // the next thing to do, right now
+  function currentObjective() {
+    if (!G) return '';
+    var info = levelInfo(G.L), p = G.p;
+    if (info.keys.blue && !p.keys.blue) return 'FIND THE BLUE KEYCARD';
+    if (info.keys.red && !p.keys.red) return 'FIND THE RED KEYCARD';
+    if (info.boss) return 'DEFEAT RILEY';
+    return 'FIND THE EXIT SWITCH';
+  }
+
+  // First-time tips. Each is shown once per browser, one at a time.
+  var TIPS = {
+    run: 'TIP: HOLD SHIFT TO RUN.',
+    map: 'TIP: LOST? PRESS TAB FOR THE MAP.',
+    weapons: 'TIP: PRESS 1 2 3, OR SCROLL THE MOUSE WHEEL, TO SWITCH WEAPONS. Q SWAPS BACK.',
+    key: 'TIP: THE MATCHING DOOR IS MARKED IN COLOR ON YOUR MAP (TAB).',
+    lowAmmo: 'TIP: LOW ON AMMO? YOUR FIST (1) NEVER RUNS OUT, AND IT IS SILENT.',
+    lowHealth: 'TIP: LOW HEALTH! BACK OFF AND LOOK FOR STIMPACKS AND MEDIKITS.',
+    hurtDir: 'TIP: THE RED MARKS AROUND YOUR AIM POINT AT WHATEVER HIT YOU.',
+    secret: 'TIP: WALLS THAT LOOK DIFFERENT MAY HIDE SECRETS. PRESS E ON THEM.'
+  };
+  function tip(id) {
+    if (!G || AUTO || !SETTINGS.v.tips || SETTINGS.v.seenTips[id]) return;
+    if (G.tipQueue.indexOf(id) < 0) G.tipQueue.push(id);
+  }
+  function updateTips(dt) {
+    G.tipT -= dt;
+    if (G.tipT > 0 || !G.tipQueue.length) return;
+    var id = G.tipQueue.shift();
+    if (SETTINGS.v.seenTips[id]) return;
+    SETTINGS.v.seenTips[id] = true;
+    SETTINGS.save();
+    message(TIPS[id], '#8fe0a0', 6);
+    G.tipT = 7;
+  }
+
+  function snapshotGear(p) {
+    return {
+      hp: Math.max(p.hp, 1), armor: p.armor,
+      ammo: { bullets: p.ammo.bullets, shells: p.ammo.shells },
+      shotgun: p.weapons.shotgun, weapon: p.weapon
+    };
+  }
+
   function startGame(idx) {
     startLevel(idx, false);
   }
 
-  function startLevel(idx, keepGear) {
+  // Dying restarts the level with the gear you walked in with.
+  function retryLevel() {
+    startLevel(levelIndex, false, G.startGear);
+  }
+
+  function startLevel(idx, keepGear, gear) {
     levelIndex = idx;
     var L = LEVELS[idx];
     var m = L.map, mw = m[0].length, mh = m.length;
@@ -185,21 +362,22 @@
     var doors = {};
     var ents = [];
     var secrets = [];
-    var old = keepGear && G ? G.p : null;
+    var old = gear || (keepGear && G ? snapshotGear(G.p) : null);
 
     var p = {
       x: 0, y: 0, ang: L.playerAngle || 0,
       hp: old ? old.hp : 100,
       armor: old ? old.armor : 0,
       ammo: old ? { bullets: old.ammo.bullets, shells: old.ammo.shells } : { bullets: 50, shells: 0 },
-      weapons: old ? { fist: true, pistol: true, shotgun: old.weapons.shotgun } : { fist: true, pistol: true, shotgun: false },
+      weapons: { fist: true, pistol: true, shotgun: old ? old.shotgun : false },
       keys: { red: false, blue: false },
-      weapon: old && old.weapons.shotgun ? old.weapon : 'pistol',
-      nextWeapon: null, raiseT: 0.3, lowerT: 0, cool: 0, fireT: 1,
+      weapon: old && old.shotgun ? old.weapon : 'pistol',
+      nextWeapon: null, prevWeapon: null, raiseT: 0.3, lowerT: 0, cool: 0, fireT: 1,
       bobPhase: 0, bobAmp: 0,
       dead: false, deadT: 0, camZ: 0.5,
       painT: 0, grinT: 0, dmgFlash: 0, bonusFlash: 0
     };
+    if (!hasAmmo(p, p.weapon)) p.weapon = bestWeapon(p);
 
     for (var y = 0; y < mh; y++) {
       for (var x = 0; x < mw; x++) {
@@ -246,16 +424,37 @@
       boss: null,
       shotId: 0, firing: false, // lets Riley count a shotgun blast as one hit
       input: { strafe: 0, moving: false, vx: 0, vy: 0 }, // what the player is doing, for Riley to read
-      floorTex: ART.floors[L.floor], ceilTex: ART.floors[L.ceil]
+      floorTex: ART.floors[L.floor], ceilTex: ART.floors[L.ceil],
+      startGear: old, info: levelInfo(L),
+      started: false,       // true once the player has the mouse and the clock runs
+      notice: null,         // big centered announcement
+      hurtDirs: [],         // where recent hits came from
+      hitT: 0, killT: 0, blockT: 0, // crosshair hit markers
+      killer: null,
+      tipQueue: [], tipT: 3, usedMap: false, ranT: 0
     };
     for (var bi = 0; bi < ents.length; bi++) if (ents[bi].kind === 'riley') G.boss = ents[bi];
     mode = 'game';
-    message(L.name);
+    mapOpen = false;
+    interSkip = false;
+    if (AUTO) begin();
+  }
+
+  // the clock starts: tell the player where they are and what to do
+  function begin() {
+    if (G.started) return;
+    G.started = true;
+    message(G.L.name);
+    notice(currentObjective(), '#f0d848', 3.5);
   }
 
   function message(text, color, secs) {
     G.msgs.push({ text: text, t: secs || 3, color: color });
     if (G.msgs.length > 4) G.msgs.shift();
+  }
+
+  function notice(text, color, secs) {
+    G.notice = { text: text, color: color || '#f0d848', t: secs || 2.5, max: secs || 2.5 };
   }
 
   // ---- grid queries ----------------------------------------------------------
@@ -434,7 +633,9 @@
     }
   }
 
-  function useAction() {
+  // What pressing "use" would act on right now, without doing it:
+  // { kind: 'door', door } | { kind: 'switch', x, y } | null
+  function useTarget() {
     var p = G.p;
     var c = Math.cos(p.ang), s = Math.sin(p.ang);
     for (var t = 0.4; t <= 1.3; t += 0.3) {
@@ -443,21 +644,46 @@
       if (id === 0) continue;
       if (DOOR_IDS[id]) {
         var d = doorAt(cx, cy);
-        if (d.locked && !p.keys[d.locked]) {
-          SND.play('locked');
-          message('YOU NEED THE ' + d.locked.toUpperCase() + ' KEYCARD.');
-        } else {
-          openDoor(d, true);
-        }
-        return;
+        if (d.open >= 0.9 && d.state === 'open' && Math.floor(p.x) === cx && Math.floor(p.y) === cy) continue;
+        return { kind: 'door', door: d };
       }
-      if (id === 9) { // exit switch
-        G.cells[cy * G.mw + cx] = 10;
-        SND.play('switchFlip');
-        G.exitT = 0.8;
-        return;
+      if (id === 9) return { kind: 'switch', x: cx, y: cy };
+      return null; // plain wall
+    }
+    return null;
+  }
+
+  // The on-screen hint for the thing you're facing (secret walls stay secret).
+  function usePrompt() {
+    if (!G || G.p.dead || G.exitT >= 0) return null;
+    var u = useTarget();
+    if (!u) return null;
+    if (u.kind === 'switch') return { verb: 'EXIT LEVEL', color: '#58e068' };
+    var d = u.door;
+    if (d.secret && !d.found) return null;
+    if (d.locked && !G.p.keys[d.locked]) return { need: d.locked, text: d.locked.toUpperCase() + ' KEYCARD NEEDED', color: d.locked === 'red' ? '#ff5a3a' : '#6a98ff' };
+    if (d.state === 'closed' || d.state === 'closing') return { verb: 'OPEN', color: '#e8e0c8' };
+    return null;
+  }
+
+  function useAction() {
+    var u = useTarget();
+    if (!u) return;
+    var p = G.p;
+    if (u.kind === 'door') {
+      var d = u.door;
+      if (d.locked && !p.keys[d.locked]) {
+        SND.play('locked');
+        message('YOU NEED THE ' + d.locked.toUpperCase() + ' KEYCARD.');
+        tip('key');
+      } else {
+        openDoor(d, true);
       }
-      return; // plain wall
+    } else if (u.kind === 'switch') {
+      G.cells[u.y * G.mw + u.x] = 10;
+      SND.play('switchFlip');
+      notice('LEVEL COMPLETE!', '#58e068', 2);
+      G.exitT = 0.8;
     }
   }
 
@@ -515,6 +741,11 @@
     var dmg = (dmgMin + rnd() * (dmgMax - dmgMin)) | 0;
     if (best) {
       damageMob(best, dmg);
+      if (!best.barrel) {
+        if (best.kind === 'riley' && best.shieldT > 0) G.blockT = 0.2;
+        else if (best.state === 'die') G.killT = 0.3;
+        else G.hitT = Math.max(G.hitT, 0.14);
+      }
       spawnPart(best.x - c * best.radius, best.y - s * best.radius, rndIn(0.3, 0.6),
         best.barrel || best.kind === 'riley' ? ['puffA', 'puffB'] : ['bloodA', 'bloodB'], 0.25);
     } else if (!isMelee) {
@@ -584,12 +815,23 @@
     }
     makeNoise(e.x, e.y, 10);
     var pd = Math.sqrt(dist2(G.p.x, G.p.y, e.x, e.y));
-    if (pd < R && hasLOS(e.x, e.y, G.p.x, G.p.y)) hurtPlayer(((R - pd) / R * 70) | 0);
+    if (pd < R && hasLOS(e.x, e.y, G.p.x, G.p.y)) hurtPlayer(((R - pd) / R * 70) | 0, e);
   }
 
-  function hurtPlayer(dmg) {
+  // src is whatever hurt you ({ x, y, kind }), used for the direction marks
+  // and the obituary
+  function hurtPlayer(dmg, src) {
     var p = G.p;
     if (p.dead || dmg <= 0 || G.exitT >= 0) return;
+    dmg = Math.max(1, Math.round(dmg * diff().dmg));
+    if (src) {
+      var a = Math.atan2(src.y - p.y, src.x - p.x);
+      G.hurtDirs.push({ ang: a, t: 1 });
+      if (G.hurtDirs.length > 6) G.hurtDirs.shift();
+      var rel = Math.atan2(Math.sin(a - p.ang), Math.cos(a - p.ang));
+      if (Math.abs(rel) > 0.9) tip('hurtDir');
+      G.killer = src.kind;
+    }
     var absorbed = Math.min(p.armor, Math.ceil(dmg / 3));
     p.armor -= absorbed;
     dmg -= absorbed;
@@ -598,6 +840,7 @@
     p.painT = 0.6;
     if (p.hp <= 0) {
       p.hp = 0; p.dead = true; p.deadT = 0;
+      mapOpen = false;
       SND.play('playerDie');
       if (rileyActive(G.boss)) {
         rileySay(G.boss, RILEY.line('playerDied', G.boss.profile));
@@ -605,6 +848,7 @@
       }
     } else {
       SND.play('playerPain');
+      if (p.hp < 30) tip('lowHealth');
     }
   }
 
@@ -688,7 +932,7 @@
         if (def.melee && d < 1.9) {
           if (e.los) {
             var dmg = (def.attackDmg[0] + rnd() * (def.attackDmg[1] - def.attackDmg[0])) | 0;
-            if (tgt) damageMob(tgt, dmg, e); else hurtPlayer(dmg);
+            if (tgt) damageMob(tgt, dmg, e); else hurtPlayer(dmg, e);
             SND.play('punch', playerDist(e.x, e.y));
           }
         } else if (def.ranged && e.los) {
@@ -879,7 +1123,7 @@
     var p = G.p, tune = e.tune, cs = tune.coolScale * (e.phase >= 3 ? 0.7 : 1);
     if (e.attack === 'melee') {
       if (d < 1.9 && e.los) {
-        hurtPlayer((rndIn(10, 20) * tune.dmgScale) | 0);
+        hurtPlayer((rndIn(10, 20) * tune.dmgScale) | 0, e);
         SND.play('punch', d);
       }
       e.cools.melee = 1.2;
@@ -996,10 +1240,15 @@
 
     for (var i = 0; i < G.msgs.length; i++) G.msgs[i].t -= dt;
     while (G.msgs.length && G.msgs[0].t <= 0) G.msgs.shift();
+    if (G.notice && (G.notice.t -= dt) <= 0) G.notice = null;
+    G.hitT -= dt; G.killT -= dt; G.blockT -= dt;
+    for (var hd = G.hurtDirs.length - 1; hd >= 0; hd--) if ((G.hurtDirs[hd].t -= dt * 0.9) <= 0) G.hurtDirs.splice(hd, 1);
+    updateTips(dt);
 
     if (G.exitT >= 0) {
       G.exitT -= dt;
       if (G.exitT <= 0) {
+        SETTINGS.unlock(Math.min(levelIndex + 1, LEVELS.length - 1));
         interStats = {
           name: G.L.name, time: G.time, par: G.L.par,
           kills: G.stats.kills, totalKills: G.stats.totalKills,
@@ -1034,6 +1283,7 @@
       var ox = p.x, oy = p.y;
       if (mvF || mvS) {
         slideMove(p, (c * mvF - s * mvS) * sp, (s * mvF + c * mvS) * sp, 0.28);
+        if (run) G.ranT += dt;
         p.bobPhase += dt * (run ? 11 : 8);
         p.bobAmp = Math.min(1, p.bobAmp + dt * 6);
       } else {
@@ -1042,6 +1292,13 @@
       G.input.strafe = mvS;
       G.input.moving = p.x !== ox || p.y !== oy;
       G.input.vx = (p.x - ox) / dt; G.input.vy = (p.y - oy) / dt;
+
+      // first-level tips for things new players tend to miss
+      if (levelIndex === 0) {
+        if (G.time > 14 && G.ranT < 0.3) tip('run');
+        if (G.time > 40 && !G.usedMap) tip('map');
+        if (G.time > 70 && !G.stats.secrets) tip('secret');
+      }
 
       // ---- use
       if (keys['KeyE'] || keys['Space']) {
@@ -1052,7 +1309,7 @@
       if (p.nextWeapon && p.raiseT <= 0 && !(p.lowerT > 0)) { p.lowerT = 0.15; }
       if (p.lowerT > 0) {
         p.lowerT -= dt;
-        if (p.lowerT <= 0) { p.weapon = p.nextWeapon; p.nextWeapon = null; p.raiseT = 0.15; }
+        if (p.lowerT <= 0) { p.weapon = p.nextWeapon || p.weapon; p.nextWeapon = null; p.raiseT = 0.15; }
       }
       if (p.raiseT > 0) p.raiseT -= dt;
 
@@ -1064,9 +1321,11 @@
         var canFire = !wep.ammo || p.ammo[wep.ammo] > 0;
         if (!canFire) {
           SND.play('noAmmo');
-          // classic auto-switch when dry
-          if (p.weapon === 'shotgun') switchWeapon('pistol');
-          else if (p.weapon === 'pistol') switchWeapon('fist');
+          // out of ammo: fall back to the best weapon that can still fire
+          var fallback = bestWeapon(p);
+          message('OUT OF ' + AMMO_NAMES[wep.ammo] + '!');
+          if (switchWeapon(fallback, true) && fallback === 'fist') p.autoFist = true;
+          tip('lowAmmo');
           p.cool = 0.3;
         } else {
           if (wep.ammo) p.ammo[wep.ammo]--;
@@ -1095,7 +1354,8 @@
       for (var e2, j = 0; j < G.ents.length; j++) {
         e2 = G.ents[j];
         if (e2.kind !== 'pickup' || e2.gone) continue;
-        if (dist2(e2.x, e2.y, p.x, p.y) < 0.45) tryPickup(e2);
+        if (dist2(e2.x, e2.y, p.x, p.y) < 0.45) { if (!e2.touching) tryPickup(e2); }
+        else e2.touching = false;
       }
 
       // ---- secret floors
@@ -1106,7 +1366,7 @@
           sec.found = true;
           G.stats.secrets++;
           SND.play('secret');
-          message('YOU FOUND A SECRET AREA!');
+          notice('SECRET AREA FOUND!', '#ffd23e', 2.5);
         }
       }
     }
@@ -1131,7 +1391,7 @@
           if (!victim && !p.dead && dist2(e.x, e.y, p.x, p.y) < 0.2) victim = 'player';
           if (!victim) continue;
           if (victim === 'player') {
-            hurtPlayer(e.dmg | 0);
+            hurtPlayer(e.dmg | 0, { x: e.x - e.vx, y: e.y - e.vy, kind: e.owner ? e.owner.kind : 'imp' });
             SND.play('fireExplode', 0);
           } else {
             if (victim !== 'wall') damageMob(victim, e.dmg | 0, e.owner);
@@ -1169,30 +1429,46 @@
   }
 
   function tryPickup(e) {
-    var p = G.p, it = ITEMS[e.item];
-    var took = true;
+    var p = G.p, it = ITEMS[e.item], am = diff().ammo;
+    var full = null;
     switch (e.item) {
-      case 'h': if (p.hp >= 100) took = false; else p.hp = Math.min(100, p.hp + 10); break;
-      case '+': if (p.hp >= 100) took = false; else p.hp = Math.min(100, p.hp + 25); break;
-      case 'A': if (p.armor >= 100) took = false; else { p.armor = 100; p.grinT = 1; } break;
-      case 'b': if (p.ammo.bullets >= 200) took = false; else p.ammo.bullets = Math.min(200, p.ammo.bullets + 10); break;
-      case 'a': if (p.ammo.shells >= 50) took = false; else p.ammo.shells = Math.min(50, p.ammo.shells + 4); break;
+      case 'h': if (p.hp >= 100) full = 'HEALTH'; else p.hp = Math.min(100, p.hp + 10); break;
+      case '+': if (p.hp >= 100) full = 'HEALTH'; else p.hp = Math.min(100, p.hp + 25); break;
+      case 'A': if (p.armor >= 100) full = 'ARMOR'; else { p.armor = 100; p.grinT = 1; } break;
+      case 'b': if (p.ammo.bullets >= 200) full = 'BULLETS'; else p.ammo.bullets = Math.min(200, p.ammo.bullets + 10 * am); break;
+      case 'a': if (p.ammo.shells >= 50) full = 'SHELLS'; else p.ammo.shells = Math.min(50, p.ammo.shells + 4 * am); break;
       case '2':
         p.weapons.shotgun = true;
-        p.ammo.shells = Math.min(50, p.ammo.shells + 8);
+        p.ammo.shells = Math.min(50, p.ammo.shells + 8 * am);
         p.grinT = 1.2;
-        if (p.weapon !== 'shotgun') switchWeapon('shotgun');
+        if (p.weapon !== 'shotgun') switchWeapon('shotgun', true);
+        notice('SHOTGUN!  PRESS 3', '#ffd23e', 2.5);
+        tip('weapons');
         break;
-      case 'r': p.keys.red = true; p.grinT = 1; break;
-      case 'u': p.keys.blue = true; p.grinT = 1; break;
+      case 'r': case 'u':
+        var col = e.item === 'r' ? 'red' : 'blue';
+        p.keys[col] = true; p.grinT = 1;
+        notice(col.toUpperCase() + ' KEYCARD', col === 'red' ? '#ff5a3a' : '#6a98ff', 2.5);
+        tip('key');
+        break;
       case 'P': p.hp = Math.min(200, p.hp + 100); p.grinT = 1.2; break;
     }
-    if (!took) return;
+    if (full) {
+      // say why it was left behind, once per visit
+      e.touching = true;
+      message(full + ' ALREADY FULL', '#8a8478', 1.5);
+      return;
+    }
     e.gone = true;
     G.stats.items++;
     p.bonusFlash = Math.min(0.35, p.bonusFlash + 0.22);
     SND.play(it.snd);
     message(it.msg);
+    // ran dry and fell back to the fist: pick the gun back up with the ammo
+    if (p.autoFist && (e.item === 'b' || e.item === 'a')) {
+      p.autoFist = false;
+      switchWeapon(bestWeapon(p), true);
+    }
   }
 
   // ---- rendering: world ------------------------------------------------------
@@ -1428,64 +1704,219 @@
     return ART.faces.hurt3;
   }
 
-  function renderHUD() {
+  var HUD_RED = '#e03828', HUD_LABEL = '#8a8478', HUD_SHADOW = '#401008';
+
+  function blinkOn(rate) { return ((G ? G.time : 0) * (rate || 3)) % 1 < 0.55; }
+
+  // numbers go orange when low and flash when critical
+  function levelColor(low, critical) {
+    if (critical) return blinkOn(3) ? '#ffffff' : HUD_RED;
+    if (low) return '#ff9a28';
+    return HUD_RED;
+  }
+
+  function renderStatusBar() {
     var p = G.p;
-    // status bar
     ctx.fillStyle = '#3a352e';
     ctx.fillRect(0, VH, W, HUD_H);
     ctx.fillStyle = '#14110d';
     ctx.fillRect(0, VH, W, 2);
     ctx.fillStyle = '#57514a';
     ctx.fillRect(0, VH + 2, W, 1);
-    // dividers
     ctx.fillStyle = '#24211c';
     [46, 116, 142, 178, 230, 250].forEach(function (dx) {
       ctx.fillRect(dx, VH + 4, 1, HUD_H - 8);
     });
 
+    // ammo for the weapon in hand
     var wep = WEAPONS[p.weapon];
-    var ammoStr = wep.ammo ? String(p.ammo[wep.ammo]) : '--';
-    ART.drawText(ctx, 'AMMO', 8, VH + 5, { scale: 1, color: '#8a8478' });
-    ART.drawText(ctx, ammoStr, 40, VH + 12, { scale: 3, color: '#e03828', shadow: '#401008', right: true });
+    var n = wep.ammo ? p.ammo[wep.ammo] : -1;
+    var lowAmmo = wep.ammo && n <= (wep.ammo === 'shells' ? 4 : 10);
+    ART.drawText(ctx, 'AMMO', 8, VH + 5, { color: n === 0 ? HUD_RED : HUD_LABEL });
+    ART.drawText(ctx, wep.ammo ? String(n) : '--', 40, VH + 12, { scale: 3, color: levelColor(lowAmmo, n === 0), shadow: HUD_SHADOW, right: true });
 
-    ART.drawText(ctx, 'HEALTH', 54, VH + 5, { scale: 1, color: '#8a8478' });
-    ART.drawText(ctx, p.hp + '%', 108, VH + 12, { scale: 3, color: '#e03828', shadow: '#401008', right: true });
+    var critHp = p.hp <= 25;
+    ART.drawText(ctx, 'HEALTH', 54, VH + 5, { color: critHp ? HUD_RED : HUD_LABEL });
+    ART.drawText(ctx, p.hp + '%', 108, VH + 12, { scale: 3, color: levelColor(p.hp <= 50, critHp && !p.dead), shadow: HUD_SHADOW, right: true });
 
-    // face
+    // ARMS: which weapons you own, which is in hand, which are empty
+    ART.drawText(ctx, 'ARMS', 129, VH + 5, { color: HUD_LABEL, center: true });
+    for (var wi = 0; wi < WEAPON_ORDER.length; wi++) {
+      var name = WEAPON_ORDER[wi], x = 119 + wi * 8;
+      var owned = p.weapons[name], inHand = (p.nextWeapon || p.weapon) === name;
+      var col = inHand ? '#ffd23e' : !owned ? '#2a2620' : hasAmmo(p, name) ? '#c8c0b0' : '#6a5a4a';
+      ART.drawText(ctx, String(wi + 1), x, VH + 13, { scale: 2, color: col });
+      if (inHand) { ctx.fillStyle = '#ffd23e'; ctx.fillRect(x, VH + 25, 6, 1); }
+    }
+
     var f = faceImage();
     ctx.drawImage(f.canvas, 160 - 12, VH + 3);
 
-    ART.drawText(ctx, 'ARMOR', 184, VH + 5, { scale: 1, color: '#8a8478' });
-    ART.drawText(ctx, p.armor + '%', 226, VH + 12, { scale: 3, color: '#e03828', shadow: '#401008', right: true });
+    ART.drawText(ctx, 'ARMOR', 184, VH + 5, { color: HUD_LABEL });
+    ART.drawText(ctx, p.armor + '%', 226, VH + 12, { scale: 3, color: p.armor > 0 ? HUD_RED : '#6a4a40', shadow: HUD_SHADOW, right: true });
 
-    // keys
-    if (p.keys.red) ctx.drawImage(ART.things.keyRed.canvas, 236, VH + 5);
-    if (p.keys.blue) ctx.drawImage(ART.things.keyBlue.canvas, 236, VH + 18);
+    // keys: a faint outline for a key this level has that you haven't found
+    var need = G.info.keys;
+    [['red', 'keyRed', 5], ['blue', 'keyBlue', 18]].forEach(function (k) {
+      if (!p.keys[k[0]] && !need[k[0]]) return;
+      ctx.globalAlpha = p.keys[k[0]] ? 1 : 0.18;
+      ctx.drawImage(ART.things[k[1]].canvas, 236, VH + k[2]);
+      ctx.globalAlpha = 1;
+    });
 
-    // ammo table
-    ART.drawText(ctx, 'BULL ' + p.ammo.bullets + '/200', 254, VH + 8, { scale: 1, color: '#c8c0b0' });
-    ART.drawText(ctx, 'SHEL ' + p.ammo.shells + '/50', 254, VH + 19, { scale: 1, color: '#c8c0b0' });
+    // ammo table, the type in use highlighted
+    var bCol = wep.ammo === 'bullets' ? '#ffd23e' : '#c8c0b0', sCol = wep.ammo === 'shells' ? '#ffd23e' : '#c8c0b0';
+    ART.drawText(ctx, 'BULL ' + p.ammo.bullets + '/200', 254, VH + 8, { color: bCol });
+    ART.drawText(ctx, 'SHEL ' + p.ammo.shells + '/50', 254, VH + 19, { color: p.weapons.shotgun ? sCol : '#6a655c' });
+  }
 
-    // messages
+  // the demon (or barrel) under the crosshair, if any
+  function aimTarget() {
+    var p = G.p, c = Math.cos(p.ang), s = Math.sin(p.ang);
+    var wall = castRay(p.x, p.y, c, s, 40);
+    var best = null, bestT = 1e9;
+    for (var i = 0; i < G.ents.length; i++) {
+      var e = G.ents[i];
+      if (!e.mob || !alive(e)) continue;
+      var dx = e.x - p.x, dy = e.y - p.y, t = dx * c + dy * s;
+      if (t < 0.2 || t > wall.dist + 0.2 || t > bestT) continue;
+      if (Math.abs(dx * s - dy * c) < e.radius) { best = e; bestT = t; }
+    }
+    return best;
+  }
+
+  function renderCrosshair() {
+    var cx = W / 2, cy = HORIZON;
+    if (SETTINGS.v.crosshair) {
+      var tgt = aimTarget();
+      ctx.fillStyle = !tgt ? 'rgba(232,224,200,0.75)' : tgt.barrel ? '#ff9a28' : '#ff4a2a';
+      ctx.fillRect(cx - 5, cy, 3, 1); ctx.fillRect(cx + 3, cy, 3, 1);
+      ctx.fillRect(cx, cy - 5, 1, 3); ctx.fillRect(cx, cy + 3, 1, 3);
+    }
+    // hit markers: white = hit, red = kill, grey = blocked by a shield
+    var mk = G.killT > 0 ? '#ff3a1a' : G.blockT > 0 ? '#9aa4a8' : G.hitT > 0 ? '#ffffff' : null;
+    if (mk) {
+      ctx.fillStyle = mk;
+      var r0 = G.killT > 0 ? 4 : 3;
+      for (var k = r0; k < r0 + 3; k++) {
+        ctx.fillRect(cx - k, cy - k, 1, 1); ctx.fillRect(cx + k, cy - k, 1, 1);
+        ctx.fillRect(cx - k, cy + k, 1, 1); ctx.fillRect(cx + k, cy + k, 1, 1);
+      }
+    }
+  }
+
+  // red wedges around the aim point, pointing at whatever just hurt you
+  function renderHurtDirs() {
+    var p = G.p, cx = W / 2, cy = HORIZON, r = 34;
+    for (var i = 0; i < G.hurtDirs.length; i++) {
+      var h = G.hurtDirs[i];
+      var rel = h.ang - p.ang;
+      var sx = Math.sin(rel), sy = -Math.cos(rel);
+      var bx = cx + sx * r, by = cy + sy * r;
+      ctx.fillStyle = 'rgba(255,40,16,' + Math.min(0.9, h.t).toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.moveTo(bx + sx * 9, by + sy * 9);
+      ctx.lineTo(bx - sy * 7, by + sx * 7);
+      ctx.lineTo(bx + sy * 7, by - sx * 7);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  function renderUsePrompt() {
+    var u = usePrompt();
+    if (!u) return;
+    var y = HORIZON + 14;
+    if (u.verb) {
+      var tw = ART.textWidth(u.verb, 1), total = 9 + 4 + tw, x = (W - total) / 2 | 0;
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(x - 3, y - 3, total + 6, 13);
+      ctx.fillStyle = '#e8e0c8';
+      ctx.fillRect(x, y - 1, 9, 9);
+      ctx.fillStyle = '#14110d';
+      ctx.fillRect(x + 1, y, 7, 7);
+      ART.drawText(ctx, 'E', x + 3, y + 1, { color: '#ffd23e' });
+      ART.drawText(ctx, u.verb, x + 13, y + 1, { color: u.color, shadow: true });
+    } else {
+      var tw2 = ART.textWidth(u.text, 1);
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect((W - tw2) / 2 - 4, y - 3, tw2 + 8, 13);
+      ART.drawText(ctx, u.text, W / 2, y + 1, { color: u.color, shadow: true, center: true });
+    }
+  }
+
+  function renderLowHealth() {
+    var p = G.p;
+    if (p.dead || p.hp > 25) return;
+    var a = 0.18 + 0.14 * Math.sin(G.time * 5);
+    for (var k = 0; k < 6; k++) {
+      ctx.fillStyle = 'rgba(200,0,0,' + (a * (1 - k / 6)).toFixed(3) + ')';
+      ctx.fillRect(k * 2, 0, 2, VH); ctx.fillRect(W - k * 2 - 2, 0, 2, VH);
+      ctx.fillRect(0, k * 2, W, 2); ctx.fillRect(0, VH - k * 2 - 2, W, 2);
+    }
+  }
+
+  var OBITS = {
+    imp: ['AN IMP BURNED YOU DOWN.', 'TIP: STRAFE WITH A AND D TO SIDESTEP FIREBALLS.'],
+    gnasher: ['A GNASHER CHEWED YOU UP.', 'TIP: BACK AWAY WHILE YOU SHOOT. GNASHERS ONLY BITE UP CLOSE.'],
+    knight: ['THE EMBER KNIGHT CRUSHED YOU.', 'TIP: KEEP YOUR DISTANCE AND BRING SHOTGUN SHELLS.'],
+    riley: ['RILEY OUTPLAYED YOU.', 'TIP: WHEN HER VISOR FLASHES WHITE, SHE IS ABOUT TO SHOOT. MOVE!'],
+    barrel: ['A BARREL BLEW UP IN YOUR FACE.', 'TIP: SHOOT BARRELS FROM FAR AWAY, WHEN DEMONS ARE NEAR THEM.']
+  };
+
+  function renderDeath() {
+    var p = G.p;
+    if (!p.dead || p.deadT < 1) return;
+    var ob = OBITS[G.killer] || ['YOU WERE OVERWHELMED.', 'TIP: FIGHT IN DOORWAYS SO DEMONS COME TO YOU ONE AT A TIME.'];
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(0, 44, W, 72);
+    ART.drawText(ctx, 'YOU DIED', W / 2, 50, { scale: 3, color: HUD_RED, shadow: true, center: true });
+    ART.drawText(ctx, ob[0], W / 2, 72, { color: '#e8e0c8', shadow: true, center: true });
+    ART.drawText(ctx, ob[1], W / 2, 84, { color: '#8fe0a0', shadow: true, center: true });
+    if (p.deadT > 1.2 && (G.time % 1) < 0.7) {
+      ART.drawText(ctx, 'CLICK OR PRESS ENTER TO TRY AGAIN', W / 2, 100, { color: '#f0d848', shadow: true, center: true });
+    }
+    ART.drawText(ctx, 'YOU KEEP THE GEAR YOU STARTED THE LEVEL WITH', W / 2, 108, { color: '#8a8478', shadow: true, center: true });
+  }
+
+  function renderMessages() {
+    var y = 4;
     for (var i = 0; i < G.msgs.length; i++) {
-      ART.drawText(ctx, G.msgs[i].text, 4, 4 + i * 8, { scale: 1, color: G.msgs[i].color || '#f0d848', shadow: true });
+      var m = G.msgs[i], lines = MENU.wrap(m.text, 78);
+      if (m.t < 0.4) ctx.globalAlpha = Math.max(0, m.t / 0.4);
+      for (var l = 0; l < lines.length; l++) {
+        ART.drawText(ctx, lines[l], 4, y, { color: m.color || '#f0d848', shadow: true });
+        y += 7;
+      }
+      ctx.globalAlpha = 1;
+      y += 1;
     }
+    var n = G.notice;
+    if (n) {
+      ctx.globalAlpha = Math.min(1, n.t / 0.4);
+      ART.drawText(ctx, n.text, W / 2, 50, { scale: 2, color: n.color, shadow: true, center: true });
+      ctx.globalAlpha = 1;
+    }
+  }
 
-    // boss bar
+  function renderBossBar() {
     var b = G.boss;
-    if (b && b.state !== 'idle' && b.state !== 'dead') {
-      var bw = 140, bx = (W - bw) / 2, by = VH - 12;
-      ART.drawText(ctx, 'RILEY', W / 2, by - 8, { scale: 1, color: '#6fe0ec', shadow: true, center: true });
-      ctx.fillStyle = '#06141c';
-      ctx.fillRect(bx - 1, by - 1, bw + 2, 6);
-      ctx.fillStyle = b.shieldT > 0 ? '#ffd23e' : '#3fd8c8';
-      ctx.fillRect(bx, by, Math.max(0, b.hp / b.maxHp) * bw, 4);
-      ctx.fillStyle = '#06141c'; // phase marks
-      ctx.fillRect(bx + bw * 0.33, by, 1, 4);
-      ctx.fillRect(bx + bw * 0.66, by, 1, 4);
-    }
+    if (!b || b.state === 'idle' || b.state === 'dead') return;
+    var bw = 140, bx = (W - bw) / 2, by = VH - 12;
+    var shield = b.shieldT > 0;
+    ART.drawText(ctx, shield ? 'RILEY - SHIELDED' : 'RILEY', W / 2, by - 8, { color: shield ? '#ffd23e' : '#6fe0ec', shadow: true, center: true });
+    ctx.fillStyle = '#06141c';
+    ctx.fillRect(bx - 1, by - 1, bw + 2, 6);
+    ctx.fillStyle = shield ? '#ffd23e' : '#3fd8c8';
+    ctx.fillRect(bx, by, Math.max(0, b.hp / b.maxHp) * bw, 4);
+    ctx.fillStyle = '#06141c'; // phase marks
+    ctx.fillRect(bx + bw * 0.33, by, 1, 4);
+    ctx.fillRect(bx + bw * 0.66, by, 1, 4);
+  }
 
-    // overlays
+  function renderHUD() {
+    var p = G.p;
+    renderStatusBar();
     if (p.dmgFlash > 0) {
       ctx.fillStyle = 'rgba(255,20,10,' + p.dmgFlash.toFixed(3) + ')';
       ctx.fillRect(0, 0, W, VH);
@@ -1494,45 +1925,65 @@
       ctx.fillStyle = 'rgba(255,220,80,' + p.bonusFlash.toFixed(3) + ')';
       ctx.fillRect(0, 0, W, VH);
     }
-    if (p.dead && p.deadT > 1) {
-      ART.drawText(ctx, 'YOU DIED', W / 2, 60, { scale: 3, color: '#e03828', shadow: true, center: true });
-      ART.drawText(ctx, 'PRESS ENTER OR CLICK TO TRY AGAIN', W / 2, 86, { scale: 1, color: '#e8e0c8', shadow: true, center: true });
+    renderLowHealth();
+    if (mapOpen) { renderAutomap(); renderMessages(); return; }
+    if (!p.dead && G.started && !MENU.isOpen()) {
+      renderHurtDirs();
+      renderCrosshair();
+      renderUsePrompt();
     }
-    if (!locked && !p.dead && G.time > 0.5) {
-      ART.drawText(ctx, 'PAUSED - CLICK TO PLAY', W / 2, 78, { scale: 1, color: '#f0d848', shadow: true, center: true });
-    }
-
-    if (mapOpen) renderAutomap();
+    renderBossBar();
+    renderMessages();
+    renderDeath();
   }
 
   function renderAutomap() {
-    ctx.fillStyle = 'rgba(0,0,0,0.72)';
+    ctx.fillStyle = 'rgba(0,0,0,0.8)';
     ctx.fillRect(0, 0, W, VH);
-    var sc = Math.min((W - 24) / G.mw, (VH - 24) / G.mh);
-    var ox = (W - G.mw * sc) / 2, oy = (VH - G.mh * sc) / 2;
+    var top = 22, bottom = VH - 14;
+    var sc = Math.min((W - 16) / G.mw, (bottom - top) / G.mh);
+    var ox = (W - G.mw * sc) / 2, oy = top + (bottom - top - G.mh * sc) / 2;
+    var pulse = (G.time * 2) % 1 < 0.6;
     for (var y = 0; y < G.mh; y++) {
       for (var x = 0; x < G.mw; x++) {
         if (!G.seen[y * G.mw + x]) continue;
         var c = G.cells[y * G.mw + x];
         if (c === 0) continue;
-        var col = '#8a8478';
-        if (c === 6 || c === 11) col = '#c8a030';
-        else if (c === 7) col = '#e03828';
-        else if (c === 8) col = '#3868e0';
-        else if (c === 9 || c === 10) col = '#38c048';
+        var col = '#6a655c';
+        if (c === 6) col = '#c8a030';
+        else if (c === 11) col = G.doors[x + ',' + y].found ? '#c8a030' : '#6a655c'; // secrets stay secret
+        else if (c === 7) col = '#ff3a2a';
+        else if (c === 8) col = '#4a7aff';
+        else if (c === 9 || c === 10) col = pulse || c === 10 ? '#58e068' : '#1e5a26';
         ctx.fillStyle = col;
         ctx.fillRect(ox + x * sc, oy + y * sc, Math.max(1, sc - 0.4), Math.max(1, sc - 0.4));
       }
     }
-    // player arrow
-    var p = G.p;
-    var px = ox + p.x * sc, py = oy + p.y * sc;
-    ctx.strokeStyle = '#f0f0e0';
+    // you: a solid arrow
+    var p = G.p, px = ox + p.x * sc, py = oy + p.y * sc, ca = Math.cos(p.ang), sa = Math.sin(p.ang);
+    ctx.fillStyle = '#f8f4e0';
     ctx.beginPath();
-    ctx.moveTo(px - Math.cos(p.ang) * 3, py - Math.sin(p.ang) * 3);
-    ctx.lineTo(px + Math.cos(p.ang) * 4, py + Math.sin(p.ang) * 4);
-    ctx.stroke();
-    ART.drawText(ctx, G.L.name, W / 2, VH - 12, { scale: 1, color: '#f0d848', shadow: true, center: true });
+    ctx.moveTo(px + ca * 5, py + sa * 5);
+    ctx.lineTo(px - ca * 3 - sa * 3, py - sa * 3 + ca * 3);
+    ctx.lineTo(px - ca * 3 + sa * 3, py - sa * 3 - ca * 3);
+    ctx.closePath();
+    ctx.fill();
+
+    ART.drawText(ctx, G.L.name, 6, 4, { color: '#ff9a28', shadow: true });
+    ART.drawText(ctx, 'TAB: CLOSE', W - 6, 4, { color: '#8a8478', right: true });
+    ART.drawText(ctx, 'GOAL: ' + currentObjective(), 6, 12, { color: '#f0d848', shadow: true });
+    var st = G.stats;
+    ART.drawText(ctx, 'KILLS ' + st.kills + '/' + st.totalKills + '  ITEMS ' + st.items + '/' + st.totalItems +
+      '  SECRETS ' + st.secrets + '/' + st.totalSecrets + '  TIME ' + fmtTime(G.time), W - 6, 12, { color: '#c8c0b0', right: true });
+
+    // legend
+    var lx = 6, ly = VH - 9;
+    [['#c8a030', 'DOOR'], ['#ff3a2a', 'RED DOOR'], ['#4a7aff', 'BLUE DOOR'], ['#58e068', 'EXIT'], ['#f8f4e0', 'YOU']].forEach(function (l) {
+      ctx.fillStyle = l[0];
+      ctx.fillRect(lx, ly, 5, 5);
+      ART.drawText(ctx, l[1], lx + 8, ly, { color: '#a8a090' });
+      lx += 8 + ART.textWidth(l[1], 1) + 12;
+    });
   }
 
   // ---- rendering: screens ----------------------------------------------------
@@ -1547,23 +1998,32 @@
     }
   }
 
-  function renderTitle(t) {
+  function renderTitleBg(c, t) {
     ctx.fillStyle = '#080604';
     ctx.fillRect(0, 0, W, H);
-    fireLine(H - 8, t, 0);
-    fireLine(H - 4, t * 1.3, 2);
+    fireLine(H - 6, t, 0);
+    fireLine(H - 2, t * 1.3, 2);
+    ART.drawText(ctx, 'FIREBIRD', W / 2, 10, { scale: 4, color: '#e03828', shadow: '#401008', center: true });
+    ART.drawText(ctx, 'FIREBIRD', W / 2 - 1, 9, { scale: 4, color: '#ff9a28', center: true });
+    ART.drawText(ctx, '3D', W / 2, 34, { scale: 5, color: '#ffd23e', shadow: '#803008', center: true });
+    ART.drawText(ctx, 'EPISODE ONE: KNEE-DEEP IN THE ASHES', W / 2, 64, { color: '#c8c0b0', center: true });
+    ART.drawText(ctx, 'A NIX GAMES PRODUCTION BY PHOENIX', W / 2, 72, { color: '#6a655c', center: true });
+  }
 
-    var pulse = (Math.sin(t * 2) + 1) / 2;
-    ART.drawText(ctx, 'FIREBIRD', W / 2, 34, { scale: 5, color: '#e03828', shadow: '#401008', center: true });
-    ART.drawText(ctx, 'FIREBIRD', W / 2 - 1, 33, { scale: 5, color: '#ff9a28', center: true });
-    ART.drawText(ctx, '3D', W / 2, 66, { scale: 7, color: '#ffd23e', shadow: '#803008', center: true });
-
-    ART.drawText(ctx, 'EPISODE ONE: KNEE-DEEP IN THE ASHES', W / 2, 108, { scale: 1, color: '#c8c0b0', center: true });
-    if (pulse > 0.25) ART.drawText(ctx, 'CLICK OR PRESS ENTER TO RISE', W / 2, 126, { scale: 1, color: '#f0d848', shadow: true, center: true });
-
-    ART.drawText(ctx, 'WASD MOVE   MOUSE TURN   CLICK FIRE', W / 2, 148, { scale: 1, color: '#8a8478', center: true });
-    ART.drawText(ctx, 'E OR SPACE USE   1-3 WEAPONS   TAB MAP   M MUSIC', W / 2, 158, { scale: 1, color: '#8a8478', center: true });
-    ART.drawText(ctx, 'A NIX GAMES PRODUCTION BY PHOENIX', W / 2, 180, { scale: 1, color: '#6a655c', center: true });
+  // background for menus: the title's darkness, or the paused game dimmed
+  function menuBg(c, t) {
+    if (mode === 'game') {
+      ctx.fillStyle = 'rgba(4,3,2,0.86)';
+      ctx.fillRect(0, 0, W, VH);
+      ctx.fillStyle = '#0a0806';
+      ctx.fillRect(0, VH, W, HUD_H);
+    } else {
+      ctx.fillStyle = '#0a0806';
+      ctx.fillRect(0, 0, W, H);
+      fireLine(H + 4, t, 1);
+    }
+    ctx.fillStyle = '#5e2a10';
+    ctx.fillRect(40, 33, W - 80, 1);
   }
 
   function fmtTime(t) {
@@ -1571,6 +2031,195 @@
     var m = (t / 60) | 0, s = t % 60;
     return m + ':' + (s < 10 ? '0' : '') + s;
   }
+
+  function onOff(b) { return b ? 'ON' : 'OFF'; }
+
+  function mainScreen() {
+    var pr = SETTINGS.progress;
+    return {
+      drawBg: renderTitleBg, scale: 2, top: 86, gap: 13, descY: 156, footerY: 172,
+      items: function () {
+        var list = [];
+        if (pr.unlocked > 0) list.push({
+          label: 'CONTINUE', action: function () { launch(pr.unlocked); },
+          desc: function () { return 'START ' + LEVELS[pr.unlocked].name + ' ON ' + diff().name + '.'; }
+        });
+        list.push(
+          { label: 'NEW GAME', action: function () { MENU.push(diffScreen(0)); }, desc: 'START EPISODE ONE FROM THE BEGINNING.' },
+          { label: 'LEVEL SELECT', action: function () { MENU.push(levelScreen()); }, desc: 'REPLAY ANY LEVEL YOU HAVE REACHED.' },
+          { label: 'OPTIONS', action: function () { MENU.push(optionsScreen()); }, desc: 'MOUSE SPEED, VOLUME, CROSSHAIR, TIPS AND DIFFICULTY.' },
+          { label: 'CONTROLS', action: function () { MENU.push(controlsScreen()); }, desc: 'EVERY KEY, ON ONE PAGE.' }
+        );
+        return list;
+      }
+    };
+  }
+
+  function diffScreen(idx) {
+    var list = DIFFS.map(function (d, i) {
+      return {
+        label: d.name, desc: d.desc,
+        action: function () { SETTINGS.v.difficulty = i; SETTINGS.save(); launch(idx); }
+      };
+    });
+    list.push({ label: 'BACK', action: function () { MENU.back(); } });
+    return { title: 'DIFFICULTY', drawBg: menuBg, scale: 2, top: 54, gap: 18, descY: 146, sel: SETTINGS.v.difficulty, items: list };
+  }
+
+  function levelScreen() {
+    var list = LEVELS.map(function (L, i) {
+      var open = i <= SETTINGS.progress.unlocked;
+      return {
+        label: open ? L.name : L.name.split(':')[0] + ': ???',
+        disabled: function () { return !open; },
+        desc: (levelInfo(L).boss ? 'BOSS LEVEL.  ' : '') + 'PAR TIME ' + fmtTime(L.par) + '.  STARTS WITH A PISTOL.',
+        action: function () { MENU.push(diffScreen(i)); }
+      };
+    });
+    list.push({ label: 'BACK', action: function () { MENU.back(); } });
+    return {
+      title: 'LEVEL SELECT', drawBg: menuBg, top: 50, gap: 15, descY: 140, items: list,
+      drawExtra: function () {
+        if (SETTINGS.progress.unlocked < LEVELS.length - 1) ART.drawText(ctx, 'FINISH A LEVEL TO UNLOCK THE NEXT ONE.', W / 2, 156, { color: '#6a655c', center: true });
+      }
+    };
+  }
+
+  function optionsScreen() {
+    var v = SETTINGS.v;
+    function step(key, min, max) {
+      return function (dir) {
+        var n = v[key] + dir;
+        v[key] = n > max ? min : n < min ? max : n;
+        SETTINGS.save();
+        applySettings();
+      };
+    }
+    function toggle(key) { return function () { v[key] = !v[key]; SETTINGS.save(); }; }
+    return {
+      title: 'OPTIONS', drawBg: menuBg, top: 46, gap: 13, descY: 150,
+      items: [
+        { label: 'MOUSE SPEED', slider: [0, 10, function () { return v.sens; }], adjust: step('sens', 1, 10), desc: 'HOW FAST THE VIEW TURNS WHEN YOU MOVE THE MOUSE. LEFT AND RIGHT TO CHANGE.' },
+        { label: 'SOUND VOLUME', slider: [0, 10, function () { return v.volume; }], adjust: step('volume', 0, 10), desc: 'LOUDNESS OF EVERYTHING. LEFT AND RIGHT TO CHANGE.' },
+        { label: 'MUSIC', value: function () { return onOff(SND.isMusicOn()); }, adjust: function () { SND.setMusic(!SND.isMusicOn()); }, desc: 'PRESS M DURING PLAY TO TOGGLE IT TOO.' },
+        { label: 'CROSSHAIR', value: function () { return onOff(v.crosshair); }, adjust: toggle('crosshair'), desc: 'A SMALL AIMING MARK. TURNS RED OVER A DEMON.' },
+        { label: 'TIPS', value: function () { return onOff(v.tips); }, adjust: function () { v.tips = !v.tips; if (v.tips) v.seenTips = {}; SETTINGS.save(); }, desc: 'SHORT HINTS THE FIRST TIME SOMETHING NEW HAPPENS. TURNING THEM ON SHOWS THEM ALL AGAIN.' },
+        { label: 'DIFFICULTY', value: function () { return diff().name; }, adjust: step('difficulty', 0, 2), desc: function () { return diff().desc + ' CHANGES TAKE EFFECT RIGHT AWAY.'; } },
+        { label: 'BACK', action: function () { MENU.back(); } }
+      ]
+    };
+  }
+
+  var CONTROLS = [
+    ['MOVE', 'W A S D   OR   ARROW KEYS'],
+    ['TURN AND AIM', 'MOUSE   OR   LEFT / RIGHT'],
+    ['FIRE', 'LEFT CLICK   OR   CTRL'],
+    ['USE / OPEN', 'E   OR   SPACE'],
+    ['RUN', 'HOLD SHIFT'],
+    ['WEAPONS', '1 2 3   OR   MOUSE WHEEL'],
+    ['LAST WEAPON', 'Q'],
+    ['MAP', 'TAB'],
+    ['MUSIC', 'M'],
+    ['PAUSE', 'ESC']
+  ];
+
+  function controlsScreen() {
+    return {
+      title: 'CONTROLS', drawBg: menuBg, top: 168, gap: 12,
+      items: [{ label: 'BACK', action: function () { MENU.back(); } }],
+      drawExtra: function () {
+        for (var i = 0; i < CONTROLS.length; i++) {
+          var y = 42 + i * 11;
+          ART.drawText(ctx, CONTROLS[i][0], 140, y, { color: '#c8c0b0', right: true });
+          ART.drawText(ctx, CONTROLS[i][1], 152, y, { color: '#ffd23e' });
+        }
+      }
+    };
+  }
+
+  function confirmScreen(question, detail, yes) {
+    return {
+      title: question, drawBg: menuBg, scale: 2, top: 86, gap: 18, sel: 1,
+      drawExtra: function () { ART.drawText(ctx, detail, W / 2, 56, { color: '#a8a090', center: true }); },
+      items: [
+        { label: 'YES', action: yes },
+        { label: 'NO', action: function () { MENU.back(); } }
+      ]
+    };
+  }
+
+  function pauseScreen() {
+    return {
+      title: 'PAUSED', drawBg: menuBg, scale: 2, top: 64, gap: 14, descY: 144,
+      items: [
+        {
+          label: function () { return G.p.dead ? 'TRY AGAIN' : 'RESUME'; },
+          action: function () { if (G.p.dead) retryLevel(); beginPlay(); },
+          desc: function () { return G.p.dead ? 'RESTART THIS LEVEL WITH THE GEAR YOU BROUGHT IN.' : 'BACK TO THE FIGHT.'; }
+        },
+        {
+          label: 'RESTART LEVEL', desc: 'START THIS LEVEL OVER WITH THE GEAR YOU BROUGHT IN.',
+          action: function () {
+            MENU.push(confirmScreen('RESTART?', 'YOU WILL LOSE PROGRESS IN THIS LEVEL.', function () { retryLevel(); beginPlay(); }));
+          }
+        },
+        { label: 'OPTIONS', action: function () { MENU.push(optionsScreen()); }, desc: 'MOUSE SPEED, VOLUME, CROSSHAIR, TIPS AND DIFFICULTY.' },
+        { label: 'CONTROLS', action: function () { MENU.push(controlsScreen()); }, desc: 'EVERY KEY, ON ONE PAGE.' },
+        {
+          label: 'QUIT TO TITLE', desc: 'YOUR UNLOCKED LEVELS ARE SAVED.',
+          action: function () { MENU.push(confirmScreen('QUIT?', 'PROGRESS IN THIS LEVEL WILL BE LOST.', toTitle)); }
+        }
+      ],
+      footer: 'ARROWS OR MOUSE: CHOOSE   ENTER OR CLICK: SELECT', footerY: 176,
+      drawExtra: function () {
+        ART.drawText(ctx, G.L.name + '   ' + diff().name, W / 2, 38, { color: '#c8c0b0', center: true });
+        ART.drawText(ctx, 'GOAL: ' + currentObjective(), W / 2, 48, { color: '#f0d848', center: true });
+        var st = G.stats;
+        ART.drawText(ctx, 'KILLS ' + st.kills + '/' + st.totalKills + '   ITEMS ' + st.items + '/' + st.totalItems +
+          '   SECRETS ' + st.secrets + '/' + st.totalSecrets + '   TIME ' + fmtTime(G.time), W / 2, 160, { color: '#8a8478', center: true });
+      }
+    };
+  }
+
+  function applySettings() {
+    SND.setVolume(SETTINGS.v.volume / 10);
+  }
+
+  function launch(idx) {
+    startLevel(idx, false);
+    beginPlay();
+  }
+
+  function toTitle() {
+    mode = 'title';
+    MENU.open(mainScreen());
+    releaseLock();
+  }
+
+  function openPause() {
+    mapOpen = false;
+    MENU.open(pauseScreen());
+    SND.play('menu');
+  }
+
+  // shown before the level starts, and doubles as the "click to grab the mouse" prompt
+  function renderLevelCard(t) {
+    ctx.fillStyle = 'rgba(4,3,2,0.7)';
+    ctx.fillRect(0, 0, W, H);
+    var parts = G.L.name.split(': ');
+    ART.drawText(ctx, parts[0], W / 2, 22, { color: '#8a8478', center: true });
+    ART.drawText(ctx, parts[1] || G.L.name, W / 2, 32, { scale: 3, color: '#ff9a28', shadow: HUD_SHADOW, center: true });
+    ART.drawText(ctx, 'GOAL', W / 2, 60, { color: '#8a8478', center: true });
+    ART.drawText(ctx, currentObjective(), W / 2, 69, { scale: 2, color: '#f0d848', shadow: true, center: true });
+    ART.drawText(ctx, 'DIFFICULTY: ' + diff().name + '     PAR ' + fmtTime(G.L.par), W / 2, 88, { color: '#a8a090', center: true });
+    if ((t % 1) < 0.7) ART.drawText(ctx, 'CLICK TO BEGIN', W / 2, 106, { scale: 2, color: '#ffffff', shadow: true, center: true });
+    if (lockFailed) ART.drawText(ctx, 'THE GAME NEEDS THE MOUSE. CLICK THE SCREEN AGAIN.', W / 2, 124, { color: '#ff9a28', center: true });
+    ART.drawText(ctx, 'WASD MOVE   MOUSE AIM   CLICK FIRE   E USE   TAB MAP   ESC PAUSE', W / 2, 140, { color: '#8a8478', center: true });
+  }
+
+  var interSkip = false, tallyTick = 0;
+  function interRoll(t) { return interSkip ? 1 : clamp(t / 1.2, 0, 1); }
+  function interDone() { return interRoll(modeT) >= 1; }
 
   function renderInter(t) {
     ctx.fillStyle = '#0a0806';
@@ -1580,21 +2229,26 @@
     ART.drawText(ctx, st.name, W / 2, 22, { scale: 2, color: '#ff9a28', shadow: true, center: true });
     ART.drawText(ctx, 'FINISHED!', W / 2, 42, { scale: 2, color: '#e8e0c8', shadow: true, center: true });
 
-    // tally rolls up over time
-    var roll = clamp(t / 1.2, 0, 1);
+    // tally rolls up over time (click to skip)
+    var roll = interRoll(t);
+    if (roll < 1 && t - tallyTick > 0.07) { tallyTick = t; SND.play('tally'); }
     function pct(a, b) { return b ? Math.round(a / b * 100 * roll) : 100; }
-    ART.drawText(ctx, 'KILLS', 90, 74, { scale: 2, color: '#c8c0b0' });
-    ART.drawText(ctx, pct(st.kills, st.totalKills) + '%', 240, 74, { scale: 2, color: '#e03828', right: true });
-    ART.drawText(ctx, 'ITEMS', 90, 96, { scale: 2, color: '#c8c0b0' });
-    ART.drawText(ctx, pct(st.items, st.totalItems) + '%', 240, 96, { scale: 2, color: '#e03828', right: true });
-    ART.drawText(ctx, 'SECRETS', 90, 118, { scale: 2, color: '#c8c0b0' });
-    ART.drawText(ctx, pct(st.secrets, st.totalSecrets) + '%', 240, 118, { scale: 2, color: '#e03828', right: true });
-    ART.drawText(ctx, 'TIME ' + fmtTime(st.time), 90, 140, { scale: 2, color: '#c8c0b0' });
-    ART.drawText(ctx, 'PAR ' + fmtTime(st.par), 240, 140, { scale: 2, color: '#c8c0b0', right: true });
+    function row(label, a, b, y) {
+      ART.drawText(ctx, label, 90, y, { scale: 2, color: '#c8c0b0' });
+      var v = pct(a, b);
+      ART.drawText(ctx, v + '%', 240, y, { scale: 2, color: v >= 100 ? '#ffd23e' : HUD_RED, right: true });
+    }
+    row('KILLS', st.kills, st.totalKills, 70);
+    row('ITEMS', st.items, st.totalItems, 90);
+    row('SECRETS', st.secrets, st.totalSecrets, 110);
+    var beatPar = st.time <= st.par;
+    ART.drawText(ctx, 'TIME ' + fmtTime(st.time), 90, 132, { scale: 2, color: beatPar && roll >= 1 ? '#ffd23e' : '#c8c0b0' });
+    ART.drawText(ctx, 'PAR ' + fmtTime(st.par), 240, 132, { scale: 2, color: '#c8c0b0', right: true });
+    if (roll >= 1) ART.drawText(ctx, beatPar ? 'UNDER PAR!' : '', W / 2, 150, { color: '#ffd23e', center: true });
 
-    if (t > 1.4 && (t % 1) < 0.6) {
-      var next = levelIndex + 1 < LEVELS.length ? 'PRESS ENTER FOR ' + LEVELS[levelIndex + 1].name.split(':')[0] : 'PRESS ENTER';
-      ART.drawText(ctx, next, W / 2, 170, { scale: 1, color: '#f0d848', shadow: true, center: true });
+    if (roll >= 1 && (t % 1) < 0.7) {
+      var next = levelIndex + 1 < LEVELS.length ? 'CLICK OR PRESS ENTER FOR ' + LEVELS[levelIndex + 1].name : 'CLICK OR PRESS ENTER';
+      ART.drawText(ctx, next, W / 2, 166, { color: '#f0d848', shadow: true, center: true });
     }
   }
 
@@ -1615,9 +2269,9 @@
       'THANKS FOR PLAYING, WARRIOR.'
     ];
     for (var i = 0; i < lines.length; i++) {
-      ART.drawText(ctx, lines[i], W / 2, 74 + i * 10, { scale: 1, color: '#e8e0c8', center: true });
+      ART.drawText(ctx, lines[i], W / 2, 74 + i * 10, { color: '#e8e0c8', center: true });
     }
-    if ((t % 1) < 0.6) ART.drawText(ctx, 'PRESS ENTER FOR THE TITLE SCREEN', W / 2, 170, { scale: 1, color: '#f0d848', shadow: true, center: true });
+    if (t > 1 && (t % 1) < 0.7) ART.drawText(ctx, 'CLICK OR PRESS ENTER FOR THE TITLE SCREEN', W / 2, 170, { color: '#f0d848', shadow: true, center: true });
   }
 
   // ---- main loop -------------------------------------------------------------
@@ -1631,17 +2285,31 @@
     modeT += dt;
 
     if (mode === 'game' && G) {
-      var paused = !locked && !G.p.dead && !AUTO;
+      if (!G.started && locked) begin();
+      var menu = MENU.isOpen();
+      var paused = !AUTO && (!locked || menu);
       if (!paused) update(dt);
       renderWorld();
       renderWeapon();
       renderHUD();
+      if (!G.started && !AUTO) { renderLevelCard(modeT); setCursor('pointer'); }
+      else if (menu) MENU.render(ctx, modeT);
+      else if (!locked && !AUTO) {
+        // resume was chosen but the browser hasn't handed the mouse back yet
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(0, 70, W, 24);
+        ART.drawText(ctx, 'CLICK TO RESUME', W / 2, 76, { scale: 2, color: '#f0d848', shadow: true, center: true });
+        setCursor('pointer');
+      }
     } else if (mode === 'title') {
-      renderTitle(modeT);
+      if (!MENU.isOpen()) MENU.open(mainScreen());
+      MENU.render(ctx, modeT);
     } else if (mode === 'inter') {
       renderInter(modeT);
+      setCursor('pointer');
     } else if (mode === 'victory') {
       renderVictory(modeT);
+      setCursor('pointer');
     }
 
     sctx.imageSmoothingEnabled = false;
@@ -1676,10 +2344,36 @@
         startLevel: startLevel,
         renderWorld: function () { renderWorld(); return { w: W, h: VH, pixels: fb }; },
         keys: keys,
-        setFire: function (on) { fireHeld = on; }
+        setFire: function (on) { fireHeld = on; },
+        switchWeapon: switchWeapon, cycleWeapon: cycleWeapon, quickSwitch: quickSwitch,
+        useTarget: useTarget, usePrompt: usePrompt, useAction: useAction,
+        objective: currentObjective, retryLevel: retryLevel, hurtPlayer: hurtPlayer,
+        aimTarget: aimTarget, onEnter: onEnter, DIFFS: DIFFS,
+        // draw one full frame (world, weapon, HUD, overlays) into the 320x200 buffer
+        renderFrame: function (overlay) {
+          renderWorld(); renderWeapon(); renderHUD();
+          if (overlay === 'card') renderLevelCard(0.1);
+          else if (overlay === 'pause') { openPause(); MENU.render(ctx, 0.1); MENU.close(); }
+          return low;
+        },
+        renderTitle: function (screen) {
+          var prevMode = mode; mode = 'title';
+          MENU.open(mainScreen());
+          if (screen === 'options') MENU.push(optionsScreen());
+          if (screen === 'controls') MENU.push(controlsScreen());
+          if (screen === 'levels') MENU.push(levelScreen());
+          if (screen === 'difficulty') MENU.push(diffScreen(0));
+          MENU.render(ctx, 0.1);
+          MENU.close(); mode = prevMode;
+          return low;
+        },
+        setMode: function (m) { mode = m; },
+        setMap: function (on) { mapOpen = on; }
       };
     }
   }
 
+  applySettings();
+  if (!AUTO) MENU.open(mainScreen());
   requestAnimationFrame(frame);
 })();
