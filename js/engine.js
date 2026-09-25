@@ -459,6 +459,17 @@
       }
     }
 
+    // secret walls wear the wall they sit in (plus a crack), so the hint is the same everywhere
+    var hostWall = 1;
+    for (var sy = 0; sy < mh; sy++) for (var sx = 0; sx < mw; sx++) {
+      if (m[sy][sx] !== 'S') continue;
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (o) {
+        var n = (m[sy + o[1]] || '')[sx + o[0]];
+        if ('#%MTH'.indexOf(n) >= 0 && n) hostWall = WALL_IDS[n];
+      });
+    }
+    ART.tex[11] = ART.secretTex(hostWall);
+
     var totalKills = 0, totalItems = 0;
     for (var i = 0; i < ents.length; i++) {
       if (ents[i].mob && !ents[i].barrel) totalKills++;
@@ -1083,7 +1094,7 @@
     if (e.cool <= 0 && e.los) {
       if (def.melee && d < 1.4) {
         e.state = 'windup'; e.st = 0.35;
-      } else if (def.ranged && d > 2 && d < 14 && rnd() < dt * 1.4) {
+      } else if (def.ranged && d > 1.2 && d < 14 && rnd() < dt * 1.4) { // no dead zone inside the stop distance
         e.state = 'windup'; e.st = 0.45;
       }
     }

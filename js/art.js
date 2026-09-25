@@ -1161,6 +1161,27 @@ var ART = (function () {
     flash: flashSprite()
   };
 
+  // A secret wall: the wall it hides in, plus a faint crack. Same hint on
+  // every level, whatever the wall is made of.
+  var secretCache = {};
+  A.secretTex = function (baseId) {
+    if (secretCache[baseId]) return secretCache[baseId];
+    var base = A.tex[baseId] || A.tex[1], data = new Uint32Array(base.data);
+    function darken(i) {
+      var c = data[i];
+      data[i] = (0xff000000 | (((c >> 16) & 255) * 0.45) << 16 | (((c >> 8) & 255) * 0.45) << 8 | ((c & 255) * 0.45)) >>> 0;
+    }
+    var x = 22;
+    for (var y = 8; y < 56; y++) { // a jagged hairline down the middle
+      x += (y % 7 === 0) ? 1 : (y % 11 === 0) ? -1 : 0;
+      darken(y * 64 + x);
+      if (y % 9 === 4) darken(y * 64 + x + 1);
+    }
+    for (var k = 0; k < 6; k++) darken((30 + k) * 64 + x + 1 + k); // a short branch
+    secretCache[baseId] = { w: 64, h: 64, data: data };
+    return secretCache[baseId];
+  };
+
   A.drawText = drawText;
   A.textWidth = textWidth;
   A.hex = hex;
