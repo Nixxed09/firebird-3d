@@ -11,4 +11,7 @@ opt = args.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else
 for group in ('demons', 'weapons', 'props', 'pickups', 'surfaces'):
     if opt.group in ('all', group):
         __import__(group).build()
+if opt.group=='all':
+    import audit
+    audit.build()
 kit.manifest()

@@ -7,5 +7,6 @@ if (!(Test-Path "$PSScriptRoot/.deps/node_modules/gltf-validator")) {
   & npm.cmd install --prefix "$PSScriptRoot/.deps" --no-save --package-lock=false --ignore-scripts gltf-validator@2.0.0-dev.3.10
   if ($LASTEXITCODE -ne 0) { throw 'Validator install failed' }
 }
-& node "$PSScriptRoot/validate.mjs"
+if ($Group -eq 'all') { & node "$PSScriptRoot/validate.mjs" --complete }
+else { & node "$PSScriptRoot/validate.mjs" }
 if ($LASTEXITCODE -ne 0) { throw 'Asset validation failed' }

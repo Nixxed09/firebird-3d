@@ -15,7 +15,7 @@ def humanoid(kind):
     ell('Face',(0,-.13,1.43),(.205,.19,.20),skin,'head')
     if not holo:
         for side in (-1,1):
-            horn('Swept furnace horn',[(side*.14,-.10,1.54),(side*.24,.01,1.68),(side*.29,.14,1.77),(side*.25,.21,1.86)],[.085,.065,.032,.003],'brass' if knight else 'char','head')
+            horn('Swept furnace horn',[(side*.14,-.10,1.54),(side*.24,.01,1.68),(side*.29,.14,1.77),(side*.25,.21,1.86)],[.085,.065,.032,.003],'brass' if knight else 'bone','head')
             o=box('Heavy brow',(side*.10,-.294,1.49),(.19,.075,.06),'iron' if knight else 'char','head');o.rotation_euler.y=side*.17
             ell('Hot eye',(side*.105,-.314,1.45),(.063,.023,.03),accent,'head',12,8)
         ell('Dark maw',(0,-.298,1.345),(.13,.035,.055),'black','head')

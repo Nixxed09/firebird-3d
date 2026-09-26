@@ -4,6 +4,344 @@
   "errors": 0,
   "warnings": 0,
   "contract_failures": [],
+  "surface_maps": [
+    {
+      "file": "surfaces/brick_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/brick_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/brick_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/brick_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/ceiling_panel_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/ceiling_panel_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/ceiling_panel_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/ceiling_panel_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_blue_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_blue_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_blue_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_blue_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_red_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_red_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_red_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_red_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_grate_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_grate_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_grate_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_grate_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_slab_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_slab_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_slab_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_slab_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/hellrock_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/hellrock_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/hellrock_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/hellrock_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/lava_floor_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/lava_floor_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/lava_floor_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/lava_floor_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/metal_panel_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/metal_panel_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/metal_panel_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/metal_panel_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/stone_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/stone_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/stone_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/stone_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_off_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_off_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_off_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_off_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_on_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_on_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_on_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_on_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/tech_panel_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/tech_panel_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/tech_panel_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/tech_panel_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    }
+  ],
   "results": [
     {
       "file": "demons/ember_knight.glb",
@@ -12,8 +350,52 @@
         3000,
         8000
       ],
-      "bytes": 1050736,
+      "bytes": 1166192,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -44,8 +426,44 @@
         3000,
         8000
       ],
-      "bytes": 493396,
+      "bytes": 579772,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -76,8 +494,44 @@
         3000,
         8000
       ],
-      "bytes": 619192,
+      "bytes": 706524,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -108,8 +562,76 @@
         3000,
         8000
       ],
-      "bytes": 883676,
+      "bytes": 1075712,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -140,8 +662,40 @@
         200,
         2000
       ],
-      "bytes": 221980,
+      "bytes": 330016,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -172,8 +726,32 @@
         200,
         2000
       ],
-      "bytes": 79680,
+      "bytes": 145900,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -200,8 +778,48 @@
         200,
         2000
       ],
-      "bytes": 114844,
+      "bytes": 245040,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -232,8 +850,48 @@
         200,
         2000
       ],
-      "bytes": 128164,
+      "bytes": 252572,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -264,8 +922,40 @@
         200,
         2000
       ],
-      "bytes": 181720,
+      "bytes": 274040,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -296,8 +986,40 @@
         200,
         2000
       ],
-      "bytes": 155088,
+      "bytes": 247408,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -328,8 +1050,36 @@
         200,
         2000
       ],
-      "bytes": 145248,
+      "bytes": 222636,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -360,8 +1110,60 @@
         4000,
         10000
       ],
-      "bytes": 599680,
+      "bytes": 741436,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -392,8 +1194,60 @@
         4000,
         10000
       ],
-      "bytes": 527696,
+      "bytes": 669452,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -424,8 +1278,68 @@
         4000,
         10000
       ],
-      "bytes": 660260,
+      "bytes": 825544,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -456,8 +1370,68 @@
         4000,
         10000
       ],
-      "bytes": 512920,
+      "bytes": 679904,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -488,8 +1462,24 @@
         200,
         2000
       ],
-      "bytes": 75496,
+      "bytes": 123648,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -516,8 +1506,24 @@
         200,
         2000
       ],
-      "bytes": 71588,
+      "bytes": 126876,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -544,8 +1550,32 @@
         200,
         2000
       ],
-      "bytes": 109316,
+      "bytes": 170140,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -576,8 +1606,24 @@
         200,
         2000
       ],
-      "bytes": 102552,
+      "bytes": 138564,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -604,8 +1650,32 @@
         200,
         2000
       ],
-      "bytes": 139432,
+      "bytes": 200984,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -636,7 +1706,7 @@
         200,
         2000
       ],
-      "bytes": 165540,
+      "bytes": 162248,
       "texture_sizes": [
         [
           128,
@@ -664,8 +1734,16 @@
         200,
         2000
       ],
-      "bytes": 71972,
+      "bytes": 96600,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -692,8 +1770,16 @@
         200,
         2000
       ],
-      "bytes": 62036,
+      "bytes": 86660,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -720,8 +1806,32 @@
         200,
         2000
       ],
-      "bytes": 100864,
+      "bytes": 179236,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -748,8 +1858,36 @@
         200,
         2000
       ],
-      "bytes": 120088,
+      "bytes": 197764,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -780,8 +1918,24 @@
         200,
         2000
       ],
-      "bytes": 201908,
+      "bytes": 251764,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -808,8 +1962,56 @@
         4000,
         10000
       ],
-      "bytes": 951580,
+      "bytes": 1086844,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -840,8 +2042,40 @@
         4000,
         10000
       ],
-      "bytes": 514308,
+      "bytes": 593844,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -868,8 +2102,56 @@
         4000,
         10000
       ],
-      "bytes": 681040,
+      "bytes": 817736,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -900,8 +2182,76 @@
         4000,
         10000
       ],
-      "bytes": 1010540,
+      "bytes": 1200196,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128
@@ -932,8 +2282,64 @@
         4000,
         10000
       ],
-      "bytes": 861320,
+      "bytes": 1023732,
       "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
         [
           128,
           128

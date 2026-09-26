@@ -14,7 +14,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 313940
+      "bytes": 94927
     },
     {
       "file": "surfaces/brick_normal.png",
@@ -27,7 +27,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1628851
+      "bytes": 1058550
     },
     {
       "file": "surfaces/brick_roughness.png",
@@ -40,7 +40,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 414691
+      "bytes": 42365
     },
     {
       "file": "surfaces/brick_emissive.png",
@@ -53,7 +53,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20653
+      "bytes": 3142
     },
     {
       "file": "surfaces/stone_albedo.png",
@@ -66,7 +66,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 369185
+      "bytes": 105892
     },
     {
       "file": "surfaces/stone_normal.png",
@@ -79,7 +79,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1537148
+      "bytes": 944446
     },
     {
       "file": "surfaces/stone_roughness.png",
@@ -92,7 +92,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 408364
+      "bytes": 41652
     },
     {
       "file": "surfaces/stone_emissive.png",
@@ -105,7 +105,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20653
+      "bytes": 3142
     },
     {
       "file": "surfaces/metal_panel_albedo.png",
@@ -118,7 +118,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 256763
+      "bytes": 75026
     },
     {
       "file": "surfaces/metal_panel_normal.png",
@@ -131,7 +131,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1705165
+      "bytes": 1159322
     },
     {
       "file": "surfaces/metal_panel_roughness.png",
@@ -144,7 +144,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20652
+      "bytes": 2386
     },
     {
       "file": "surfaces/metal_panel_emissive.png",
@@ -157,7 +157,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20653
+      "bytes": 3142
     },
     {
       "file": "surfaces/tech_panel_albedo.png",
@@ -170,7 +170,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 268633
+      "bytes": 73941
     },
     {
       "file": "surfaces/tech_panel_normal.png",
@@ -183,7 +183,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1696091
+      "bytes": 1135393
     },
     {
       "file": "surfaces/tech_panel_roughness.png",
@@ -196,7 +196,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20652
+      "bytes": 2386
     },
     {
       "file": "surfaces/tech_panel_emissive.png",
@@ -209,7 +209,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 22625
+      "bytes": 4394
     },
     {
       "file": "surfaces/hellrock_albedo.png",
@@ -222,7 +222,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 403570
+      "bytes": 222719
     },
     {
       "file": "surfaces/hellrock_normal.png",
@@ -235,7 +235,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1633621
+      "bytes": 1074057
     },
     {
       "file": "surfaces/hellrock_roughness.png",
@@ -248,7 +248,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 155922
+      "bytes": 46059
     },
     {
       "file": "surfaces/hellrock_emissive.png",
@@ -261,7 +261,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 282057
+      "bytes": 163256
     },
     {
       "file": "surfaces/floor_slab_albedo.png",
@@ -274,7 +274,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 356421
+      "bytes": 102430
     },
     {
       "file": "surfaces/floor_slab_normal.png",
@@ -287,7 +287,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1534758
+      "bytes": 943995
     },
     {
       "file": "surfaces/floor_slab_roughness.png",
@@ -300,7 +300,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 408557
+      "bytes": 41576
     },
     {
       "file": "surfaces/floor_slab_emissive.png",
@@ -313,7 +313,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20653
+      "bytes": 3142
     },
     {
       "file": "surfaces/floor_grate_albedo.png",
@@ -326,7 +326,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 23470
+      "bytes": 5065
     },
     {
       "file": "surfaces/floor_grate_normal.png",
@@ -339,7 +339,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1734861
+      "bytes": 1235126
     },
     {
       "file": "surfaces/floor_grate_roughness.png",
@@ -352,7 +352,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 22701
+      "bytes": 2551
     },
     {
       "file": "surfaces/floor_grate_emissive.png",
@@ -365,7 +365,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 22256
+      "bytes": 4095
     },
     {
       "file": "surfaces/lava_floor_albedo.png",
@@ -378,7 +378,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 460117
+      "bytes": 237858
     },
     {
       "file": "surfaces/lava_floor_normal.png",
@@ -391,7 +391,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1633621
+      "bytes": 1074057
     },
     {
       "file": "surfaces/lava_floor_roughness.png",
@@ -404,7 +404,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 195147
+      "bytes": 52219
     },
     {
       "file": "surfaces/lava_floor_emissive.png",
@@ -417,7 +417,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 423333
+      "bytes": 210318
     },
     {
       "file": "surfaces/ceiling_panel_albedo.png",
@@ -430,7 +430,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 222104
+      "bytes": 70791
     },
     {
       "file": "surfaces/ceiling_panel_normal.png",
@@ -443,7 +443,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1647155
+      "bytes": 1043710
     },
     {
       "file": "surfaces/ceiling_panel_roughness.png",
@@ -456,7 +456,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20652
+      "bytes": 2386
     },
     {
       "file": "surfaces/ceiling_panel_emissive.png",
@@ -469,7 +469,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20653
+      "bytes": 3142
     },
     {
       "file": "surfaces/door_albedo.png",
@@ -482,7 +482,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 258880
+      "bytes": 74599
     },
     {
       "file": "surfaces/door_normal.png",
@@ -495,7 +495,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1714004
+      "bytes": 1172955
     },
     {
       "file": "surfaces/door_roughness.png",
@@ -508,7 +508,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20652
+      "bytes": 2386
     },
     {
       "file": "surfaces/door_emissive.png",
@@ -521,7 +521,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20653
+      "bytes": 3142
     },
     {
       "file": "surfaces/door_red_albedo.png",
@@ -534,7 +534,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 268896
+      "bytes": 75916
     },
     {
       "file": "surfaces/door_red_normal.png",
@@ -547,7 +547,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1715387
+      "bytes": 1175059
     },
     {
       "file": "surfaces/door_red_roughness.png",
@@ -560,7 +560,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20652
+      "bytes": 2386
     },
     {
       "file": "surfaces/door_red_emissive.png",
@@ -573,7 +573,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20653
+      "bytes": 3142
     },
     {
       "file": "surfaces/door_blue_albedo.png",
@@ -586,7 +586,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 272226
+      "bytes": 75866
     },
     {
       "file": "surfaces/door_blue_normal.png",
@@ -599,7 +599,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1715387
+      "bytes": 1175059
     },
     {
       "file": "surfaces/door_blue_roughness.png",
@@ -612,7 +612,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20652
+      "bytes": 2386
     },
     {
       "file": "surfaces/door_blue_emissive.png",
@@ -625,7 +625,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20653
+      "bytes": 3142
     },
     {
       "file": "surfaces/switch_off_albedo.png",
@@ -638,7 +638,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 225661
+      "bytes": 72794
     },
     {
       "file": "surfaces/switch_off_normal.png",
@@ -651,7 +651,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1676747
+      "bytes": 1086898
     },
     {
       "file": "surfaces/switch_off_roughness.png",
@@ -664,7 +664,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20652
+      "bytes": 2386
     },
     {
       "file": "surfaces/switch_off_emissive.png",
@@ -677,7 +677,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 21254
+      "bytes": 3221
     },
     {
       "file": "surfaces/switch_on_albedo.png",
@@ -690,7 +690,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 227267
+      "bytes": 72754
     },
     {
       "file": "surfaces/switch_on_normal.png",
@@ -703,7 +703,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 1677185
+      "bytes": 1086918
     },
     {
       "file": "surfaces/switch_on_roughness.png",
@@ -716,7 +716,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 20652
+      "bytes": 2386
     },
     {
       "file": "surfaces/switch_on_emissive.png",
@@ -729,7 +729,7 @@
         2
       ],
       "edge_max_error": 0.0,
-      "bytes": 21259
+      "bytes": 3222
     }
   ]
 }

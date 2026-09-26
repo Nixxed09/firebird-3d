@@ -3,6 +3,7 @@ import math,json
 import numpy as np
 import bpy
 import kit as k
+import png
 
 N=1024
 Y,X=np.mgrid[0:N,0:N].astype(np.float32)/(N-1)
@@ -121,13 +122,13 @@ def build():
         maps=make(name)
         for channel,pixels in maps.items():
             path=dest/f'{name}_{channel}.png'
-            im=k.image(name+'_'+channel,pixels,path=path,noncolor=channel in ('normal','roughness'))
+            png.save(path,pixels,channel)
             # Read saved PNG through Blender to verify dimensions and both seamless edges.
             read=bpy.data.images.load(str(path),check_existing=False);a=np.empty(N*N*4,np.float32);read.pixels.foreach_get(a);a=a.reshape(N,N,4)
             seam=max(float(np.max(np.abs(a[0]-a[-1]))),float(np.max(np.abs(a[:,0]-a[:,-1]))))
             if seam!=0:raise RuntimeError(f'{path}: seam {seam}')
             report.append({'file':path.relative_to(k.ROOT).as_posix(),'pixels':[N,N],'tile_m':[2,2],'edge_max_error':seam,'bytes':path.stat().st_size})
-            bpy.data.images.remove(read);bpy.data.images.remove(im)
+            bpy.data.images.remove(read)
         thumbs.append(np.clip(maps['albedo'][::4,::4,:]+maps['emissive'][::4,::4,:]*.6,0,1))
         print('SURFACE '+name,flush=True)
     while len(thumbs)<16:thumbs.append(np.zeros((256,256,3),np.float32))

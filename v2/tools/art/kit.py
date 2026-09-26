@@ -29,11 +29,8 @@ def materials():
     y,x=np.mgrid[0:128,0:128]/128
     grain=.94+.035*np.sin(x*math.tau*29)*np.sin(y*math.tau*23)+.025*np.cos((x+y)*math.tau*13)
     scratch=np.maximum(0,np.cos((x*31+y*2)*math.tau))**28
-    base=image('forge_grain',np.repeat((grain-.1*scratch)[:,:,None],3,2))
     normal=np.stack((.5+.035*np.sin(x*math.tau*29),.5+.035*np.sin(y*math.tau*23),np.full_like(x,.998)),2)
     norm=image('forge_normal',normal,noncolor=True)
-    orm=image('forge_roughness',np.stack((np.ones_like(x),.65+.15*grain,np.ones_like(x)),2),noncolor=True)
-    emi=image('forge_emission',np.repeat((.85+.15*np.cos(y*math.tau*16))[:,:,None],3,2))
     palette={
       'skin':((.30,.065,.028),.08,.82), 'char':((.045,.027,.025),.08,.85),
       'bone':((.72,.49,.23),.15,.48), 'iron':((.07,.105,.13),.8,.62),
@@ -50,21 +47,22 @@ def materials():
         mat=bpy.data.materials.new(name); mat.use_nodes=True
         n=mat.node_tree.nodes; l=mat.node_tree.links; p=n.get('Principled BSDF')
         p.inputs['Base Color'].default_value=(*c,1)
-        # Multiplication by a constant exports as baseColorFactor via glTF's supported Mix node.
-        t=n.new('ShaderNodeTexImage'); t.image=base
-        mix=n.new('ShaderNodeMixRGB'); mix.blend_type='MULTIPLY'; mix.inputs[0].default_value=1
-        mix.inputs[2].default_value=(*c,1); l.new(t.outputs['Color'],mix.inputs[1]); l.new(mix.outputs[0],p.inputs['Base Color'])
+        # Direct coloured pixels survive Blender's glTF export and round-trip exactly.
+        # Generic shader MixRGB colour multipliers are not exported as PBR factors.
+        base=image(name+'_albedo',(grain-.1*scratch)[:,:,None]*np.array(c)[None,None,:])
+        t=n.new('ShaderNodeTexImage');t.image=base;l.new(t.outputs['Color'],p.inputs['Base Color'])
         p.inputs['Metallic'].default_value=metal
+        orm=image(name+'_roughness',np.stack((np.ones_like(x),rough*(.9+.1*grain),np.ones_like(x)),2),noncolor=True)
         t=n.new('ShaderNodeTexImage'); t.image=orm
         sep=n.new('ShaderNodeSeparateColor'); l.new(t.outputs['Color'],sep.inputs[0]); l.new(sep.outputs['Green'],p.inputs['Roughness'])
         p.inputs['Roughness'].default_value=rough
         t=n.new('ShaderNodeTexImage'); t.image=norm
         normalnode=n.new('ShaderNodeNormalMap'); l.new(t.outputs['Color'],normalnode.inputs['Color']); l.new(normalnode.outputs[0],p.inputs['Normal'])
-        if name in ('ember','cyan','gold','tell','holo','shield','green'):
-            p.inputs['Emission Color'].default_value=(*c,1); p.inputs['Emission Strength'].default_value=2 if name not in ('holo','shield') else .5
-            t=n.new('ShaderNodeTexImage'); t.image=emi
-            mix=n.new('ShaderNodeMixRGB'); mix.blend_type='MULTIPLY'; mix.inputs[0].default_value=1; mix.inputs[2].default_value=(*c,1)
-            l.new(t.outputs[0],mix.inputs[1]); l.new(mix.outputs[0],p.inputs['Emission Color'])
+        if name in ('ember','cyan','gold','tell','holo','shield','green','bone'):
+            p.inputs['Emission Color'].default_value=(*c,1); p.inputs['Emission Strength'].default_value=.12 if name=='bone' else .5 if name in ('holo','shield') else 2
+            if name!='tell':
+                emi=image(name+'_emissive',(.85+.15*np.cos(y*math.tau*16))[:,:,None]*np.array(c)[None,None,:])
+                t=n.new('ShaderNodeTexImage');t.image=emi;l.new(t.outputs['Color'],p.inputs['Emission Color'])
         if name in ('holo','shield'):
             p.inputs['Alpha'].default_value=.68 if name=='holo' else .12
             mat.surface_render_method='DITHERED'; mat.use_transparency_overlap=False
