@@ -137,6 +137,14 @@ now, and she picks one; she can never invent a move.
   letter is explained at the top of the file. The game checks your map at
   load and tells you if a row is the wrong length.
 
+## Hosting
+
+GitHub Pages serves `main`. The classic game is at the root, and the WebGL
+rebuild is at **https://nixxed09.github.io/firebird-3d/v2/**.
+A desktop shortcut (Chrome app window, `assets/firebird.ico`) opens that
+`/v2/` address, so every push reaches it. **Keep `/v2/` working.** When v2
+moves to the root, leave a redirect at `/v2/`.
+
 ## Level design
 
 Levels follow the shared Level Design Contract
