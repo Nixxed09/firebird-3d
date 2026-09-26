@@ -6,7 +6,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { buildLevel } from './level.js';
-import { makeMob, makePickup, makeTorch, shotgunModel, pistolModel, fistModel, addHand } from './models.js';
+import { makeMob, makePickup, makeTorch, shotgunModel, pistolModel, fistModel, chaingunModel, rocketModel, addHand } from './models.js';
 import { makeFx } from './fx.js';
 import { emptyAssets, instance } from './assets.js';
 
@@ -43,7 +43,7 @@ export function createRenderer(canvas, opts) {
     fist: { p: [0.14, -0.15, -0.3], ry: 0 }, pistol: { p: [0.15, -0.14, -0.38], ry: 0.06 }, shotgun: { p: [0.1, -0.13, -0.2], ry: 0.04 },
     chaingun: { p: [0.12, -0.15, -0.22], ry: 0.04 }, rocket: { p: [0.13, -0.16, -0.2], ry: 0.04 }
   };
-  var BUILT_IN = { fist: fistModel, pistol: pistolModel, shotgun: shotgunModel };
+  var BUILT_IN = { fist: fistModel, pistol: pistolModel, shotgun: shotgunModel, chaingun: chaingunModel, rocket: rocketModel };
   function makeGuns() {
     Object.keys(guns).forEach(function (k) { gunRig.remove(guns[k]); });
     guns = {};
@@ -61,7 +61,8 @@ export function createRenderer(canvas, opts) {
         if (len > 1e-3 && WANT[k]) inst.obj.scale.multiplyScalar(WANT[k] / len);
         ['pump', 'slide', 'barrels', 'tube'].forEach(function (n) { var node = inst.obj.getObjectByName(n); if (node) g.userData[n] = node; });
         g.userData.authored = true;
-        addHand(g, k);
+        // FIREBIRD's original weapon kit already contains both glove and sleeve meshes.
+        if (entry.dir !== 'assets') addHand(g, k);
       } else if (BUILT_IN[k]) g = BUILT_IN[k]();
       else return;
       var pose = GUN_POSE[k];
@@ -174,7 +175,7 @@ export function createRenderer(canvas, opts) {
       if (e.kind === 'proj') {
         var pm = projs.get(e);
         if (!pm) {
-          pm = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), new THREE.MeshBasicMaterial({ color: e.green ? 0x9ffcff : 0xffb040 }));
+          pm = new THREE.Mesh(new THREE.SphereGeometry(e.playerRocket ? 0.13 : 0.09, 10, 8), new THREE.MeshBasicMaterial({ color: e.green ? 0x9ffcff : 0xffb040 }));
           scene.add(pm); projs.set(e, pm);
         }
         pm.position.set(e.x, e.y, e.z);

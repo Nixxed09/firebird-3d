@@ -163,6 +163,8 @@ var SPOTS = [
   ['v2-05-balcony-view', at(0, 21.5, 21.3, 1, -2.2, -0.35, 'var d = G.doors["20,22"]; if (d) { d.open = 1; d.state = "open"; d.timer = 999; }')],
   ['v2-06-hall-floor', at(0, 5.5, 20.5, 0, -0.3, 0.12)],
   ['v2-07-sparring', at(0, 21.5, 8.5, 2, -Math.PI / 2, 0.05, OPEN_ALL)],
+  ['v2-07-chaingun', at(1, 18.5, 7.5, 0, Math.PI / 2, 0, 'p.weapons.chaingun = true; p.ammo.bullets = 100; p.weapon = "chaingun";'), 1500],
+  ['v2-07-rocket', at(2, 16.5, 23.5, 0, -Math.PI / 2, 0, 'p.weapons.rocket = true; p.ammo.rockets = 8; p.weapon = "rocket";'), 1500],
   ['v2-08-riley', at(3, 16.5, 7.5, 0, -Math.PI / 2, 0.05, OPEN_ALL), 1500]
 ];
 var visual = [];

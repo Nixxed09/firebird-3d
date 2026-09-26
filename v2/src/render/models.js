@@ -187,7 +187,8 @@ function authored(entry, e) {
     if (!o.isMesh) return;
     (Array.isArray(o.material) ? o.material : [o.material]).forEach(function (m) {
       // authored glow is capped so eyes and accents don't bloom into a glare
-      if (m.emissive && m.emissiveIntensity > 1.2) m.emissiveIntensity = 1.2;
+      var glowCap = e.kind === 'riley' ? 0.65 : 1.2;
+      if (m.emissive && m.emissiveIntensity > glowCap) m.emissiveIntensity = glowCap;
       if (/tell/i.test(m.name) || /tell/i.test(o.name)) tell.push(m); else if (m.emissive) mats.push(m);
     });
   });
@@ -218,7 +219,7 @@ function authored(entry, e) {
       if (current && current.getClip().name && /attack$/i.test(current.getClip().name) && !current.isRunning() && st === 'chase') play('walk');
       if (inst.mixer) inst.mixer.update(dt || 0);
       var tellOn = st === 'windup' && ent.attack !== 'melee';
-      tell.forEach(function (m) { if (m.emissive) { m.emissive.setHex(tellOn ? 0xffffff : 0x9ffcff); m.emissiveIntensity = tellOn ? 6 : 2; } });
+      tell.forEach(function (m) { if (m.emissive) { m.emissive.setHex(tellOn ? 0xffffff : 0x9ffcff); m.emissiveIntensity = tellOn ? 4.5 : 0.65; } });
       if (shield) shield.visible = ent.shieldT > 0;
     },
     authored: true,
@@ -281,11 +282,16 @@ export function makePickup(e, assets) {
   } else if (it === 'a') {
     var sb = part(geo('box', BOX), std(0xa02818, { roughness: 0.6 }), 0, 0.09, 0, inner); sb.scale.set(0.3, 0.18, 0.18);
     for (var i = 0; i < 4; i++) { var sh = part(geo('cyl', CYL), std(0xd8a040, { metalness: 0.8, roughness: 0.3 }), -0.1 + i * 0.066, 0.2, 0, inner); sh.scale.set(0.022, 0.06, 0.022); }
+  } else if (it === 'k') {
+    var rocketBox = part(geo('box', BOX), std(0x533827, { metalness: 0.25, roughness: 0.7 }), 0, 0.12, 0, inner); rocketBox.scale.set(0.32, 0.22, 0.23);
+    var rocketMark = part(geo('box', BOX), glow(0xff8a28, 1.5), 0, 0.13, 0.12, inner); rocketMark.scale.set(0.18, 0.045, 0.012);
   } else if (it === 'A') {
     var vest = part(geo('box', BOX), std(0x2e8a3a, { metalness: 0.4, roughness: 0.4 }), 0, 0.2, 0, inner); vest.scale.set(0.34, 0.36, 0.14);
     var plate = part(geo('box', BOX), glow(0x7aff8a, 1.2), 0, 0.26, 0.075, inner); plate.scale.set(0.16, 0.1, 0.01);
   } else if (it === '2') {
     var gun = shotgunModel(true); gun.scale.setScalar(0.9); gun.rotation.z = 0.2; gun.position.y = 0.15; inner.add(gun);
+  } else if (it === '3' || it === '4') {
+    var heavy = it === '3' ? chaingunModel(true) : rocketModel(true); heavy.scale.setScalar(0.7); heavy.rotation.z = 0.2; heavy.position.y = 0.2; inner.add(heavy);
   } else if (it === 'r' || it === 'u') {
     var col = it === 'r' ? 0xff2a1a : 0x3a7aff;
     var card = part(geo('box', BOX), glow(col, 2.5), 0, 0.2, 0, inner); card.scale.set(0.16, 0.22, 0.015);
@@ -294,7 +300,7 @@ export function makePickup(e, assets) {
     var orb = part(geo('sph', SPH), glow(0xffb040, 4), 0, 0.3, 0, inner); orb.scale.setScalar(0.14);
     var halo = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.012, 6, 32), glow(0xffd23e, 3)); halo.position.y = 0.3; inner.add(halo);
   }
-  var spin = it === 'r' || it === 'u' || it === 'P' || it === '2';
+  var spin = it === 'r' || it === 'u' || it === 'P' || it === '2' || it === '3' || it === '4';
   return {
     obj: root,
     update: function (t) {
@@ -398,5 +404,31 @@ export function fistModel() {
   var knuckles = new THREE.Mesh(rbox('knuck', 0.105, 0.04, 0.03, 0.012), std(0x5a4a3a, { metalness: 0.7, roughness: 0.35 })); knuckles.position.set(0, 0.02, -0.06); g.add(knuckles);
   var thumb = new THREE.Mesh(rbox('thumb', 0.03, 0.03, 0.06, 0.012), gloveMat()); thumb.position.set(-0.05, -0.01, -0.02); g.add(thumb);
   var sleeve = new THREE.Mesh(geo('cyl', CYL), sleeveMat()); sleeve.scale.set(0.05, 0.3, 0.05); sleeve.rotation.x = Math.PI / 2; sleeve.position.set(0, -0.01, 0.2); g.add(sleeve);
+  return g;
+}
+
+export function chaingunModel(noHands) {
+  var g = new THREE.Group(), dark = blued(), metal = gunMetal();
+  var receiver = part(geo('box', BOX), dark, 0, 0, 0.02, g); receiver.scale.set(0.16, 0.14, 0.3);
+  var drum = part(geo('cyl', CYL), metal, 0, -0.1, 0.06, g); drum.scale.set(0.12, 0.16, 0.12);
+  var barrels = new THREE.Group(); barrels.name = 'barrels'; barrels.position.z = -0.25; g.add(barrels); g.userData.barrels = barrels;
+  for (var i = 0; i < 6; i++) {
+    var a = i * Math.PI / 3, tube = part(geo('cyl', CYL), metal, Math.cos(a) * 0.055, Math.sin(a) * 0.055, -0.27, barrels);
+    tube.scale.set(0.019, 0.54, 0.019); tube.rotation.x = Math.PI / 2;
+  }
+  var collar = part(geo('cyl', CYL), std(0xa46732, { metalness: 0.7 }), 0, 0, -0.47, g); collar.scale.set(0.085, 0.055, 0.085); collar.rotation.x = Math.PI / 2;
+  if (!noHands) { hand(g, 0.03, -0.12, 0.13, 0.3); hand(g, -0.04, -0.13, -0.23, 0.15); }
+  return g;
+}
+
+export function rocketModel(noHands) {
+  var g = new THREE.Group(), metal = gunMetal(), dark = blued();
+  var tube = new THREE.Group(); tube.name = 'tube'; g.add(tube); g.userData.tube = tube;
+  var body = part(geo('cyl', CYL), dark, 0, 0, -0.3, tube); body.scale.set(0.09, 0.8, 0.09); body.rotation.x = Math.PI / 2;
+  var muzzle = part(geo('cyl', CYL), metal, 0, 0, -0.7, tube); muzzle.scale.set(0.11, 0.07, 0.11); muzzle.rotation.x = Math.PI / 2;
+  var band = part(geo('cyl', CYL), std(0x9d4b24, { metalness: 0.5 }), 0, 0, -0.22, tube); band.scale.set(0.102, 0.07, 0.102); band.rotation.x = Math.PI / 2;
+  var sight = part(geo('box', BOX), glow(0xffa42a, 1.5), 0, 0.115, -0.47, g); sight.scale.set(0.025, 0.025, 0.08);
+  var grip = part(geo('box', BOX), dark, 0, -0.12, 0.02, g); grip.scale.set(0.055, 0.24, 0.07);
+  if (!noHands) { hand(g, 0.03, -0.15, 0.1, 0.25); hand(g, -0.03, -0.13, -0.3, 0.1); }
   return g;
 }

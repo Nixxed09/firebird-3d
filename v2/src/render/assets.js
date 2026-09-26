@@ -49,9 +49,9 @@ export function emptyAssets() {
 }
 
 // Asset folders, highest priority first. Each has its own assets.json.
-export var ASSET_DIRS = ['assets/codex', 'assets/cc0', 'assets'];
+export var ASSET_DIRS = ['assets', 'assets/codex', 'assets/cc0'];
 
-// The build packs every manifest and file into dist/assets-pack.js
+// The build packs every manifest and a compact starter set into dist/assets-pack.js
 // (window.FIREBIRD_ASSET_PACK = { 'assets/cc0/assets.json': {...}, 'assets/cc0/imp.glb': 'base64...' }),
 // which works even from a double-clicked file. Without a pack, fetch over http.
 function packed(path) {
@@ -67,27 +67,51 @@ function fileUrl(path) {
 function manifest(dir) {
   var inPack = packed(dir + '/assets.json');
   if (inPack !== undefined) return Promise.resolve(inPack);
-  // the build always writes a pack; with one present, never fetch (a missing file would log a 404)
-  if (typeof window !== 'undefined' && window.FIREBIRD_ASSET_PACK) return Promise.resolve(null);
   if (typeof location !== 'undefined' && location.protocol === 'file:') return Promise.resolve(null); // the browser blocks file fetches
   return fetch(dir + '/assets.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
 }
 
 // Resolves with a registry; never rejects. The first folder to supply an id wins.
-export function loadAssets(dirs) {
+export function loadAssets(dirs, initialKeys) {
   var pack = typeof window !== 'undefined' && window.FIREBIRD_ASSET_PACK;
   dirs = dirs || (pack && pack.__dirs) || ASSET_DIRS;
   var reg = emptyAssets();
   var loader = new GLTFLoader(), texLoader = new THREE.TextureLoader();
+  var catalog = [], inflight = {};
+  reg.ensure = function (keys) {
+    var jobs = Array.from(new Set(keys || [])).map(function (key) {
+      var table = key.indexOf('tex:') === 0 ? reg.texture : reg.model;
+      if (table(key)) return Promise.resolve();
+      if (inflight[key]) return inflight[key];
+      var names = (ALIASES[key] || [key]).map(norm);
+      var candidates = catalog.filter(function (c) { return names.indexOf(c.id) >= 0; });
+      candidates.sort(function (a, b) { return a.priority - b.priority; });
+      var job = candidates.reduce(function (chain, c) {
+        return chain.then(function () {
+          if (table(key)) return;
+          var file = c.entry.file || c.entry.path || c.entry.src;
+          // A double-clicked build uses its compact starter pack. Missing art
+          // falls back to procedural visuals instead of making blocked file requests.
+          if (typeof location !== 'undefined' && location.protocol === 'file:') {
+            var refs = [file].concat(Object.values(c.entry.maps || c.entry.textures || {})).filter(Boolean);
+            if (refs.some(function (ref) { return packed(c.dir + '/' + ref) === undefined; })) return;
+          }
+          return loadOne(c.dir, c.entry, c.priority);
+        });
+      }, Promise.resolve()).finally(function () { delete inflight[key]; });
+      inflight[key] = job;
+      return job;
+    });
+    return Promise.all(jobs).then(function () { reg.ready = true; return reg; });
+  };
   return Promise.all(dirs.map(function (d) { return manifest(d).then(function (m) { return { dir: d, man: m }; }); })).then(function (found) {
-    var jobs = [];
     found.forEach(function (f, priority) {
       if (!f.man) return;
       var list = Array.isArray(f.man) ? f.man : f.man.assets || f.man.files || [];
-      list.forEach(function (a) { jobs.push(loadOne(f.dir, a, priority)); });
+      list.forEach(function (a) { catalog.push({ dir: f.dir, entry: a, priority: priority, id: norm(a.id || a.name || a.file) }); });
     });
-    return Promise.all(jobs);
-  }).then(function () { reg.ready = true; return reg; });
+    return reg.ensure(initialKeys || []);
+  });
 
   function claim(table, id, value, priority) {
     var cur = table[id];

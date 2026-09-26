@@ -125,7 +125,19 @@ var E1M1 = {
   ]
 };
 
-// the rest keep their classic flat layouts until they get their height pass
-export var LEVELS = [E1M1].concat(CLASSIC.slice(1).map(function (L) {
-  return Object.assign({ ceilHeight: 2 }, L);
+// Place the later weapons along the main route, with ammo on both sides of
+// the pickup. Copy the classic maps before changing them.
+function place(L, marks) {
+  var copy = Object.assign({ ceilHeight: 2 }, L, { map: L.map.slice() });
+  marks.forEach(function (m) {
+    var x = m[0], z = m[1], row = copy.map[z];
+    if (!row || row[x] !== '.') throw new Error('Weapon pickup must be on an open floor at ' + x + ',' + z);
+    copy.map[z] = row.slice(0, x) + m[2] + row.slice(x + 1);
+  });
+  return copy;
+}
+export var LEVELS = [E1M1].concat(CLASSIC.slice(1).map(function (L, i) {
+  if (i === 0) return place(L, [[18, 7, '3']]);
+  if (i === 1) return place(L, [[16, 23, '4'], [19, 23, 'k'], [16, 13, 'k']]);
+  return place(L, []);
 }));

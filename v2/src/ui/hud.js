@@ -37,7 +37,7 @@ export function createHud(ctx, game, settings) {
     ctx.fillStyle = '#24211c';
     [46, 116, 142, 178, 230, 250].forEach(function (dx) { ctx.fillRect(dx, VH + 4, 1, HUD_H - 8); });
     var wep = WEAPONS[p.weapon], n = wep.ammo ? p.ammo[wep.ammo] : -1;
-    var lowAmmo = wep.ammo && n <= (wep.ammo === 'shells' ? 4 : 10);
+    var lowAmmo = wep.ammo && n <= (wep.ammo === 'shells' ? 4 : wep.ammo === 'rockets' ? 2 : 10);
     ART.drawText(ctx, 'AMMO', 8, VH + 5, { color: n === 0 ? HUD_RED : HUD_LABEL });
     ART.drawText(ctx, wep.ammo ? String(n) : '--', 40, VH + 12, { scale: 3, color: levelColor(G, lowAmmo, n === 0), shadow: HUD_SHADOW, right: true });
     var crit = p.hp <= 25;
@@ -45,10 +45,10 @@ export function createHud(ctx, game, settings) {
     ART.drawText(ctx, p.hp + '%', 108, VH + 12, { scale: 3, color: levelColor(G, p.hp <= 50, crit && !p.dead), shadow: HUD_SHADOW, right: true });
     ART.drawText(ctx, 'ARMS', 129, VH + 5, { color: HUD_LABEL, center: true });
     WEAPON_ORDER.forEach(function (name, wi) {
-      var x = 119 + wi * 8, owned = p.weapons[name], inHand = (p.nextWeapon || p.weapon) === name;
+      var x = 119 + (wi % 3) * 8, y = VH + (wi < 3 ? 11 : 20), owned = p.weapons[name], inHand = (p.nextWeapon || p.weapon) === name;
       var col = inHand ? '#ffd23e' : !owned ? '#2a2620' : game.hasAmmo(p, name) ? '#c8c0b0' : '#6a5a4a';
-      ART.drawText(ctx, String(wi + 1), x, VH + 13, { scale: 2, color: col });
-      if (inHand) { ctx.fillStyle = '#ffd23e'; ctx.fillRect(x, VH + 25, 6, 1); }
+      ART.drawText(ctx, String(wi + 1), x, y, { color: col });
+      if (inHand) { ctx.fillStyle = '#ffd23e'; ctx.fillRect(x, y + 7, 5, 1); }
     });
     ctx.drawImage(faceImage(p).canvas, 160 - 12, VH + 3);
     ART.drawText(ctx, 'ARMOR', 184, VH + 5, { color: HUD_LABEL });
@@ -59,8 +59,9 @@ export function createHud(ctx, game, settings) {
       ctx.drawImage(ART.things[k[1]].canvas, 236, VH + k[2]);
       ctx.globalAlpha = 1;
     });
-    ART.drawText(ctx, 'BULL ' + p.ammo.bullets + '/200', 254, VH + 8, { color: wep.ammo === 'bullets' ? '#ffd23e' : '#c8c0b0' });
-    ART.drawText(ctx, 'SHEL ' + p.ammo.shells + '/50', 254, VH + 19, { color: !p.weapons.shotgun ? '#6a655c' : wep.ammo === 'shells' ? '#ffd23e' : '#c8c0b0' });
+    ART.drawText(ctx, 'BULL ' + p.ammo.bullets + '/200', 254, VH + 5, { color: wep.ammo === 'bullets' ? '#ffd23e' : '#c8c0b0' });
+    ART.drawText(ctx, 'SHEL ' + p.ammo.shells + '/50', 254, VH + 15, { color: !p.weapons.shotgun ? '#6a655c' : wep.ammo === 'shells' ? '#ffd23e' : '#c8c0b0' });
+    ART.drawText(ctx, 'ROKT ' + p.ammo.rockets + '/30', 254, VH + 25, { color: !p.weapons.rocket ? '#6a655c' : wep.ammo === 'rockets' ? '#ffd23e' : '#c8c0b0' });
   }
 
   function crosshair(G) {
