@@ -1,6 +1,6 @@
 {
   "validator": "2.0.0-dev.3.10",
-  "models": 4,
+  "models": 9,
   "errors": 0,
   "warnings": 0,
   "contract_failures": [],
@@ -109,6 +109,162 @@
         8000
       ],
       "bytes": 883676,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "weapons/chaingun.glb",
+      "triangles": 9720,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 951580,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "weapons/fist.glb",
+      "triangles": 6032,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 514308,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "weapons/pistol.glb",
+      "triangles": 6060,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 681040,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "weapons/rocket_launcher.glb",
+      "triangles": 9640,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 1010540,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "weapons/shotgun.glb",
+      "triangles": 8308,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 861320,
       "texture_sizes": [
         [
           128,

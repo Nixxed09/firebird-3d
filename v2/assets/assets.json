@@ -294,9 +294,35 @@
       "nodes": []
     },
     {
+      "file": "previews/chaingun.png",
+      "type": "preview",
+      "bytes": 343646,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
       "file": "previews/ember_knight.png",
       "type": "preview",
       "bytes": 356694,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/fist.png",
+      "type": "preview",
+      "bytes": 360411,
       "size_m": null,
       "triangles": 0,
       "animations": [],
@@ -333,9 +359,48 @@
       ]
     },
     {
+      "file": "previews/pistol.png",
+      "type": "preview",
+      "bytes": 341993,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
       "file": "previews/riley.png",
       "type": "preview",
       "bytes": 360619,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/rocket_launcher.png",
+      "type": "preview",
+      "bytes": 346234,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/shotgun.png",
+      "type": "preview",
+      "bytes": 328073,
       "size_m": null,
       "triangles": 0,
       "animations": [],
@@ -357,7 +422,7 @@
     {
       "file": "validation.json",
       "type": "json",
-      "bytes": 2053,
+      "bytes": 4424,
       "size_m": null,
       "triangles": 0,
       "animations": [],
@@ -366,7 +431,293 @@
     {
       "file": "validation.md",
       "type": "md",
-      "bytes": 599,
+      "bytes": 969,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "weapons/chaingun.glb",
+      "type": "weapons",
+      "bytes": 951580,
+      "size_m": [
+        0.6412,
+        0.6452,
+        1.4071
+      ],
+      "triangles": 9720,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "barrels"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cloth",
+        "edge"
+      ],
+      "preview": "previews/chaingun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "weapons/chaingun.meta.json",
+      "type": "json",
+      "bytes": 299,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "weapons/fist.glb",
+      "type": "weapons",
+      "bytes": 514308,
+      "size_m": [
+        0.59,
+        0.2897,
+        0.6369
+      ],
+      "triangles": 6032,
+      "animations": [],
+      "nodes": [
+        "fists"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "cloth",
+        "black",
+        "leather",
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/fist.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "weapons/fist.meta.json",
+      "type": "json",
+      "bytes": 293,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "weapons/pistol.glb",
+      "type": "weapons",
+      "bytes": 681040,
+      "size_m": [
+        0.305,
+        0.5687,
+        0.8377
+      ],
+      "triangles": 6060,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "slide"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cloth"
+      ],
+      "preview": "previews/pistol.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "weapons/pistol.meta.json",
+      "type": "json",
+      "bytes": 296,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "weapons/rocket_launcher.glb",
+      "type": "weapons",
+      "bytes": 1010540,
+      "size_m": [
+        0.4825,
+        0.6987,
+        1.3806
+      ],
+      "triangles": 9640,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "tube"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cyan",
+        "cloth",
+        "edge",
+        "red"
+      ],
+      "preview": "previews/rocket_launcher.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "weapons/rocket_launcher.meta.json",
+      "type": "json",
+      "bytes": 306,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "weapons/shotgun.glb",
+      "type": "weapons",
+      "bytes": 861320,
+      "size_m": [
+        0.43,
+        0.5657,
+        1.4097
+      ],
+      "triangles": 8308,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "pump"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cloth",
+        "wood"
+      ],
+      "preview": "previews/shotgun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "weapons/shotgun.meta.json",
+      "type": "json",
+      "bytes": 296,
       "size_m": null,
       "triangles": 0,
       "animations": [],

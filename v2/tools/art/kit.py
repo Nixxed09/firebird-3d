@@ -236,8 +236,12 @@ def export(name,group,objects,notes='',budget=(200,2000)):
 
 def manifest():
     entries=[]
+    owned_previews={p.stem for group in ('demons','weapons','props','pickups') for p in (ROOT/group).glob('*.glb')}
     for p in sorted(ROOT.rglob('*')):
         if not p.is_file() or p.name in ('assets.json',):continue
+        # Other artists may deliver independent packs alongside this authored kit.
+        if p.relative_to(ROOT).parts[0]=='cc0':continue
+        if p.parent.name=='previews' and p.stem not in owned_previews:continue
         rel=p.relative_to(ROOT).as_posix();e={'file':rel,'type':p.suffix[1:],'bytes':p.stat().st_size,'size_m':None,'triangles':0,'animations':[],'nodes':[]}
         if p.suffix=='.glb':
             data=p.read_bytes();length=struct.unpack_from('<I',data,12)[0];g=json.loads(data[20:20+length])
