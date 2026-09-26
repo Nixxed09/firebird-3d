@@ -36,3 +36,7 @@ Khronos glTF Validator 2.0.0-dev.3.10: **31 models, 0 errors, 0 warnings**.
 | weapons/pistol.glb | 6060 | 4000–10000 | 665.1 | 128×128 | 0 | 0 |
 | weapons/rocket_launcher.glb | 9640 | 4000–10000 | 986.9 | 128×128 | 0 | 0 |
 | weapons/shotgun.glb | 8308 | 4000–10000 | 841.1 | 128×128 | 0 | 0 |
+
+Surfaces: **14 sets, 56 PNG maps, 1024 × 1024 each**. All decoded opposite edges match exactly (maximum error 0). Albedo and emissive use sRGB; normal and roughness are linear data. 2m repeats.
+
+[Surface seam measurements](surface_validation.json) · [Surface catalogue](surface_catalogue.png)

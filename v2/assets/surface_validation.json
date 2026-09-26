@@ -1,0 +1,735 @@
+{
+  "sets": 14,
+  "maps": 56,
+  "edge_test": "Decoded PNG opposite edges, exact equality on all channels",
+  "results": [
+    {
+      "file": "surfaces/brick_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 313940
+    },
+    {
+      "file": "surfaces/brick_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1628851
+    },
+    {
+      "file": "surfaces/brick_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 414691
+    },
+    {
+      "file": "surfaces/brick_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20653
+    },
+    {
+      "file": "surfaces/stone_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 369185
+    },
+    {
+      "file": "surfaces/stone_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1537148
+    },
+    {
+      "file": "surfaces/stone_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 408364
+    },
+    {
+      "file": "surfaces/stone_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20653
+    },
+    {
+      "file": "surfaces/metal_panel_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 256763
+    },
+    {
+      "file": "surfaces/metal_panel_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1705165
+    },
+    {
+      "file": "surfaces/metal_panel_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20652
+    },
+    {
+      "file": "surfaces/metal_panel_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20653
+    },
+    {
+      "file": "surfaces/tech_panel_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 268633
+    },
+    {
+      "file": "surfaces/tech_panel_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1696091
+    },
+    {
+      "file": "surfaces/tech_panel_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20652
+    },
+    {
+      "file": "surfaces/tech_panel_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 22625
+    },
+    {
+      "file": "surfaces/hellrock_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 403570
+    },
+    {
+      "file": "surfaces/hellrock_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1633621
+    },
+    {
+      "file": "surfaces/hellrock_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 155922
+    },
+    {
+      "file": "surfaces/hellrock_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 282057
+    },
+    {
+      "file": "surfaces/floor_slab_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 356421
+    },
+    {
+      "file": "surfaces/floor_slab_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1534758
+    },
+    {
+      "file": "surfaces/floor_slab_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 408557
+    },
+    {
+      "file": "surfaces/floor_slab_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20653
+    },
+    {
+      "file": "surfaces/floor_grate_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 23470
+    },
+    {
+      "file": "surfaces/floor_grate_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1734861
+    },
+    {
+      "file": "surfaces/floor_grate_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 22701
+    },
+    {
+      "file": "surfaces/floor_grate_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 22256
+    },
+    {
+      "file": "surfaces/lava_floor_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 460117
+    },
+    {
+      "file": "surfaces/lava_floor_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1633621
+    },
+    {
+      "file": "surfaces/lava_floor_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 195147
+    },
+    {
+      "file": "surfaces/lava_floor_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 423333
+    },
+    {
+      "file": "surfaces/ceiling_panel_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 222104
+    },
+    {
+      "file": "surfaces/ceiling_panel_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1647155
+    },
+    {
+      "file": "surfaces/ceiling_panel_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20652
+    },
+    {
+      "file": "surfaces/ceiling_panel_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20653
+    },
+    {
+      "file": "surfaces/door_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 258880
+    },
+    {
+      "file": "surfaces/door_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1714004
+    },
+    {
+      "file": "surfaces/door_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20652
+    },
+    {
+      "file": "surfaces/door_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20653
+    },
+    {
+      "file": "surfaces/door_red_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 268896
+    },
+    {
+      "file": "surfaces/door_red_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1715387
+    },
+    {
+      "file": "surfaces/door_red_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20652
+    },
+    {
+      "file": "surfaces/door_red_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20653
+    },
+    {
+      "file": "surfaces/door_blue_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 272226
+    },
+    {
+      "file": "surfaces/door_blue_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1715387
+    },
+    {
+      "file": "surfaces/door_blue_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20652
+    },
+    {
+      "file": "surfaces/door_blue_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20653
+    },
+    {
+      "file": "surfaces/switch_off_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 225661
+    },
+    {
+      "file": "surfaces/switch_off_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1676747
+    },
+    {
+      "file": "surfaces/switch_off_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20652
+    },
+    {
+      "file": "surfaces/switch_off_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 21254
+    },
+    {
+      "file": "surfaces/switch_on_albedo.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 227267
+    },
+    {
+      "file": "surfaces/switch_on_normal.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 1677185
+    },
+    {
+      "file": "surfaces/switch_on_roughness.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 20652
+    },
+    {
+      "file": "surfaces/switch_on_emissive.png",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "tile_m": [
+        2,
+        2
+      ],
+      "edge_max_error": 0.0,
+      "bytes": 21259
+    }
+  ]
+}

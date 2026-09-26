@@ -35,6 +35,7 @@ for(const e of manifest.files.filter(x=>x.file.endsWith('.glb'))){
   if(e.file.endsWith('/riley.glb'))check(json.materials.some(m=>m.name==='tell'&&m.emissiveTexture),'Riley tell emissive material');
   const preview=fs.readFileSync(path.join(root,e.preview));check(preview.readUInt32BE(16)===512&&preview.readUInt32BE(20)===512,'512px preview');
   e.texture_sizes=textures;
+  const runtime=manifest.assets?.find(a=>a.file===e.file);if(runtime)runtime.texture_sizes=textures;
   results.push({file:e.file,triangles:tris,budget:e.budget,bytes:data.length,texture_sizes:textures,errors:report.issues.numErrors,warnings:report.issues.numWarnings,infos:report.issues.numInfos,checks,issues:report.issues.messages});
 }
 const summary={validator:validator.version(),models:results.length,errors:results.reduce((s,r)=>s+r.errors,0),warnings:results.reduce((s,r)=>s+r.warnings,0),contract_failures:failures,results};
@@ -43,6 +44,10 @@ fs.writeFileSync(path.join(root,'validation.json'),JSON.stringify(summary,null,2
 for(const name of ['validation.json','validation.md'])if(!manifest.files.some(x=>x.file===name))manifest.files.push({file:name,type:'report',bytes:0,size_m:null,triangles:0,animations:[],nodes:[]});
 const lines=['# FIREBIRD asset validation','',`Khronos glTF Validator ${summary.validator}: **${summary.models} models, ${summary.errors} errors, ${summary.warnings} warnings**.`,`${failures.length} contract failures. All model textures embedded; every model has a 512 × 512 four-angle turntable.`, '', '| Model | Triangles | Budget | GLB KiB | Texture px | Errors | Warnings |','|---|---:|---:|---:|---|---:|---:|'];
 for(const r of results)lines.push(`| ${r.file} | ${r.triangles} | ${r.budget.join('–')} | ${(r.bytes/1024).toFixed(1)} | ${[...new Set(r.texture_sizes.map(t=>t.join('×')))].join(', ')} | ${r.errors} | ${r.warnings} |`);
+if(fs.existsSync(path.join(root,'surface_validation.json'))){
+  const surface=JSON.parse(fs.readFileSync(path.join(root,'surface_validation.json')));
+  lines.push('',`Surfaces: **${surface.sets} sets, ${surface.maps} PNG maps, 1024 × 1024 each**. All decoded opposite edges match exactly (maximum error 0). Albedo and emissive use sRGB; normal and roughness are linear data. 2m repeats.`, '', '[Surface seam measurements](surface_validation.json) · [Surface catalogue](surface_catalogue.png)');
+}
 fs.writeFileSync(path.join(root,'validation.md'),lines.join('\n')+'\n');
 for(const e of manifest.files)e.bytes=fs.statSync(path.join(root,e.file)).size;
 fs.writeFileSync(path.join(root,'assets.json'),JSON.stringify(manifest,null,2)+'\n');

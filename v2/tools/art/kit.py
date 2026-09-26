@@ -253,4 +253,12 @@ def manifest():
             e['type']='preview' if p.parent.name=='previews' else 'texture'
             if p.parent.name=='surfaces':e['size_m']=[2,2,0]
         entries.append(e)
-    (ROOT/'assets.json').write_text(json.dumps({'schema':1,'units':'metres','up':'+Y','forward':'+Z','files':entries},indent=2)+'\n')
+    runtime=[]
+    for entry in entries:
+        if entry['file'].endswith('.glb'):
+            runtime.append(dict(entry,id=Path(entry['file']).stem,type={'demons':'demon','weapons':'weapon','props':'prop','pickups':'pickup'}[entry['type']]))
+    for p in sorted((ROOT/'surfaces').glob('*_albedo.png')):
+        name=p.stem.removesuffix('_albedo')
+        runtime.append({'id':name,'type':'texture','filter':'linear','size_m':[2,2,0],'pixels':[1024,1024],
+            'maps':{channel:f'surfaces/{name}_{channel}.png' for channel in ('albedo','normal','roughness','emissive')}})
+    (ROOT/'assets.json').write_text(json.dumps({'schema':1,'units':'metres','up':'+Y','forward':'+Z','assets':runtime,'files':entries},indent=2)+'\n')
