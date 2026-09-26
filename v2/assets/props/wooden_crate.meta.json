@@ -1,0 +1,15 @@
+{
+  "file": "props/wooden_crate.glb",
+  "type": "props",
+  "size_m": [
+    1.032,
+    0.995,
+    1.059
+  ],
+  "triangles": 1480,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Crate: hide debris_1..6 until break, then hide whole and scatter shards."
+}

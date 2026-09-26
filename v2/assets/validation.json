@@ -1,6 +1,6 @@
 {
   "validator": "2.0.0-dev.3.10",
-  "models": 9,
+  "models": 18,
   "errors": 0,
   "warnings": 0,
   "contract_failures": [],
@@ -114,6 +114,270 @@
           128,
           128
         ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/ceiling_lamp.glb",
+      "triangles": 1044,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 109316,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/ceiling_lamp_broken.glb",
+      "triangles": 876,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 102552,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/explosive_barrel.glb",
+      "triangles": 1236,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 139432,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/hanging_chain.glb",
+      "triangles": 1536,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 165540,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/pipe_elbow.glb",
+      "triangles": 500,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 71972,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/pipe_straight.glb",
+      "triangles": 420,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 62036,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/pipe_valve.glb",
+      "triangles": 876,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 100864,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/standing_torch.glb",
+      "triangles": 984,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 120088,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/wooden_crate.glb",
+      "triangles": 1480,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 201908,
+      "texture_sizes": [
         [
           128,
           128

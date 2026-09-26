@@ -1,0 +1,15 @@
+{
+  "file": "props/ceiling_lamp_broken.glb",
+  "type": "props",
+  "size_m": [
+    0.5692,
+    0.7747,
+    0.494
+  ],
+  "triangles": 876,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Origin at base; mount ceiling lamp by top extent."
+}

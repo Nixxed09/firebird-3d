@@ -294,6 +294,32 @@
       "nodes": []
     },
     {
+      "file": "previews/ceiling_lamp.png",
+      "type": "preview",
+      "bytes": 357906,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/ceiling_lamp_broken.png",
+      "type": "preview",
+      "bytes": 363071,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
       "file": "previews/chaingun.png",
       "type": "preview",
       "bytes": 343646,
@@ -310,6 +336,19 @@
       "file": "previews/ember_knight.png",
       "type": "preview",
       "bytes": 356694,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/explosive_barrel.png",
+      "type": "preview",
+      "bytes": 349751,
       "size_m": null,
       "triangles": 0,
       "animations": [],
@@ -346,9 +385,61 @@
       ]
     },
     {
+      "file": "previews/hanging_chain.png",
+      "type": "preview",
+      "bytes": 321544,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
       "file": "previews/imp.png",
       "type": "preview",
       "bytes": 354780,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pipe_elbow.png",
+      "type": "preview",
+      "bytes": 319315,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pipe_straight.png",
+      "type": "preview",
+      "bytes": 325162,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pipe_valve.png",
+      "type": "preview",
+      "bytes": 360064,
       "size_m": null,
       "triangles": 0,
       "animations": [],
@@ -411,6 +502,491 @@
       ]
     },
     {
+      "file": "previews/standing_torch.png",
+      "type": "preview",
+      "bytes": 309177,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/wooden_crate.png",
+      "type": "preview",
+      "bytes": 392419,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "props/ceiling_lamp.glb",
+      "type": "props",
+      "bytes": 109316,
+      "size_m": [
+        0.494,
+        0.82,
+        0.494
+      ],
+      "triangles": 1044,
+      "animations": [],
+      "nodes": [
+        "ceiling_lamp"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "black",
+        "gold"
+      ],
+      "preview": "previews/ceiling_lamp.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/ceiling_lamp.meta.json",
+      "type": "json",
+      "bytes": 245,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/ceiling_lamp_broken.glb",
+      "type": "props",
+      "bytes": 102552,
+      "size_m": [
+        0.5692,
+        0.7747,
+        0.494
+      ],
+      "triangles": 876,
+      "animations": [],
+      "nodes": [
+        "ceiling_lamp_broken"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "black"
+      ],
+      "preview": "previews/ceiling_lamp_broken.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/ceiling_lamp_broken.meta.json",
+      "type": "json",
+      "bytes": 254,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/explosive_barrel.glb",
+      "type": "props",
+      "bytes": 139432,
+      "size_m": [
+        0.698,
+        0.965,
+        0.698
+      ],
+      "triangles": 1236,
+      "animations": [],
+      "nodes": [
+        "explosive_barrel"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "black",
+        "green",
+        "brass"
+      ],
+      "preview": "previews/explosive_barrel.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/explosive_barrel.meta.json",
+      "type": "json",
+      "bytes": 250,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/hanging_chain.glb",
+      "type": "props",
+      "bytes": 165540,
+      "size_m": [
+        0.244,
+        1.495,
+        0.244
+      ],
+      "triangles": 1536,
+      "animations": [],
+      "nodes": [
+        "hanging_chain"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron"
+      ],
+      "preview": "previews/hanging_chain.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/hanging_chain.meta.json",
+      "type": "json",
+      "bytes": 247,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/pipe_elbow.glb",
+      "type": "props",
+      "bytes": 71972,
+      "size_m": [
+        0.64,
+        1.19,
+        0.32
+      ],
+      "triangles": 500,
+      "animations": [],
+      "nodes": [
+        "pipe_elbow"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/pipe_elbow.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/pipe_elbow.meta.json",
+      "type": "json",
+      "bytes": 240,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/pipe_straight.glb",
+      "type": "props",
+      "bytes": 62036,
+      "size_m": [
+        0.32,
+        0.85,
+        0.32
+      ],
+      "triangles": 420,
+      "animations": [],
+      "nodes": [
+        "pipe_straight"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/pipe_straight.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/pipe_straight.meta.json",
+      "type": "json",
+      "bytes": 243,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/pipe_valve.glb",
+      "type": "props",
+      "bytes": 100864,
+      "size_m": [
+        0.488,
+        0.85,
+        0.5208
+      ],
+      "triangles": 876,
+      "animations": [],
+      "nodes": [
+        "pipe_valve"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "edge",
+        "red"
+      ],
+      "preview": "previews/pipe_valve.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/pipe_valve.meta.json",
+      "type": "json",
+      "bytes": 243,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/standing_torch.glb",
+      "type": "props",
+      "bytes": 120088,
+      "size_m": [
+        0.52,
+        1.8205,
+        0.52
+      ],
+      "triangles": 984,
+      "animations": [],
+      "nodes": [
+        "standing_torch"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "ember",
+        "gold"
+      ],
+      "preview": "previews/standing_torch.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/standing_torch.meta.json",
+      "type": "json",
+      "bytes": 246,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/wooden_crate.glb",
+      "type": "props",
+      "bytes": 201908,
+      "size_m": [
+        1.032,
+        0.995,
+        1.059
+      ],
+      "triangles": 1480,
+      "animations": [],
+      "nodes": [
+        "whole",
+        "debris_1",
+        "debris_2",
+        "debris_3",
+        "debris_4",
+        "debris_5",
+        "debris_6"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Crate: hide debris_1..6 until break, then hide whole and scatter shards.",
+      "materials": [
+        "wood",
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/wooden_crate.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/wooden_crate.meta.json",
+      "type": "json",
+      "bytes": 269,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
       "file": "README.md",
       "type": "md",
       "bytes": 2763,
@@ -422,7 +998,7 @@
     {
       "file": "validation.json",
       "type": "json",
-      "bytes": 4424,
+      "bytes": 8485,
       "size_m": null,
       "triangles": 0,
       "animations": [],
@@ -431,7 +1007,7 @@
     {
       "file": "validation.md",
       "type": "md",
-      "bytes": 969,
+      "bytes": 1639,
       "size_m": null,
       "triangles": 0,
       "animations": [],

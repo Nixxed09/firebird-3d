@@ -1,0 +1,15 @@
+{
+  "file": "props/pipe_valve.glb",
+  "type": "props",
+  "size_m": [
+    0.488,
+    0.85,
+    0.5208
+  ],
+  "triangles": 876,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Origin at base; mount ceiling lamp by top extent."
+}

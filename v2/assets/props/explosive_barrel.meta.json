@@ -1,0 +1,15 @@
+{
+  "file": "props/explosive_barrel.glb",
+  "type": "props",
+  "size_m": [
+    0.698,
+    0.965,
+    0.698
+  ],
+  "triangles": 1236,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Origin at base; mount ceiling lamp by top extent."
+}
