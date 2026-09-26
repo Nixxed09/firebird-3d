@@ -19,6 +19,7 @@ import { createGame } from '../src/sim/game.js';
 import { LEVELS } from '../src/levels.js';
 import { makeRng } from '../src/sim/rng.js';
 import { PlayBot } from './playbot.js';
+import { Recorder, writeFlow } from './flow.js';
 
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
 var require = createRequire(import.meta.url);
@@ -129,6 +130,8 @@ function playEpisode(key, persona, sd, difficulty) {
   FB.startLevel(0, false);
   for (var li = 0; li < LEVELS.length; li++) {
     var lv = { name: LEVELS[li].name, attempts: 1, time: 0, result: 'timeout', damage: 0, gear: [gearOf(FB.state().p)] };
+    var rec = new Recorder(LEVELS[li]); // flow of play across every attempt (tests/flow.js)
+    FLOW[li].push({ persona: key, difficulty: difficulty, seed: sd, samples: rec.samples, deaths: rec.deaths });
     run.levels.push(lv);
     var t = 0, done = false, fight = null, seenMsgs = new Set(), lastHp = FB.state().p.hp;
     bot.reset();
@@ -141,6 +144,7 @@ function playEpisode(key, persona, sd, difficulty) {
       }) : [];
       bot.step(DT);
       FB.update(DT);
+      rec.tick(FB.state(), DT);
       t += DT;
       G = FB.state(); p = G.p;
 
@@ -184,7 +188,9 @@ function playEpisode(key, persona, sd, difficulty) {
         if (fight) { fight.end = t; fight.bossHp = boss.hp; fight.bossMaxHp = boss.maxHp; history.push(fight); fight = null; }
         if (lv.attempts >= MAX_ATTEMPTS) { lv.result = 'gave up'; break; }
         lv.attempts++;
+        rec.death(G);
         FB.retryLevel();
+        rec.retry();
         lv.gear.push(gearOf(FB.state().p));
         bot.reset();
         seenMsgs = new Set();
@@ -417,6 +423,7 @@ function aggregate(all) {
 // ---- main ------------------------------------------------------------------
 
 var detailDiff = DIFFS.indexOf(1) >= 0 ? 1 : DIFFS[0];
+var FLOW = LEVELS.map(function () { return []; }); // per level: every episode's trace
 var personas = loadPersonas();
 var keys = Object.keys(personas.all);
 console.log('Playtest: ' + keys.length + ' personas x ' + DIFFS.length + ' difficulties x ' + SEEDS + ' seeds, ' + personas.source);
@@ -439,5 +446,10 @@ var runs = keys.map(function (k, i) {
 });
 fs.mkdirSync(OUT, { recursive: true });
 fs.writeFileSync(path.join(OUT, 'playtest-report.md'), report(runs, personas, all));
+var worlds = LEVELS.map(function (L, i) { var g = createGame({ levels: LEVELS, rng: makeRng(1), settings: { difficulty: 1, tips: false, seenTips: {} } }); g.startLevel(i, false); return g.state().W; });
+var flow = writeFlow(OUT, LEVELS, worlds, FLOW);
+flow.levels.forEach(function (f) {
+  console.log('  flow ' + f.level + ': intensity ' + f.intensity.map(function (v) { return v == null ? '-' : Math.round(v); }).join('') + ', lost ' + Math.round(f.lostShare * 100) + '% of the time');
+});
 fs.writeFileSync(path.join(OUT, 'playtest-report.json'), JSON.stringify({ seed: SEED, seeds: SEEDS, difficulties: DIFFS, personaSource: personas.source, episodes: all }, null, 1));
 console.log('Report: ' + path.join(OUT, 'playtest-report.md'));
