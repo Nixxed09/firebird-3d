@@ -307,6 +307,7 @@ function playEvents(G) {
 // ---- the loop: fixed-step simulation, render every frame ---------------------------------------------
 
 var STEP = 1 / 60, acc = 0, last = performance.now(), lastMode = '', frames = [];
+var frozen = false, FROZEN_T = 10; // ?debug freeze(): no sim steps, a pinned render clock
 // the title screen shows a slow fly-through of E1M1 behind the menu
 game.startLevel(0, false);
 var attract = game.state();
@@ -326,7 +327,7 @@ function frame(now) {
     ctx.clearRect(0, 0, W, H);
     MENU.render(ctx, modeT);
   } else if (gm === 'game' || gm === 'inter' || gm === 'victory') {
-    var paused = gm === 'game' && (!started || !locked || MENU.isOpen()) && !DEBUG;
+    var paused = frozen || (gm === 'game' && (!started || !locked || MENU.isOpen()) && !DEBUG);
     if (!paused && gm === 'game') {
       acc += dt;
       while (acc >= STEP) {
@@ -336,7 +337,7 @@ function frame(now) {
       }
     } else acc = 0;
     G = game.state();
-    gfx.render(G, now / 1000, paused ? 0 : dt);
+    gfx.render(G, frozen ? FROZEN_T : now / 1000, paused ? 0 : dt, frozen);
     G.events.length = 0;
     hud.draw(G, { map: mapOpen, menu: MENU.isOpen(), camera: gfx.camera });
     if (gm === 'inter') interScreen(modeT);
@@ -360,6 +361,10 @@ if (DEBUG) {
     launch: function (i) { game.startLevel(i, false); started = true; mode = 'game'; MENU.close(); },
     toTitle: toTitle,
     setMap: function (on) { mapOpen = on; },
+    // freeze(true): stop the simulation and pin the render clock, so the same
+    // spot renders the same pixels every run (screenshot baselines)
+    freeze: function (on) { frozen = !!on; },
+    frozen: function () { return frozen; },
     frameStats: function () {
       var s = frames.slice().sort(function (a, b) { return a - b; });
       function q(f) { return s.length ? s[Math.min(s.length - 1, Math.floor(s.length * f))] * 1000 : 0; }

@@ -203,7 +203,16 @@ export function createRenderer(canvas, opts) {
     viewLight.position.copy(flashSprite.position);
   }
 
-  function render(G, t, dt) {
+  // frozen: the same picture every time (for screenshot baselines). Visual-only
+  // randomness (flicker, embers, shake) comes from a fixed seed for this frame.
+  function render(G, t, dt, frozen) {
+    if (!frozen) return renderFrame(G, t, dt);
+    var real = Math.random, a = 12345;
+    Math.random = function () { a = (a * 1103515245 + 12345) & 0x7fffffff; return a / 0x7fffffff; };
+    try { return renderFrame(G, t, 0); } finally { Math.random = real; }
+  }
+
+  function renderFrame(G, t, dt) {
     renderer.info.reset();
     if (G !== G0) buildScene(G);
     var p = G.p;
