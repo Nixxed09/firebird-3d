@@ -132,7 +132,8 @@ function playEpisode(key, persona, sd, difficulty) {
   for (var li = 0; li < LEVELS.length; li++) {
     var lv = { name: LEVELS[li].name, attempts: 1, time: 0, result: 'timeout', damage: 0, gear: [gearOf(FB.state().p)] };
     var rec = new Recorder(LEVELS[li]); // flow of play across every attempt (tests/flow.js)
-    FLOW[li].push({ persona: key, difficulty: difficulty, seed: sd, samples: rec.samples, deaths: rec.deaths });
+    FLOW[li].push({ persona: key, difficulty: difficulty, seed: sd, samples: rec.samples, deaths: rec.deaths, choices: rec.choices });
+    bot.onChoice = function (ev) { rec.choices.push(ev); };
     run.levels.push(lv);
     var t = 0, done = false, fight = null, seenMsgs = new Set(), lastHp = FB.state().p.hp;
     bot.reset();
@@ -340,6 +341,14 @@ function economy(L, am) {
   var spar = L.boss && L.boss.sparring;
   var riley = spar ? Math.round(900 * (L.boss.hpScale || 1)) : 900 + 2 * 40;
   var hp = n('i') * 40 + n('g') * 110 + n('K') * 400 + n('Y') * riley;
+  // demons the level's events spawn later (arena waves); they count too
+  var HP = { imp: 40, gnasher: 110, knight: 400 };
+  (function walk(v) {
+    if (Array.isArray(v)) return v.forEach(walk);
+    if (!v || typeof v !== 'object') return;
+    if (Array.isArray(v.spawn)) v.spawn.forEach(function (m) { hp += HP[m.kind] || 0; });
+    Object.keys(v).forEach(function (k) { if (k !== 'spawn') walk(v[k]); });
+  })(L.events || []);
   var bullets = n('b') * 10 * am, shells = n('a') * 4 * am + n('2') * 8 * am;
   return { monsterHp: hp, bullets: bullets, shells: shells, maxDamage: bullets * 10 + shells * 70 };
 }

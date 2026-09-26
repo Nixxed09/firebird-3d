@@ -18,9 +18,22 @@
 //              boss at range makes no "progress" but isn't being lost.)
 //   intensity  1 + 9 x (0.6 x damage over the last 2 s / 30, capped at 1
 //                      + 0.4 x awake demons within 10 cells / 4, capped at 1)
+//   P5         the bucket holding the peak; "ends high" = it is in the last quarter
+//   S2 weenie  line of sight from eye height, within 40 cells, to the level's final
+//              destination (the boss, or the exit switch's face): when it is first
+//              seen (share of level time, and share of the route walked), and how
+//              much of the rest of the approach keeps it in view
+//   N2         at a real choice (2+ frontier targets within 20% of each other's
+//              score without the torch term), how often a first-timer takes the
+//              torch-flanked door, against chance, and whether that door is on the
+//              critical path (start -> needed keycards -> destination)
+//              With bots, torchChosenRate reflects the bot's own torch bonus, so only
+//              onCriticalRate (does a torch door ever lead off the route?) is evidence;
+//              whether PEOPLE follow torches needs a human playtest.
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
+import { hasLOS, floorAt } from '../src/sim/world.js';
 
 var STEP = 0.5, LOST_AFTER = 20, NEAR = 10, BUCKETS = 20;
 var DOORS = { 6: 1, 7: 1, 8: 1, 11: 1 };
@@ -49,6 +62,8 @@ export function Recorder(L) {
   this.deaths = [];    // [t, x, z]
   this.t = 0; this.next = 0; this.lastHp = null; this.recent = [];
   this.fieldKey = null; this.field = null; this.best = Infinity; this.bestT = 0;
+  this.choices = [];   // N2: { x, z, torchChosen, torchOptions, options, door }
+  this.weenie = null;  // S2: { firstT, firstRoute, after, inView }
 }
 
 Recorder.prototype.objective = function (G) {
@@ -105,7 +120,32 @@ Recorder.prototype.tick = function (G, dt) {
   var lost = this.t - this.bestT >= LOST_AFTER ? 1 : 0;
   this.recent = this.recent.filter(function (r) { return r[0] > self.t - 2; });
   var dmg = this.recent.reduce(function (a, r) { return a + r[1]; }, 0);
-  this.samples.push([+this.t.toFixed(1), cx, cz, p.hp, p.armor, p.ammo.bullets, p.ammo.shells, awake, near, Math.round(dmg), dist, lost]);
+  var seesGoal = this.seesDestination(G);
+  this.samples.push([+this.t.toFixed(1), cx, cz, p.hp, p.armor, p.ammo.bullets, p.ammo.shells, awake, near, Math.round(dmg), dist, lost, seesGoal ? 1 : 0]);
+};
+
+// S2: can the player see the level's final destination right now?
+// The boss (chest height) on boss levels, else the exit switch's face.
+Recorder.prototype.seesDestination = function (G) {
+  var p = G.p, W = G.W, ey = p.y + (p.eyeH || 0.8), tx, ty, tz;
+  if (this.L.map.join('').indexOf('Y') >= 0) {
+    var b = G.boss; if (!b) return false;
+    tx = b.x; ty = b.y + (b.h || 1) * 0.6; tz = b.z;
+  } else if (G.exitCell) {
+    // a point just in front of the switch face, on the side nearest the player
+    var ex = G.exitCell, best = null;
+    [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (o) {
+      var x = ex.x + o[0], z = ex.z + o[1];
+      if (x < 0 || z < 0 || x >= W.mw || z >= W.mh || W.cells[z * W.mw + x] !== 0) return;
+      var d = Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z);
+      if (!best || d < best.d) best = { d: d, o: o };
+    });
+    if (!best) return false;
+    tx = ex.x + 0.5 + best.o[0] * 0.55; tz = ex.z + 0.5 + best.o[1] * 0.55;
+    ty = floorAt(W, ex.x + best.o[0], ex.z + best.o[1]) + 0.8;
+  } else return false;
+  if (Math.hypot(tx - p.x, tz - p.z) > 40) return false;
+  return hasLOS(W, p.x, ey, p.z, tx, ty, tz);
 };
 
 // a retry restarts the level: progress toward the objective starts over
@@ -120,7 +160,49 @@ export function intensity(s) {
 // ---- aggregate and draw ----------------------------------------------------------------------
 
 // levelTraces: [{ samples, deaths }] for one level across episodes; W: the level's world
-export function summarise(levelTraces, W) {
+// The critical path: start -> the keycards the locked doors need (in the
+// shorter order) -> the final destination, each locked door passable only
+// once its key is held. Returns a Set of cell indices.
+export function criticalPath(L, W) {
+  var m = L.map, find = function (ch) { var out = []; m.forEach(function (row, z) { for (var x = 0; x < row.length; x++) if (row[x] === ch) out.push({ x: x, z: z }); }); return out; };
+  var start = find('p')[0], dest = find('Y')[0] || find('X')[0];
+  if (!start || !dest) return new Set();
+  var locks = {}; m.forEach(function (row, z) { for (var x = 0; x < row.length; x++) { if (row[x] === 'R') locks[z * W.mw + x] = 'red'; if (row[x] === 'U') locks[z * W.mw + x] = 'blue'; } });
+  var keys = [];
+  if (Object.values(locks).indexOf('red') >= 0 && find('r')[0]) keys.push({ color: 'red', at: find('r')[0] });
+  if (Object.values(locks).indexOf('blue') >= 0 && find('u')[0]) keys.push({ color: 'blue', at: find('u')[0] });
+  function route(from, to, held) {
+    var n = W.mw * W.mh, prev = new Int32Array(n).fill(-2), q = [from.z * W.mw + from.x];
+    prev[q[0]] = -1;
+    for (var h = 0; h < q.length; h++) {
+      var c = q[h];
+      if (c === to.z * W.mw + to.x) { var path = []; for (var k = c; k !== -1; k = prev[k]) path.push(k); return path; }
+      var x = c % W.mw, z = (c / W.mw) | 0;
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (o) {
+        var nx = x + o[0], nz = z + o[1], ni = nz * W.mw + nx;
+        if (nx < 0 || nz < 0 || nx >= W.mw || nz >= W.mh || prev[ni] !== -2) return;
+        var id = W.cells[ni], isTarget = ni === to.z * W.mw + to.x;
+        if (id !== 0 && !DOORS[id] && !isTarget) return;
+        if (locks[ni] && held.indexOf(locks[ni]) < 0) return;
+        prev[ni] = c; q.push(ni);
+      });
+    }
+    return null;
+  }
+  var orders = keys.length === 2 ? [[keys[0], keys[1]], [keys[1], keys[0]]] : [keys];
+  var bestSet = null, bestLen = Infinity;
+  orders.forEach(function (order) {
+    var held = [], at = start, cells = [], ok = true;
+    order.forEach(function (k) { var r = route(at, k.at, held); if (!r) ok = false; else { cells = cells.concat(r); held.push(k.color); at = k.at; } });
+    var last = ok && route(at, dest, held);
+    if (!last) return;
+    cells = cells.concat(last);
+    if (cells.length < bestLen) { bestLen = cells.length; bestSet = new Set(cells); }
+  });
+  return bestSet || new Set();
+}
+
+export function summarise(levelTraces, W, L) {
   var n = W.mw * W.mh, time = new Float32Array(n), deaths = new Float32Array(n), lost = new Float32Array(n);
   var curve = new Array(BUCKETS).fill(0), counts = new Array(BUCKETS).fill(0), lostSamples = 0, total = 0;
   levelTraces.forEach(function (tr) {
@@ -134,12 +216,75 @@ export function summarise(levelTraces, W) {
     });
     tr.deaths.forEach(function (d) { deaths[d[2] * W.mw + d[1]]++; });
   });
+  // P5: where the intensity peaks, and whether the level ends high
+  var ints = curve.map(function (v, b) { return counts[b] ? +(v / counts[b]).toFixed(2) : null; });
+  var peak = 0;
+  ints.forEach(function (v, b) { if (v != null && (ints[peak] == null || v > ints[peak])) peak = b; });
+
+  // S2: the weenie, per episode, then medians
+  function median(a) { if (!a.length) return null; a = a.slice().sort(function (x, y) { return x - y; }); return +a[a.length >> 1].toFixed(2); }
+  var destField = null;
+  if (L) {
+    var dest = null;
+    L.map.forEach(function (row, z) { for (var x = 0; x < row.length; x++) if (row[x] === 'Y' || (row[x] === 'X' && !dest)) dest = { x: x, z: z }; });
+    if (dest) {
+      var tg = [dest];
+      if (W.cells[dest.z * W.mw + dest.x] !== 0) tg = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(function (o) { return { x: dest.x + o[0], z: dest.z + o[1] }; })
+        .filter(function (c) { return c.x >= 0 && c.z >= 0 && c.x < W.mw && c.z < W.mh && W.cells[c.z * W.mw + c.x] === 0; });
+      destField = distanceField(W, tg);
+    }
+  }
+  var firstShare = [], firstRoute = [], inView = [], never = 0;
+  levelTraces.forEach(function (tr) {
+    var s = tr.samples; if (!s.length) return;
+    var k0 = -1;
+    for (var k = 0; k < s.length; k++) if (s[k][12]) { k0 = k; break; }
+    if (k0 < 0) { never++; return; }
+    firstShare.push(s[k0][0] / s[s.length - 1][0]);
+    if (destField) {
+      var d0 = destField[s[0][2] * W.mw + s[0][1]], dk = destField[s[k0][2] * W.mw + s[k0][1]];
+      if (d0 > 0 && dk >= 0) firstRoute.push(Math.max(0, 1 - dk / d0));
+    }
+    var after = s.slice(k0);
+    inView.push(after.filter(function (r) { return r[12]; }).length / after.length);
+  });
+  var weenie = {
+    firstSeenAtTimeShare: median(firstShare), firstSeenAtRouteShare: median(firstRoute),
+    approachInView: median(inView), neverSeen: never,
+    good: median(firstRoute) != null && median(firstRoute) <= 0.6
+  };
+
+  // N2: torch-flanked doors at real choices
+  var crit = L ? criticalPath(L, W) : new Set(), choices = { total: 0, withTorchOption: 0, torchChosen: 0, chance: 0, torchChosenOnCritical: 0 };
+  levelTraces.forEach(function (tr) {
+    (tr.choices || []).forEach(function (c) {
+      choices.total++;
+      if (!c.torchOptions) return;
+      choices.withTorchOption++;
+      choices.chance += c.torchOptions / c.options;
+      if (c.torchChosen) {
+        choices.torchChosen++;
+        var on = (c.door && crit.has(c.door.z * W.mw + c.door.x)) || crit.has(c.z * W.mw + c.x);
+        if (on) choices.torchChosenOnCritical++;
+      }
+    });
+  });
+  var tc = choices.withTorchOption;
+  choices.torchChosenRate = tc ? +(choices.torchChosen / tc).toFixed(2) : null;
+  choices.chanceRate = tc ? +(choices.chance / tc).toFixed(2) : null;
+  choices.onCriticalRate = choices.torchChosen ? +(choices.torchChosenOnCritical / choices.torchChosen).toFixed(2) : null;
+  choices.good = tc ? choices.torchChosenRate > choices.chanceRate && choices.onCriticalRate > 0.9 : null;
+  delete choices.chance;
+
   var hot = [];
   for (var i = 0; i < n; i++) if (lost[i] > 0) hot.push({ x: i % W.mw, z: (i / W.mw) | 0, lostSeconds: lost[i] });
   hot.sort(function (a, b) { return b.lostSeconds - a.lostSeconds; });
   return {
     episodes: levelTraces.length,
-    intensity: curve.map(function (v, b) { return counts[b] ? +(v / counts[b]).toFixed(2) : null; }),
+    intensity: ints,
+    peakBucket: peak, peakValue: ints[peak], endsHigh: peak >= BUCKETS * 0.75,
+    weenie: weenie,
+    choices: choices,
     lostShare: total ? +(lostSamples / total).toFixed(3) : 0,
     lostHotspots: hot.slice(0, 8),
     deathCells: Array.from(deaths).map(function (v, i) { return v ? { x: i % W.mw, z: (i / W.mw) | 0, deaths: v } : null; }).filter(Boolean),
@@ -217,14 +362,14 @@ export function writeFlow(outDir, levels, worlds, byLevel) {
     levels: []
   };
   levels.forEach(function (L, li) {
-    var sum = summarise(byLevel[li], worlds[li]);
+    var sum = summarise(byLevel[li], worlds[li], L);
     fs.writeFileSync(path.join(outDir, 'flow-' + L.name.split(':')[0] + '.png'), drawLevel(sum, worlds[li]));
     var copy = Object.assign({ level: L.name }, sum); delete copy.grids;
     summary.levels.push(copy);
   });
   fs.writeFileSync(path.join(outDir, 'flow.json'), JSON.stringify(summary, null, 1));
   fs.writeFileSync(path.join(outDir, 'flow-traces.json'), JSON.stringify(levels.map(function (L, li) {
-    return { level: L.name, episodes: byLevel[li].map(function (tr) { return { persona: tr.persona, difficulty: tr.difficulty, seed: tr.seed, samples: tr.samples, deaths: tr.deaths }; }) };
+    return { level: L.name, episodes: byLevel[li].map(function (tr) { return { persona: tr.persona, difficulty: tr.difficulty, seed: tr.seed, samples: tr.samples, deaths: tr.deaths, choices: tr.choices }; }) };
   })));
   return summary;
 }

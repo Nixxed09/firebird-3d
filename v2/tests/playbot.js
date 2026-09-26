@@ -329,9 +329,26 @@ PlayBot.prototype.follow = function (path, dt) {
   for (var i = 2; i < Math.min(path.length, 5); i++) {
     var pi = path[i];
     if (pi.kind !== 'walk' || DOOR[this.cell(pi.x, pi.z)]) break;
-    if (this.sees(pi.x + 0.5, floorAt(G.W, pi.x, pi.z) + 0.5, pi.z + 0.5)) target = pi; else break;
+    if (this.sees(pi.x + 0.5, floorAt(G.W, pi.x, pi.z) + 0.5, pi.z + 0.5) && this.groundHolds(p.x, p.z, pi.x + 0.5, pi.z + 0.5)) target = pi; else break;
   }
   return Math.atan2(target.z + 0.5 - p.z, target.x + 0.5 - p.x);
+};
+
+// A shortcut is only safe if the ground along it holds: every cell under the
+// straight line (and a body's width either side) is passable and no lower than
+// both ends. Without this, cutting a corner at the top of E1M2's open-sided
+// stair walked the bot off the edge, and it fell and climbed again forever.
+PlayBot.prototype.groundHolds = function (ax, az, bx, bz) {
+  var W = this.G().W, lo = Math.min(floorAt(W, Math.floor(ax), Math.floor(az)), floorAt(W, Math.floor(bx), Math.floor(bz)));
+  var d = Math.hypot(bx - ax, bz - az), n = Math.max(2, Math.ceil(d * 6)), nx = -(bz - az) / (d || 1), nz = (bx - ax) / (d || 1);
+  for (var i = 0; i <= n; i++) {
+    for (var side = -1; side <= 1; side++) {
+      var x = ax + (bx - ax) * i / n + nx * side * 0.28, z = az + (bz - az) * i / n + nz * side * 0.28;
+      var cx = Math.floor(x), cz = Math.floor(z);
+      if (!this.passable(cx, cz) || floorAt(W, cx, cz) < lo - 0.05) return false;
+    }
+  }
+  return true;
 };
 
 PlayBot.prototype.chooseWeapon = function (d) {
@@ -498,27 +515,50 @@ PlayBot.prototype.frontier = function () {
   var goal = this.game.goalTarget ? this.game.goalTarget() : null;
   var torches = G.ents.filter(function (e) { return e.kind === 'torch' && self.knows(Math.floor(e.x), Math.floor(e.z)); });
   function unseen(x, z) { return x >= 0 && z >= 0 && x < mw && z < mh && !G.seen[z * mw + x]; }
-  var best = null;
+  var best = null, cands = [];
   dist.forEach(function (d, c) {
     var x = c % mw, z = (c / mw) | 0;
     if (!NB.some(function (o) { return unseen(x + o[0], z + o[1]); })) return;
     if (self.banned['explore:' + x + ',' + z] > self.now) return;
     var open = 0;
     for (var dz = -2; dz <= 2; dz++) for (var dx = -2; dx <= 2; dx++) if (unseen(x + dx, z + dz)) open++;
-    var sc = 0.55 - d * 0.03 + open * 0.02, cue = 'open';
-    var nearDoor = DOOR[self.cell(x, z)] || NB.some(function (o) { return DOOR[self.cell(x + o[0], z + o[1])]; });
+    var sc = 0.55 - d * 0.03 + open * 0.02, cue = 'open', torchTerm = 0, door = null;
+    if (DOOR[self.cell(x, z)]) door = { x: x, z: z };
+    else NB.forEach(function (o) { if (!door && DOOR[self.cell(x + o[0], z + o[1])]) door = { x: x + o[0], z: z + o[1] }; });
     var lit = torches.filter(function (t) { return Math.hypot(t.x - (x + 0.5), t.z - (z + 0.5)) < 2.2; }).length;
-    if (nearDoor) { sc += 0.4; cue = 'door'; if (lit) { sc += 0.5 + 0.2 * Math.min(2, lit); cue = 'torch-door'; } }
-    else if (lit) { sc += 0.25; cue = 'torch'; }
+    if (door) { sc += 0.4; cue = 'door'; if (lit) { torchTerm = 0.5 + 0.2 * Math.min(2, lit); cue = 'torch-door'; } }
+    else if (lit) { torchTerm = 0.25; cue = 'torch'; }
+    sc += torchTerm;
     if (goal) {
       var gd = Math.hypot(goal.x - (x + 0.5), goal.z - (z + 0.5));
       sc += 0.8 * Math.max(0, 1 - gd / 20);
       if (gd < 8) cue += '+marker';
     }
-    if (!best || sc > best.score) best = { x: x, z: z, score: sc, cue: cue };
+    var cand = { x: x, z: z, score: sc, base: sc - torchTerm, cue: cue, torchDoor: cue.indexOf('torch-door') === 0, door: door };
+    cands.push(cand);
+    if (!best || sc > best.score) best = cand;
   });
+  this.noteChoice(cands, best);
   this.frontierCache = { t: this.now, best: best };
   return best;
+};
+
+// N2: a real choice is 2+ frontier targets within 20% of the best score
+// without the torch bonus. Report it once per new pick (the frontier is
+// recomputed every second on the way there).
+PlayBot.prototype.noteChoice = function (cands, best) {
+  if (!this.onChoice || !best || cands.length < 2) return;
+  var top = cands.reduce(function (a, c) { return c.base > a ? c.base : a; }, -Infinity);
+  var near = cands.filter(function (c) { return top - c.base <= 0.2 * Math.abs(top); });
+  if (near.length < 2 || near.indexOf(best) < 0) return;
+  var key = best.x + ',' + best.z;
+  if (key === this.lastChoice) return;
+  this.lastChoice = key;
+  this.onChoice({
+    x: best.x, z: best.z, torchChosen: best.torchDoor,
+    torchOptions: near.filter(function (c) { return c.torchDoor; }).length, options: near.length,
+    door: best.door
+  });
 };
 
 PlayBot.prototype.adjacentTo = function (x, z, id) {
