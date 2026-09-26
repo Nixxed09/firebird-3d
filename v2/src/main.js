@@ -6,6 +6,7 @@ import { LEVELS } from './levels.js';
 import { makeRng } from './sim/rng.js';
 import { createRenderer } from './render/renderer.js';
 import { createHud, fmtTime } from './ui/hud.js';
+import { loadAssets } from './render/assets.js';
 
 var SETTINGS = MENUS.SETTINGS, MENU = MENUS.MENU;
 var v = SETTINGS.v;
@@ -54,6 +55,7 @@ function clearInput() { for (var k in keys) keys[k] = false; fire = false; game.
 document.addEventListener('keydown', function (e) {
   if (['Tab', 'Space'].indexOf(e.code) >= 0 || e.code.slice(0, 5) === 'Arrow') e.preventDefault();
   SND.init();
+  if (!assetsSettled) return; // still loading
   if (MENU.isOpen()) { SND.startMusic(); MENU.key(e.code); return; }
   if (e.repeat) return;
   if (e.code === 'Enter' || e.code === 'NumpadEnter') { onEnter(); return; }
@@ -323,9 +325,14 @@ function frame(now) {
     var p = attract.p, t = now / 1000;
     p.ang = t * 0.12; p.pitch = Math.sin(t * 0.3) * 0.15; p.x = 5.5 + Math.sin(t * 0.07) * 0.5; p.z = 17.5;
     gfx.render(attract, t, dt);
-    if (!MENU.isOpen()) MENU.open(mainScreen());
     ctx.clearRect(0, 0, W, H);
-    MENU.render(ctx, modeT);
+    if (!assetsSettled) {
+      titleBg(ctx, modeT);
+      if ((modeT % 0.8) < 0.55) ART.drawText(ctx, 'LOADING...', W / 2, 120, { scale: 2, color: '#f0d848', shadow: true, center: true });
+    } else {
+      if (!MENU.isOpen()) MENU.open(mainScreen());
+      MENU.render(ctx, modeT);
+    }
   } else if (gm === 'game' || gm === 'inter' || gm === 'victory') {
     var paused = frozen || (gm === 'game' && (!started || !locked || MENU.isOpen()) && !DEBUG);
     if (!paused && gm === 'game') {
@@ -352,8 +359,23 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 applySettings();
-MENU.open(mainScreen());
 requestAnimationFrame(frame);
+
+// Authored art loads before the menu opens, so a level never starts with
+// half-loaded art that pops in mid-play. If it's slow or broken, the built-in
+// art is used after a few seconds.
+var assetReg = null, assetsSettled = false;
+function assetsDone(reg) {
+  if (assetsSettled) return;
+  assetsSettled = true;
+  assetReg = reg || { ready: true, loaded: [], problems: ['timed out; using built-in art'] };
+  if (assetReg.loaded.length) gfx.setAssets(assetReg);
+  if (assetReg.problems.length) console.info('[assets] ' + assetReg.problems.join(' | '));
+  if (assetReg.loaded.length) console.info('[assets] using ' + assetReg.loaded.length + ' authored assets');
+  MENU.open(mainScreen());
+}
+loadAssets().then(assetsDone);
+setTimeout(function () { assetsDone(null); }, 6000);
 
 // ?debug: a handle for automated checks and screenshots
 if (DEBUG) {
@@ -365,6 +387,9 @@ if (DEBUG) {
     // spot renders the same pixels every run (screenshot baselines)
     freeze: function (on) { frozen = !!on; },
     frozen: function () { return frozen; },
+    models: function () { return gfx.debugModels(); },
+    // which authored assets loaded, and anything that failed
+    assets: function () { return assetReg ? { ready: assetReg.ready, loaded: assetReg.loaded.slice(), problems: assetReg.problems.slice() } : { ready: false }; },
     frameStats: function () {
       var s = frames.slice().sort(function (a, b) { return a - b; });
       function q(f) { return s.length ? s[Math.min(s.length - 1, Math.floor(s.length * f))] * 1000 : 0; }

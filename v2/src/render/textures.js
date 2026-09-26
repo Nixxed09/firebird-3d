@@ -3,7 +3,7 @@
 // the mortar, rivets and cracks. No image files.
 import * as THREE from 'three';
 
-var N = 256;
+var N = 128; // retro-modern: chunky, readable texels (DUSK / Ultrakill), with modern lighting on top
 
 // ---- tiling noise ------------------------------------------------------------------
 
@@ -78,6 +78,7 @@ function tex(data, srgb) {
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
   t.anisotropy = 8;
+  t.magFilter = THREE.NearestFilter; // retro-modern: chunky texels up close, like DUSK
   t.needsUpdate = true;
   return t;
 }
@@ -237,26 +238,28 @@ export function wallSet(id) {
   return wallSet(1);
 }
 
-// a secret wall: its host plus a hairline crack, dark on light walls, pale on dark
-export function secretSet(hostId) {
-  var key = 'secret' + hostId;
-  if (cache[key]) return cache[key];
-  var host = { 1: brick(0x8a4232, 0x4a1e14, 0x2a1d18, 1), 2: stone(0x8a8578, 0x4a463c, 2), 3: metal(0x5a5f68, 0x26282e, 3), 4: tech(4), 5: hellrock(5) }[hostId] || brick(0x8a4232, 0x4a1e14, 0x2a1d18, 1);
-  var dark = hostId === 5 || hostId === 3;
-  var crack = new Uint8Array(N * N), x = 88;
-  for (var y = 24; y < 232; y++) {
-    x += (y % 13 === 0) ? 2 : (y % 17 === 0) ? -2 : 0;
-    for (var w = 0; w < 5; w++) crack[y * N + x + w] = 1;
+// A see-through hairline crack that reads on any wall: a dark core with a
+// pale rim, laid over the host wall's own material.
+var crackMat = null;
+export function crackOverlay() {
+  if (crackMat) return crackMat;
+  var M = 128, data = new Uint8ClampedArray(M * M * 4), x = 44;
+  function px(cx, cy, r, g, b, a) { if (cx < 0 || cy < 0 || cx >= M || cy >= M) return; var k = (cy * M + cx) * 4; data[k] = r; data[k + 1] = g; data[k + 2] = b; data[k + 3] = Math.max(data[k + 3], a); }
+  for (var y = 10; y < 118; y++) {
+    x += (y % 7 === 0) ? 1 : (y % 9 === 0) ? -1 : 0;
+    px(x - 1, y, 200, 190, 170, 150); px(x + 2, y, 200, 190, 170, 150);   // pale rim
+    px(x, y, 12, 10, 8, 255); px(x + 1, y, 12, 10, 8, 255);              // dark core
   }
-  for (var k = 0; k < 28; k++) for (var w2 = 0; w2 < 4; w2++) crack[(120 + k) * N + x + 6 + k + w2] = 1;
-  return (cache[key] = bake(function (u, v, px, py) {
-    var o = host(u, v, px, py);
-    if (crack[py * N + px]) {
-      o.c = dark ? [o.c[0] * 0.4 + 0.45, o.c[1] * 0.4 + 0.4, o.c[2] * 0.4 + 0.35] : [o.c[0] * 0.3, o.c[1] * 0.3, o.c[2] * 0.3];
-      o.h = 0; o.r = 0.95;
-    }
-    return o;
-  }, { emissive: hostId === 4 || hostId === 5, bump: 4 }));
+  for (var k2 = 0; k2 < 16; k2++) { px(x + 3 + k2, 60 + k2, 12, 10, 8, 255); px(x + 3 + k2, 59 + k2, 200, 190, 170, 140); }
+  var t;
+  if (typeof document !== 'undefined') {
+    var cv = document.createElement('canvas'); cv.width = cv.height = M;
+    cv.getContext('2d').putImageData(new ImageData(data, M, M), 0, 0);
+    t = new THREE.CanvasTexture(cv);
+  } else t = new THREE.DataTexture(data, M, M);
+  t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; t.needsUpdate = true;
+  crackMat = new THREE.MeshStandardMaterial({ map: t, transparent: true, alphaTest: 0.3, depthWrite: false, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 });
+  return crackMat;
 }
 
 export function floorSet(name) {

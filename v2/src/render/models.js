@@ -3,6 +3,7 @@
 // pain, the white hit flash, and a death collapse.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { instance, findClip, CELL } from './assets.js';
 
 var geoCache = {};
 function geo(key, make) { return geoCache[key] || (geoCache[key] = make()); }
@@ -175,18 +176,72 @@ function barrel() {
 
 var MAKERS = { imp: imp, gnasher: gnasher, knight: knight, riley: riley, barrel: barrel };
 
-export function makeMob(e) {
-  var m = MAKERS[e.kind](), scale = e.kind === 'riley' ? e.h / 0.95 : 1;
+// An authored (glTF) demon or prop: clips follow the simulation's state.
+// Clip names: idle, walk, attack_windup, attack, pain, death.
+function authored(entry, e) {
+  var inst = instance(entry), root = new THREE.Group();
+  inst.obj.scale.setScalar(1 / CELL);
+  root.add(inst.obj);
+  var mats = [], tell = [], shield = inst.obj.getObjectByName('shield');
+  inst.obj.traverse(function (o) {
+    if (!o.isMesh) return;
+    (Array.isArray(o.material) ? o.material : [o.material]).forEach(function (m) {
+      // authored glow is capped so eyes and accents don't bloom into a glare
+      if (m.emissive && m.emissiveIntensity > 1.2) m.emissiveIntensity = 1.2;
+      if (/tell/i.test(m.name) || /tell/i.test(o.name)) tell.push(m); else if (m.emissive) mats.push(m);
+    });
+  });
+  var current = null, lastState = null;
+  function play(name, once) {
+    if (!inst.mixer) return;
+    var clip = findClip(inst.clips, name) || (name === 'attack_windup' ? findClip(inst.clips, 'attack') : null) || findClip(inst.clips, 'idle');
+    if (!clip) return;
+    var act = inst.mixer.clipAction(clip);
+    if (current === act) return;
+    act.reset();
+    act.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
+    act.clampWhenFinished = !!once;
+    act.play();
+    if (current) current.crossFadeTo(act, 0.15, false);
+    current = act;
+  }
+  var STATE_CLIP = { idle: 'idle', chase: 'walk', flee: 'walk', windup: 'attack_windup', pain: 'pain', die: 'death', dead: 'death' };
+  return {
+    obj: root, mats: mats,
+    animate: function (ent, t, dt) {
+      var st = ent.state || 'idle';
+      if (st !== lastState) {
+        if (lastState === 'windup' && st === 'chase' && findClip(inst.clips, 'attack')) play('attack', true);
+        else play(STATE_CLIP[st] || 'idle', st === 'pain' || st === 'die' || st === 'dead');
+        lastState = st;
+      }
+      if (current && current.getClip().name && /attack$/i.test(current.getClip().name) && !current.isRunning() && st === 'chase') play('walk');
+      if (inst.mixer) inst.mixer.update(dt || 0);
+      var tellOn = st === 'windup' && ent.attack !== 'melee';
+      tell.forEach(function (m) { if (m.emissive) { m.emissive.setHex(tellOn ? 0xffffff : 0x9ffcff); m.emissiveIntensity = tellOn ? 6 : 2; } });
+      if (shield) shield.visible = ent.shieldT > 0;
+    },
+    authored: true,
+    clip: function () { return current ? current.getClip().name : null; }
+  };
+}
+
+export function makeMob(e, assets) {
+  var entry = assets && assets.model(e.kind);
+  var m = entry ? authored(entry, e) : MAKERS[e.kind](), scale = !entry && e.kind === 'riley' ? e.h / 0.95 : 1;
   m.obj.scale.setScalar(scale);
   var dieT = 0;
   var base = m.animate;
+  m.debug = function () { return { kind: e.kind, authored: !!m.authored, clip: m.clip ? m.clip() : null, state: e.state }; };
   m.update = function (t, dt, towardPlayer) {
     m.obj.position.set(e.x, e.y, e.z);
     // face the way it moves, or you when it attacks or sees you
     var face = e.state === 'windup' || e.state === 'pain' || e.los ? towardPlayer : (e.moveAng || 0);
     var cur = m.obj.rotation.y, want = -face + Math.PI / 2, dd = Math.atan2(Math.sin(want - cur), Math.cos(want - cur));
     m.obj.rotation.y = cur + dd * Math.min(1, dt * 10);
-    if (e.state === 'die' || e.state === 'dead') {
+    if (m.authored) {
+      base(e, t, dt);
+    } else if (e.state === 'die' || e.state === 'dead') {
       dieT += dt;
       var k = Math.min(1, dieT / 0.45);
       m.obj.rotation.x = -k * 1.35;
@@ -208,11 +263,13 @@ export function makeMob(e) {
 
 // ---- pickups -----------------------------------------------------------------------------
 
-export function makePickup(e) {
+export function makePickup(e, assets) {
   var root = new THREE.Group(), inner = new THREE.Group();
   root.add(inner);
-  var it = e.item;
-  if (it === 'h' || it === '+') {
+  var it = e.item, entry = assets && assets.model('pickup:' + it);
+  if (entry) {
+    var pi = instance(entry); pi.obj.scale.setScalar(1 / CELL); inner.add(pi.obj);
+  } else if (it === 'h' || it === '+') {
     var big = it === '+';
     var box = part(geo('box', BOX), std(0xf0ece0, { roughness: 0.5 }), 0, 0.1, 0, inner); box.scale.set(big ? 0.34 : 0.2, big ? 0.2 : 0.14, big ? 0.24 : 0.14);
     var c1 = part(geo('box', BOX), glow(0xff2a1a, 2), 0, 0.1, 0, inner); c1.scale.set(big ? 0.22 : 0.13, big ? 0.06 : 0.04, big ? 0.245 : 0.145);
@@ -249,8 +306,13 @@ export function makePickup(e) {
   };
 }
 
-export function makeTorch(e) {
-  var root = new THREE.Group();
+export function makeTorch(e, assets) {
+  var root = new THREE.Group(), entry = assets && assets.model('torch');
+  if (entry) {
+    var ti = instance(entry); ti.obj.scale.setScalar(1 / CELL); root.add(ti.obj);
+    root.position.set(e.x, e.y, e.z);
+    return { obj: root, update: function (t) { if (ti.mixer) ti.mixer.update(1 / 60); } };
+  }
   var pole = part(geo('cyl', CYL), std(0x3a2a1a, { metalness: 0.3 }), 0, 0.4, 0, root); pole.scale.set(0.03, 0.8, 0.03);
   var bowl = part(geo('cyl', CYL), std(0x5a4a3a, { metalness: 0.6, roughness: 0.4 }), 0, 0.82, 0, root); bowl.scale.set(0.1, 0.06, 0.1);
   var flame = new THREE.Group(); flame.position.y = 0.9; root.add(flame);
@@ -276,6 +338,15 @@ var blued = function () { return std(0x1c1e24, { metalness: 0.85, roughness: 0.4
 var gunWood = function () { return std(0x6a3a1a, { roughness: 0.55, metalness: 0.05 }); };
 var gloveMat = function () { return std(0x2a211c, { roughness: 0.85 }); };
 var sleeveMat = function () { return std(0x3a4230, { roughness: 0.9 }); };
+
+// authored guns without arms get the built-in gloved hand at the grip
+export function addHand(gun, weapon) {
+  var has = false;
+  gun.traverse(function (o) { if (/hand|arm|glove/i.test(o.name)) has = true; });
+  if (has) return;
+  if (weapon === 'shotgun' || weapon === 'chaingun' || weapon === 'rocket') { hand(gun, 0.01, -0.07, 0.08, 0.4); hand(gun, -0.01, -0.05, -0.2, 0.1); }
+  else if (weapon !== 'fist') hand(gun, 0, -0.06, 0.02, 0.3);
+}
 
 function hand(parent, x, y, z, rx) {
   var h = new THREE.Group(); h.position.set(x, y, z); h.rotation.x = rx || 0; parent.add(h);

@@ -81,9 +81,14 @@ async function compare(page, pngA, pngB) {
   }, pngA, pngB);
 }
 
+// the 3D view only: the HUD canvas is hidden for the shot, so moving text
+// (radio lines, messages) can never count as the player moving
 async function viewShot(page) {
   var box = await (await page.$('#view')).boundingBox();
-  return page.screenshot({ encoding: 'base64', clip: box });
+  await page.evaluate(function () { document.getElementById('hud').style.visibility = 'hidden'; });
+  var png = await page.screenshot({ encoding: 'base64', clip: box });
+  await page.evaluate(function () { document.getElementById('hud').style.visibility = ''; });
+  return png;
 }
 
 // ---- 1. the player's path, no debug hooks ----------------------------------------
@@ -151,11 +156,13 @@ function at(level, x, z, y, ang, pitch, extra) {
 var OPEN_ALL = 'for (var k in G.doors) { G.doors[k].open = 1; G.doors[k].state = "open"; G.doors[k].timer = 9999; }';
 var SPOTS = [
   ['v2-01-title', null, 1500],
-  ['v2-02-start-room', at(0, 3.5, 17.5, 0, 0, 0)],
-  ['v2-03-stairs-up', at(0, 9.6, 17.5, 0, 0, 0.1, 'var d = G.doors["9,17"]; d.open = 1; d.state = "open"; d.timer = 999;')],
-  ['v2-04-shotgun-room', at(0, 15.6, 18.6, 1, -0.35, 0.05)],
-  ['v2-05-balcony-view', at(0, 21.5, 11.3, 1, -2.2, -0.35, 'var d = G.doors["20,12"]; d.open = 1; d.state = "open"; d.timer = 999;')],
-  ['v2-06-hall-floor', at(0, 5.5, 10.5, 0, -0.3, 0.12)],
+  // E1M1 coordinates: the level gained a 10-row sparring arena on top (f5fcfba)
+  ['v2-02-start-room', at(0, 3.5, 27.5, 0, 0, 0)],
+  ['v2-03-stairs-up', at(0, 9.6, 27.5, 0, 0, 0.1, 'var d = G.doors["9,27"]; d.open = 1; d.state = "open"; d.timer = 999;')],
+  ['v2-04-shotgun-room', at(0, 15.6, 28.6, 1, -0.35, 0.05)],
+  ['v2-05-balcony-view', at(0, 21.5, 21.3, 1, -2.2, -0.35, 'var d = G.doors["20,22"]; if (d) { d.open = 1; d.state = "open"; d.timer = 999; }')],
+  ['v2-06-hall-floor', at(0, 5.5, 20.5, 0, -0.3, 0.12)],
+  ['v2-07-sparring', at(0, 21.5, 8.5, 2, -Math.PI / 2, 0.05, OPEN_ALL)],
   ['v2-08-riley', at(3, 16.5, 7.5, 0, -Math.PI / 2, 0.05, OPEN_ALL), 1500]
 ];
 var visual = [];
@@ -190,8 +197,8 @@ visual.forEach(function (v) { console.log('  ' + v); });
 // frame budget in three scenes, vsync off
 await page.evaluate('window.FIREBIRD2.freeze(false)');
 var SCENES = [
-  ['start room', at(0, 3.5, 17.5, 0, 0, 0)],
-  ['fight in the hall', at(0, 18.5, 14.5, 1, -0.6, 0, 'p.weapons.shotgun = true; p.ammo.shells = 50; p.weapon = "shotgun"; F.setFire(true);')],
+  ['start room', at(0, 3.5, 27.5, 0, 0, 0)],
+  ['fight in the hall', at(0, 18.5, 24.5, 1, -0.6, 0, 'p.weapons.shotgun = true; p.ammo.shells = 50; p.weapon = "shotgun"; F.setFire(true);')],
   ['Riley arena', at(3, 16.5, 9.5, 0, -Math.PI / 2, 0.05, OPEN_ALL)]
 ];
 for (var j = 0; j < SCENES.length; j++) {

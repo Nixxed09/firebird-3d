@@ -76,6 +76,7 @@ export function createGame(opts) {
   var levelIndex = 0;
   var G = null;
   var interStats = null;
+  var radioSaid = {}; // level index -> { trigger index: true }, kept across retries
 
   function rnd() { return rng(); }
   function rndIn(a, b) { return a + rng() * (b - a); }
@@ -120,6 +121,7 @@ export function createGame(opts) {
     var L = LEVELS[idx];
     var W = buildWorld(L);
     var m = L.map;
+    buildingLevel = L;
     var old = gear || (keepGear && G ? snapshotGear(G.p) : null);
     var p = {
       x: 0, z: 0, y: 0, ang: L.playerAngle || 0, pitch: 0, vx: 0, vz: 0, vy: 0, onGround: true, crouch: false, eyeH: PLAYER.eye,
@@ -161,7 +163,7 @@ export function createGame(opts) {
     };
     ents.forEach(function (e) { if (e.kind === 'riley') G.boss = e; });
     mode = 'game';
-    message(L.name);
+    // the level card already names the level; the goal goes centre screen
     notice(currentObjective(), '#f0d848', 3.5);
     return G;
   }
@@ -646,12 +648,19 @@ export function createGame(opts) {
   function setupRiley(e) {
     var mem = RILEY.recall(storage);
     e.mem = mem; e.tune = RILEY.tuning(mem);
-    e.hp = e.maxHp = Math.round(MOBS.riley.hp * e.tune.hpScale);
+    var spar = G_L_boss();
+    e.sparring = !!(spar && spar.sparring);
+    e.allowed = spar && spar.moves ? spar.moves : null;
+    e.hp = e.maxHp = Math.round(MOBS.riley.hp * e.tune.hpScale * (spar && spar.hpScale || 1));
     e.profile = RILEY.newProfile();
     e.phase = 1;
     e.cools = { volley: 1, lead: 3, summon: 8, shield: 5, melee: 0 };
     e.move = null; e.moveT = 0; e.shieldT = 0; e.talkT = 0; e.flankSide = 1; e.attack = null; e.settled = false;
   }
+  // the level's boss settings (setupRiley runs while the level is being built)
+  var buildingLevel = null;
+  function G_L_boss() { return buildingLevel && buildingLevel.boss; }
+
   function rileyActive(e) { return !!e && e.state !== 'idle' && alive(e); }
   function rileySay(e, text, isInsight) {
     if (!text || (isInsight && e.talkT > 0)) return false;
@@ -661,7 +670,9 @@ export function createGame(opts) {
     return true;
   }
   function rileyIntro(e) {
-    var mem = e.mem;
+    var mem = e.mem, spar = G.L.boss;
+    // a first sparring match picks up from the radio; a rematch uses what she remembers
+    if (e.sparring && spar && spar.intro && !(mem.fights > 0)) { rileySay(e, spar.intro); return; }
     rileySay(e, RILEY.line('intro', e.profile, { memory: mem.fights > 0 ? mem : null }));
     if (mem.ease > 0) rileySay(e, RILEY.line('ease', e.profile));
     else if (e.tune.practised) rileySay(e, RILEY.line('studied', e.profile, { wins: mem.wins }));
@@ -690,7 +701,9 @@ export function createGame(opts) {
   }
   function rileyChoose(e, d, dx, dz) {
     var s = { los: e.los, dist: d, phase: e.phase, cool: e.cools, impsAlive: countSummoned(), playerWeapon: G.p.weapon };
-    var pick = RILEY.choose(RILEY.legalMoves(s), e.profile, s, rng);
+    var legal = RILEY.legalMoves(s);
+    if (e.allowed) { var only = legal.filter(function (mv) { return e.allowed.indexOf(mv) >= 0; }); if (only.length) legal = only; }
+    var pick = RILEY.choose(legal, e.profile, s, rng);
     e.move = pick.move;
     rileySay(e, RILEY.insight(e.profile, pick.why), true);
     var pr = e.profile;
@@ -766,10 +779,12 @@ export function createGame(opts) {
     if (e.hp <= 0) {
       sound('rileyDerez', e);
       rileySay(e, RILEY.line('defeated', e.profile));
+      if (e.sparring) message("RILEY: THAT WAS JUST PRACTICE. I'LL REMEMBER HOW YOU FIGHT.", '#6fe0ec', 6);
       rileySettle(e, true);
-      G.exitT = 5;
+      G.exitT = e.sparring ? 6.5 : 5;
       return;
     }
+    if (e.sparring) return; // sparring: no phase changes, no backup imps
     if (e.phase < 3 && e.hp < e.maxHp * 0.33) { e.phase = 3; rileySay(e, RILEY.line('phase3', e.profile)); }
     else if (e.phase < 2 && e.hp < e.maxHp * 0.66) { e.phase = 2; rileySay(e, RILEY.line('phase2', e.profile)); rileySummon(e); }
   }
@@ -825,6 +840,8 @@ export function createGame(opts) {
     }
     var ex = G.exitCell;
     if (!info.boss && ex && G.seen[ex.z * G.mw + ex.x]) return { x: ex.x + 0.5, y: 0.8, z: ex.z + 0.5 };
+    var b = G.boss;
+    if (info.boss && b && alive(b) && G.seen[Math.floor(b.z) * G.mw + Math.floor(b.x)]) return { x: b.x, y: b.y + b.h + 0.3, z: b.z };
     return null;
   }
 
@@ -973,6 +990,15 @@ export function createGame(opts) {
       if (e2.kind !== 'pickup' || e2.gone) continue;
       if (d2(e2.x, e2.z, p.x, p.z) < 0.45 && Math.abs(e2.y - p.y) < 0.6) { if (!e2.touching) tryPickup(e2); }
       else e2.touching = false;
+    }
+    // Riley on the radio: level triggers
+    var trig = G.L.triggers || [], said = radioSaid[levelIndex] || (radioSaid[levelIndex] = {});
+    for (var ti = 0; ti < trig.length; ti++) {
+      var b = trig[ti].box;
+      if (said[ti] || p.x < b[0] || p.x > b[2] + 1 || p.z < b[1] || p.z > b[3] + 1) continue;
+      said[ti] = true;
+      message('RILEY: ' + trig[ti].say, '#6fe0ec', Math.max(4.5, trig[ti].say.length / 14));
+      sound('rileyTalk');
     }
     // secret floors
     var pcx = Math.floor(p.x), pcz = Math.floor(p.z);
