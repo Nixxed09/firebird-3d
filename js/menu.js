@@ -258,3 +258,5 @@ var MENU = (function () {
     depth: function () { return stack.length; }
   };
 })();
+
+if (typeof module !== 'undefined') module.exports = { SETTINGS: SETTINGS, MENU: MENU };

@@ -53,7 +53,8 @@ export function buildWorld(L) {
     });
     var di = d.z * mw + d.x;
     W.floor[di] = lo === Infinity ? 0 : lo;
-    W.ceil[di] = Math.min(ce || baseCeil, W.floor[di] + 1.5);
+    // a door gets a lintel; a secret wall stays full height so its shape can't give it away
+    W.ceil[di] = d.secret ? (ce || baseCeil) : Math.min(ce || baseCeil, W.floor[di] + 1.5);
   }
   // a lift rests at its lowest neighbour and rises to its own height
   W.lifts.forEach(function (lf) {

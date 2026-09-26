@@ -1193,3 +1193,5 @@ var ART = (function () {
 
   return A;
 })();
+
+if (typeof module !== 'undefined') module.exports = ART;

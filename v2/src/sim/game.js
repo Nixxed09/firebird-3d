@@ -776,7 +776,22 @@ export function createGame(opts) {
 
   // ---- goals and first sightings ------------------------------------------------
 
+  // mark the cells you can see (and the walls around them) for the automap and goal marker
+  function markSeen() {
+    var p = G.p, ey = eyeY(), R = 12, W = G.W, px = Math.floor(p.x), pz = Math.floor(p.z);
+    for (var z = Math.max(0, pz - R); z <= Math.min(G.mh - 1, pz + R); z++) {
+      for (var x = Math.max(0, px - R); x <= Math.min(G.mw - 1, px + R); x++) {
+        var i = z * G.mw + x;
+        if (G.seen[i] || solidCell(W, x, z)) continue;
+        if (!hasLOS(W, p.x, ey, p.z, x + 0.5, floorAt(W, x, z) + 0.4, z + 0.5)) continue;
+        G.seen[i] = 1;
+        nbrs(W, x, z).forEach(function (n) { if (W.cells[n.i] !== 0) G.seen[n.i] = 1; });
+      }
+    }
+  }
+
   function spotThings() {
+    markSeen();
     var p = G.p, ey = eyeY();
     function close(e, r) { return d2(e.x, e.z, p.x, p.z) < r * r && hasLOS(G.W, p.x, ey, p.z, e.x, (e.y || 0) + (e.h || 0.3) * 0.6, e.z); }
     for (var i = 0; i < G.ents.length; i++) {

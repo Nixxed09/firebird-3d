@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIREBIRD 3D — NIX GAMES</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: #000; overflow: hidden; }
+    #view, #hud { position: absolute; display: block; }
+    #hud { image-rendering: pixelated; image-rendering: crisp-edges; cursor: pointer; }
+    #errbox { display: none; position: fixed; left: 0; right: 0; bottom: 0; padding: 8px 12px; background: #400; color: #fff; font: 14px/1.4 monospace; z-index: 10; }
+  </style>
+</head>
+<body>
+  <canvas id="view"></canvas>
+  <canvas id="hud"></canvas>
+  <div id="errbox"></div>
+  <script>
+    window.onerror = function (msg, src, line) {
+      var box = document.getElementById('errbox');
+      box.style.display = 'block';
+      box.textContent = 'GAME ERROR: ' + msg + ' (' + (src || '').split('/').pop() + ':' + line + ')';
+      return false;
+    };
+  </script>
+  <script src="dist/firebird.js"></script>
+</body>
+</html>
