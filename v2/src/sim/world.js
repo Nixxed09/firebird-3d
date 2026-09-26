@@ -2,7 +2,8 @@
 // ceiling height. Units are cells (1 cell = 2 m); y is up.
 // Pure logic: no DOM, no three.js.
 
-export var WALL_IDS = { '#': 1, '%': 2, 'M': 3, 'T': 4, 'H': 5, 'D': 6, 'R': 7, 'U': 8, 'X': 9, 'S': 11 };
+export var WALL_IDS = { '#': 1, '%': 2, 'M': 3, 'T': 4, 'H': 5, 'D': 6, 'R': 7, 'U': 8, 'X': 9, 'S': 11, '=': 12 };
+// 12 = a wall switch that fires a level event (13 once pressed); 9/10 stay the exit switch
 export var DOOR_IDS = { 6: true, 7: true, 8: true, 11: true };
 export var FLOOR_STEP = 0.25;     // one height digit
 export var DEFAULT_CEIL = 2;      // 4 m rooms
@@ -23,7 +24,9 @@ export function buildWorld(L) {
     cells: new Uint8Array(mw * mh),
     floor: new Float32Array(mw * mh),
     ceil: new Float32Array(mw * mh),
-    doors: {}, lifts: []
+    doors: {}, lifts: [],
+    lava: new Uint8Array(mw * mh), // 1 = molten: hurts while you stand in it
+    movers: []                     // floors that events raise or lower
   };
   var baseCeil = L.ceilHeight || DEFAULT_CEIL;
   for (var z = 0; z < mh; z++) {
@@ -42,6 +45,7 @@ export function buildWorld(L) {
           secret: id === 11, found: false, used: false
         };
       }
+      if (ch === '~') W.lava[i] = 1;
       if (ch === 'L') W.lifts.push({ x: x, z: z, top: W.floor[i], bottom: 0, pos: 0, state: 'down', wait: 0 });
     }
   }
@@ -203,6 +207,25 @@ export function flood(W, ox, oz, maxSteps, pass, out) {
       floodQ[tail++] = nc;
     }
   }
+}
+
+// Movers: floor cells an event raises or lowers to a height, at a speed (cells/s).
+export function addMover(W, cells, to, speed) {
+  var mv = { cells: cells, from: W.floor[cells[0]], to: to, pos: W.floor[cells[0]], speed: speed || 0.8, moved: 0, done: false };
+  W.movers.push(mv);
+  return mv;
+}
+export function updateMovers(W, dt) {
+  W.movers.forEach(function (mv) {
+    var prev = mv.pos;
+    if (!mv.done) {
+      var dir = mv.to > mv.pos ? 1 : -1;
+      mv.pos += dir * mv.speed * dt;
+      if ((dir > 0 && mv.pos >= mv.to) || (dir < 0 && mv.pos <= mv.to)) { mv.pos = mv.to; mv.done = true; }
+      mv.cells.forEach(function (i) { W.floor[i] = mv.pos; if (W.ceil[i] < mv.pos + 1) W.ceil[i] = mv.pos + 1; });
+    }
+    mv.moved = mv.pos - prev;
+  });
 }
 
 // Lifts: rest at the bottom, rise when stood on (or used), come back down when left alone.

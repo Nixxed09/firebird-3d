@@ -21,7 +21,8 @@ ctx.imageSmoothingEnabled = false;
 
 var DEBUG = /debug/.test(location.search);
 var game = createGame({
-  levels: LEVELS, rng: makeRng((Date.now() & 0xffffffff) >>> 0),
+  // ?debug runs are seeded so screenshots and bot runs reproduce exactly; play is random
+  levels: LEVELS, rng: makeRng(DEBUG ? (+((/seed=(\d+)/.exec(location.search) || [])[1]) || 1) : (Date.now() & 0xffffffff) >>> 0),
   storage: (function () { try { return window.localStorage; } catch (e) { return null; } })(),
   settings: v, saveSettings: function () { SETTINGS.save(); },
   onProgress: function (i, st) { SETTINGS.unlock(Math.min(i + 1, LEVELS.length - 1)); lastRecord = SETTINGS.record ? SETTINGS.record(i, st) : null; }

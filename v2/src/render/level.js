@@ -84,16 +84,33 @@ export function buildLevel(G, assets) {
   var W = G.W, L = G.L, batch = new Batch(), group = new THREE.Group();
   var trim = 'wall' + mainWall(W);
   var lifts = {}; W.lifts.forEach(function (lf) { lifts[lf.x + ',' + lf.z] = lf; });
+  // floors that events will raise or lower: drawn as moving blocks
+  var moverBoxes = [], moverCell = {};
+  (L.events || []).forEach(function (ev) {
+    (ev.do || []).forEach(function collect(a) {
+      if (a.after) (a.do || []).forEach(collect);
+      var b = a.raise || a.lower;
+      if (!b) return;
+      var lo = Math.min(W.floor[b[1] * W.mw + b[0]], a.to);
+      moverBoxes.push({ box: b, lo: lo });
+      for (var z = b[1]; z <= b[3]; z++) for (var x = b[0]; x <= b[2]; x++) moverCell[x + ',' + z] = lo;
+    });
+  });
   var switches = [];
 
   function open(x, z) { var c = cellAt(W, x, z); return c === 0 || !!DOOR_IDS[c]; }
-  function base(x, z) { var lf = lifts[x + ',' + z]; return lf ? lf.bottom : floorAt(W, x, z); }
+  function base(x, z) {
+    var lf = lifts[x + ',' + z];
+    if (lf) return lf.bottom;
+    if (moverCell[x + ',' + z] !== undefined) return moverCell[x + ',' + z];
+    return floorAt(W, x, z);
+  }
 
   for (var z = 0; z < W.mh; z++) {
     for (var x = 0; x < W.mw; x++) {
       if (!open(x, z)) continue;
       var f = base(x, z), c = ceilAt(W, x, z);
-      if (!lifts[x + ',' + z]) {
+      if (!lifts[x + ',' + z] && moverCell[x + ',' + z] === undefined) {
         batch.quad('floor', [x, f, z], [x, f, z + 1], [x + 1, f, z + 1], [x + 1, f, z], [0, 1, 0],
           [[x, z], [x, z + 1], [x + 1, z + 1], [x + 1, z]]);
       }
@@ -102,7 +119,7 @@ export function buildLevel(G, assets) {
       for (var d in DIRS) {
         var nx = x + DIRS[d][0], nz = z + DIRS[d][1], nc = cellAt(W, nx, nz);
         if (!open(nx, nz)) {
-          if (nc === 9) { var sw = { x: nx, z: nz, faces: new Batch(), dir: d }; wallFace(sw.faces, 'sw', x, z, d, f, c); switches.push(sw); }
+          if (nc === 9 || nc === 12) { var sw = { x: nx, z: nz, faces: new Batch(), dir: d, exit: nc === 9 }; wallFace(sw.faces, 'sw', x, z, d, f, c); switches.push(sw); }
           else wallFace(batch, 'wall' + (nc >= 1 && nc <= 5 ? nc : 1), x, z, d, f, c);
           if (!DOOR_IDS[cellAt(W, x, z)]) {
             strip(batch, 'trim', x, z, d, f, 0.09, 0.035);          // baseboard
@@ -144,6 +161,32 @@ export function buildLevel(G, assets) {
   switches.forEach(function (sw) {
     sw.faces.meshes(function () { return switchOff; }).forEach(function (m) { sw.mesh = m; group.add(m); });
   });
+
+  // moving floors: one block per event box, its top at the current floor height
+  var floorMat = mat('floor'), trimMat = mat('trim');
+  var movers = moverBoxes.map(function (mb) {
+    var b = mb.box, w = b[2] - b[0] + 1, d = b[3] - b[1] + 1, depth = 3;
+    var geo = new THREE.BoxGeometry(w, depth, d);
+    setBoxUV(geo, w, depth);
+    var mesh = new THREE.Mesh(geo, [trimMat, trimMat, floorMat, trimMat, trimMat, trimMat]);
+    mesh.userData = { i: b[1] * W.mw + b[0], depth: depth, cx: b[0] + w / 2, cz: b[1] + d / 2 };
+    group.add(mesh);
+    return mesh;
+  });
+
+  // lava: a glowing, flowing surface on every molten cell, gone when drained
+  var lavaTex = (assets && assets.texture('tex:hell')) || floorSet('hell');
+  var lavaMat = new THREE.MeshStandardMaterial({ color: 0xff7a20, emissive: 0xff5a10, emissiveIntensity: 2.4, roughness: 0.4, map: lavaTex.map, emissiveMap: lavaTex.map });
+  var lavaCells = [];
+  for (var lz = 0; lz < W.mh; lz++) for (var lx = 0; lx < W.mw; lx++) {
+    var li = lz * W.mw + lx;
+    if (!W.lava[li]) continue;
+    var q = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), lavaMat);
+    q.rotation.x = -Math.PI / 2;
+    q.position.set(lx + 0.5, W.floor[li] + 0.04, lz + 0.5);
+    q.userData.i = li;
+    group.add(q); lavaCells.push(q);
+  }
 
   // doors rise into the ceiling; secret walls are full blocks that rise
   var doors = [];
@@ -191,7 +234,12 @@ export function buildLevel(G, assets) {
         m.visible = d.open < 0.99;
       });
       liftMeshes.forEach(function (m) { var lf = m.userData.lift; m.position.set(lf.x + 0.5, lf.pos - m.userData.h / 2, lf.z + 0.5); });
-      switches.forEach(function (sw) { if (sw.mesh) sw.mesh.material = W.cells[sw.z * W.mw + sw.x] === 10 ? switchOn : switchOff; });
+      switches.forEach(function (sw) { if (sw.mesh) { var v = W.cells[sw.z * W.mw + sw.x]; sw.mesh.material = v === 10 || v === 13 ? switchOn : switchOff; } });
+      movers.forEach(function (m) { m.position.set(m.userData.cx, W.floor[m.userData.i] - m.userData.depth / 2, m.userData.cz); });
+      var t = performance.now() / 1000;
+      lavaMat.map.offset.set(t * 0.02, t * 0.013);
+      lavaMat.emissiveIntensity = 2.2 + Math.sin(t * 2.3) * 0.3;
+      lavaCells.forEach(function (q) { q.visible = !!W.lava[q.userData.i]; q.position.y = W.floor[q.userData.i] + 0.04; });
     }
   };
 }

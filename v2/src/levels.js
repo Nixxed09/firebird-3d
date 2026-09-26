@@ -2,6 +2,7 @@
 // heights: one digit per cell, floor at digit x 0.25 cells (0.5 m); 0-9 then a-z.
 // 'L' in a map is a lift: it rests at its lowest neighbour and rises to its own height.
 import CLASSIC from '../../js/levels.js';
+import { E1M2 } from './levels/e1m2.js';
 
 var E1M1 = {
   name: 'E1M1: ASH GATES', floor: 'slab', ceil: 'ceilDark', par: 240, playerAngle: 0, ceilHeight: 2.5,
@@ -126,6 +127,8 @@ var E1M1 = {
 };
 
 // the rest keep their classic flat layouts until they get their height pass
-export var LEVELS = [E1M1].concat(CLASSIC.slice(1).map(function (L) {
+// E1M2 is the first level built to the full contract (sections 3 and 3b); the
+// rest keep their classic flat layouts until they get the same treatment
+export var LEVELS = [E1M1, E1M2].concat(CLASSIC.slice(2).map(function (L) {
   return Object.assign({ ceilHeight: 2 }, L);
 }));

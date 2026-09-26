@@ -56,9 +56,56 @@ opens with "BACK AGAIN! LAST TIME YOU..." about how you fought her here.
 **Data:** `boss` and `triggers` in `src/levels.js`. Radio lines fire once
 per level per session, so retrying after a death doesn't repeat them.
 
+## E1M2: The Furnace (v2, the first level built to the full contract)
+
+```
+THE IDEA:     control the furnace: drain the lava to open the way
+FANTASY:      breaking into a demon forge and turning its machine against it
+ROLE IN ARC:  ramp; the first level with a hub, branches and loops
+TEACHES:      lava (hurts, demons avoid it), switches that change the level,
+              sealed-arena waves
+TESTS:        jumping (switch ledge), stairs, keys and doors, barrels, lifts of E1M1
+PLAYER GOAL:  find the red keycard -> find the exit switch
+WEENIE:       the glowing furnace tower in the lava pit, seen from the first step
+              and from most of the hub (S2)
+ARRIVAL:      a high gantry over the hub (S3, overlook), with two staircases and
+              a drop: three ways down (M1)
+HUB:          the foundry floor circles the lava pit: left or right around it
+              (C1 loop, M1 lanes), four tech pillars for cover (M2, M6)
+WINGS:        west = the coal bunkers (stone, dark, one flickering lamp, imps you
+              hear before you see; the drain switch up on a ledge)
+              east = the cooling tanks (metal, blue light, gnashers; a railed
+              stair up to the tank tops with the red key and armour, an overlook)
+              each wing has two doors into the hub: a loop through it (S5, M3)
+SET PIECE:    pull the drain switch -> the screen shakes, the pit drains and rises
+              into floor: a new middle lane straight to the red door (T3, S5 shortcut)
+OPEN LOOPS:   the lava pit and the red door, both visible from the arrival (P4)
+FINALE:       the forge (hellrock): step in -> doors seal, "IT'S A TRAP!", then
+              wave 1 (2 imps + gnasher), then wave 2 (2 gnashers + 2 imps). Side
+              platforms for high ground, pillars to circle, a lava channel to
+              jump, ammo and health inside (C1-C5). Cleared -> door reopens and
+              the plinth in front of the exit sinks.
+SECRET:       a cracked stone wall at the bunkers' south end: Phoenix Orb and shells
+INTENSITY:    2 3 2 3 2 4 5 3 8 9 2 (arrival, hub, bunkers, switch, tanks, forge)
+THREE MOMENTS: the reveal (the furnace from the gantry), the set piece (the drain),
+              the smile (Riley: "THAT WAS AWESOME")
+BUILT BY:     tools/build_e1m2.py (edit that, then check with node tools/lab.mjs 1)
+```
+
+**Lab (node tools/lab.mjs 1):** passes every hard rule. Loops 2, lanes 2, the
+goal is in view by 46% of the route, 4 overlooks, 0 jump-scares, 5 districts, 8
+floor levels, 13 blocks to circle. Soft miss: range mix 0.55 (want 0.6).
+
+**Caught by testing:**
+- The lab found the red-key platform unreachable (its stair met it diagonally).
+- The bots found the stair's ceiling too low to climb.
+- Bots also tried to jump onto the stair from its side, so it now has a rail: you
+  climb it from the bottom (S6).
+
 ## Status
 
 | Level | Built with height | Bot-played | Human-played |
 |---|---|---|---|
 | E1M1 Ash Gates (with Riley's sparring arena) | yes | needs a rerun after this change | the user played the earlier v2 E1M1 ("much better") |
-| E1M2–E1M4 | not yet (classic flat layouts) | yes | no |
+| E1M2 The Furnace | yes, rebuilt to the full contract | yes (first-timer bot clears it; intensity peaks at the forge) | no |
+| E1M3–E1M4 | not yet (classic flat layouts) | yes | no |

@@ -191,3 +191,64 @@ test('the E1M4 rematch opens by recalling how you fought her in E1M1', function 
   assert.ok(intro.indexOf('BACK AGAIN') >= 0, 'she knows you: ' + intro);
   if (mem.lastStyle) assert.ok(intro.indexOf(mem.lastStyle) >= 0, 'and says how you fought last time: ' + intro);
 });
+
+// ---- E1M2: switches, lava, a sealed arena with waves ----------------------------
+
+test('E1M2 plays out: drain the pit, take the key, survive the forge waves, exit', function () {
+  var g = game(4); g.startLevel(1, false); var G = clear(g), p = G.p, W = G.W;
+  var pit = 17 * W.mw + 15;
+  assert.ok(W.lava[pit] === 1 && W.floor[pit] === 0, 'the pit starts as lava');
+  // the drain switch on the west wing ledge
+  p.x = 3.5; p.z = 8.5; p.y = floorAt0(W, 3, 8); p.ang = -Math.PI / 2;
+  assert.strictEqual(g.usePrompt().verb, 'PULL THE SWITCH');
+  g.useAction();
+  assert.ok(W.lava[pit] === 0, 'lava off');
+  run(g, 3);
+  assert.ok(Math.abs(W.floor[pit] - 0.5) < 1e-6, 'the pit rose into floor (' + W.floor[pit] + ')');
+  assert.ok(G.msgs.some(function (m) { return /SHORTCUT/.test(m.text); }), 'Riley calls out the shortcut');
+  // the red key, then through the red door into the forge
+  p.keys.red = true;
+  var d = G.doors['17,11']; d.open = 1; d.state = 'open'; d.timer = 99;
+  p.x = 17.5; p.z = 7.5; p.y = 0.5; p.hp = 9999;
+  run(g, 0.2);
+  assert.ok(d.sealed, 'the forge seals behind you');
+  var before = G.ents.filter(function (e) { return e.wave; }).length;
+  assert.strictEqual(before, 0, 'a warning beat before any demon appears (P6)');
+  run(g, 2.2, function () { p.hp = 9999; });
+  var wave1 = G.ents.filter(function (e) { return e.wave === 'forge1'; });
+  assert.strictEqual(wave1.length, 3, 'wave one arrives after the warning');
+  wave1.forEach(function (e) { e.hp = 1; g.state().ents; });
+  wave1.forEach(function (e) { e.state = 'die'; e.st = -1; });
+  run(g, 2, function () { p.hp = 9999; });
+  var wave2 = G.ents.filter(function (e) { return e.wave === 'forge2'; });
+  assert.strictEqual(wave2.length, 4, 'then wave two');
+  wave2.forEach(function (e) { e.state = 'die'; e.st = -1; });
+  run(g, 3, function () { p.hp = 9999; });
+  assert.ok(!d.sealed, 'the door reopens when the forge is cleared');
+  var plinth = 2 * W.mw + 17;
+  assert.ok(Math.abs(W.floor[plinth] - 0.5) < 1e-6, 'the plinth sank (' + W.floor[plinth] + ')');
+  p.x = 17.5; p.z = 2.6; p.y = 0.5; p.ang = -Math.PI / 2;
+  assert.strictEqual(g.usePrompt().verb, 'EXIT LEVEL');
+  g.useAction(); run(g, 1.2);
+  assert.strictEqual(g.mode(), 'inter');
+});
+
+test('lava burns the player, and demons path around it', function () {
+  var g = game(); g.startLevel(1, false); var G = clear(g), p = G.p;
+  p.x = 15.5; p.z = 15.5; p.y = 0; p.onGround = true;
+  run(g, 1.1);
+  assert.ok(p.hp < 100 && G.killer === 'lava', 'standing in lava hurts (hp ' + p.hp + ')');
+  var flowAtLava = G.flow[18 * G.mw + 20]; // a lava cell away from the player (the route map starts where you stand)
+  assert.strictEqual(flowAtLava, -1, 'no demon route runs through the lava');
+});
+
+function floorAt0(W, x, z) { return W.floor[z * W.mw + x]; }
+
+test('a demon that walks off a ledge lands clear of it and keeps moving', function () {
+  var g = game(); g.startLevel(1, false); var G = clear(g), p = G.p;
+  p.x = 17.5; p.z = 7.5; p.y = 0.5; p.hp = 99999;
+  var gn = { kind: 'gnasher', mob: true, x: 10.5, z: 9.5, y: 1.5, hp: 9999, radius: 0.42, speed: 2.9, h: 0.7, state: 'chase', st: 0, animT: 0, cool: 99, moveAng: 0, retarget: 0, losT: 0, los: false, target: null, lostT: 0, strafeSide: 1, flashT: 0 };
+  G.ents.push(gn);
+  run(g, 8, function () { p.hp = 99999; gn.cool = 99; });
+  assert.ok(Math.hypot(gn.x - p.x, gn.z - p.z) < 2, 'the gnasher came down off the platform and reached you (at ' + gn.x.toFixed(2) + ',' + gn.z.toFixed(2) + ' y ' + gn.y + ')');
+});

@@ -28,6 +28,9 @@ function walkGraph(L, W) {
   function heights(x, z) { var lf = liftAt[x + ',' + z]; return lf ? [lf.bottom, lf.top] : [floorAt(W, x, z)]; }
   function edge(ax, az, bx, bz, keys) {
     if (!open(bx, bz, keys)) return null;
+    if (W.lava[bz * W.mw + bx]) return null; // nobody plans a route through lava
+    var headroom = ceilAt(W, bx, bz) - Math.max(floorAt(W, bx, bz), floorAt(W, ax, az));
+    if (headroom < 0.95) return null;       // too low to stand up in (player 0.9 cells tall)
     var best = null;
     heights(ax, az).forEach(function (fa) {
       heights(bx, bz).forEach(function (fb) {
@@ -62,8 +65,22 @@ function bfs(W, g, start, keys, oneWayOk) {
 
 // ---- measurements --------------------------------------------------------------------
 
-export function analyse(L, index) {
-  var W = buildWorld(L), g = walkGraph(L, W), m = L.map;
+// the world after every event has played out: movers at their targets, lava toggled
+function settle(L, W) {
+  (L.events || []).forEach(function (ev) {
+    (ev.do || []).concat.apply([], (ev.do || []).map(function (a) { return a.after ? a.do || [] : []; })).concat(ev.do || []).forEach(function (a) {
+      var box = a.raise || a.lower;
+      if (box) for (var z = box[1]; z <= box[3]; z++) for (var x = box[0]; x <= box[2]; x++) W.floor[z * W.mw + x] = a.to;
+      if (a.lava) for (var z2 = a.lava[1]; z2 <= a.lava[3]; z2++) for (var x2 = a.lava[0]; x2 <= a.lava[2]; x2++) W.lava[z2 * W.mw + x2] = a.on ? 1 : 0;
+    });
+  });
+}
+
+export function analyse(L, index, opts) {
+  opts = opts || {};
+  var W = buildWorld(L), m = L.map;
+  if (opts.settled !== false) settle(L, W);
+  var g = walkGraph(L, W);
   var N = W.mw * W.mh, keysAll = { red: true, blue: true, secret: false };
   var find = function (chars) { var out = []; for (var z = 0; z < W.mh; z++) for (var x = 0; x < W.mw; x++) if (chars.indexOf(m[z][x]) >= 0) out.push({ x: x, z: z, ch: m[z][x], i: z * W.mw + x }); return out; };
   var start = find('p')[0], boss = find('Y')[0], exit = find('X')[0], goal = boss || exit;
@@ -163,7 +180,9 @@ export function analyse(L, index) {
       var pth = routeAvoiding(W, g, start.i, goal.i, keysAll, used);
       if (!pth) break;
       lanes++;
-      pth.slice(3, -3).forEach(function (c) { used[c] = 1; }); // routes may share the first and last steps
+      // routes may share the first and last steps and any doorway (doors are deliberate gates;
+      // lanes are about the ground between them)
+      pth.slice(3, -3).forEach(function (c) { if (!nearDoor(W, c)) used[c] = 1; });
     }
   }
   // range mix: for each walkable cell, the longest straight view (close < 4 cells, mid 4-10, long > 10)
@@ -188,6 +207,11 @@ export function analyse(L, index) {
   };
 }
 
+function nearDoor(W, c) {
+  var x = c % W.mw, z = (c / W.mw) | 0;
+  for (var dz = -1; dz <= 1; dz++) for (var dx = -1; dx <= 1; dx++) if (DOOR_IDS[cellAt(W, x + dx, z + dz)]) return true;
+  return false;
+}
 function clusters(W, cells) {
   var set = {}, seen = {}, n = 0;
   cells.forEach(function (c) { set[c] = 1; });
@@ -297,18 +321,26 @@ function roomLoops(W, g, reach, keys) {
     rooms++;
   }
   // each gap cell joins the rooms it touches
-  var links = {};
+  // each connected run of gap cells (a doorway or a corridor) is one link between the rooms it touches
+  var links = [], gapSeen = {};
   for (var c2 = 0; c2 < N; c2++) {
-    if (reach.dist[c2] < 0 || !isGap(c2)) continue;
-    var x = c2 % W.mw, z = (c2 / W.mw) | 0, touch = {};
-    DIRS.forEach(function (o) { var n = (z + o[1]) * W.mw + x + o[0]; if (room[n] >= 0) touch[room[n]] = 1; });
+    if (reach.dist[c2] < 0 || !isGap(c2) || gapSeen[c2]) continue;
+    var run = [c2], q2 = [c2], touch = {}; gapSeen[c2] = 1;
+    while (q2.length) {
+      var k2 = q2.pop(), kx = k2 % W.mw, kz = (k2 / W.mw) | 0;
+      DIRS.forEach(function (o) {
+        var n = (kz + o[1]) * W.mw + kx + o[0];
+        if (room[n] >= 0) touch[room[n]] = 1;
+        else if (reach.dist[n] >= 0 && isGap(n) && !gapSeen[n]) { gapSeen[n] = 1; q2.push(n); run.push(n); }
+      });
+    }
     var t = Object.keys(touch).map(Number).sort(function (a, b) { return a - b; });
-    for (var a = 0; a < t.length; a++) for (var b = a + 1; b < t.length; b++) links[t[a] + '-' + t[b]] = 1;
+    for (var a = 0; a < t.length; a++) for (var b = a + 1; b < t.length; b++) links.push(t[a] + '-' + t[b]);
   }
-  var E = Object.keys(links).length, parent = [];
+  var E = links.length, parent = [];
   for (var r = 0; r < rooms; r++) parent[r] = r;
   function root(v) { while (parent[v] !== v) v = parent[v] = parent[parent[v]]; return v; }
-  Object.keys(links).forEach(function (l) { var p = l.split('-').map(Number); parent[root(p[0])] = root(p[1]); });
+  links.forEach(function (l) { var p = l.split('-').map(Number); parent[root(p[0])] = root(p[1]); });
   var comps = {}; for (var r2 = 0; r2 < rooms; r2++) comps[root(r2)] = 1;
   return Math.max(0, E - rooms + Object.keys(comps).length); // independent cycles in the room graph
 }

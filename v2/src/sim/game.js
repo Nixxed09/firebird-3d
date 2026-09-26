@@ -4,7 +4,8 @@
 import RILEY from '../../../js/riley.js';
 import {
   buildWorld, DOOR_IDS, cellAt, doorAt, solidCell, floorAt, ceilAt, probe, slideMove,
-  groundUnder, castRay, hasLOS, flood, updateLifts, nbrs, STEP_UP, JUMP_UP
+  groundUnder, castRay, hasLOS, flood, updateLifts, nbrs, STEP_UP, JUMP_UP,
+  addMover, updateMovers
 } from './world.js';
 
 export var PLAYER = { r: 0.28, h: 0.9, hCrouch: 0.55, eye: 0.8, eyeCrouch: 0.45, walk: 3.2, run: 5.0, jumpV: 3.9, gravity: 14 };
@@ -57,6 +58,7 @@ var TIPS = {
   torches: 'TIP: A PAIR OF TORCHES BESIDE A DOOR MEANS IT MATTERS. FOLLOW THEM.',
   lift: 'TIP: STAND ON A GLOWING PLATFORM TO RIDE IT UP.',
   barrel: 'TIP: A DEMON IS NEXT TO A BARREL. SHOOT THE BARREL!',
+  lava: 'TIP: LAVA BURNS! GET OUT, OR FIND A WAY TO DRAIN IT.',
   meet_imp: 'TIP: IMPS THROW FIREBALLS. STRAFE WITH A AND D TO DODGE.',
   meet_gnasher: 'TIP: GNASHERS CHARGE AND BITE. BACK AWAY WHILE YOU SHOOT.',
   meet_knight: 'TIP: THE EMBER KNIGHT IS TOUGH. KEEP YOUR DISTANCE AND USE SHELLS.'
@@ -159,10 +161,12 @@ export function createGame(opts) {
       shotId: 0, firing: false, input: { strafe: 0, moving: false, vx: 0, vz: 0 },
       startGear: old, info: levelInfo(L), exitCell: exitCell,
       hurtDirs: [], hitT: 0, killT: 0, blockT: 0, shake: 0, hitstop: 0, killer: null,
-      tipQueue: [], tipT: 3, usedMap: false, ranT: 0, jumped: false, spotT: 0, started: true
+      tipQueue: [], tipT: 3, usedMap: false, ranT: 0, jumped: false, spotT: 0, started: true,
+      fired: {}, waves: {}, lightsOff: {}, lavaT: 0, timers: []
     };
     ents.forEach(function (e) { if (e.kind === 'riley') G.boss = e; });
     mode = 'game';
+    fireEvents('start');
     // the level card already names the level; the goal goes centre screen
     notice(currentObjective(), '#f0d848', 3.5);
     return G;
@@ -426,8 +430,10 @@ export function createGame(opts) {
       if (c !== 0) {
         if (!DOOR_IDS[c]) return false;
         var d = doorAt(W, x, z);
+        if (d.sealed) return false;
         if (!(d.open >= 0.9 || (!d.locked && !d.secret))) return false;
       }
+      if (W.lava[z * W.mw + x]) return false; // demons don't wade through lava
       return W.floor[to] - W.floor[z * W.mw + x] <= STEP_UP + 1e-4;
     }, G.flow);
   }
@@ -514,6 +520,7 @@ export function createGame(opts) {
         return { kind: 'door', door: d };
       }
       if (id === 9) return { kind: 'switch', x: cx, z: cz };
+      if (id === 12) return { kind: 'lever', x: cx, z: cz };
       return null;
     }
     return null;
@@ -523,6 +530,7 @@ export function createGame(opts) {
     var u = useTarget();
     if (!u) return null;
     if (u.kind === 'switch') return { verb: 'EXIT LEVEL', color: '#58e068' };
+    if (u.kind === 'lever') return { verb: 'PULL THE SWITCH', color: '#ffd23e' };
     var d = u.door;
     if (d.secret && !d.found) return null;
     if (d.locked && !G.p.keys[d.locked]) return { need: d.locked, text: d.locked.toUpperCase() + ' KEYCARD NEEDED', color: d.locked === 'red' ? '#ff5a3a' : '#6a98ff' };
@@ -535,8 +543,13 @@ export function createGame(opts) {
     var p = G.p;
     if (u.kind === 'door') {
       var d = u.door;
-      if (d.locked && !p.keys[d.locked]) { sound('locked'); message('YOU NEED THE ' + d.locked.toUpperCase() + ' KEYCARD.'); tip('key'); }
+      if (d.sealed) { sound('locked'); message('SEALED. SURVIVE!', '#ff9a28'); }
+      else if (d.locked && !p.keys[d.locked]) { sound('locked'); message('YOU NEED THE ' + d.locked.toUpperCase() + ' KEYCARD.'); tip('key'); }
       else openDoor(d, true);
+    } else if (u.kind === 'lever') {
+      G.W.cells[u.z * G.mw + u.x] = 13;
+      sound('switchFlip');
+      fireEvents('use', u.x + ',' + u.z);
     } else if (u.kind === 'switch') {
       G.W.cells[u.z * G.mw + u.x] = 10;
       sound('switchFlip');
@@ -547,7 +560,10 @@ export function createGame(opts) {
 
   // ---- demons ---------------------------------------------------------------------
 
-  function mobGround(e) { e.y = groundUnder(G.W, e.x, e.z, e.radius * 0.6); }
+  // a demon stands on the highest floor under its whole body, like the player, so it
+  // steps fully off a ledge before dropping (dropping early left its body inside the
+  // ledge, and every move after that collided: stuck for good)
+  function mobGround(e) { e.y = groundUnder(G.W, e.x, e.z, e.radius); }
 
   function updateMob(e, dt) {
     var p = G.p, def = MOBS[e.kind];
@@ -618,7 +634,7 @@ export function createGame(opts) {
       } else if (!moved) {
         var ax = Math.floor(e.x + Math.cos(e.moveAng) * 0.7), az = Math.floor(e.z + Math.sin(e.moveAng) * 0.7);
         var dr = doorAt(G.W, ax, az);
-        if (dr && !dr.locked && !dr.secret && dr.state === 'closed') openDoor(dr, false);
+        if (dr && !dr.locked && !dr.secret && !dr.sealed && dr.state === 'closed') openDoor(dr, false);
         e.moveAng += (rnd() < 0.5 ? 1 : -1) * Math.PI / 2 * rndIn(0.6, 1.2);
         e.retarget = rndIn(0.25, 0.5);
         e.pathT = 0.8;
@@ -789,6 +805,76 @@ export function createGame(opts) {
     else if (e.phase < 2 && e.hp < e.maxHp * 0.66) { e.phase = 2; rileySay(e, RILEY.line('phase2', e.profile)); rileySummon(e); }
   }
 
+  // ---- level events: "when X happens, do Y" ---------------------------------------
+  // when: { enter: [x0,z0,x1,z1] } | { use: [x,z] } (a '=' switch) | { pickup: 'r' } | { cleared: 'waveId' } | { start: true }
+  // do:   [{ raise|lower: [x0,z0,x1,z1], to: height, speed }, { lava: [x0,z0,x1,z1], on: bool },
+  //        { seal|open: ['x,z', ...] }, { spawn: [{ kind, x, z }], wave: 'id' }, { light: 'id', on: bool },
+  //        { say: '...' }, { notice: '...' }, { shake: n }]
+  function boxCells(b) {
+    var out = [];
+    for (var z = b[1]; z <= b[3]; z++) for (var x = b[0]; x <= b[2]; x++) if (x >= 0 && z >= 0 && x < G.mw && z < G.mh) out.push(z * G.mw + x);
+    return out;
+  }
+  function fireEvents(kind, arg) {
+    (G.L.events || []).forEach(function (evt, i) {
+      if (G.fired[i]) return;
+      var w = evt.when || {};
+      var hit = (kind === 'use' && w.use && w.use[0] + ',' + w.use[1] === arg) ||
+        (kind === 'pickup' && w.pickup === arg) || (kind === 'cleared' && w.cleared === arg) || (kind === 'start' && w.start);
+      if (hit) runEvent(evt, i);
+    });
+  }
+  function runEvent(evt, i) {
+    G.fired[i] = true;
+    runActions(evt.do || []);
+  }
+  // { after: seconds, do: [...] } waits, so a warning can come before the danger (P6, C5)
+  function runActions(list) {
+    list.forEach(function (a) {
+      if (a.after) { G.timers.push({ t: a.after, acts: a.do || [] }); return; }
+      var box = a.raise || a.lower;
+      if (box) { addMover(G.W, boxCells(box), a.to, a.speed); sound('doorOpen', { x: box[0] + 0.5, y: 0, z: box[1] + 0.5 }); }
+      if (a.lava) boxCells(a.lava).forEach(function (c) { G.W.lava[c] = a.on ? 1 : 0; });
+      if (a.seal) a.seal.forEach(function (k) { var d = G.doors[k]; if (d) { d.sealed = true; if (d.state !== 'closed') d.state = 'closing'; } });
+      if (a.open) a.open.forEach(function (k) { var d = G.doors[k]; if (d) { d.sealed = false; openDoor(d, false); } });
+      if (a.spawn) a.spawn.forEach(function (sp) {
+        var fy = floorAt(G.W, sp.x, sp.z), m2 = makeMob(sp.kind, sp.x + 0.5, sp.z + 0.5, fy);
+        m2.state = 'chase'; m2.wave = a.wave || null; G.ents.push(m2); G.stats.totalKills++;
+        ev('fx', 'summon', m2.x, fy + 0.4, m2.z);
+      });
+      if (a.wave) G.waves[a.wave] = true;
+      if (a.light) G.lightsOff[a.light] = a.on === false;
+      if (a.say) { message('RILEY: ' + a.say, '#6fe0ec', Math.max(4.5, a.say.length / 14)); sound('rileyTalk'); }
+      if (a.notice) notice(a.notice, '#ff9a28', 2.5);
+      if (a.shake) shake(a.shake);
+    });
+  }
+  function updateEvents(dt) {
+    var p = G.p, evs = G.L.events || [];
+    for (var ti = G.timers.length - 1; ti >= 0; ti--) {
+      if ((G.timers[ti].t -= dt) <= 0) { var due = G.timers.splice(ti, 1)[0]; runActions(due.acts); }
+    }
+    for (var i = 0; i < evs.length; i++) {
+      var w = evs[i].when || {};
+      if (G.fired[i] || !w.enter) continue;
+      var b = w.enter;
+      if (p.x >= b[0] && p.x <= b[2] + 1 && p.z >= b[1] && p.z <= b[3] + 1) runEvent(evs[i], i);
+    }
+    // a wave is cleared when all of its demons are down
+    for (var id in G.waves) {
+      if (!G.waves[id]) continue;
+      if (!G.ents.some(function (e) { return e.wave === id && alive(e); })) { G.waves[id] = false; fireEvents('cleared', id); }
+    }
+    // lava burns whoever stands in it
+    G.lavaT -= dt;
+    if (G.lavaT <= 0) {
+      G.lavaT = 0.5;
+      var pc = Math.floor(p.z) * G.mw + Math.floor(p.x);
+      if (!p.dead && G.W.lava[pc] && p.onGround) { hurtPlayer(6, { x: p.x, z: p.z, kind: 'lava' }); tip('lava'); }
+      G.ents.forEach(function (e) { if (e.mob && !e.barrel && alive(e) && G.W.lava[Math.floor(e.z) * G.mw + Math.floor(e.x)]) damageMob(e, 8); });
+    }
+  }
+
   // ---- goals and first sightings ------------------------------------------------
 
   // mark the cells you can see (and the walls around them) for the automap and goal marker
@@ -868,6 +954,7 @@ export function createGame(opts) {
     if (full) { e.touching = true; message(full + ' ALREADY FULL', '#8a8478', 1.5); return; }
     e.gone = true;
     G.stats.items++;
+    fireEvents('pickup', e.item);
     p.bonusFlash = Math.min(0.35, p.bonusFlash + 0.22);
     sound(it.snd);
     ev('fx', 'pickup', e.x, e.y + 0.3, e.z, { item: e.item });
@@ -1042,6 +1129,16 @@ export function createGame(opts) {
 
     updateDoors(dt);
     updateLiftsAll(dt);
+    updateMovers(G.W, dt);
+    G.W.movers.forEach(function (mv) {
+      if (!mv.moved) return;
+      [p].concat(G.ents).forEach(function (e) {
+        if (e !== p && !(e.mob && alive(e)) && e.kind !== 'pickup') return;
+        var c = Math.floor(e.z) * G.mw + Math.floor(e.x);
+        if (mv.cells.indexOf(c) >= 0 && Math.abs(e.y - (mv.pos - mv.moved)) < 0.08) e.y = mv.pos;
+      });
+    });
+    updateEvents(dt);
     G.flowT -= dt;
     if (G.flowT <= 0) { G.flowT = 0.25; updateFlow(); }
     updatePlayer(dt);
@@ -1119,6 +1216,8 @@ export function createGame(opts) {
         nbrs(G.W, cx, cz).forEach(function (n) {
           var c = cellAt(G.W, n.x, n.z);
           if (c !== 0 && !(DOOR_IDS[c])) return;
+          var dn = doorAt(G.W, n.x, n.z);
+          if (dn && dn.sealed) return; // an arena lock: shut until the fight is won
           var dh = floorAt(G.W, n.x, n.z) - from;
           var kind = dh <= 0.02 && dh >= -0.02 ? 'walk' : dh < 0 ? 'drop' : dh <= STEP_UP ? 'step' : dh <= JUMP_UP ? 'jump' : null;
           if (kind) out.push({ cx: n.x, cz: n.z, cost: kind === 'jump' ? 2 : 1, kind: kind });

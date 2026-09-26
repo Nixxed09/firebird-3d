@@ -28,7 +28,7 @@ export function createRenderer(canvas, opts) {
   var camera = new THREE.PerspectiveCamera(78, 16 / 9, 0.03, 60);
   camera.rotation.order = 'YXZ';
   var scene = null, composer = null, bloom = null, level = null, fx = null;
-  var models = new Map(), torchLights = [], projs = new Map();
+  var models = new Map(), torchLights = [], projs = new Map(), levelLights = [];
   var viewScene = new THREE.Scene(), viewCam = new THREE.PerspectiveCamera(60, 16 / 9, 0.01, 5);
   var viewLight = new THREE.PointLight(0xffb070, 0, 3, 1.5);
   var viewKey = new THREE.DirectionalLight(0xffd8b0, 1.2); viewKey.position.set(-1, 2, 1);
@@ -107,7 +107,18 @@ export function createRenderer(canvas, opts) {
       scene.add(L); torchLights.push(L);
     });
     // a soft fill light in every room, up near the ceiling, so nothing is pitch black
+    // placed lights from the level: coloured zones, flicker, switchable by events
+    levelLights = (G.L.lights || []).map(function (l) {
+      var P = new THREE.PointLight(l.color || 0xffffff, l.intensity || 2, l.dist || 10, 1.3);
+      P.position.set(l.x, l.y || 1.5, l.z);
+      P.userData = l;
+      scene.add(P);
+      return P;
+    });
+    var dark = G.L.darkZones || [];
+    function inDark(r) { return dark.some(function (b) { return r.x >= b[0] && r.x <= b[2] + 1 && r.z >= b[1] && r.z <= b[3] + 1; }); }
     rooms(G).forEach(function (r) {
+      if (inDark(r)) return; // dark rooms get no fill light: only their placed lamps
       var fill = new THREE.PointLight(0xc8b8a8, 1.6 + r.size * 0.02, 4 + Math.sqrt(r.size) * 1.6, 1.1);
       fill.position.set(r.x, r.y, r.z);
       scene.add(fill);
@@ -200,6 +211,11 @@ export function createRenderer(canvas, opts) {
 
   function updateTorches(t) {
     var p = G0.p;
+    levelLights.forEach(function (L, i) {
+      var l = L.userData, off = G0.lightsOff && G0.lightsOff[l.id];
+      var n = l.flicker ? (Math.sin(t * 23 + i) > 0.6 ? 0.15 : 1) * (0.8 + Math.random() * 0.2) : 1;
+      L.intensity = off ? 0 : (l.intensity || 2) * n;
+    });
     torchLights.forEach(function (L, i) {
       var e = L.userData.e;
       var n = Math.sin(t * 13 + i * 7) * 0.12 + Math.sin(t * 31 + i * 3) * 0.08 + (Math.random() - 0.5) * 0.08;
