@@ -6,7 +6,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { buildLevel } from './level.js';
-import { makeMob, makePickup, makeTorch, shotgunModel, pistolModel, fistModel } from './models.js';
+import { makeMob, makePickup, makeTorch, shotgunModel, pistolModel, fistModel, addHand } from './models.js';
 import { makeFx } from './fx.js';
 import { emptyAssets, instance } from './assets.js';
 
@@ -40,7 +40,7 @@ export function createRenderer(canvas, opts) {
   viewScene.add(gunRig);
   // where each weapon sits in view (metres, camera space); authored guns have their origin at the grip
   var GUN_POSE = {
-    fist: { p: [0.14, -0.15, -0.3], ry: 0 }, pistol: { p: [0.13, -0.13, -0.3], ry: 0.06 }, shotgun: { p: [0.1, -0.13, -0.2], ry: 0.04 },
+    fist: { p: [0.14, -0.15, -0.3], ry: 0 }, pistol: { p: [0.15, -0.14, -0.38], ry: 0.06 }, shotgun: { p: [0.1, -0.13, -0.2], ry: 0.04 },
     chaingun: { p: [0.12, -0.15, -0.22], ry: 0.04 }, rocket: { p: [0.13, -0.16, -0.2], ry: 0.04 }
   };
   var BUILT_IN = { fist: fistModel, pistol: pistolModel, shotgun: shotgunModel };
@@ -53,8 +53,15 @@ export function createRenderer(canvas, opts) {
         g = new THREE.Group();
         var inst = instance(entry); g.add(inst.obj);
         inst.obj.rotation.y = Math.PI; // authored models face +Z; the view camera looks down -Z
+        // fit any authored gun to the same on-screen length as the built-in one
+        inst.obj.updateMatrixWorld(true);
+        var box = new THREE.Box3().setFromObject(inst.obj, true), len = box.max.z - box.min.z;
+        g.userData.authoredLength = len;
+        var WANT = { fist: 0.2, pistol: 0.24, shotgun: 0.85, chaingun: 0.8, rocket: 0.9 };
+        if (len > 1e-3 && WANT[k]) inst.obj.scale.multiplyScalar(WANT[k] / len);
         ['pump', 'slide', 'barrels', 'tube'].forEach(function (n) { var node = inst.obj.getObjectByName(n); if (node) g.userData[n] = node; });
         g.userData.authored = true;
+        addHand(g, k);
       } else if (BUILT_IN[k]) g = BUILT_IN[k]();
       else return;
       var pose = GUN_POSE[k];

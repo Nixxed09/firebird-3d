@@ -186,6 +186,8 @@ function authored(entry, e) {
   inst.obj.traverse(function (o) {
     if (!o.isMesh) return;
     (Array.isArray(o.material) ? o.material : [o.material]).forEach(function (m) {
+      // authored glow is capped so eyes and accents don't bloom into a glare
+      if (m.emissive && m.emissiveIntensity > 1.2) m.emissiveIntensity = 1.2;
       if (/tell/i.test(m.name) || /tell/i.test(o.name)) tell.push(m); else if (m.emissive) mats.push(m);
     });
   });
@@ -336,6 +338,15 @@ var blued = function () { return std(0x1c1e24, { metalness: 0.85, roughness: 0.4
 var gunWood = function () { return std(0x6a3a1a, { roughness: 0.55, metalness: 0.05 }); };
 var gloveMat = function () { return std(0x2a211c, { roughness: 0.85 }); };
 var sleeveMat = function () { return std(0x3a4230, { roughness: 0.9 }); };
+
+// authored guns without arms get the built-in gloved hand at the grip
+export function addHand(gun, weapon) {
+  var has = false;
+  gun.traverse(function (o) { if (/hand|arm|glove/i.test(o.name)) has = true; });
+  if (has) return;
+  if (weapon === 'shotgun' || weapon === 'chaingun' || weapon === 'rocket') { hand(gun, 0.01, -0.07, 0.08, 0.4); hand(gun, -0.01, -0.05, -0.2, 0.1); }
+  else if (weapon !== 'fist') hand(gun, 0, -0.06, 0.02, 0.3);
+}
 
 function hand(parent, x, y, z, rx) {
   var h = new THREE.Group(); h.position.set(x, y, z); h.rotation.x = rx || 0; parent.add(h);
