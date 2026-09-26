@@ -33,6 +33,7 @@ var SEEDS = +opt('seeds', 5);          // runs per persona per difficulty
 var DIFFS = opt('difficulties', '0,1,2').split(',').map(Number);
 var DIFF_NAMES = ['ROOKIE', 'WARRIOR', 'INFERNO'];
 var ONLY = opt('personas', '');
+var FIRST_TIMER = argv.indexOf('--first-timer') >= 0; // bots know only what they have seen (tests/playbot.js)
 var OUT = opt('out', path.join(__dirname, '..', 'captures'));
 var DT = 1 / 30;
 var LEVEL_LIMIT = 8 * 60;   // seconds of game time per level before we call it stuck
@@ -123,7 +124,7 @@ function playEpisode(key, persona, sd, difficulty) {
     levels: LEVELS, rng: rng, settings: { difficulty: difficulty, tips: false, seenTips: {} },
     storage: { getItem: function (k) { return k in store ? store[k] : null; }, setItem: function (k, v) { store[k] = String(v); } }
   });
-  var bot = new PlayBot(FB, persona, rng);
+  var bot = new PlayBot(FB, persona, rng, { firstTimer: FIRST_TIMER });
   var run = { persona: key, name: persona.name, seed: sd, difficulty: difficulty, style: bot.style, levels: [], deaths: [], riley: { fights: [], lines: [], claims: [] }, finished: false };
   var history = run.riley.fights;
 
@@ -228,6 +229,8 @@ function playEpisode(key, persona, sd, difficulty) {
   run.decisions = bot.log.decisions;
   run.secretsTried = bot.log.secretsTried;
   run.jumps = bot.log.jumps;
+  run.explored = bot.log.explored;
+  run.cues = bot.log.cues;
   return run;
 }
 
@@ -241,7 +244,12 @@ function report(runs, personas, all) {
   L.push('');
   L.push(new Date().toISOString().slice(0, 16).replace('T', ' ') + '. ' + all.length + ' episodes: ' + Object.keys(personasOf(all)).length + ' personas x ' + DIFFS.length + ' difficulties x ' + SEEDS + ' seeds (from ' + SEED + ').');
   L.push('Personas: ' + personas.source + ' (+ 2 Firebird extremes).');
-  L.push('Bots know the level layout and the physics\' movement rules (walk, step, jump, drop, lifts), but only see demons in 3D line of sight.');
+  L.push(FIRST_TIMER ? 'FIRST-TIMER bots: they know only the cells the game has marked as seen, and explore by cues (doors, torch-flanked doors, torches, open views, the goal marker).' : 'Bots know the level layout and the physics\' movement rules (walk, step, jump, drop, lifts), but only see demons in 3D line of sight.');
+  if (FIRST_TIMER) {
+    var cues = {};
+    all.forEach(function (x) { for (var c in (x.run.cues || {})) cues[c] = (cues[c] || 0) + x.run.cues[c]; });
+    L.push('Exploration steps by the cue that won: ' + Object.keys(cues).sort(function (a, b) { return cues[b] - cues[a]; }).map(function (c) { return c + ' ' + cues[c]; }).join(', ') + '.');
+  }
   L.push('');
   aggregate(all).forEach(function (l) { L.push(l); });
   L.push('');

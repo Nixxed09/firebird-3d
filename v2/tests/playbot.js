@@ -10,6 +10,16 @@
 // (game.walkGraph(): walk / step / jump / drop, plus lifts). It sees demons
 // only in 3D line of sight from its eyes, and it only goes after a secret wall
 // once it has looked at that wall up close.
+//
+// First-timer mode (opts.firstTimer): the bot knows only what the game has
+// marked as seen (G.seen, the automap's knowledge: line of sight within 12
+// cells). It plans only through seen cells, goes for pickups, the exit and the
+// boss only once seen, and otherwise explores: it scores the edge of what it
+// knows by distance, how much is unseen there, doors, torch-flanked doors (the
+// levels' cue language), torches, and the direction of the in-game goal
+// marker (game.goalTarget(), which itself only points at things seen). The cue
+// behind each exploration step is logged, so the playtest shows which cues
+// actually lead players.
 import { hasLOS, cellAt, floorAt } from '../src/sim/world.js';
 
 var DOOR = { 6: true, 7: true, 8: true, 11: true };
@@ -42,13 +52,14 @@ export function personaToStyle(persona) {
   };
 }
 
-export function PlayBot(game, persona, rng) {
+export function PlayBot(game, persona, rng, opts) {
+  this.firstTimer = !!(opts && opts.firstTimer);
   this.game = game;
   this.persona = persona;
   this.style = personaToStyle(persona);
   this.rng = rng;
   this.spotted = {};
-  this.log = { decisions: {}, secretsTried: 0, secretsSpotted: 0, abandonedFights: 0, jumps: 0 };
+  this.log = { decisions: {}, secretsTried: 0, secretsSpotted: 0, abandonedFights: 0, jumps: 0, explored: 0, cues: {} };
   this.reset();
 }
 
@@ -64,6 +75,8 @@ PlayBot.prototype.reset = function () {
   this.banned = {};
   this.tried = {};
   this.fightProgress = null;
+  this.frontierCache = null; // its time stamp would outlive the clock reset below
+  this.metBoss = false;
   this.now = 0;
 };
 
@@ -78,7 +91,14 @@ PlayBot.prototype.cell = function (x, z) {
 };
 
 // can the player pass through this cell at all (doors: only if it can open them)?
+// what the player knows: seen cells, and the one it stands on
+PlayBot.prototype.knows = function (x, z) {
+  var G = this.G();
+  return !!G.seen[z * G.mw + x] || (x === Math.floor(G.p.x) && z === Math.floor(G.p.z));
+};
+
 PlayBot.prototype.passable = function (x, z) {
+  if (this.firstTimer && !this.knows(x, z)) return false;
   var G = this.G(), c = this.cell(x, z);
   if (c === 0) return true;
   if (!DOOR[c]) return false;
@@ -196,6 +216,7 @@ PlayBot.prototype.options = function (threats) {
 
   G.ents.forEach(function (e) {
     if (e.kind !== 'pickup' || e.gone) return;
+    if (self.firstTimer && !self.knows(Math.floor(e.x), Math.floor(e.z))) return;
     var it = e.item, sc = null, key = 'item:' + Math.floor(e.x) + ',' + Math.floor(e.z);
     if (HEALS[it]) { if (p.hp >= 100 && it !== 'P') return; sc = hurt ? 2.2 : 0.35 + st.completionism * 0.5 + (it === 'P' ? 0.8 : 0); }
     else if (it === 'r' || it === 'u') sc = 1.6;
@@ -209,14 +230,20 @@ PlayBot.prototype.options = function (threats) {
   });
 
   G.secrets.forEach(function (sec) {
-    if (sec.found) return;
+    if (sec.found || (self.firstTimer && !self.knows(sec.x, sec.z))) return;
     opts.push({ kind: 'item', target: { x: sec.x + 0.5, z: sec.z + 0.5 }, score: 0.5 + st.curiosity * 0.6, key: 'area:' + sec.x + ',' + sec.z, gx: sec.x, gz: sec.z });
   });
 
-  if (G.boss && G.boss.state !== 'dead' && G.boss.state !== 'die') {
-    opts.push({ kind: 'boss', target: G.boss, score: 0.8 + st.aggression * 0.3 - st.completionism * 0.3, key: 'boss' });
-  } else if (G.exitCell) {
+  var bossAlive = G.boss && G.boss.state !== 'dead' && G.boss.state !== 'die';
+  if (bossAlive && this.firstTimer && this.knows(Math.floor(G.boss.x), Math.floor(G.boss.z))) this.metBoss = true;
+  if (bossAlive) {
+    if (!this.firstTimer || this.metBoss) opts.push({ kind: 'boss', target: G.boss, score: 0.8 + st.aggression * 0.3 - st.completionism * 0.3, key: 'boss' });
+  } else if (G.exitCell && (!this.firstTimer || this.knows(G.exitCell.x, G.exitCell.z))) {
     opts.push({ kind: 'exit', score: 0.7 + (1 - st.completionism) * 0.5, key: 'exit' });
+  }
+  if (this.firstTimer) {
+    var fr = this.frontier();
+    if (fr) opts.push({ kind: 'explore', score: fr.score, key: 'explore:' + fr.x + ',' + fr.z, gx: fr.x, gz: fr.z, cue: fr.cue });
   }
 
   if (st.curiosity > 0.55) {
@@ -430,6 +457,14 @@ PlayBot.prototype.step = function (dt) {
       self.setMove(err < 0.3 ? a : null, false);
       if (err < 0.2) self.use();
     });
+    case 'explore': return this.goTo(function (x, z) { return x === plan.gx && z === plan.gz; }, dt, function () {
+      // reached the edge: whatever is visible from here is now seen; move on
+      self.banned[plan.key] = self.now + 30;
+      self.log.explored++;
+      self.log.cues[plan.cue] = (self.log.cues[plan.cue] || 0) + 1;
+      self.frontierCache = null;
+      self.plan = null;
+    });
     case 'secret': {
       var dr = plan.door;
       return this.goTo(function (x, z) { return Math.abs(x - dr.x) + Math.abs(z - dr.z) === 1 && self.cell(x, z) === 0; }, dt, function () {
@@ -444,6 +479,46 @@ PlayBot.prototype.step = function (dt) {
       });
     }
   }
+};
+
+// The best cell on the edge of what the bot knows, scored by the cues a
+// first-time player would follow. Recomputed at most once a second.
+PlayBot.prototype.frontier = function () {
+  if (this.frontierCache && this.now - this.frontierCache.t < 1) return this.frontierCache.best;
+  var G = this.G(), p = G.p, mw = G.mw, mh = G.mh, self = this;
+  this.graph = this.game.walkGraph();
+  var start = Math.floor(p.z) * mw + Math.floor(p.x), dist = new Map([[start, 0]]), q = [start];
+  for (var h = 0; h < q.length; h++) {
+    var c = q[h];
+    this.edges(c % mw, (c / mw) | 0).forEach(function (e) {
+      var n = e.cz * mw + e.cx;
+      if (!dist.has(n)) { dist.set(n, dist.get(c) + 1); q.push(n); }
+    });
+  }
+  var goal = this.game.goalTarget ? this.game.goalTarget() : null;
+  var torches = G.ents.filter(function (e) { return e.kind === 'torch' && self.knows(Math.floor(e.x), Math.floor(e.z)); });
+  function unseen(x, z) { return x >= 0 && z >= 0 && x < mw && z < mh && !G.seen[z * mw + x]; }
+  var best = null;
+  dist.forEach(function (d, c) {
+    var x = c % mw, z = (c / mw) | 0;
+    if (!NB.some(function (o) { return unseen(x + o[0], z + o[1]); })) return;
+    if (self.banned['explore:' + x + ',' + z] > self.now) return;
+    var open = 0;
+    for (var dz = -2; dz <= 2; dz++) for (var dx = -2; dx <= 2; dx++) if (unseen(x + dx, z + dz)) open++;
+    var sc = 0.55 - d * 0.03 + open * 0.02, cue = 'open';
+    var nearDoor = DOOR[self.cell(x, z)] || NB.some(function (o) { return DOOR[self.cell(x + o[0], z + o[1])]; });
+    var lit = torches.filter(function (t) { return Math.hypot(t.x - (x + 0.5), t.z - (z + 0.5)) < 2.2; }).length;
+    if (nearDoor) { sc += 0.4; cue = 'door'; if (lit) { sc += 0.5 + 0.2 * Math.min(2, lit); cue = 'torch-door'; } }
+    else if (lit) { sc += 0.25; cue = 'torch'; }
+    if (goal) {
+      var gd = Math.hypot(goal.x - (x + 0.5), goal.z - (z + 0.5));
+      sc += 0.8 * Math.max(0, 1 - gd / 20);
+      if (gd < 8) cue += '+marker';
+    }
+    if (!best || sc > best.score) best = { x: x, z: z, score: sc, cue: cue };
+  });
+  this.frontierCache = { t: this.now, best: best };
+  return best;
 };
 
 PlayBot.prototype.adjacentTo = function (x, z, id) {
