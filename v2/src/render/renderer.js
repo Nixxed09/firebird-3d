@@ -8,6 +8,7 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import { buildLevel } from './level.js';
 import { makeMob, makePickup, makeTorch, shotgunModel, pistolModel, fistModel } from './models.js';
 import { makeFx } from './fx.js';
+import { emptyAssets, instance } from './assets.js';
 
 var FOG = { slab: 0x0c0907, tech: 0x06090c, hell: 0x160604 };
 
@@ -34,14 +35,42 @@ export function createRenderer(canvas, opts) {
   viewScene.add(new THREE.AmbientLight(0xffffff, 0.35), new THREE.HemisphereLight(0xffe0c0, 0x201810, 0.8), viewLight, viewKey);
   viewScene.environment = envMap;
   viewScene.environmentIntensity = 0.6;
-  var guns = { fist: fistModel(), pistol: pistolModel(), shotgun: shotgunModel() };
-  var gunRig = new THREE.Group();
+  var assets = emptyAssets();
+  var gunRig = new THREE.Group(), guns = {};
   viewScene.add(gunRig);
-  Object.keys(guns).forEach(function (k) { gunRig.add(guns[k]); guns[k].visible = false; });
-  guns.fist.position.set(0.14, -0.15, -0.3);
-  guns.pistol.position.set(0.13, -0.13, -0.3);
-  guns.shotgun.position.set(0.1, -0.13, -0.2);
-  guns.shotgun.rotation.y = 0.04; guns.pistol.rotation.y = 0.06;
+  // where each weapon sits in view (metres, camera space); authored guns have their origin at the grip
+  var GUN_POSE = {
+    fist: { p: [0.14, -0.15, -0.3], ry: 0 }, pistol: { p: [0.13, -0.13, -0.3], ry: 0.06 }, shotgun: { p: [0.1, -0.13, -0.2], ry: 0.04 },
+    chaingun: { p: [0.12, -0.15, -0.22], ry: 0.04 }, rocket: { p: [0.13, -0.16, -0.2], ry: 0.04 }
+  };
+  var BUILT_IN = { fist: fistModel, pistol: pistolModel, shotgun: shotgunModel };
+  function makeGuns() {
+    Object.keys(guns).forEach(function (k) { gunRig.remove(guns[k]); });
+    guns = {};
+    Object.keys(GUN_POSE).forEach(function (k) {
+      var entry = assets.model(k), g;
+      if (entry) {
+        g = new THREE.Group();
+        var inst = instance(entry); g.add(inst.obj);
+        inst.obj.rotation.y = Math.PI; // authored models face +Z; the view camera looks down -Z
+        ['pump', 'slide', 'barrels', 'tube'].forEach(function (n) { var node = inst.obj.getObjectByName(n); if (node) g.userData[n] = node; });
+        g.userData.authored = true;
+      } else if (BUILT_IN[k]) g = BUILT_IN[k]();
+      else return;
+      var pose = GUN_POSE[k];
+      g.position.set(pose.p[0], pose.p[1], pose.p[2]); g.rotation.y = pose.ry;
+      g.userData.baseZ = pose.p[2];
+      g.visible = false;
+      gunRig.add(g); guns[k] = g;
+    });
+  }
+  makeGuns();
+  // moving parts slide along their own z from wherever the artist put them
+  function offsetZ(node, dz) {
+    if (!node) return;
+    if (node.userData.z0 === undefined) node.userData.z0 = node.position.z;
+    node.position.z = node.userData.z0 + dz;
+  }
   var flashSprite = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffd080, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
   flashSprite.scale.setScalar(0.035);
   viewScene.add(flashSprite);
@@ -57,14 +86,14 @@ export function createRenderer(canvas, opts) {
     scene.environmentIntensity = 0.25;
     scene.add(new THREE.HemisphereLight(0xa08878, 0x201a20, 0.9));
     scene.add(new THREE.AmbientLight(0x504848, 0.5));
-    level = buildLevel(G);
+    level = buildLevel(G, assets);
     scene.add(level.group);
     fx = makeFx(scene);
     models.clear(); projs.clear(); torchLights = [];
     // a warm light at every torch (a fixed number, so shaders never recompile mid-fight)
     G.ents.forEach(function (e) {
       if (e.kind !== 'torch') return;
-      var m = makeTorch(e); scene.add(m.obj); models.set(e, m);
+      var m = makeTorch(e, assets); scene.add(m.obj); models.set(e, m);
       var L = new THREE.PointLight(0xff8a3a, 2.2, 7.5, 1.4);
       L.position.set(e.x, e.y + 1.0, e.z);
       L.userData.e = e;
@@ -76,6 +105,11 @@ export function createRenderer(canvas, opts) {
       fill.position.set(r.x, r.y, r.z);
       scene.add(fill);
       // and the fixture it comes from: a caged lamp on the ceiling
+      var lampEntry = assets.model('lamp');
+      if (lampEntry) {
+        var li = instance(lampEntry); li.obj.scale.setScalar(0.5); li.obj.position.set(r.x, r.y + 0.4, r.z); scene.add(li.obj);
+        return;
+      }
       var lamp = new THREE.Group();
       var panel = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.5), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffe6c0, emissiveIntensity: 1.1 }));
       var cage = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.1, 0.58), new THREE.MeshStandardMaterial({ color: 0x2a2826, metalness: 0.8, roughness: 0.4, wireframe: true }));
@@ -144,8 +178,8 @@ export function createRenderer(canvas, opts) {
       if (e.kind === 'part') return;
       var m = models.get(e);
       if (!m) {
-        if (e.kind === 'pickup') m = makePickup(e);
-        else if (e.mob) m = makeMob(e);
+        if (e.kind === 'pickup') m = makePickup(e, assets);
+        else if (e.mob) m = makeMob(e, assets);
         else return;
         scene.add(m.obj); models.set(e, m);
       }
@@ -179,21 +213,21 @@ export function createRenderer(canvas, opts) {
     sway.y += (dPitch * 0.6 - sway.y) * Math.min(1, dt * 8);
     Object.keys(guns).forEach(function (k) { guns[k].visible = k === p.weapon && !p.dead; });
     var g = guns[p.weapon];
+    if (!g) return;
     var ft = p.fireT, kick = ft < 0.12 ? Math.sin(ft / 0.12 * Math.PI) : 0;
     var raise = p.lowerT > 0 ? (1 - p.lowerT / 0.15) : p.raiseT > 0 ? p.raiseT / 0.15 : 0;
     gunRig.position.set(Math.sin(bob) * 0.012 * bobAmt + sway.x * 0.1, -Math.abs(Math.cos(bob)) * 0.01 * bobAmt + sway.y * 0.1 - raise * 0.25 - p.landT * 0.1, 0);
     gunRig.rotation.set(0, 0, 0);
     if (p.weapon === 'fist') {
-      g.position.z = -0.3 - (ft < 0.2 ? Math.sin(ft / 0.2 * Math.PI) * 0.18 : 0);
+      g.position.z = g.userData.baseZ - (ft < 0.2 ? Math.sin(ft / 0.2 * Math.PI) * 0.18 : 0);
       g.rotation.x = ft < 0.2 ? -Math.sin(ft / 0.2 * Math.PI) * 0.3 : 0;
     } else {
       g.rotation.x = kick * (p.weapon === 'shotgun' ? 0.35 : 0.2);
-      g.position.z = (p.weapon === 'shotgun' ? -0.2 : -0.3) + kick * 0.05;
-      if (p.weapon === 'shotgun' && g.userData.pump) {
-        var pt = ft > 0.3 && ft < 0.7 ? Math.sin((ft - 0.3) / 0.4 * Math.PI) : 0;
-        g.userData.pump.position.z = -0.3 + pt * 0.09;
-      }
-      if (p.weapon === 'pistol' && g.userData.slide) g.userData.slide.position.z = -0.08 + kick * 0.04;
+      g.position.z = g.userData.baseZ + kick * 0.05;
+      var pt = ft > 0.3 && ft < 0.7 ? Math.sin((ft - 0.3) / 0.4 * Math.PI) : 0;
+      offsetZ(g.userData.pump, pt * 0.09);
+      offsetZ(g.userData.slide, kick * 0.04);
+      if (g.userData.barrels) g.userData.barrels.rotation.z += dt * (p.fireT < 0.3 ? 30 : 0);
     }
     var flashing = ft < 0.06 && p.weapon !== 'fist' && !p.dead;
     flashSprite.visible = flashing;
@@ -237,6 +271,10 @@ export function createRenderer(canvas, opts) {
   }
 
   return {
+    // swap in authored art once it has loaded; the scene rebuilds on the next frame
+    setAssets: function (reg) { assets = reg; makeGuns(); G0 = null; },
+    assets: function () { return assets; },
+    debugModels: function () { var out = []; models.forEach(function (m) { if (m.debug) out.push(m.debug()); }); return out; },
     render: render, resize: resize, renderer: renderer, camera: camera,
     info: function () { return renderer.info; }
   };

@@ -6,6 +6,7 @@ import { LEVELS } from './levels.js';
 import { makeRng } from './sim/rng.js';
 import { createRenderer } from './render/renderer.js';
 import { createHud, fmtTime } from './ui/hud.js';
+import { loadAssets } from './render/assets.js';
 
 var SETTINGS = MENUS.SETTINGS, MENU = MENUS.MENU;
 var v = SETTINGS.v;
@@ -355,6 +356,16 @@ applySettings();
 MENU.open(mainScreen());
 requestAnimationFrame(frame);
 
+// authored art loads in the background and swaps in; until then (or if it
+// never arrives) the built-in art is used
+var assetReg = null;
+loadAssets().then(function (reg) {
+  assetReg = reg;
+  if (reg.loaded.length) gfx.setAssets(reg);
+  if (reg.problems.length) console.info('[assets] ' + reg.problems.join(' | '));
+  if (reg.loaded.length) console.info('[assets] using ' + reg.loaded.length + ' authored assets');
+});
+
 // ?debug: a handle for automated checks and screenshots
 if (DEBUG) {
   window.FIREBIRD2 = Object.assign({}, game, {
@@ -365,6 +376,9 @@ if (DEBUG) {
     // spot renders the same pixels every run (screenshot baselines)
     freeze: function (on) { frozen = !!on; },
     frozen: function () { return frozen; },
+    models: function () { return gfx.debugModels(); },
+    // which authored assets loaded, and anything that failed
+    assets: function () { return assetReg ? { ready: assetReg.ready, loaded: assetReg.loaded.slice(), problems: assetReg.problems.slice() } : { ready: false }; },
     frameStats: function () {
       var s = frames.slice().sort(function (a, b) { return a - b; });
       function q(f) { return s.length ? s[Math.min(s.length - 1, Math.floor(s.length * f))] * 1000 : 0; }

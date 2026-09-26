@@ -3,7 +3,7 @@
 // parts (doors that rise, secret walls, lifts, the exit switch).
 import * as THREE from 'three';
 import { DOOR_IDS, floorAt, ceilAt, cellAt } from '../sim/world.js';
-import { wallSet, secretSet, floorSet, makeMaterial } from './textures.js';
+import { wallSet, floorSet, makeMaterial, crackOverlay } from './textures.js';
 
 // collects quads per material, then makes one mesh per material
 function Batch() { this.groups = {}; }
@@ -77,7 +77,10 @@ function hostWall(W, x, z) {
   return host;
 }
 
-export function buildLevel(G) {
+export function buildLevel(G, assets) {
+  // an authored surface set when there is one, else the built-in painted one
+  function wallTex(id) { return (assets && assets.texture('tex:' + id)) || wallSet(id); }
+  function floorTex(name) { return (assets && assets.texture('tex:' + name)) || floorSet(name); }
   var W = G.W, L = G.L, batch = new Batch(), group = new THREE.Group();
   var trim = 'wall' + mainWall(W);
   var lifts = {}; W.lifts.forEach(function (lf) { lifts[lf.x + ',' + lf.z] = lf; });
@@ -128,16 +131,16 @@ export function buildLevel(G) {
   var mats = {};
   function mat(key) {
     if (mats[key]) return mats[key];
-    if (key === 'floor') return (mats[key] = makeMaterial(floorSet(L.floor)));
-    if (key === 'ceil') return (mats[key] = makeMaterial(floorSet(L.ceil)));
-    if (key === 'trim') return (mats[key] = makeMaterial(wallSet(3), { color: 0x9a8a78, metalness: 0.6, roughness: 0.5 }));
-    if (key === 'beam') return (mats[key] = makeMaterial(wallSet(3), { color: 0x6a5a4a, metalness: 0.4 }));
-    return (mats[key] = makeMaterial(wallSet(+key.slice(4))));
+    if (key === 'floor') return (mats[key] = makeMaterial(floorTex(L.floor)));
+    if (key === 'ceil') return (mats[key] = makeMaterial(floorTex(L.ceil)));
+    if (key === 'trim') return (mats[key] = makeMaterial(wallTex(3), { color: 0x9a8a78, metalness: 0.6, roughness: 0.5 }));
+    if (key === 'beam') return (mats[key] = makeMaterial(wallTex(3), { color: 0x6a5a4a, metalness: 0.4 }));
+    return (mats[key] = makeMaterial(wallTex(+key.slice(4))));
   }
   batch.meshes(mat).forEach(function (m) { m.receiveShadow = true; group.add(m); });
 
   // exit switches: their own meshes so the texture can flip when pressed
-  var switchOff = makeMaterial(wallSet(9)), switchOn = makeMaterial(wallSet(10));
+  var switchOff = makeMaterial(wallTex(9)), switchOn = makeMaterial(wallTex(10));
   switches.forEach(function (sw) {
     sw.faces.meshes(function () { return switchOff; }).forEach(function (m) { sw.mesh = m; group.add(m); });
   });
@@ -147,12 +150,19 @@ export function buildLevel(G) {
   for (var dk in W.doors) {
     var dr = W.doors[dk], df = floorAt(W, dr.x, dr.z), dc = ceilAt(W, dr.x, dr.z), h = dc - df, mesh;
     if (dr.secret) {
-      mesh = new THREE.Mesh(new THREE.BoxGeometry(1, h, 1), makeMaterial(secretSet(hostWall(W, dr.x, dr.z))));
+      // the very same material as the wall it hides in, plus a see-through crack on each face
+      mesh = new THREE.Mesh(new THREE.BoxGeometry(1, h, 1), mat('wall' + hostWall(W, dr.x, dr.z)));
       setBoxUV(mesh.geometry, 1, h);
+      var crack = crackOverlay();
+      [[0, 0.502, 0], [Math.PI, -0.502, 0], [Math.PI / 2, 0, 0.502], [-Math.PI / 2, 0, -0.502]].forEach(function (f) {
+        var q = new THREE.Mesh(new THREE.PlaneGeometry(0.9, Math.min(h, 1.9) * 0.9), crack);
+        q.rotation.y = f[0]; q.position.set(f[2], 0, f[1]);
+        mesh.add(q);
+      });
     } else {
       var alongX = open(dr.x - 1, dr.z) && open(dr.x + 1, dr.z);
       var geo = alongX ? new THREE.BoxGeometry(0.22, h, 1) : new THREE.BoxGeometry(1, h, 0.22);
-      mesh = new THREE.Mesh(geo, makeMaterial(wallSet(dr.locked === 'red' ? 7 : dr.locked === 'blue' ? 8 : 6)));
+      mesh = new THREE.Mesh(geo, makeMaterial(wallTex(dr.locked === 'red' ? 7 : dr.locked === 'blue' ? 8 : 6)));
       setBoxUV(mesh.geometry, 1, h);
     }
     mesh.position.set(dr.x + 0.5, df + h / 2, dr.z + 0.5);
@@ -165,7 +175,7 @@ export function buildLevel(G) {
   // lifts: a glowing-edged platform block
   var liftMeshes = W.lifts.map(function (lf) {
     var h = Math.max(0.2, lf.top - lf.bottom + 0.2);
-    var m = new THREE.Mesh(new THREE.BoxGeometry(0.98, h, 0.98), makeMaterial(wallSet(4)));
+    var m = new THREE.Mesh(new THREE.BoxGeometry(0.98, h, 0.98), makeMaterial(wallTex(4)));
     setBoxUV(m.geometry, 1, h);
     m.userData = { lift: lf, h: h };
     group.add(m);

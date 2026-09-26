@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "imp",
+      "type": "demon",
+      "file": "imp.glb",
+      "size_m": [
+        0.7,
+        1.7,
+        0.5
+      ],
+      "animations": [
+        "idle",
+        "walk",
+        "attack_windup",
+        "attack",
+        "pain",
+        "death"
+      ]
+    },
+    {
+      "id": "pistol",
+      "type": "weapon",
+      "file": "pistol.glb",
+      "nodes": [
+        "slide"
+      ]
+    },
+    {
+      "id": "barrel",
+      "type": "prop",
+      "file": "barrel.glb"
+    },
+    {
+      "id": "brick",
+      "type": "texture",
+      "maps": {
+        "albedo": "textures/brick_albedo.png",
+        "normal": "textures/brick_normal.png"
+      }
+    }
+  ]
+}
