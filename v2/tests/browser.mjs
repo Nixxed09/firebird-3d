@@ -6,12 +6,17 @@
 //     Play button; this step exists because one shipped once.
 //  2. FRAME BUDGET: vsync off, so frame times are the real cost. Fails if
 //     p95 is over 16.7 ms (can't hold 60 fps), and warns under 2x headroom.
-//  3. SCREENSHOTS at fixed spots (with ?debug), compared with the saved
-//     baselines in tests/baseline/. Changes are reported with a diff image;
-//     --strict fails on them, --update-baseline accepts the new look.
+//  3. SCREENSHOTS at fixed spots (with ?debug), each taken with the game
+//     frozen (FIREBIRD2.freeze: no sim steps, pinned render clock), compared
+//     with the saved baselines in tests/baseline/. A change fails the run and
+//     writes a diff image; --advisory only warns, --update-baseline accepts
+//     the new look. The title's drifting camera isn't frozen, so the title
+//     picture is saved but not compared.
 //
 // Also fails on any console error, page error or failed request.
-//   node tests/browser.mjs [--out dir] [--strict] [--update-baseline]
+//   node tests/browser.mjs [--out dir] [--advisory] [--update-baseline]
+// Self-tests (each must FAIL): --selftest-dead-play, --selftest-visual (turns
+// the start-room camera by 2 degrees).
 import puppeteer from 'puppeteer-core';
 import fs from 'fs';
 import path from 'path';
@@ -21,7 +26,7 @@ var here = path.dirname(fileURLToPath(import.meta.url));
 var argv = process.argv.slice(2);
 function opt(name, def) { var i = argv.indexOf('--' + name); return i >= 0 ? argv[i + 1] : def; }
 var OUT = opt('out', argv[0] && argv[0].slice(0, 2) !== '--' ? argv[0] : path.join(here, '..', 'captures'));
-var STRICT = argv.indexOf('--strict') >= 0, UPDATE = argv.indexOf('--update-baseline') >= 0;
+var STRICT = argv.indexOf('--advisory') < 0, UPDATE = argv.indexOf('--update-baseline') >= 0;
 var BASE = path.join(here, 'baseline');
 var BUDGET_FAIL = 16.7, BUDGET_WARN = 8.3; // ms, p95
 fs.mkdirSync(OUT, { recursive: true });
@@ -156,10 +161,16 @@ var SPOTS = [
 var visual = [];
 for (var i = 0; i < SPOTS.length; i++) {
   var s = SPOTS[i];
+  var still = !!s[1];
+  // freeze first, then place: the simulation never runs, so demons stay where
+  // they spawned and every run sees the same scene (only rendering continues)
+  await page.evaluate('window.FIREBIRD2.freeze(' + still + ')');
   if (s[1]) await page.evaluate(s[1]);
-  await sleep(s[2] || 700);
+  if (s[0] === 'v2-02-start-room' && argv.indexOf('--selftest-visual') >= 0) await page.evaluate('window.FIREBIRD2.state().p.ang += 0.035');
+  await sleep(s[2] || 800); // let the renderer build the scene
   var png = await page.screenshot({ encoding: 'base64' });
   fs.writeFileSync(path.join(OUT, s[0] + '.png'), Buffer.from(png, 'base64'));
+  if (!still) { visual.push(s[0] + ': saved (animated, not compared)'); continue; }
   var basePath = path.join(BASE, s[0] + '.png');
   if (UPDATE || !fs.existsSync(basePath)) {
     fs.writeFileSync(basePath, Buffer.from(png, 'base64'));
@@ -167,8 +178,8 @@ for (var i = 0; i < SPOTS.length; i++) {
     continue;
   }
   var c = await compare(page, fs.readFileSync(basePath).toString('base64'), png);
-  // torches, fire and Riley animate, so a few percent always moves
-  if (c.changed > 0.03) {
+  // frozen frames are byte-identical run to run; allow a hair for GPU rounding
+  if (c.changed > 0.005) {
     if (c.diff) fs.writeFileSync(path.join(OUT, s[0] + '-diff.png'), Buffer.from(c.diff.split(',')[1], 'base64'));
     var msg = s[0] + ' looks different from its baseline (' + (c.changed * 100).toFixed(1) + '% of pixels; see ' + s[0] + '-diff.png)';
     if (STRICT) fail(msg); else warn(msg);
@@ -177,6 +188,7 @@ for (var i = 0; i < SPOTS.length; i++) {
 visual.forEach(function (v) { console.log('  ' + v); });
 
 // frame budget in three scenes, vsync off
+await page.evaluate('window.FIREBIRD2.freeze(false)');
 var SCENES = [
   ['start room', at(0, 3.5, 17.5, 0, 0, 0)],
   ['fight in the hall', at(0, 18.5, 14.5, 1, -0.6, 0, 'p.weapons.shotgun = true; p.ammo.shells = 50; p.weapon = "shotgun"; F.setFire(true);')],
