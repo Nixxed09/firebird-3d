@@ -44,6 +44,12 @@
         "death": "Death"
       },
       "recolor": {
+        "Yeti_Main": {
+          "color": "#c0587a"
+        },
+        "Yeti_Secondary": {
+          "color": "#5a1a2e"
+        },
         "Eye_White": {
           "color": "#ffe9a0",
           "emit": 0.7
