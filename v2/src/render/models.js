@@ -2,6 +2,7 @@
 // animates from the simulation's state: walking, the attack windup (the tell),
 // pain, the white hit flash, and a death collapse.
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 
 var geoCache = {};
 function geo(key, make) { return geoCache[key] || (geoCache[key] = make()); }
@@ -76,7 +77,7 @@ function gnasher() {
   }
   var lower = part(geo('sph', SPH), skin, 0, -0.04, 0.02, jaw); lower.scale.set(0.26, 0.08, 0.22);
   [-1, 1].forEach(function (s) {
-    var eye = part(geo('sph', SPH), glow(0xfff0a0, 1.4), s * 0.12, 0.56, 0.24, body); eye.scale.setScalar(0.028); eye.userData.noFlash = true;
+    var eye = part(geo('sph', SPH), glow(0xffa030, 0.9), s * 0.12, 0.56, 0.25, body); eye.scale.setScalar(0.02); eye.userData.noFlash = true;
     var leg = part(geo('cap', CAP), skin, s * 0.18, 0.1, 0, body); leg.scale.set(0.07, 0.07, 0.07); body.userData['leg' + s] = leg;
   });
   var mats = flashable(root);
@@ -227,7 +228,7 @@ export function makePickup(e) {
     var vest = part(geo('box', BOX), std(0x2e8a3a, { metalness: 0.4, roughness: 0.4 }), 0, 0.2, 0, inner); vest.scale.set(0.34, 0.36, 0.14);
     var plate = part(geo('box', BOX), glow(0x7aff8a, 1.2), 0, 0.26, 0.075, inner); plate.scale.set(0.16, 0.1, 0.01);
   } else if (it === '2') {
-    var gun = shotgunModel(); gun.scale.setScalar(0.9); gun.rotation.z = 0.2; gun.position.y = 0.15; inner.add(gun);
+    var gun = shotgunModel(true); gun.scale.setScalar(0.9); gun.rotation.z = 0.2; gun.position.y = 0.15; inner.add(gun);
   } else if (it === 'r' || it === 'u') {
     var col = it === 'r' ? 0xff2a1a : 0x3a7aff;
     var card = part(geo('box', BOX), glow(col, 2.5), 0, 0.2, 0, inner); card.scale.set(0.16, 0.22, 0.015);
@@ -268,31 +269,63 @@ export function makeTorch(e) {
 
 // ---- weapons (also used by the view model) ------------------------------------------------
 
-var gunMetal = function () { return std(0x2a2c30, { metalness: 0.85, roughness: 0.35 }); };
-var gunWood = function () { return std(0x5a3418, { roughness: 0.6 }); };
+var RB = function (w, h, d, r) { return new RoundedBoxGeometry(w, h, d, 3, r); };
+function rbox(key, w, h, d, r) { return geo('rb' + key, function () { return RB(w, h, d, r); }); }
+var gunMetal = function () { return std(0x3a3d44, { metalness: 0.9, roughness: 0.3 }); };
+var blued = function () { return std(0x1c1e24, { metalness: 0.85, roughness: 0.4 }); };
+var gunWood = function () { return std(0x6a3a1a, { roughness: 0.55, metalness: 0.05 }); };
+var gloveMat = function () { return std(0x2a211c, { roughness: 0.85 }); };
+var sleeveMat = function () { return std(0x3a4230, { roughness: 0.9 }); };
 
-export function shotgunModel() {
-  var g = new THREE.Group(), metal = gunMetal(), wood = gunWood();
-  var barrel1 = part(geo('cyl', CYL), metal, -0.018, 0, -0.35, g); barrel1.scale.set(0.018, 0.6, 0.018); barrel1.rotation.x = Math.PI / 2;
-  var barrel2 = part(geo('cyl', CYL), metal, 0.018, 0, -0.35, g); barrel2.scale.set(0.018, 0.6, 0.018); barrel2.rotation.x = Math.PI / 2;
-  var pump = part(geo('box', BOX), wood, 0, -0.035, -0.3, g); pump.scale.set(0.06, 0.045, 0.22); g.userData.pump = pump;
-  var recv = part(geo('box', BOX), metal, 0, -0.01, 0.02, g); recv.scale.set(0.07, 0.08, 0.2);
-  var stock = part(geo('box', BOX), wood, 0, -0.05, 0.22, g); stock.scale.set(0.06, 0.1, 0.26); stock.rotation.x = -0.15;
+function hand(parent, x, y, z, rx) {
+  var h = new THREE.Group(); h.position.set(x, y, z); h.rotation.x = rx || 0; parent.add(h);
+  var palm = new THREE.Mesh(rbox('palm', 0.07, 0.05, 0.09, 0.02), gloveMat()); h.add(palm);
+  var fingers = new THREE.Mesh(rbox('fing', 0.075, 0.03, 0.05, 0.012), gloveMat()); fingers.position.set(0, -0.03, -0.03); h.add(fingers);
+  var sleeve = new THREE.Mesh(geo('cyl', CYL), sleeveMat()); sleeve.scale.set(0.045, 0.28, 0.045); sleeve.rotation.x = Math.PI / 2 - 0.15; sleeve.position.set(0.01, -0.02, 0.17); h.add(sleeve);
+  return h;
+}
+
+export function shotgunModel(noHands) {
+  var g = new THREE.Group(), metal = gunMetal(), dark = blued(), wood = gunWood();
+  [-0.019, 0.019].forEach(function (x) {
+    var b = new THREE.Mesh(geo('cyl', CYL), metal); b.scale.set(0.019, 0.62, 0.019); b.rotation.x = Math.PI / 2; b.position.set(x, 0, -0.36); g.add(b);
+    var bore = new THREE.Mesh(geo('cyl', CYL), std(0x050505)); bore.scale.set(0.013, 0.01, 0.013); bore.rotation.x = Math.PI / 2; bore.position.set(x, 0, -0.672); g.add(bore);
+  });
+  var rib = new THREE.Mesh(rbox('rib', 0.012, 0.01, 0.6, 0.004), dark); rib.position.set(0, 0.022, -0.36); g.add(rib);
+  var bead = new THREE.Mesh(geo('sph', SPH), glow(0xffe0a0, 1.2)); bead.scale.setScalar(0.006); bead.position.set(0, 0.03, -0.66); g.add(bead);
+  var pump = new THREE.Group(); pump.position.set(0, -0.034, -0.3); g.add(pump); g.userData.pump = pump;
+  var fore = new THREE.Mesh(rbox('fore', 0.066, 0.05, 0.2, 0.015), wood); pump.add(fore);
+  for (var i = 0; i < 5; i++) { var gr = new THREE.Mesh(rbox('grip', 0.068, 0.006, 0.012, 0.002), std(0x3a1e0c)); gr.position.set(0, -0.022, -0.08 + i * 0.04); pump.add(gr); }
+  var recv = new THREE.Mesh(rbox('recv', 0.075, 0.085, 0.2, 0.012), dark); recv.position.set(0, -0.012, 0.02); g.add(recv);
+  var port = new THREE.Mesh(rbox('port', 0.005, 0.03, 0.07, 0.003), std(0x0a0a0a)); port.position.set(0.039, 0.0, 0.0); g.add(port);
+  var guard = new THREE.Mesh(new THREE.TorusGeometry(0.025, 0.005, 6, 14, Math.PI), dark); guard.position.set(0, -0.055, 0.07); guard.rotation.set(0, Math.PI / 2, Math.PI); g.add(guard);
+  var stock = new THREE.Mesh(rbox('stock', 0.064, 0.1, 0.28, 0.02), wood); stock.position.set(0, -0.055, 0.24); stock.rotation.x = -0.14; g.add(stock);
+  if (!noHands) {
+    g.userData.pumpHand = hand(pump, -0.005, -0.045, 0.01, 0.1);
+    hand(g, 0.01, -0.08, 0.1, 0.4);
+  }
   return g;
 }
 
 export function pistolModel() {
-  var g = new THREE.Group(), metal = gunMetal();
-  var slide = part(geo('box', BOX), metal, 0, 0.02, -0.08, g); slide.scale.set(0.045, 0.05, 0.22); g.userData.slide = slide;
-  var grip = part(geo('box', BOX), std(0x1a1a1c, { roughness: 0.7 }), 0, -0.07, 0.02, g); grip.scale.set(0.04, 0.13, 0.06); grip.rotation.x = 0.25;
-  var sight = part(geo('box', BOX), glow(0xff5a2a, 2), 0, 0.05, -0.17, g); sight.scale.set(0.008, 0.01, 0.01);
+  var g = new THREE.Group(), metal = gunMetal(), dark = blued();
+  var slide = new THREE.Mesh(rbox('slide', 0.042, 0.042, 0.19, 0.008), metal); slide.position.set(0, 0.02, -0.07); g.add(slide); g.userData.slide = slide;
+  for (var i = 0; i < 6; i++) { var ser = new THREE.Mesh(rbox('ser', 0.044, 0.03, 0.004, 0.001), dark); ser.position.set(0, 0.022, 0.0 + i * 0.008 - 0.02); slide.add(ser); ser.position.set(0, 0, 0.06 + i * 0.008); }
+  var frame = new THREE.Mesh(rbox('frame', 0.038, 0.03, 0.16, 0.008), dark); frame.position.set(0, -0.012, -0.06); g.add(frame);
+  var barrel = new THREE.Mesh(geo('cyl', CYL), std(0x080808)); barrel.scale.set(0.009, 0.01, 0.009); barrel.rotation.x = Math.PI / 2; barrel.position.set(0, 0.022, -0.166); g.add(barrel);
+  var grip = new THREE.Mesh(rbox('pgrip', 0.036, 0.11, 0.05, 0.01), std(0x2a2420, { roughness: 0.8 })); grip.position.set(0, -0.07, 0.01); grip.rotation.x = 0.28; g.add(grip);
+  var guard = new THREE.Mesh(new THREE.TorusGeometry(0.018, 0.004, 6, 14, Math.PI), dark); guard.position.set(0, -0.03, -0.035); guard.rotation.set(0, Math.PI / 2, Math.PI); g.add(guard);
+  var sight = new THREE.Mesh(rbox('sight', 0.006, 0.01, 0.01, 0.002), glow(0xff5a2a, 1.5)); sight.position.set(0, 0.046, -0.155); g.add(sight);
+  var rear = new THREE.Mesh(rbox('rear', 0.03, 0.01, 0.008, 0.002), dark); rear.position.set(0, 0.046, 0.02); g.add(rear);
+  hand(g, 0, -0.07, 0.04, 0.3);
   return g;
 }
 
 export function fistModel() {
-  var g = new THREE.Group(), skin = std(0xc08a60, { roughness: 0.6 }), glove = std(0x3a2a20, { roughness: 0.8 });
-  var hand = part(geo('box', BOX), glove, 0, 0, 0, g); hand.scale.set(0.1, 0.09, 0.12);
-  var knuck = part(geo('box', BOX), glove, 0, 0.02, -0.07, g); knuck.scale.set(0.1, 0.05, 0.04);
-  var wrist = part(geo('cyl', CYL), skin, 0, -0.02, 0.12, g); wrist.scale.set(0.045, 0.14, 0.045); wrist.rotation.x = Math.PI / 2;
+  var g = new THREE.Group();
+  var fist = new THREE.Mesh(rbox('fist', 0.1, 0.085, 0.11, 0.03), gloveMat()); g.add(fist);
+  var knuckles = new THREE.Mesh(rbox('knuck', 0.105, 0.04, 0.03, 0.012), std(0x5a4a3a, { metalness: 0.7, roughness: 0.35 })); knuckles.position.set(0, 0.02, -0.06); g.add(knuckles);
+  var thumb = new THREE.Mesh(rbox('thumb', 0.03, 0.03, 0.06, 0.012), gloveMat()); thumb.position.set(-0.05, -0.01, -0.02); g.add(thumb);
+  var sleeve = new THREE.Mesh(geo('cyl', CYL), sleeveMat()); sleeve.scale.set(0.05, 0.3, 0.05); sleeve.rotation.x = Math.PI / 2; sleeve.position.set(0, -0.01, 0.2); g.add(sleeve);
   return g;
 }

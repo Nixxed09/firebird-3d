@@ -4,7 +4,7 @@
 import CLASSIC from '../../js/levels.js';
 
 var E1M1 = {
-  name: 'E1M1: ASH GATES', floor: 'slab', ceil: 'ceilDark', par: 90, playerAngle: 0, ceilHeight: 3.5,
+  name: 'E1M1: ASH GATES', floor: 'slab', ceil: 'ceilDark', par: 90, playerAngle: 0, ceilHeight: 2.5,
   map: [
       '#######################X######',
       '####################..t.t....#',
@@ -53,6 +53,31 @@ var E1M1 = {
       '000000000000000444444444444440',
       '000000000000000000000000000000',
       '000000000000000000000000000000'
+  ],
+  // ceilings: absolute height per cell, same digits as heights ('.' = ceilHeight, 5 m)
+  ceilings: [
+      '..............................',
+      '....................iiiiiiiii.',
+      '....................iiiiiiiii.',
+      '....................iiiiiiiii.',
+      '....................iiiiiiiii.',
+      '....................iiiiiiiii.',
+      '..............................',
+      '..gggggggggggggggggggggggggg..',
+      '..gggggggggggggggggggggggggg..',
+      '..gggggggggggggggggggggggggg..',
+      '..gggggggggggggggggggggggggg..',
+      '..gggggggggggggggggggggggggg..',
+      '..............................',
+      '...............eeeeeeeeeeeeee.',
+      '...............eeeeeeeeeeeeee.',
+      '...............eeeeeeeeeeeeee.',
+      '...............eeeeeeeeeeeeee.',
+      '.........cccccceeeeeeeeeeeeee.',
+      '...............eeeeeeeeeeeeee.',
+      '...............eeeeeeeeeeeeee.',
+      '..............................',
+      '..............................'
   ]
 };
 

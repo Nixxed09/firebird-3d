@@ -38,9 +38,10 @@ export function createRenderer(canvas, opts) {
   var gunRig = new THREE.Group();
   viewScene.add(gunRig);
   Object.keys(guns).forEach(function (k) { gunRig.add(guns[k]); guns[k].visible = false; });
-  guns.fist.position.set(0.12, -0.14, -0.3);
-  guns.pistol.position.set(0.1, -0.1, -0.28);
-  guns.shotgun.position.set(0.1, -0.12, -0.22);
+  guns.fist.position.set(0.14, -0.15, -0.3);
+  guns.pistol.position.set(0.13, -0.13, -0.3);
+  guns.shotgun.position.set(0.1, -0.13, -0.2);
+  guns.shotgun.rotation.y = 0.04; guns.pistol.rotation.y = 0.06;
   var flashSprite = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffd080, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
   flashSprite.scale.setScalar(0.035);
   viewScene.add(flashSprite);
@@ -74,6 +75,13 @@ export function createRenderer(canvas, opts) {
       var fill = new THREE.PointLight(0xc8b8a8, 1.6 + r.size * 0.02, 4 + Math.sqrt(r.size) * 1.6, 1.1);
       fill.position.set(r.x, r.y, r.z);
       scene.add(fill);
+      // and the fixture it comes from: a caged lamp on the ceiling
+      var lamp = new THREE.Group();
+      var panel = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.5), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffe6c0, emissiveIntensity: 1.1 }));
+      var cage = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.1, 0.58), new THREE.MeshStandardMaterial({ color: 0x2a2826, metalness: 0.8, roughness: 0.4, wireframe: true }));
+      lamp.add(panel, cage);
+      lamp.position.set(r.x, r.y + 0.35, r.z);
+      scene.add(lamp);
     });
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
@@ -84,6 +92,11 @@ export function createRenderer(canvas, opts) {
   }
 
   // w x h is the 3D view's own size (the page keeps it above the status bar)
+  function ceilUnder(W, x, z, fallback) {
+    var i = Math.floor(z) * W.mw + Math.floor(x);
+    return W.cells[i] === 0 ? W.ceil[i] : fallback;
+  }
+
   // open areas bounded by walls and doors, with their centre and size
   function rooms(G) {
     var W = G.W, seen = new Uint8Array(W.mw * W.mh), out = [];
@@ -99,7 +112,7 @@ export function createRenderer(canvas, opts) {
           seen[ni] = 1; q.push(ni);
         });
       }
-      if (n >= 3) out.push({ x: sx / n, z: sz / n, y: top - 0.4, size: n });
+      if (n >= 3) out.push({ x: sx / n, z: sz / n, y: ceilUnder(W, sx / n, sz / n, top) - 0.4, size: n });
     }
     return out;
   }
@@ -175,7 +188,7 @@ export function createRenderer(canvas, opts) {
       g.rotation.x = ft < 0.2 ? -Math.sin(ft / 0.2 * Math.PI) * 0.3 : 0;
     } else {
       g.rotation.x = kick * (p.weapon === 'shotgun' ? 0.35 : 0.2);
-      g.position.z = (p.weapon === 'shotgun' ? -0.22 : -0.28) + kick * 0.05;
+      g.position.z = (p.weapon === 'shotgun' ? -0.2 : -0.3) + kick * 0.05;
       if (p.weapon === 'shotgun' && g.userData.pump) {
         var pt = ft > 0.3 && ft < 0.7 ? Math.sin((ft - 0.3) / 0.4 * Math.PI) : 0;
         g.userData.pump.position.z = -0.3 + pt * 0.09;
@@ -184,7 +197,7 @@ export function createRenderer(canvas, opts) {
     }
     var flashing = ft < 0.06 && p.weapon !== 'fist' && !p.dead;
     flashSprite.visible = flashing;
-    flashSprite.position.set(g.position.x, g.position.y + 0.02, g.position.z - (p.weapon === 'shotgun' ? 0.68 : 0.22));
+    flashSprite.position.set(g.position.x, g.position.y + (p.weapon === 'shotgun' ? 0 : 0.02), g.position.z - (p.weapon === 'shotgun' ? 0.7 : 0.18));
     flashSprite.scale.setScalar((p.weapon === 'shotgun' ? 0.06 : 0.035) * (0.8 + Math.random() * 0.4));
     viewLight.intensity = flashing ? 3 : 0;
     viewLight.position.copy(flashSprite.position);

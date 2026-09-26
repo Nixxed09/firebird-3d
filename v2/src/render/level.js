@@ -41,6 +41,24 @@ function wallFace(batch, key, x, z, dir, y0, y1) {
 
 var DIRS = { E: [1, 0], W: [-1, 0], S: [0, 1], N: [0, -1] };
 
+// an axis-aligned box's visible faces, into a batch
+function boxInto(batch, key, x0, y0, z0, x1, y1, z1) {
+  batch.quad(key, [x0, y1, z0], [x0, y1, z1], [x1, y1, z1], [x1, y1, z0], [0, 1, 0], [[x0, z0], [x0, z1], [x1, z1], [x1, z0]]);
+  batch.quad(key, [x0, y0, z1], [x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [0, -1, 0], [[x0, z1], [x0, z0], [x1, z0], [x1, z1]]);
+  batch.quad(key, [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1], [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]);
+  batch.quad(key, [x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [0, 0, -1], [[x1, y0], [x0, y0], [x0, y1], [x1, y1]]);
+  batch.quad(key, [x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0], [[z1, y0], [z0, y0], [z0, y1], [z1, y1]]);
+  batch.quad(key, [x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0], [-1, 0, 0], [[z0, y0], [z1, y0], [z1, y1], [z0, y1]]);
+}
+
+// a strip along the foot of a wall (baseboard) or under a ledge lip
+function strip(batch, key, x, z, dir, y, h, d) {
+  if (dir === 'E') boxInto(batch, key, x + 1 - d, y, z, x + 1, y + h, z + 1);
+  else if (dir === 'W') boxInto(batch, key, x, y, z, x + d, y + h, z + 1);
+  else if (dir === 'S') boxInto(batch, key, x, y, z + 1 - d, x + 1, y + h, z + 1);
+  else boxInto(batch, key, x, y, z, x + 1, y + h, z + d);
+}
+
 // the most common wall in the level, used for step and ledge faces
 function mainWall(W) {
   var count = {};
@@ -83,13 +101,28 @@ export function buildLevel(G) {
         if (!open(nx, nz)) {
           if (nc === 9) { var sw = { x: nx, z: nz, faces: new Batch(), dir: d }; wallFace(sw.faces, 'sw', x, z, d, f, c); switches.push(sw); }
           else wallFace(batch, 'wall' + (nc >= 1 && nc <= 5 ? nc : 1), x, z, d, f, c);
+          if (!DOOR_IDS[cellAt(W, x, z)]) {
+            strip(batch, 'trim', x, z, d, f, 0.09, 0.035);          // baseboard
+            if (c - f > 2) strip(batch, 'trim', x, z, d, c - 0.12, 0.08, 0.05); // crown moulding in tall rooms
+          }
           continue;
         }
         var nf = base(nx, nz), ncl = ceilAt(W, nx, nz);
-        if (nf > f) wallFace(batch, trim, x, z, d, f, Math.min(nf, c));   // a step or ledge face
+        if (nf > f) {
+          wallFace(batch, trim, x, z, d, f, Math.min(nf, c));   // a step or ledge face
+          if (nf - f > 0.3) strip(batch, 'trim', x, z, d, nf - 0.07, 0.07, 0.06); // a lip on real ledges
+        }
         if (ncl < c) wallFace(batch, trim, x, z, d, Math.max(ncl, f), c); // a lintel above an opening
       }
     }
+  }
+
+  // beams across tall ceilings every third row, so big rooms have a sense of scale
+  for (var bz = 0; bz < W.mh; bz++) for (var bx = 0; bx < W.mw; bx++) {
+    if (bz % 3 !== 1 || cellAt(W, bx, bz) !== 0) continue;
+    var bc = ceilAt(W, bx, bz);
+    if (bc - floorAt(W, bx, bz) < 2.6) continue;
+    boxInto(batch, 'beam', bx, bc - 0.2, bz + 0.38, bx + 1, bc, bz + 0.62);
   }
 
   var mats = {};
@@ -97,6 +130,8 @@ export function buildLevel(G) {
     if (mats[key]) return mats[key];
     if (key === 'floor') return (mats[key] = makeMaterial(floorSet(L.floor)));
     if (key === 'ceil') return (mats[key] = makeMaterial(floorSet(L.ceil)));
+    if (key === 'trim') return (mats[key] = makeMaterial(wallSet(3), { color: 0x9a8a78, metalness: 0.6, roughness: 0.5 }));
+    if (key === 'beam') return (mats[key] = makeMaterial(wallSet(3), { color: 0x6a5a4a, metalness: 0.4 }));
     return (mats[key] = makeMaterial(wallSet(+key.slice(4))));
   }
   batch.meshes(mat).forEach(function (m) { m.receiveShadow = true; group.add(m); });
