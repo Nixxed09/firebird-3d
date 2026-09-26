@@ -307,3 +307,5 @@ var SND = (function () {
     isMusicOn: function () { return musicOn; }
   };
 })();
+
+if (typeof module !== 'undefined') module.exports = SND;

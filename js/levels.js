@@ -164,3 +164,5 @@ var LEVELS = [
     if (starts !== 1) throw new Error(LEVELS[L].name + ' has ' + starts + ' player starts');
   }
 })();
+
+if (typeof module !== 'undefined') module.exports = LEVELS;
