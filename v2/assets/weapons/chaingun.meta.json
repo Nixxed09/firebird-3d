@@ -1,0 +1,15 @@
+{
+  "file": "weapons/chaingun.glb",
+  "type": "weapons",
+  "size_m": [
+    0.6412,
+    0.6452,
+    1.4071
+  ],
+  "triangles": 9720,
+  "budget": [
+    4000,
+    10000
+  ],
+  "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates."
+}

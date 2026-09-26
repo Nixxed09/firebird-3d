@@ -1,0 +1,15 @@
+{
+  "file": "pickups/pickup_pistol.glb",
+  "type": "pickups",
+  "size_m": [
+    0.274,
+    0.4735,
+    0.4968
+  ],
+  "triangles": 4320,
+  "budget": [
+    4000,
+    10000
+  ],
+  "notes": "Ground-level origin; rotate root for idle pickup spin."
+}

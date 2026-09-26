@@ -1,0 +1,186 @@
+{
+  "source": "Re-imported delivered GLBs in Blender 4.5",
+  "clip_columns": [
+    "idle",
+    "walk",
+    "attack_windup",
+    "attack",
+    "pain",
+    "death"
+  ],
+  "model_rows": [
+    "imp",
+    "gnasher",
+    "ember_knight",
+    "riley"
+  ],
+  "model_catalogue_order": [
+    "ember_knight",
+    "gnasher",
+    "imp",
+    "riley",
+    "chaingun",
+    "fist",
+    "pistol",
+    "rocket_launcher",
+    "shotgun",
+    "ceiling_lamp",
+    "ceiling_lamp_broken",
+    "explosive_barrel",
+    "hanging_chain",
+    "pipe_elbow",
+    "pipe_straight",
+    "pipe_valve",
+    "standing_torch",
+    "wooden_crate",
+    "armour_vest",
+    "bullet_clip",
+    "keycard_blue",
+    "keycard_red",
+    "medkit_large",
+    "medkit_small",
+    "phoenix_orb",
+    "pickup_chaingun",
+    "pickup_pistol",
+    "pickup_rocket_launcher",
+    "pickup_shotgun",
+    "rocket_box",
+    "shell_box"
+  ],
+  "visibility": {
+    "distance_m": 20,
+    "eye_height_m": 1.6,
+    "horizontal_fov_degrees": 75,
+    "pixels_per_view": [
+      512,
+      512
+    ],
+    "shield_hidden": true
+  },
+  "results": [
+    {
+      "file": "demons/imp.glb",
+      "height_m": 1.7,
+      "feet_y_m": -0.0,
+      "animations": {
+        "idle": {
+          "sample_frame": 12,
+          "max_vertex_displacement_m": 0.02479
+        },
+        "walk": {
+          "sample_frame": 6,
+          "max_vertex_displacement_m": 0.37526
+        },
+        "attack_windup": {
+          "sample_frame": 18,
+          "max_vertex_displacement_m": 1.07043
+        },
+        "attack": {
+          "sample_frame": 3,
+          "max_vertex_displacement_m": 0.96068
+        },
+        "pain": {
+          "sample_frame": 2,
+          "max_vertex_displacement_m": 0.25431
+        },
+        "death": {
+          "sample_frame": 30,
+          "max_vertex_displacement_m": 1.79692
+        }
+      }
+    },
+    {
+      "file": "demons/gnasher.glb",
+      "height_m": 1.4,
+      "feet_y_m": -0.0,
+      "animations": {
+        "idle": {
+          "sample_frame": 12,
+          "max_vertex_displacement_m": 0.04075
+        },
+        "walk": {
+          "sample_frame": 6,
+          "max_vertex_displacement_m": 0.43164
+        },
+        "attack_windup": {
+          "sample_frame": 18,
+          "max_vertex_displacement_m": 0.42961
+        },
+        "attack": {
+          "sample_frame": 3,
+          "max_vertex_displacement_m": 0.27819
+        },
+        "pain": {
+          "sample_frame": 2,
+          "max_vertex_displacement_m": 0.21744
+        },
+        "death": {
+          "sample_frame": 30,
+          "max_vertex_displacement_m": 1.30826
+        }
+      }
+    },
+    {
+      "file": "demons/ember_knight.glb",
+      "height_m": 2.6,
+      "feet_y_m": -0.0,
+      "animations": {
+        "idle": {
+          "sample_frame": 12,
+          "max_vertex_displacement_m": 0.03199
+        },
+        "walk": {
+          "sample_frame": 6,
+          "max_vertex_displacement_m": 0.5556
+        },
+        "attack_windup": {
+          "sample_frame": 18,
+          "max_vertex_displacement_m": 1.63712
+        },
+        "attack": {
+          "sample_frame": 3,
+          "max_vertex_displacement_m": 1.46927
+        },
+        "pain": {
+          "sample_frame": 2,
+          "max_vertex_displacement_m": 0.38895
+        },
+        "death": {
+          "sample_frame": 30,
+          "max_vertex_displacement_m": 2.57828
+        }
+      }
+    },
+    {
+      "file": "demons/riley.glb",
+      "height_m": 1.9,
+      "feet_y_m": -0.0,
+      "animations": {
+        "idle": {
+          "sample_frame": 12,
+          "max_vertex_displacement_m": 0.02236
+        },
+        "walk": {
+          "sample_frame": 6,
+          "max_vertex_displacement_m": 0.46342
+        },
+        "attack_windup": {
+          "sample_frame": 18,
+          "max_vertex_displacement_m": 1.35328
+        },
+        "attack": {
+          "sample_frame": 3,
+          "max_vertex_displacement_m": 1.21454
+        },
+        "pain": {
+          "sample_frame": 2,
+          "max_vertex_displacement_m": 0.23619
+        },
+        "death": {
+          "sample_frame": 30,
+          "max_vertex_displacement_m": 1.8313
+        }
+      }
+    }
+  ]
+}

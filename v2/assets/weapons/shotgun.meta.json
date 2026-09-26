@@ -1,0 +1,15 @@
+{
+  "file": "weapons/shotgun.glb",
+  "type": "weapons",
+  "size_m": [
+    0.43,
+    0.5657,
+    1.4097
+  ],
+  "triangles": 8308,
+  "budget": [
+    4000,
+    10000
+  ],
+  "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates."
+}

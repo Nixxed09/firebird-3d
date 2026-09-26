@@ -1,0 +1,15 @@
+{
+  "file": "demons/gnasher.glb",
+  "type": "demons",
+  "size_m": [
+    1.2585,
+    1.4,
+    0.977
+  ],
+  "triangles": 5204,
+  "budget": [
+    3000,
+    8000
+  ],
+  "notes": "Six in-place clips; windup precedes attack; no gore."
+}
