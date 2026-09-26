@@ -1,0 +1,376 @@
+{
+  "schema": 1,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "files": [
+    {
+      "file": "demons/ember_knight.glb",
+      "type": "demons",
+      "bytes": 1050736,
+      "size_m": [
+        1.6198,
+        2.6,
+        0.8193
+      ],
+      "triangles": 7984,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; windup precedes attack; no gore.",
+      "materials": [
+        "iron",
+        "black",
+        "brass",
+        "ember",
+        "bone",
+        "char"
+      ],
+      "preview": "previews/ember_knight.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "demons/ember_knight.meta.json",
+      "type": "json",
+      "bytes": 252,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "demons/gnasher.glb",
+      "type": "demons",
+      "bytes": 493396,
+      "size_m": [
+        1.2585,
+        1.4,
+        0.977
+      ],
+      "triangles": 5204,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; windup precedes attack; no gore.",
+      "materials": [
+        "char",
+        "skin",
+        "black",
+        "bone",
+        "ember"
+      ],
+      "preview": "previews/gnasher.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "demons/gnasher.meta.json",
+      "type": "json",
+      "bytes": 246,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "demons/imp.glb",
+      "type": "demons",
+      "bytes": 619192,
+      "size_m": [
+        1.0591,
+        1.7,
+        0.6734
+      ],
+      "triangles": 5148,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; windup precedes attack; no gore.",
+      "materials": [
+        "skin",
+        "char",
+        "ember",
+        "black",
+        "bone"
+      ],
+      "preview": "previews/imp.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "demons/imp.meta.json",
+      "type": "json",
+      "bytes": 243,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "demons/riley.glb",
+      "type": "demons",
+      "bytes": 883676,
+      "size_m": [
+        1.56,
+        1.9,
+        1.24
+      ],
+      "triangles": 6824,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig",
+        "shield"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; +Z forward. Riley tell material supports runtime white emissive flash.",
+      "materials": [
+        "holo",
+        "tell",
+        "brass",
+        "iron",
+        "cyan",
+        "edge",
+        "gold",
+        "shield"
+      ],
+      "preview": "previews/riley.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "demons/riley.meta.json",
+      "type": "json",
+      "bytes": 279,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "previews/ember_knight.png",
+      "type": "preview",
+      "bytes": 356694,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/gnasher.png",
+      "type": "preview",
+      "bytes": 375675,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/imp.png",
+      "type": "preview",
+      "bytes": 354780,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/riley.png",
+      "type": "preview",
+      "bytes": 360619,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "README.md",
+      "type": "md",
+      "bytes": 2763,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "validation.json",
+      "type": "json",
+      "bytes": 2053,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "validation.md",
+      "type": "md",
+      "bytes": 599,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    }
+  ]
+}

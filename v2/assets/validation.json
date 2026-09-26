@@ -1,0 +1,137 @@
+{
+  "validator": "2.0.0-dev.3.10",
+  "models": 4,
+  "errors": 0,
+  "warnings": 0,
+  "contract_failures": [],
+  "results": [
+    {
+      "file": "demons/ember_knight.glb",
+      "triangles": 7984,
+      "budget": [
+        3000,
+        8000
+      ],
+      "bytes": 1050736,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "demons/gnasher.glb",
+      "triangles": 5204,
+      "budget": [
+        3000,
+        8000
+      ],
+      "bytes": 493396,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "demons/imp.glb",
+      "triangles": 5148,
+      "budget": [
+        3000,
+        8000
+      ],
+      "bytes": 619192,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "demons/riley.glb",
+      "triangles": 6824,
+      "budget": [
+        3000,
+        8000
+      ],
+      "bytes": 883676,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    }
+  ]
+}

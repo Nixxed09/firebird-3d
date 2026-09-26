@@ -1,0 +1,15 @@
+{
+  "file": "demons/riley.glb",
+  "type": "demons",
+  "size_m": [
+    1.56,
+    1.9,
+    1.24
+  ],
+  "triangles": 6824,
+  "budget": [
+    3000,
+    8000
+  ],
+  "notes": "Six in-place clips; +Z forward. Riley tell material supports runtime white emissive flash."
+}
