@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "imp",
+      "type": "demon",
+      "file": "imp.glb",
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "source": "Demon by Quaternius (CC0 1.0), https://poly.pizza/m/LnfIziKv4o"
+    },
+    {
+      "id": "gnasher",
+      "type": "demon",
+      "file": "gnasher.glb",
+      "animations": [
+        "attack",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "source": "Yeti by Quaternius (CC0 1.0), https://poly.pizza/m/S1E7idPFhe"
+    },
+    {
+      "id": "knight",
+      "type": "demon",
+      "file": "knight.glb",
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "source": "Blue Demon by Quaternius (CC0 1.0), https://poly.pizza/m/S7jYW6Amye"
+    },
+    {
+      "id": "riley",
+      "type": "demon",
+      "file": "riley.glb",
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "punch",
+        "roll",
+        "run_shoot",
+        "walk"
+      ],
+      "nodes": [
+        "shield"
+      ],
+      "source": "Adventurer by Quaternius (CC0 1.0), https://poly.pizza/m/ZwF0K7WBmu"
+    },
+    {
+      "id": "pistol",
+      "type": "weapon",
+      "file": "pistol.glb",
+      "source": "Pistol by Quaternius (CC0 1.0), https://poly.pizza/m/52kQzphmeF"
+    },
+    {
+      "id": "shotgun",
+      "type": "weapon",
+      "file": "shotgun.glb",
+      "source": "Shotgun by Quaternius (CC0 1.0), https://poly.pizza/m/8Z4HaN1NyS"
+    },
+    {
+      "id": "barrel",
+      "type": "prop",
+      "file": "barrel.glb",
+      "source": "Exploding Barrel by Quaternius (CC0 1.0), https://poly.pizza/m/1orHe0kCc1"
+    }
+  ]
+}
