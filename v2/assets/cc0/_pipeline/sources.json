@@ -52,7 +52,7 @@
         },
         "Eye_White": {
           "color": "#ffe9a0",
-          "emit": 0.7
+          "emit": 0.3
         }
       }
     },
