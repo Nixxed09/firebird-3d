@@ -185,8 +185,9 @@ for (var i = 0; i < SPOTS.length; i++) {
     continue;
   }
   var c = await compare(page, fs.readFileSync(basePath).toString('base64'), png);
-  // frozen frames are byte-identical run to run; allow a hair for GPU rounding
-  if (c.changed > 0.005) {
+  // frozen, seeded frames (?debug seeds everything, default seed 1) come out
+  // identical run to run (0.0% over 3 runs); 0.1% leaves a hair for GPU rounding
+  if (c.changed > 0.001) {
     if (c.diff) fs.writeFileSync(path.join(OUT, s[0] + '-diff.png'), Buffer.from(c.diff.split(',')[1], 'base64'));
     var msg = s[0] + ' looks different from its baseline (' + (c.changed * 100).toFixed(1) + '% of pixels; see ' + s[0] + '-diff.png)';
     if (STRICT) fail(msg); else warn(msg);

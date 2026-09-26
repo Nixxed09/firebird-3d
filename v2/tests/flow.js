@@ -18,7 +18,10 @@
 //              boss at range makes no "progress" but isn't being lost.)
 //   intensity  1 + 9 x (0.6 x damage over the last 2 s / 30, capped at 1
 //                      + 0.4 x awake demons within 10 cells / 4, capped at 1)
-//   P5         the bucket holding the peak; "ends high" = it is in the last quarter
+//   P5         the bucket holding the peak; "ends high" = it is in the last quarter.
+//              The averaged curve hides peaks that land at different moments, so
+//              P5 is also measured per episode (intensity smoothed over 2.5 s):
+//              where each episode peaks, how high, and the share ending high
 //   S2 weenie  line of sight from eye height, within 40 cells, to the level's final
 //              destination (the boss, or the exit switch's face): when it is first
 //              seen (share of level time, and share of the route walked), and how
@@ -221,6 +224,17 @@ export function summarise(levelTraces, W, L) {
   var peak = 0;
   ints.forEach(function (v, b) { if (v != null && (ints[peak] == null || v > ints[peak])) peak = b; });
 
+  // P5 per episode: averaging across episodes flattens the curve, so also
+  // find each episode's own peak
+  var epPeakAt = [], epPeakVal = [], epEndHigh = 0, epN = 0;
+  levelTraces.forEach(function (tr) {
+    var s = tr.samples; if (s.length < 8) return; epN++;
+    var sm = s.map(function (r, i) { var a = s.slice(Math.max(0, i - 2), i + 3); return a.reduce(function (t, x) { return t + intensity(x); }, 0) / a.length; });
+    var k = sm.indexOf(Math.max.apply(null, sm));
+    epPeakAt.push(k / s.length); epPeakVal.push(sm[k]);
+    if (k / s.length >= 0.75) epEndHigh++;
+  });
+
   // S2: the weenie, per episode, then medians
   function median(a) { if (!a.length) return null; a = a.slice().sort(function (x, y) { return x - y; }); return +a[a.length >> 1].toFixed(2); }
   var destField = null;
@@ -283,6 +297,7 @@ export function summarise(levelTraces, W, L) {
     episodes: levelTraces.length,
     intensity: ints,
     peakBucket: peak, peakValue: ints[peak], endsHigh: peak >= BUCKETS * 0.75,
+    perEpisode: { peakAtMedian: median(epPeakAt), peakValueMedian: median(epPeakVal), endsHighShare: epN ? +(epEndHigh / epN).toFixed(2) : null },
     weenie: weenie,
     choices: choices,
     lostShare: total ? +(lostSamples / total).toFixed(3) : 0,

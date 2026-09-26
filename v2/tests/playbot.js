@@ -27,6 +27,20 @@ var EXIT_SWITCH = 9;
 var HEALS = { h: 10, '+': 25, P: 100 };
 var NB = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
+// The engine's own limits (tryPickup in src/sim/game.js): a pickup you are
+// full of stays on the floor, flagged e.touching.
+function canTake(e, p) {
+  if (e.touching) return false;
+  switch (e.item) {
+    case 'h': case '+': return p.hp < 100;
+    case 'P': return p.hp < 200;
+    case 'A': return p.armor < 100;
+    case 'b': return p.ammo.bullets < 200;
+    case 'a': return p.ammo.shells < 50;
+  }
+  return true;
+}
+
 function n01(v) { return Math.max(0, Math.min(1, (v + 1) / 2)); } // -1..1 -> 0..1
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 function angDiff(a, b) { return Math.atan2(Math.sin(a - b), Math.cos(a - b)); }
@@ -217,6 +231,7 @@ PlayBot.prototype.options = function (threats) {
   G.ents.forEach(function (e) {
     if (e.kind !== 'pickup' || e.gone) return;
     if (self.firstTimer && !self.knows(Math.floor(e.x), Math.floor(e.z))) return;
+    if (!canTake(e, p)) return; // full already: standing on it does nothing
     var it = e.item, sc = null, key = 'item:' + Math.floor(e.x) + ',' + Math.floor(e.z);
     if (HEALS[it]) { if (p.hp >= 100 && it !== 'P') return; sc = hurt ? 2.2 : 0.35 + st.completionism * 0.5 + (it === 'P' ? 0.8 : 0); }
     else if (it === 'r' || it === 'u') sc = 1.6;
