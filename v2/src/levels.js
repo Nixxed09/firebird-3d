@@ -4,12 +4,37 @@
 import CLASSIC from '../../js/levels.js';
 
 var E1M1 = {
-  name: 'E1M1: ASH GATES', floor: 'slab', ceil: 'ceilDark', par: 90, playerAngle: 0, ceilHeight: 2.5,
+  name: 'E1M1: ASH GATES', floor: 'slab', ceil: 'ceilDark', par: 240, playerAngle: 0, ceilHeight: 2.5,
+  // Riley waits at the top to spar: she only uses what this level has taught,
+  // taps out early, and remembers how you fought for the rematch in E1M4
+  boss: {
+    sparring: true, hpScale: 0.4, moves: ['volley', 'lead', 'flank', 'close', 'backoff', 'seek'],
+    intro: "THERE YOU ARE! LET'S SPAR. I'LL WATCH HOW YOU FIGHT. READY?"
+  },
+  // Riley on the radio: each line plays once, when you walk into its box [x0, z0, x1, z1]
+  triggers: [
+    { box: [2, 25, 8, 30], say: "HI! I'M RILEY. I'M WAITING FOR YOU AT THE TOP. LOOK AROUND WITH THE MOUSE, MOVE WITH WASD." },
+    { box: [7, 26, 9, 28], say: "DOORS OPEN WITH E. GO ON, TRY IT." },
+    { box: [15, 23, 28, 29], say: "SEE THE SHOTGUN UP THERE? JUMP WITH SPACE." },
+    { box: [14, 20, 28, 22], say: "NICE VIEW. THE BLUE KEYCARD IS DOWN IN THE HALL. THE BLUE DOOR IS ACROSS FROM YOU." },
+    { box: [2, 17, 5, 21], say: "GOT IT? NOW THE BLUE DOOR. THE LIFT BEHIND IT BRINGS YOU UP TO ME." },
+    { box: [20, 11, 28, 15], say: "LAST STOP. GRAB WHAT YOU NEED. WHEN MY VISOR FLASHES WHITE, I'M ABOUT TO SHOOT. MOVE!" }
+  ],
   map: [
-      '#######################X######',
+      '##############################',
+      '##############.t...........t.#',
+      '##############...............#',
+      '##############....T..Y..T....#',
+      '##############....T.....T....#',
+      '##############.h...........h.#',
+      '##############...............#',
+      '##############....T.....T....#',
+      '##############.......a.......#',
+      '##############........t.t....#',
+      '#######################D######',
       '####################..t.t....#',
       '####################.........#',
-      '####################..i..+...#',
+      '####################.....+...#',
       '####################....A....#',
       '####################...L.....#',
       '#######################U######',
@@ -28,9 +53,18 @@ var E1M1 = {
       '##.......######.t.........t.##',
       '##...h...#####################',
       '##############################'
-
   ],
   heights: [
+      '000000000000000000000000000000',
+      '00000000000000aa88888888888aa0',
+      '00000000000000aa88888888888aa0',
+      '00000000000000aa88888888888aa0',
+      '00000000000000aa88888888888aa0',
+      '00000000000000aa88888888888aa0',
+      '00000000000000aa88888888888aa0',
+      '00000000000000aa88888888888aa0',
+      '00000000000000aa88888888888aa0',
+      '00000000000000aa88888888888aa0',
       '000000000000000000000000000000',
       '000000000000000000008888888880',
       '000000000000000000008888888880',
@@ -56,6 +90,16 @@ var E1M1 = {
   ],
   // ceilings: absolute height per cell, same digits as heights ('.' = ceilHeight, 5 m)
   ceilings: [
+      '..............................',
+      '..............qqqqqqqqqqqqqqq.',
+      '..............qqqqqqqqqqqqqqq.',
+      '..............qqqqqqqqqqqqqqq.',
+      '..............qqqqqqqqqqqqqqq.',
+      '..............qqqqqqqqqqqqqqq.',
+      '..............qqqqqqqqqqqqqqq.',
+      '..............qqqqqqqqqqqqqqq.',
+      '..............qqqqqqqqqqqqqqq.',
+      '..............qqqqqqqqqqqqqqq.',
       '..............................',
       '....................iiiiiiiii.',
       '....................iiiiiiiii.',
