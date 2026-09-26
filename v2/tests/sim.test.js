@@ -151,7 +151,9 @@ test('rocket pickup fires a travelling projectile with splash damage', function 
   p.ang = 0; p.pitch = 0;
   var before = p.ammo.rockets;
   g.setFire(true); g.update(1 / 60); g.setFire(false);
-  assert.ok(G.ents.some(function (e) { return e.playerRocket; }), 'a rocket is visible in flight');
+  var projectile = G.ents.find(function (e) { return e.playerRocket; });
+  assert.ok(projectile, 'a rocket is visible in flight');
+  assert.ok(projectile.z > p.z + 0.05 && projectile.vz < 0, 'it exits the right-hand muzzle and converges on the reticle');
   run(g, 0.2);
   assert.strictEqual(p.ammo.rockets, before - 1);
   assert.ok(near.hp < 200 && splash.hp < 200, 'impact damages the target and its neighbour');

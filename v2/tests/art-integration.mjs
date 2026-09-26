@@ -26,6 +26,7 @@ const browser = await puppeteer.launch({
 });
 try {
   const page = await browser.newPage();
+  await page.setViewport({ width: 1280, height: 800 });
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(`http://127.0.0.1:${server.address().port}/v2/index.html?debug`, { waitUntil: 'load' });
@@ -33,14 +34,24 @@ try {
   async function loaded(ids) {
     await page.waitForFunction(want => want.every(id => window.FIREBIRD2.assets().loaded.includes('assets:' + id)), { timeout: 30000 }, ids);
   }
+  async function capture(name) {
+    if (!process.argv.includes('--capture')) return;
+    const out = path.join(root, 'v2', 'captures', 'http-' + name + '.png');
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    await new Promise(resolve => setTimeout(resolve, 700));
+    await page.screenshot({ path: out });
+  }
   await loaded(['imp']);
-  await page.evaluate(() => { const F = window.FIREBIRD2; F.freeze(true); F.launch(1); F.state().p.weapons.chaingun = true; });
+  await page.evaluate(() => { const F = window.FIREBIRD2; F.freeze(true); F.launch(1); const G = F.state(), p = G.p; G.notice = null; G.msgs.length = 0; p.weapons.chaingun = true; p.weapon = 'chaingun'; p.ammo.bullets = 100; p.x = 18.5; p.z = 7.5; p.ang = Math.PI / 2; p.raiseT = 0; });
   await loaded(['chaingun', 'pickupchaingun']);
-  await page.evaluate(() => { const F = window.FIREBIRD2; F.launch(2); F.state().p.weapons.rocket = true; });
+  await capture('chaingun');
+  await page.evaluate(() => { const F = window.FIREBIRD2; F.launch(2); const G = F.state(), p = G.p; G.notice = null; G.msgs.length = 0; p.weapons.rocket = true; p.weapon = 'rocket'; p.ammo.rockets = 8; p.x = 16.5; p.z = 23.5; p.ang = -Math.PI / 2; p.raiseT = 0; });
   await loaded(['rocketlauncher', 'pickuprocketlauncher', 'rocketbox']);
+  await capture('rocket');
   await page.evaluate(() => window.FIREBIRD2.launch(0));
   await loaded(['riley']);
   await page.waitForFunction(() => window.FIREBIRD2.models().some(m => m.kind === 'riley' && m.authored), { timeout: 30000 });
+  await capture('riley');
   assert.deepEqual(errors, [], 'no browser page errors');
   const art = await page.evaluate(() => window.FIREBIRD2.assets());
   assert.deepEqual(art.problems, [], 'every requested model and texture loaded');

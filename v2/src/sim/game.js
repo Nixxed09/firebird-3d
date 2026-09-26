@@ -354,11 +354,25 @@ export function createGame(opts) {
     if (pd < R && hasLOS(G.W, e.x, e.y + 0.3, e.z, G.p.x, eyeY(), G.p.z)) hurtPlayer(((R - pd) / R * 70) | 0, e);
   }
 
+  function muzzlePoint(p, weapon) {
+    var cp = Math.cos(p.pitch), forward = weapon === 'pistol' ? 0.4 : weapon === 'shotgun' ? 0.65 : 0.55;
+    var side = weapon === 'shotgun' ? 0.1 : 0.14;
+    return {
+      x: p.x + Math.cos(p.ang) * cp * forward - Math.sin(p.ang) * side,
+      y: eyeY() + Math.sin(p.pitch) * forward - 0.12,
+      z: p.z + Math.sin(p.ang) * cp * forward + Math.cos(p.ang) * side
+    };
+  }
+
   function fireRocket() {
     var p = G.p, cp = Math.cos(p.pitch), dx = Math.cos(p.ang) * cp, dz = Math.sin(p.ang) * cp, dy = Math.sin(p.pitch);
+    var from = muzzlePoint(p, 'rocket');
+    // Leave the right-hand tube, then converge on the crosshair at 16 cells.
+    var ax = p.x + dx * 16 - from.x, ay = eyeY() + dy * 16 - from.y, az = p.z + dz * 16 - from.z;
+    var len = Math.hypot(ax, ay, az);
     G.ents.push({ kind: 'proj', playerRocket: true, owner: p,
-      x: p.x + dx * 0.45, y: eyeY() - 0.08 + dy * 0.45, z: p.z + dz * 0.45,
-      vx: dx * 18, vy: dy * 18, vz: dz * 18, h: 0.2, animT: 0, dmg: 0 });
+      x: from.x, y: from.y, z: from.z,
+      vx: ax / len * 18, vy: ay / len * 18, vz: az / len * 18, h: 0.2, animT: 0, dmg: 0 });
   }
 
   function explodeRocket(e) {
@@ -1010,7 +1024,7 @@ export function createGame(opts) {
         p.cool = wep.rate; p.fireT = 0;
         sound(p.weapon === 'fist' ? 'punch' : p.weapon === 'chaingun' ? 'pistol' : p.weapon === 'rocket' ? 'shotgun' : p.weapon);
         if (p.weapon === 'shotgun') sound('pump');
-        if (!wep.melee) { shake(wep.shake); ev('fx', 'muzzle', p.x + Math.cos(p.ang) * 0.4, eyeY() - 0.1, p.z + Math.sin(p.ang) * 0.4, { weapon: p.weapon }); }
+        if (!wep.melee) { var muzzle = muzzlePoint(p, p.weapon); shake(wep.shake); ev('fx', 'muzzle', muzzle.x, muzzle.y, muzzle.z, { weapon: p.weapon }); }
         if (rileyActive(G.boss)) RILEY.noteShot(G.boss.profile, p.weapon, playerDist(G.boss.x, G.boss.z));
         G.shotId++; G.firing = true;
         if (wep.rocket) fireRocket();

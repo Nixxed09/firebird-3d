@@ -35,8 +35,8 @@ function wallFace(batch, key, x, z, dir, y0, y1) {
   else if (dir === 'S') { a = [x, z + 1]; b = [x + 1, z + 1]; n = [0, 0, -1]; u0 = x; u1 = x + 1; }
   else { a = [x + 1, z]; b = [x, z]; n = [0, 0, 1]; u0 = x + 1; u1 = x; }
   batch.quad(key,
-    [a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], n,
-    [[u0, y0], [u1, y0], [u1, y1], [u0, y1]]);
+    [b[0], y0, b[1]], [a[0], y0, a[1]], [a[0], y1, a[1]], [b[0], y1, b[1]], n,
+    [[u1, y0], [u0, y0], [u0, y1], [u1, y1]]);
 }
 
 var DIRS = { E: [1, 0], W: [-1, 0], S: [0, 1], N: [0, -1] };

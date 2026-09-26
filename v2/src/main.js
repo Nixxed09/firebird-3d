@@ -13,7 +13,7 @@ var v = SETTINGS.v;
 if (v.invertY === undefined) v.invertY = false;
 if (v.fov === undefined) v.fov = 78;
 
-var W = 320, H = 200, VH = 168;
+var W = 320, H = 200, VH = H;
 var view = document.getElementById('view'), hudC = document.getElementById('hud');
 hudC.width = W; hudC.height = H;
 var ctx = hudC.getContext('2d');
@@ -34,7 +34,7 @@ var mode = 'title', modeT = 0, started = false, mapOpen = false, locked = false,
 function diff() { return DIFFS[v.difficulty] || DIFFS[1]; }
 function applySettings() { SND.setVolume(v.volume / 10); gfx.camera.fov = v.fov; gfx.camera.updateProjectionMatrix(); }
 
-// ---- layout: the 3D view sits above the status bar -------------------------------------
+// ---- layout: full-screen 3D with a compact HUD over its lower edge ---------------------
 
 function layout() {
   var sw = window.innerWidth, sh = window.innerHeight, w = Math.min(sw, sh * 1.6), h = w / 1.6;
@@ -157,12 +157,16 @@ function fireLine(y, t, seed) {
 }
 function titleBg(c, t) {
   ctx.fillStyle = 'rgba(8,6,4,0.55)'; ctx.fillRect(0, 0, W, H);
-  fireLine(H - 6, t, 0); fireLine(H - 2, t * 1.3, 2);
+  fireLine(H - 2, t, 0); fireLine(H, t * 1.3, 2);
   ART.drawText(ctx, 'FIREBIRD', W / 2, 10, { scale: 4, color: '#e03828', shadow: '#401008', center: true });
   ART.drawText(ctx, 'FIREBIRD', W / 2 - 1, 9, { scale: 4, color: '#ff9a28', center: true });
   ART.drawText(ctx, '3D', W / 2, 34, { scale: 5, color: '#ffd23e', shadow: '#803008', center: true });
   ART.drawText(ctx, 'EPISODE ONE: KNEE-DEEP IN THE ASHES', W / 2, 64, { color: '#c8c0b0', center: true });
   ART.drawText(ctx, 'A NIX GAMES PRODUCTION BY PHOENIX', W / 2, 72, { color: '#8a8478', center: true });
+  ctx.fillStyle = 'rgba(5,10,13,0.82)'; ctx.fillRect(76, 78, 168, 84);
+  ctx.fillStyle = '#74513c'; ctx.fillRect(76, 78, 168, 1); ctx.fillRect(76, 161, 168, 1);
+  ctx.fillStyle = '#ff9a28'; ctx.fillRect(76, 78, 25, 2); ctx.fillRect(76, 78, 2, 10);
+  ctx.fillRect(219, 160, 25, 2); ctx.fillRect(242, 152, 2, 10);
 }
 function menuBg(c, t) {
   ctx.fillStyle = mode === 'game' ? 'rgba(4,3,2,0.8)' : 'rgba(8,6,4,0.7)';
@@ -174,7 +178,7 @@ function onOff(b) { return b ? 'ON' : 'OFF'; }
 function mainScreen() {
   var pr = SETTINGS.progress;
   return {
-    drawBg: titleBg, scale: 2, top: 86, gap: 13, descY: 156, footerY: 172,
+    drawBg: titleBg, scale: 2, top: 84, gap: 15, x0: 88, x1: 232, descY: 165, footerY: 176,
     items: function () {
       var list = [];
       if (pr.unlocked > 0) list.push({ label: 'CONTINUE', action: function () { launch(pr.unlocked); }, desc: function () { return 'START ' + LEVELS[pr.unlocked].name + ' ON ' + diff().name + '.'; } });
