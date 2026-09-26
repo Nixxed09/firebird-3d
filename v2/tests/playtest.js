@@ -321,7 +321,11 @@ function personasOf(all) { var o = {}; all.forEach(function (x) { o[x.run.person
 // against how much health its monsters have. Independent of how anyone plays.
 function economy(L, am) {
   var s = L.map.join(''), n = function (ch) { return s.split(ch).length - 1; };
-  var hp = n('i') * 40 + n('g') * 110 + n('K') * 400 + n('Y') * (900 + 2 * 40);
+  // Riley: 900 hp plus a round of summoned imps; a sparring Riley (L.boss) has
+  // a fraction of it and never summons
+  var spar = L.boss && L.boss.sparring;
+  var riley = spar ? Math.round(900 * (L.boss.hpScale || 1)) : 900 + 2 * 40;
+  var hp = n('i') * 40 + n('g') * 110 + n('K') * 400 + n('Y') * riley;
   var bullets = n('b') * 10 * am, shells = n('a') * 4 * am + n('2') * 8 * am;
   return { monsterHp: hp, bullets: bullets, shells: shells, maxDamage: bullets * 10 + shells * 70 };
 }
