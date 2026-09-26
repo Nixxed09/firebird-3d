@@ -123,6 +123,42 @@ test('same seed, same run', function () {
   assert.strictEqual(trace(7), trace(7));
 });
 
+test('chaingun pickup unlocks rapid fire and carries into the next level', function () {
+  var g = game(); g.startLevel(1, false); var G = clear(g), p = G.p;
+  p.x = 18.5; p.z = 7.5; p.raiseT = 0;
+  g.update(1 / 60);
+  assert.ok(p.weapons.chaingun, 'pickup unlocks the chaingun');
+  assert.ok(p.ammo.bullets >= 90, 'pickup supplies bullets');
+  run(g, 0.4);
+  assert.strictEqual(p.weapon, 'chaingun');
+  var before = p.ammo.bullets;
+  g.setFire(true); run(g, 0.5); g.setFire(false);
+  assert.ok(before - p.ammo.bullets >= 3, 'held fire launches several rounds');
+  g.startLevel(2, true);
+  assert.ok(g.state().p.weapons.chaingun, 'weapon persists between levels');
+});
+
+test('rocket pickup fires a travelling projectile with splash damage', function () {
+  var g = game(); g.startLevel(2, false); var G = clear(g), p = G.p;
+  p.x = 16.5; p.z = 23.5; p.raiseT = 0;
+  g.update(1 / 60);
+  assert.ok(p.weapons.rocket, 'pickup unlocks the launcher');
+  run(g, 0.4);
+  assert.strictEqual(p.weapon, 'rocket');
+  var near = { kind: 'imp', mob: true, x: 18.5, z: 23.5, y: 0, hp: 200, radius: 0.35, h: 0.85, state: 'pain', st: 99, animT: 0, cool: 99, losT: 99, flashT: 0 };
+  var splash = { kind: 'imp', mob: true, x: 19.5, z: 23.5, y: 0, hp: 200, radius: 0.35, h: 0.85, state: 'pain', st: 99, animT: 0, cool: 99, losT: 99, flashT: 0 };
+  G.ents.push(near, splash);
+  p.ang = 0; p.pitch = 0;
+  var before = p.ammo.rockets;
+  g.setFire(true); g.update(1 / 60); g.setFire(false);
+  var projectile = G.ents.find(function (e) { return e.playerRocket; });
+  assert.ok(projectile, 'a rocket is visible in flight');
+  assert.ok(projectile.z > p.z + 0.05 && projectile.vz < 0, 'it exits the right-hand muzzle and converges on the reticle');
+  run(g, 0.2);
+  assert.strictEqual(p.ammo.rockets, before - 1);
+  assert.ok(near.hp < 200 && splash.hp < 200, 'impact damages the target and its neighbour');
+});
+
 // ---- Riley: the E1M1 sparring match and the E1M4 rematch ------------------------
 
 function sharedStore() {

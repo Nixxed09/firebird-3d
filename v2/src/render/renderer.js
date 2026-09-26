@@ -6,7 +6,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { buildLevel } from './level.js';
-import { makeMob, makePickup, makeTorch, shotgunModel, pistolModel, fistModel, addHand } from './models.js';
+import { makeMob, makePickup, makeTorch, shotgunModel, pistolModel, fistModel, chaingunModel, rocketModel, addHand } from './models.js';
 import { makeFx } from './fx.js';
 import { emptyAssets, instance } from './assets.js';
 
@@ -41,9 +41,9 @@ export function createRenderer(canvas, opts) {
   // where each weapon sits in view (metres, camera space); authored guns have their origin at the grip
   var GUN_POSE = {
     fist: { p: [0.14, -0.15, -0.3], ry: 0 }, pistol: { p: [0.15, -0.14, -0.38], ry: 0.06 }, shotgun: { p: [0.1, -0.13, -0.2], ry: 0.04 },
-    chaingun: { p: [0.12, -0.15, -0.22], ry: 0.04 }, rocket: { p: [0.13, -0.16, -0.2], ry: 0.04 }
+    chaingun: { p: [0.18, -0.17, -0.22], ry: 0.28 }, rocket: { p: [0.18, -0.16, -0.2], ry: 0.26 }
   };
-  var BUILT_IN = { fist: fistModel, pistol: pistolModel, shotgun: shotgunModel };
+  var BUILT_IN = { fist: fistModel, pistol: pistolModel, shotgun: shotgunModel, chaingun: chaingunModel, rocket: rocketModel };
   function makeGuns() {
     Object.keys(guns).forEach(function (k) { gunRig.remove(guns[k]); });
     guns = {};
@@ -57,16 +57,31 @@ export function createRenderer(canvas, opts) {
         inst.obj.updateMatrixWorld(true);
         var box = new THREE.Box3().setFromObject(inst.obj, true), len = box.max.z - box.min.z;
         g.userData.authoredLength = len;
-        var WANT = { fist: 0.2, pistol: 0.24, shotgun: 0.85, chaingun: 0.8, rocket: 0.9 };
+        var WANT = { fist: 0.2, pistol: 0.24, shotgun: 0.85, chaingun: 0.68, rocket: 0.72 };
         if (len > 1e-3 && WANT[k]) inst.obj.scale.multiplyScalar(WANT[k] / len);
         ['pump', 'slide', 'barrels', 'tube'].forEach(function (n) { var node = inst.obj.getObjectByName(n); if (node) g.userData[n] = node; });
         g.userData.authored = true;
-        addHand(g, k);
+        // FIREBIRD's original weapon kit already contains both glove and sleeve meshes.
+        if (entry.dir !== 'assets') addHand(g, k);
       } else if (BUILT_IN[k]) g = BUILT_IN[k]();
       else return;
+      // The larger fallback guns use the same screen footprint as authored art.
+      if (!entry && (k === 'chaingun' || k === 'rocket')) g.scale.setScalar(k === 'rocket' ? 0.45 : 0.48);
+      g.updateMatrixWorld(true);
+      var gunBox = new THREE.Box3().setFromObject(g, true);
+      var muzzlePart = k === 'chaingun' ? g.userData.barrels : k === 'rocket' ? g.userData.tube : k === 'pistol' ? g.userData.slide : null;
+      var muzzleBox = muzzlePart ? new THREE.Box3().setFromObject(muzzlePart, true) : gunBox;
+      g.userData.muzzle = new THREE.Vector3(
+        (muzzleBox.min.x + muzzleBox.max.x) * 0.5,
+        (muzzleBox.min.y + muzzleBox.max.y) * 0.5,
+        muzzleBox.min.z + 0.015
+      ).divide(g.scale);
       var pose = GUN_POSE[k];
-      g.position.set(pose.p[0], pose.p[1], pose.p[2]); g.rotation.y = pose.ry;
-      g.userData.baseZ = pose.p[2];
+      // Keep the rear of a heavy gun in front of the view camera. Authored
+      // grips can extend behind their origin and otherwise fill the screen.
+      var baseZ = k === 'chaingun' || k === 'rocket' ? -0.27 - gunBox.max.z : pose.p[2];
+      g.position.set(pose.p[0], pose.p[1], baseZ); g.rotation.y = pose.ry;
+      g.userData.baseZ = baseZ;
       g.visible = false;
       gunRig.add(g); guns[k] = g;
     });
@@ -174,7 +189,7 @@ export function createRenderer(canvas, opts) {
       if (e.kind === 'proj') {
         var pm = projs.get(e);
         if (!pm) {
-          pm = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), new THREE.MeshBasicMaterial({ color: e.green ? 0x9ffcff : 0xffb040 }));
+          pm = new THREE.Mesh(new THREE.SphereGeometry(e.playerRocket ? 0.13 : 0.09, 10, 8), new THREE.MeshBasicMaterial({ color: e.green ? 0x9ffcff : 0xffb040 }));
           scene.add(pm); projs.set(e, pm);
         }
         pm.position.set(e.x, e.y, e.z);
@@ -238,7 +253,8 @@ export function createRenderer(canvas, opts) {
     }
     var flashing = ft < 0.06 && p.weapon !== 'fist' && !p.dead;
     flashSprite.visible = flashing;
-    flashSprite.position.set(g.position.x, g.position.y + (p.weapon === 'shotgun' ? 0 : 0.02), g.position.z - (p.weapon === 'shotgun' ? 0.7 : 0.18));
+    g.updateMatrixWorld(true);
+    flashSprite.position.copy(g.localToWorld(g.userData.muzzle.clone()));
     flashSprite.scale.setScalar((p.weapon === 'shotgun' ? 0.06 : 0.035) * (0.8 + Math.random() * 0.4));
     viewLight.intensity = flashing ? 3 : 0;
     viewLight.position.copy(flashSprite.position);

@@ -1,11 +1,11 @@
-// The HUD, drawn crisp on a 320x200 overlay above the 3D view: status bar,
+// The HUD, drawn crisp on a 320x200 overlay over the full 3D view: compact
 // crosshair and hit markers, damage direction, use prompts, goal marker,
 // messages, boss bar, death screen and automap. Ported from the classic game.
 import { ART } from './globals.js';
 import { WEAPONS, WEAPON_ORDER } from '../sim/game.js';
 
-var W = 320, H = 200, VH = 168, HUD_H = 32, HORIZON = VH / 2;
-var HUD_RED = '#e03828', HUD_LABEL = '#8a8478', HUD_SHADOW = '#401008';
+var W = 320, H = 200, VH = H, HORIZON = VH / 2;
+var HUD_RED = '#e03828';
 
 function wrap(text, n) {
   var words = String(text).split(' '), lines = [], cur = '';
@@ -17,50 +17,49 @@ export function fmtTime(t) { t = t | 0; var m = (t / 60) | 0, s = t % 60; return
 
 export function createHud(ctx, game, settings) {
   function blink(G, rate) { return (G.time * (rate || 3)) % 1 < 0.55; }
-  function levelColor(G, low, crit) { return crit ? (blink(G, 3) ? '#ffffff' : HUD_RED) : low ? '#ff9a28' : HUD_RED; }
-
-  function faceImage(p) {
-    if (p.dead) return ART.faces.dead;
-    if (p.grinT > 0) return ART.faces.grin;
-    if (p.painT > 0.25) return ART.faces.pain;
-    if (p.hp >= 80) return ART.faces.ok;
-    if (p.hp >= 55) return ART.faces.hurt1;
-    if (p.hp >= 30) return ART.faces.hurt2;
-    return ART.faces.hurt3;
+  function panel(x, width, color) {
+    ctx.fillStyle = 'rgba(7,12,17,0.83)'; ctx.fillRect(x, 164, width, 33);
+    ctx.fillStyle = 'rgba(160,180,190,0.35)'; ctx.fillRect(x, 164, width, 1);
+    ctx.fillStyle = color; ctx.fillRect(x + 3, 164, 22, 2);
+    ctx.fillStyle = 'rgba(160,180,190,0.22)'; ctx.fillRect(x, 164, 1, 33); ctx.fillRect(x + width - 1, 164, 1, 33);
+  }
+  function meter(x, y, width, amount, max, color) {
+    ctx.fillStyle = '#26313a'; ctx.fillRect(x, y, width, 3);
+    ctx.fillStyle = color; ctx.fillRect(x, y, Math.round(width * Math.max(0, Math.min(1, amount / max))), 3);
   }
 
   function statusBar(G) {
     var p = G.p;
-    ctx.fillStyle = '#3a352e'; ctx.fillRect(0, VH, W, HUD_H);
-    ctx.fillStyle = '#14110d'; ctx.fillRect(0, VH, W, 2);
-    ctx.fillStyle = '#57514a'; ctx.fillRect(0, VH + 2, W, 1);
-    ctx.fillStyle = '#24211c';
-    [46, 116, 142, 178, 230, 250].forEach(function (dx) { ctx.fillRect(dx, VH + 4, 1, HUD_H - 8); });
     var wep = WEAPONS[p.weapon], n = wep.ammo ? p.ammo[wep.ammo] : -1;
-    var lowAmmo = wep.ammo && n <= (wep.ammo === 'shells' ? 4 : 10);
-    ART.drawText(ctx, 'AMMO', 8, VH + 5, { color: n === 0 ? HUD_RED : HUD_LABEL });
-    ART.drawText(ctx, wep.ammo ? String(n) : '--', 40, VH + 12, { scale: 3, color: levelColor(G, lowAmmo, n === 0), shadow: HUD_SHADOW, right: true });
-    var crit = p.hp <= 25;
-    ART.drawText(ctx, 'HEALTH', 54, VH + 5, { color: crit ? HUD_RED : HUD_LABEL });
-    ART.drawText(ctx, p.hp + '%', 108, VH + 12, { scale: 3, color: levelColor(G, p.hp <= 50, crit && !p.dead), shadow: HUD_SHADOW, right: true });
-    ART.drawText(ctx, 'ARMS', 129, VH + 5, { color: HUD_LABEL, center: true });
+    var lowAmmo = wep.ammo && n <= (wep.ammo === 'shells' ? 4 : wep.ammo === 'rockets' ? 2 : 10);
+    var hpColor = p.hp <= 25 ? (blink(G, 3) ? '#ffdfc5' : '#ff654c') : p.hp <= 50 ? '#ffad4c' : '#8ff0bf';
+    var ammoColor = n === 0 ? '#ff654c' : lowAmmo ? '#ffad4c' : '#ffe0a0';
+    panel(4, 99, hpColor); panel(108, 104, '#ff9b4d'); panel(217, 99, '#6adce8');
+    ART.drawText(ctx, 'HEALTH', 9, 168, { color: '#a7b0b5' });
+    ART.drawText(ctx, String(p.hp), 9, 175, { scale: 2, color: hpColor });
+    meter(9, 191, 48, p.hp, 100, hpColor);
+    ART.drawText(ctx, 'ARMOR', 64, 168, { color: '#a7b0b5' });
+    ART.drawText(ctx, String(p.armor), 64, 175, { scale: 2, color: p.armor ? '#88d6e5' : '#6a7980' });
+    meter(64, 191, 33, p.armor, 100, '#6adce8');
+    ART.drawText(ctx, p.weapon.toUpperCase(), 113, 168, { color: '#ffb36f' });
+    ART.drawText(ctx, wep.ammo ? String(n) : '--', 113, 175, { scale: 2, color: ammoColor });
+    ART.drawText(ctx, wep.ammo ? wep.ammo.toUpperCase() : 'MELEE', 205, 179, { color: '#a7b0b5', right: true });
     WEAPON_ORDER.forEach(function (name, wi) {
-      var x = 119 + wi * 8, owned = p.weapons[name], inHand = (p.nextWeapon || p.weapon) === name;
-      var col = inHand ? '#ffd23e' : !owned ? '#2a2620' : game.hasAmmo(p, name) ? '#c8c0b0' : '#6a5a4a';
-      ART.drawText(ctx, String(wi + 1), x, VH + 13, { scale: 2, color: col });
-      if (inHand) { ctx.fillStyle = '#ffd23e'; ctx.fillRect(x, VH + 25, 6, 1); }
+      var x = 114 + wi * 19, owned = p.weapons[name], inHand = (p.nextWeapon || p.weapon) === name;
+      var col = inHand ? '#ffe0a0' : !owned ? '#53616a' : game.hasAmmo(p, name) ? '#c1d4d8' : '#7c6b60';
+      ctx.fillStyle = inHand ? '#9b4727' : '#1d2930'; ctx.fillRect(x - 2, 187, 15, 9);
+      if (inHand) { ctx.fillStyle = '#ff9b4d'; ctx.fillRect(x - 2, 186, 15, 1); }
+      ART.drawText(ctx, String(wi + 1), x + 3, 188, { color: col });
     });
-    ctx.drawImage(faceImage(p).canvas, 160 - 12, VH + 3);
-    ART.drawText(ctx, 'ARMOR', 184, VH + 5, { color: HUD_LABEL });
-    ART.drawText(ctx, p.armor + '%', 226, VH + 12, { scale: 3, color: p.armor > 0 ? HUD_RED : '#6a4a40', shadow: HUD_SHADOW, right: true });
+    ART.drawText(ctx, 'SUPPLIES', 222, 168, { color: '#a7b0b5' });
+    ART.drawText(ctx, 'B' + p.ammo.bullets + '  S' + p.ammo.shells, 222, 178, { color: wep.ammo === 'bullets' || wep.ammo === 'shells' ? '#d8e4e2' : '#93a3a8' });
+    ART.drawText(ctx, 'R' + p.ammo.rockets, 222, 188, { color: wep.ammo === 'rockets' ? '#ffe0a0' : '#93a3a8' });
     [['red', 'keyRed', 5], ['blue', 'keyBlue', 18]].forEach(function (k) {
-      if (!p.keys[k[0]] && !G.info.keys[k[0]]) return;
-      ctx.globalAlpha = p.keys[k[0]] ? 1 : 0.18;
-      ctx.drawImage(ART.things[k[1]].canvas, 236, VH + k[2]);
-      ctx.globalAlpha = 1;
+      var x = k[0] === 'red' ? 286 : 300;
+      ctx.fillStyle = p.keys[k[0]] ? (k[0] === 'red' ? '#ff7257' : '#6baaff') : G.info.keys[k[0]] ? '#4d5b65' : '#26313a';
+      ctx.fillRect(x, 187, 9, 6);
+      ctx.fillStyle = '#9aaab1'; ctx.fillRect(x + 3, 188, 3, 1);
     });
-    ART.drawText(ctx, 'BULL ' + p.ammo.bullets + '/200', 254, VH + 8, { color: wep.ammo === 'bullets' ? '#ffd23e' : '#c8c0b0' });
-    ART.drawText(ctx, 'SHEL ' + p.ammo.shells + '/50', 254, VH + 19, { color: !p.weapons.shotgun ? '#6a655c' : wep.ammo === 'shells' ? '#ffd23e' : '#c8c0b0' });
   }
 
   function crosshair(G) {
@@ -105,7 +104,7 @@ export function createHud(ctx, game, settings) {
     }
   }
 
-  // project a world point onto the 320x168 view with the renderer's camera
+  // project a world point onto the full 320x200 view with the renderer's camera
   function goalMarker(G, camera) {
     if (!settings.goalMarker || !camera) return;
     var g = game.goalTarget();
@@ -117,7 +116,7 @@ export function createHud(ctx, game, settings) {
     var col = (G.time * 2) % 1 < 0.7 ? '#ffd23e' : '#c89a20';
     ctx.fillStyle = col;
     ctx.beginPath();
-    if (pr.inFront && pr.x > 8 && pr.x < W - 8 && pr.y > 8 && pr.y < VH - 8) {
+    if (pr.inFront && pr.x > 8 && pr.x < W - 8 && pr.y > 8 && pr.y < 160) {
       var sx = Math.round(pr.x), sy = Math.round(pr.y) - 8;
       ctx.moveTo(sx, sy - 4); ctx.lineTo(sx + 4, sy); ctx.lineTo(sx, sy + 4); ctx.lineTo(sx - 4, sy); ctx.closePath(); ctx.fill();
       ART.drawText(ctx, String(Math.round(d * 2)) + 'M', sx, sy + 7, { color: col, shadow: true, center: true });
@@ -172,7 +171,7 @@ export function createHud(ctx, game, settings) {
   function bossBar(G) {
     var b = G.boss;
     if (!b || b.state === 'idle' || b.state === 'dead') return;
-    var bw = 140, bx = (W - bw) / 2, by = VH - 12, shield = b.shieldT > 0;
+    var bw = 140, bx = (W - bw) / 2, by = VH - 47, shield = b.shieldT > 0;
     ART.drawText(ctx, shield ? 'RILEY - SHIELDED' : 'RILEY', W / 2, by - 8, { color: shield ? '#ffd23e' : '#6fe0ec', shadow: true, center: true });
     ctx.fillStyle = '#06141c'; ctx.fillRect(bx - 1, by - 1, bw + 2, 6);
     ctx.fillStyle = shield ? '#ffd23e' : '#3fd8c8'; ctx.fillRect(bx, by, Math.max(0, b.hp / b.maxHp) * bw, 4);
@@ -226,12 +225,12 @@ export function createHud(ctx, game, settings) {
       if (!opts.map) bossBar(G);
       messages(G);
       death(G);
-      statusBar(G);
+      if (!opts.map && !opts.menu && !p.dead) statusBar(G);
     }
   };
 }
 
-// world point -> 320x168 overlay coordinates
+// world point -> 320x200 overlay coordinates
 function project(camera, v) {
   var e = camera.matrixWorldInverse.elements, pm = camera.projectionMatrix.elements;
   var x = v.x, y = v.y, z = v.z;

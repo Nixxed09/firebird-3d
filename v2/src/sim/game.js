@@ -12,10 +12,12 @@ export var PLAYER = { r: 0.28, h: 0.9, hCrouch: 0.55, eye: 0.8, eyeCrouch: 0.45,
 export var WEAPONS = {
   fist: { ammo: null, rate: 0.5, melee: true, dmgMin: 8, dmgMax: 24, knock: 0.12 },
   pistol: { ammo: 'bullets', rate: 0.42, pellets: 1, spread: 0.025, dmgMin: 5, dmgMax: 15, knock: 0.03, shake: 0.6 },
-  shotgun: { ammo: 'shells', rate: 0.95, pellets: 7, spread: 0.10, dmgMin: 5, dmgMax: 15, knock: 0.045, shake: 2.2 }
+  shotgun: { ammo: 'shells', rate: 0.95, pellets: 7, spread: 0.10, dmgMin: 5, dmgMax: 15, knock: 0.045, shake: 2.2 },
+  chaingun: { ammo: 'bullets', rate: 0.105, pellets: 1, spread: 0.045, dmgMin: 5, dmgMax: 12, knock: 0.018, shake: 0.35 },
+  rocket: { ammo: 'rockets', rate: 0.85, rocket: true, shake: 2.8 }
 };
-export var WEAPON_ORDER = ['fist', 'pistol', 'shotgun'];
-var AMMO_NAMES = { bullets: 'BULLETS', shells: 'SHELLS' };
+export var WEAPON_ORDER = ['fist', 'pistol', 'shotgun', 'chaingun', 'rocket'];
+var AMMO_NAMES = { bullets: 'BULLETS', shells: 'SHELLS', rockets: 'ROCKETS' };
 
 // h = body height in cells (1 cell = 2 m)
 export var MOBS = {
@@ -31,8 +33,11 @@ export var ITEMS = {
   '+': { msg: 'PICKED UP A MEDIKIT.', snd: 'health' },
   b: { msg: 'PICKED UP A CLIP.', snd: 'pickup' },
   a: { msg: 'PICKED UP A BOX OF SHELLS.', snd: 'pickup' },
+  k: { msg: 'PICKED UP A BOX OF ROCKETS.', snd: 'pickup' },
   A: { msg: 'PICKED UP THE ARMOR!', snd: 'pickup' },
   2: { msg: 'YOU GOT THE SHOTGUN!', snd: 'weaponUp' },
+  3: { msg: 'YOU GOT THE CHAINGUN!', snd: 'weaponUp' },
+  4: { msg: 'YOU GOT THE ROCKET LAUNCHER!', snd: 'weaponUp' },
   r: { msg: 'PICKED UP THE RED KEYCARD.', snd: 'keyPickup' },
   u: { msg: 'PICKED UP THE BLUE KEYCARD.', snd: 'keyPickup' },
   P: { msg: 'PHOENIX ORB! YOU FEEL REBORN!', snd: 'orb' }
@@ -48,7 +53,7 @@ var TIPS = {
   run: 'TIP: HOLD SHIFT TO RUN.',
   jump: 'TIP: SPACE JUMPS. C CROUCHES. LOOK UP AND DOWN WITH THE MOUSE.',
   map: 'TIP: LOST? PRESS TAB FOR THE MAP.',
-  weapons: 'TIP: PRESS 1 2 3, OR SCROLL THE MOUSE WHEEL, TO SWITCH WEAPONS. Q SWAPS BACK.',
+  weapons: 'TIP: PRESS 1 TO 5, OR SCROLL THE MOUSE WHEEL, TO SWITCH WEAPONS. Q SWAPS BACK.',
   key: 'TIP: THE MATCHING DOOR IS MARKED IN COLOR ON YOUR MAP (TAB).',
   lowAmmo: 'TIP: LOW ON AMMO? YOUR FIST (1) NEVER RUNS OUT, AND IT IS SILENT.',
   lowHealth: 'TIP: LOW HEALTH! BACK OFF AND LOOK FOR STIMPACKS AND MEDIKITS.',
@@ -113,7 +118,8 @@ export function createGame(opts) {
   }
 
   function snapshotGear(p) {
-    return { hp: Math.max(p.hp, 1), armor: p.armor, ammo: { bullets: p.ammo.bullets, shells: p.ammo.shells }, shotgun: p.weapons.shotgun, weapon: p.weapon };
+    return { hp: Math.max(p.hp, 1), armor: p.armor, ammo: { bullets: p.ammo.bullets, shells: p.ammo.shells, rockets: p.ammo.rockets },
+      shotgun: p.weapons.shotgun, chaingun: p.weapons.chaingun, rocket: p.weapons.rocket, weapon: p.weapon };
   }
 
   function startLevel(idx, keepGear, gear) {
@@ -126,10 +132,10 @@ export function createGame(opts) {
     var p = {
       x: 0, z: 0, y: 0, ang: L.playerAngle || 0, pitch: 0, vx: 0, vz: 0, vy: 0, onGround: true, crouch: false, eyeH: PLAYER.eye,
       hp: old ? old.hp : 100, armor: old ? old.armor : 0,
-      ammo: old ? { bullets: old.ammo.bullets, shells: old.ammo.shells } : { bullets: 50, shells: 0 },
-      weapons: { fist: true, pistol: true, shotgun: old ? old.shotgun : false },
+      ammo: old ? { bullets: old.ammo.bullets, shells: old.ammo.shells, rockets: old.ammo.rockets || 0 } : { bullets: 50, shells: 0, rockets: 0 },
+      weapons: { fist: true, pistol: true, shotgun: old ? old.shotgun : false, chaingun: old ? !!old.chaingun : false, rocket: old ? !!old.rocket : false },
       keys: { red: false, blue: false },
-      weapon: old && old.shotgun ? old.weapon : 'pistol',
+      weapon: old && old.weapon && (old.weapon === 'pistol' || old.weapon === 'fist' || old[old.weapon]) ? old.weapon : 'pistol',
       nextWeapon: null, prevWeapon: null, raiseT: 0.3, lowerT: 0, cool: 0, fireT: 1,
       dead: false, deadT: 0, painT: 0, grinT: 0, dmgFlash: 0, bonusFlash: 0, jumpHeld: false, landT: 0
     };
@@ -171,7 +177,8 @@ export function createGame(opts) {
   function retryLevel() {
     var g = G.startGear;
     if (g) {
-      g = { hp: Math.max(g.hp, 100), armor: g.armor, ammo: { bullets: Math.max(g.ammo.bullets, 50), shells: g.shotgun ? Math.max(g.ammo.shells, 8) : g.ammo.shells }, shotgun: g.shotgun, weapon: g.weapon };
+      g = { hp: Math.max(g.hp, 100), armor: g.armor, ammo: { bullets: Math.max(g.ammo.bullets, 50), shells: g.shotgun ? Math.max(g.ammo.shells, 8) : g.ammo.shells, rockets: g.rocket ? Math.max(g.ammo.rockets || 0, 3) : 0 },
+        shotgun: g.shotgun, chaingun: g.chaingun, rocket: g.rocket, weapon: g.weapon };
     }
     startLevel(levelIndex, false, g);
   }
@@ -345,6 +352,44 @@ export function createGame(opts) {
     var pd = Math.sqrt(d2(G.p.x, G.p.z, e.x, e.z) + Math.pow(G.p.y - e.y, 2));
     shake(6 / (1 + pd * 0.35));
     if (pd < R && hasLOS(G.W, e.x, e.y + 0.3, e.z, G.p.x, eyeY(), G.p.z)) hurtPlayer(((R - pd) / R * 70) | 0, e);
+  }
+
+  function muzzlePoint(p, weapon) {
+    var cp = Math.cos(p.pitch), forward = weapon === 'pistol' ? 0.4 : weapon === 'shotgun' ? 0.65 : 0.55;
+    var side = weapon === 'shotgun' ? 0.1 : 0.14;
+    return {
+      x: p.x + Math.cos(p.ang) * cp * forward - Math.sin(p.ang) * side,
+      y: eyeY() + Math.sin(p.pitch) * forward - 0.12,
+      z: p.z + Math.sin(p.ang) * cp * forward + Math.cos(p.ang) * side
+    };
+  }
+
+  function fireRocket() {
+    var p = G.p, cp = Math.cos(p.pitch), dx = Math.cos(p.ang) * cp, dz = Math.sin(p.ang) * cp, dy = Math.sin(p.pitch);
+    var from = muzzlePoint(p, 'rocket');
+    // Leave the right-hand tube, then converge on the crosshair at 16 cells.
+    var ax = p.x + dx * 16 - from.x, ay = eyeY() + dy * 16 - from.y, az = p.z + dz * 16 - from.z;
+    var len = Math.hypot(ax, ay, az);
+    G.ents.push({ kind: 'proj', playerRocket: true, owner: p,
+      x: from.x, y: from.y, z: from.z,
+      vx: ax / len * 18, vy: ay / len * 18, vz: az / len * 18, h: 0.2, animT: 0, dmg: 0 });
+  }
+
+  function explodeRocket(e) {
+    var radius = 2.6, p = G.p;
+    ev('fx', 'explosion', e.x, e.y, e.z);
+    sound('barrelBoom', e);
+    for (var i = 0; i < G.ents.length; i++) {
+      var o = G.ents[i];
+      if (!o.mob || o.state === 'die' || o.state === 'dead') continue;
+      var dist = Math.sqrt(d2(o.x, o.z, e.x, e.z) + Math.pow(o.y + o.h * 0.5 - e.y, 2));
+      if (dist >= radius || !hasLOS(G.W, e.x, e.y, e.z, o.x, o.y + o.h * 0.5, o.z)) continue;
+      damageMob(o, Math.max(1, Math.round(105 * (1 - dist / radius))));
+    }
+    var pd = Math.sqrt(d2(p.x, p.z, e.x, e.z) + Math.pow(eyeY() - e.y, 2));
+    if (pd < radius && hasLOS(G.W, e.x, e.y, e.z, p.x, eyeY(), p.z)) hurtPlayer(Math.round(65 * (1 - pd / radius)), e);
+    shake(4 / (1 + pd * 0.4));
+    makeNoise(e.x, e.z, 16);
   }
 
   function hurtPlayer(dmg, src) {
@@ -855,10 +900,17 @@ export function createGame(opts) {
       case 'A': if (p.armor >= 100) full = 'ARMOR'; else { p.armor = 100; p.grinT = 1; } break;
       case 'b': if (p.ammo.bullets >= 200) full = 'BULLETS'; else p.ammo.bullets = Math.min(200, p.ammo.bullets + 10 * am); break;
       case 'a': if (p.ammo.shells >= 50) full = 'SHELLS'; else p.ammo.shells = Math.min(50, p.ammo.shells + 4 * am); break;
+      case 'k': if (p.ammo.rockets >= 30) full = 'ROCKETS'; else p.ammo.rockets = Math.min(30, p.ammo.rockets + 3 * am); break;
       case '2':
         p.weapons.shotgun = true; p.ammo.shells = Math.min(50, p.ammo.shells + 8 * am); p.grinT = 1.2;
         if (p.weapon !== 'shotgun') switchWeapon('shotgun', true);
         notice('SHOTGUN!  PRESS 3', '#ffd23e', 2.5); tip('weapons'); break;
+      case '3':
+        p.weapons.chaingun = true; p.ammo.bullets = Math.min(200, p.ammo.bullets + 40 * am); p.grinT = 1.2;
+        switchWeapon('chaingun', true); notice('CHAINGUN!  PRESS 4', '#ffd23e', 2.5); break;
+      case '4':
+        p.weapons.rocket = true; p.ammo.rockets = Math.min(30, p.ammo.rockets + 5 * am); p.grinT = 1.2;
+        switchWeapon('rocket', true); notice('ROCKET LAUNCHER!  PRESS 5', '#ffd23e', 2.5); break;
       case 'r': case 'u':
         var col = e.item === 'r' ? 'red' : 'blue';
         p.keys[col] = true; p.grinT = 1;
@@ -872,7 +924,7 @@ export function createGame(opts) {
     sound(it.snd);
     ev('fx', 'pickup', e.x, e.y + 0.3, e.z, { item: e.item });
     message(it.msg);
-    if (p.autoFist && (e.item === 'b' || e.item === 'a')) { p.autoFist = false; switchWeapon(bestWeapon(p), true); }
+    if (p.autoFist && (e.item === 'b' || e.item === 'a' || e.item === 'k')) { p.autoFist = false; switchWeapon(bestWeapon(p), true); }
   }
 
   // ---- the player ----------------------------------------------------------------
@@ -970,12 +1022,13 @@ export function createGame(opts) {
       } else {
         if (wep.ammo) p.ammo[wep.ammo]--;
         p.cool = wep.rate; p.fireT = 0;
-        sound(p.weapon === 'fist' ? 'punch' : p.weapon);
+        sound(p.weapon === 'fist' ? 'punch' : p.weapon === 'chaingun' ? 'pistol' : p.weapon === 'rocket' ? 'shotgun' : p.weapon);
         if (p.weapon === 'shotgun') sound('pump');
-        if (!wep.melee) { shake(wep.shake); ev('fx', 'muzzle', p.x + Math.cos(p.ang) * 0.4, eyeY() - 0.1, p.z + Math.sin(p.ang) * 0.4, { weapon: p.weapon }); }
+        if (!wep.melee) { var muzzle = muzzlePoint(p, p.weapon); shake(wep.shake); ev('fx', 'muzzle', muzzle.x, muzzle.y, muzzle.z, { weapon: p.weapon }); }
         if (rileyActive(G.boss)) RILEY.noteShot(G.boss.profile, p.weapon, playerDist(G.boss.x, G.boss.z));
         G.shotId++; G.firing = true;
-        if (wep.melee) fireHitscan(p.ang, p.pitch, wep.dmgMin, wep.dmgMax, true, wep.knock);
+        if (wep.rocket) fireRocket();
+        else if (wep.melee) fireHitscan(p.ang, p.pitch, wep.dmgMin, wep.dmgMax, true, wep.knock);
         else for (var pl = 0; pl < wep.pellets; pl++) {
           fireHitscan(p.ang + (rnd() - 0.5) * 2 * wep.spread, p.pitch + (rnd() - 0.5) * wep.spread, wep.dmgMin, wep.dmgMax, false, wep.knock);
         }
@@ -1058,12 +1111,15 @@ export function createGame(opts) {
           e.x += e.vx * dt / steps; e.y += e.vy * dt / steps; e.z += e.vz * dt / steps;
           var cx = Math.floor(e.x), cz = Math.floor(e.z);
           var victim = solidCell(G.W, cx, cz) || e.y < floorAt(G.W, cx, cz) || e.y > ceilAt(G.W, cx, cz) ? 'wall' : projectileVictim(e);
-          if (!victim && !p.dead && d2(e.x, e.z, p.x, p.z) < 0.2 && e.y > p.y - 0.1 && e.y < p.y + (p.crouch ? PLAYER.hCrouch : PLAYER.h) + 0.1) victim = 'player';
+          if (!victim && !e.playerRocket && !p.dead && d2(e.x, e.z, p.x, p.z) < 0.2 && e.y > p.y - 0.1 && e.y < p.y + (p.crouch ? PLAYER.hCrouch : PLAYER.h) + 0.1) victim = 'player';
           if (!victim) continue;
           hitSomething = true;
-          if (victim === 'player') { hurtPlayer(e.dmg | 0, { x: e.x - e.vx, z: e.z - e.vz, kind: e.owner ? e.owner.kind : 'imp' }); sound('fireExplode'); }
-          else { if (victim !== 'wall') damageMob(victim, e.dmg | 0, e.owner); sound('fireExplode', e); }
-          ev('fx', e.green ? 'greenBurst' : 'fireBurst', e.x, e.y, e.z);
+          if (e.playerRocket) explodeRocket(e);
+          else {
+            if (victim === 'player') { hurtPlayer(e.dmg | 0, { x: e.x - e.vx, z: e.z - e.vz, kind: e.owner ? e.owner.kind : 'imp' }); sound('fireExplode'); }
+            else { if (victim !== 'wall') damageMob(victim, e.dmg | 0, e.owner); sound('fireExplode', e); }
+            ev('fx', e.green ? 'greenBurst' : 'fireBurst', e.x, e.y, e.z);
+          }
           G.ents.splice(k, 1);
         }
         continue;
