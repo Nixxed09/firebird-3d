@@ -1,6 +1,6 @@
 {
   "validator": "2.0.0-dev.3.10",
-  "models": 18,
+  "models": 31,
   "errors": 0,
   "warnings": 0,
   "contract_failures": [],
@@ -114,6 +114,410 @@
           128,
           128
         ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/armour_vest.glb",
+      "triangles": 1512,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 221980,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/bullet_clip.glb",
+      "triangles": 480,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 79680,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/keycard_blue.glb",
+      "triangles": 668,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 114844,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/keycard_red.glb",
+      "triangles": 776,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 128164,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/medkit_large.glb",
+      "triangles": 1188,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 181720,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/medkit_small.glb",
+      "triangles": 972,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 155088,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/phoenix_orb.glb",
+      "triangles": 1384,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 145248,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/pickup_chaingun.glb",
+      "triangles": 5768,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 599680,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/pickup_pistol.glb",
+      "triangles": 4320,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 527696,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/pickup_rocket_launcher.glb",
+      "triangles": 5688,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 660260,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/pickup_shotgun.glb",
+      "triangles": 4356,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 512920,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/rocket_box.glb",
+      "triangles": 440,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 75496,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/shell_box.glb",
+      "triangles": 480,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 71588,
+      "texture_sizes": [
         [
           128,
           128

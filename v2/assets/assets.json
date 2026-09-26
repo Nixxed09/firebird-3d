@@ -294,6 +294,745 @@
       "nodes": []
     },
     {
+      "file": "pickups/armour_vest.glb",
+      "type": "pickups",
+      "bytes": 221980,
+      "size_m": [
+        0.45,
+        0.59,
+        0.279
+      ],
+      "triangles": 1512,
+      "animations": [],
+      "nodes": [
+        "armour_vest"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "cloth",
+        "iron",
+        "edge",
+        "brass",
+        "cyan"
+      ],
+      "preview": "previews/armour_vest.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/armour_vest.meta.json",
+      "type": "json",
+      "bytes": 252,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/bullet_clip.glb",
+      "type": "pickups",
+      "bytes": 79680,
+      "size_m": [
+        0.17,
+        0.33,
+        0.1
+      ],
+      "triangles": 480,
+      "animations": [],
+      "nodes": [
+        "bullet_clip"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "iron",
+        "brass",
+        "edge",
+        "black"
+      ],
+      "preview": "previews/bullet_clip.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/bullet_clip.meta.json",
+      "type": "json",
+      "bytes": 249,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/keycard_blue.glb",
+      "type": "pickups",
+      "bytes": 114844,
+      "size_m": [
+        0.31,
+        0.204,
+        0.0395
+      ],
+      "triangles": 668,
+      "animations": [],
+      "nodes": [
+        "keycard_blue"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "blue",
+        "brass",
+        "black",
+        "cyan",
+        "white",
+        "edge"
+      ],
+      "preview": "previews/keycard_blue.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/keycard_blue.meta.json",
+      "type": "json",
+      "bytes": 254,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/keycard_red.glb",
+      "type": "pickups",
+      "bytes": 128164,
+      "size_m": [
+        0.31,
+        0.204,
+        0.0395
+      ],
+      "triangles": 776,
+      "animations": [],
+      "nodes": [
+        "keycard_red"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "red",
+        "brass",
+        "black",
+        "ember",
+        "white",
+        "edge"
+      ],
+      "preview": "previews/keycard_red.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/keycard_red.meta.json",
+      "type": "json",
+      "bytes": 253,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/medkit_large.glb",
+      "type": "pickups",
+      "bytes": 181720,
+      "size_m": [
+        0.568,
+        0.4375,
+        0.3189
+      ],
+      "triangles": 1188,
+      "animations": [],
+      "nodes": [
+        "medkit_large"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "white",
+        "iron",
+        "brass",
+        "green",
+        "black"
+      ],
+      "preview": "previews/medkit_large.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/medkit_large.meta.json",
+      "type": "json",
+      "bytes": 257,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/medkit_small.glb",
+      "type": "pickups",
+      "bytes": 155088,
+      "size_m": [
+        0.328,
+        0.3075,
+        0.2049
+      ],
+      "triangles": 972,
+      "animations": [],
+      "nodes": [
+        "medkit_small"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "white",
+        "iron",
+        "brass",
+        "green",
+        "black"
+      ],
+      "preview": "previews/medkit_small.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/medkit_small.meta.json",
+      "type": "json",
+      "bytes": 256,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/phoenix_orb.glb",
+      "type": "pickups",
+      "bytes": 145248,
+      "size_m": [
+        0.9653,
+        0.6911,
+        0.42
+      ],
+      "triangles": 1384,
+      "animations": [],
+      "nodes": [
+        "phoenix_orb"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "ember",
+        "brass",
+        "gold",
+        "iron"
+      ],
+      "preview": "previews/phoenix_orb.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/phoenix_orb.meta.json",
+      "type": "json",
+      "bytes": 255,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/pickup_chaingun.glb",
+      "type": "pickups",
+      "bytes": 599680,
+      "size_m": [
+        0.6412,
+        0.55,
+        1.0662
+      ],
+      "triangles": 5768,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "barrels"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cyan",
+        "edge"
+      ],
+      "preview": "previews/pickup_chaingun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/pickup_chaingun.meta.json",
+      "type": "json",
+      "bytes": 261,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/pickup_pistol.glb",
+      "type": "pickups",
+      "bytes": 527696,
+      "size_m": [
+        0.274,
+        0.4735,
+        0.4968
+      ],
+      "triangles": 4320,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "slide"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cyan"
+      ],
+      "preview": "previews/pickup_pistol.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/pickup_pistol.meta.json",
+      "type": "json",
+      "bytes": 260,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/pickup_rocket_launcher.glb",
+      "type": "pickups",
+      "bytes": 660260,
+      "size_m": [
+        0.4505,
+        0.6035,
+        1.2377
+      ],
+      "triangles": 5688,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "tube"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cyan",
+        "edge",
+        "red"
+      ],
+      "preview": "previews/pickup_rocket_launcher.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/pickup_rocket_launcher.meta.json",
+      "type": "json",
+      "bytes": 270,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/pickup_shotgun.glb",
+      "type": "pickups",
+      "bytes": 512920,
+      "size_m": [
+        0.296,
+        0.4705,
+        1.0688
+      ],
+      "triangles": 4356,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "pump"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cyan",
+        "wood"
+      ],
+      "preview": "previews/pickup_shotgun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/pickup_shotgun.meta.json",
+      "type": "json",
+      "bytes": 261,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/rocket_box.glb",
+      "type": "pickups",
+      "bytes": 75496,
+      "size_m": [
+        0.42,
+        0.54,
+        0.292
+      ],
+      "triangles": 440,
+      "animations": [],
+      "nodes": [
+        "rocket_box"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "iron",
+        "brass",
+        "red"
+      ],
+      "preview": "previews/rocket_box.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/rocket_box.meta.json",
+      "type": "json",
+      "bytes": 250,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/shell_box.glb",
+      "type": "pickups",
+      "bytes": 71588,
+      "size_m": [
+        0.34,
+        0.26,
+        0.169
+      ],
+      "triangles": 480,
+      "animations": [],
+      "nodes": [
+        "shell_box"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "red",
+        "brass",
+        "white"
+      ],
+      "preview": "previews/shell_box.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/shell_box.meta.json",
+      "type": "json",
+      "bytes": 249,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "previews/armour_vest.png",
+      "type": "preview",
+      "bytes": 354925,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/bullet_clip.png",
+      "type": "preview",
+      "bytes": 338739,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
       "file": "previews/ceiling_lamp.png",
       "type": "preview",
       "bytes": 357906,
@@ -411,6 +1150,123 @@
       ]
     },
     {
+      "file": "previews/keycard_blue.png",
+      "type": "preview",
+      "bytes": 335501,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/keycard_red.png",
+      "type": "preview",
+      "bytes": 338426,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/medkit_large.png",
+      "type": "preview",
+      "bytes": 347757,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/medkit_small.png",
+      "type": "preview",
+      "bytes": 356592,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/phoenix_orb.png",
+      "type": "preview",
+      "bytes": 337220,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pickup_chaingun.png",
+      "type": "preview",
+      "bytes": 356764,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pickup_pistol.png",
+      "type": "preview",
+      "bytes": 359391,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pickup_rocket_launcher.png",
+      "type": "preview",
+      "bytes": 339297,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pickup_shotgun.png",
+      "type": "preview",
+      "bytes": 330464,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
       "file": "previews/pipe_elbow.png",
       "type": "preview",
       "bytes": 319315,
@@ -476,9 +1332,35 @@
       ]
     },
     {
+      "file": "previews/rocket_box.png",
+      "type": "preview",
+      "bytes": 348668,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
       "file": "previews/rocket_launcher.png",
       "type": "preview",
       "bytes": 346234,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/shell_box.png",
+      "type": "preview",
+      "bytes": 358266,
       "size_m": null,
       "triangles": 0,
       "animations": [],
@@ -998,7 +1880,7 @@
     {
       "file": "validation.json",
       "type": "json",
-      "bytes": 8485,
+      "bytes": 14659,
       "size_m": null,
       "triangles": 0,
       "animations": [],
@@ -1007,7 +1889,7 @@
     {
       "file": "validation.md",
       "type": "md",
-      "bytes": 1639,
+      "bytes": 2633,
       "size_m": null,
       "triangles": 0,
       "animations": [],

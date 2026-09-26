@@ -1,0 +1,15 @@
+{
+  "file": "pickups/rocket_box.glb",
+  "type": "pickups",
+  "size_m": [
+    0.42,
+    0.54,
+    0.292
+  ],
+  "triangles": 440,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Ground-level origin; rotate root for idle pickup spin."
+}

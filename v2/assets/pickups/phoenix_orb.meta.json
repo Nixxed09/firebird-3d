@@ -1,0 +1,15 @@
+{
+  "file": "pickups/phoenix_orb.glb",
+  "type": "pickups",
+  "size_m": [
+    0.9653,
+    0.6911,
+    0.42
+  ],
+  "triangles": 1384,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Ground-level origin; rotate root for idle pickup spin."
+}

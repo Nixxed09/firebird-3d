@@ -1,0 +1,15 @@
+{
+  "file": "pickups/bullet_clip.glb",
+  "type": "pickups",
+  "size_m": [
+    0.17,
+    0.33,
+    0.1
+  ],
+  "triangles": 480,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Ground-level origin; rotate root for idle pickup spin."
+}

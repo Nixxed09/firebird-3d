@@ -1,6 +1,6 @@
 # FIREBIRD asset validation
 
-Khronos glTF Validator 2.0.0-dev.3.10: **18 models, 0 errors, 0 warnings**.
+Khronos glTF Validator 2.0.0-dev.3.10: **31 models, 0 errors, 0 warnings**.
 0 contract failures. All model textures embedded; every model has a 512 × 512 four-angle turntable.
 
 | Model | Triangles | Budget | GLB KiB | Texture px | Errors | Warnings |
@@ -9,6 +9,19 @@ Khronos glTF Validator 2.0.0-dev.3.10: **18 models, 0 errors, 0 warnings**.
 | demons/gnasher.glb | 5204 | 3000–8000 | 481.8 | 128×128 | 0 | 0 |
 | demons/imp.glb | 5148 | 3000–8000 | 604.7 | 128×128 | 0 | 0 |
 | demons/riley.glb | 6824 | 3000–8000 | 863.0 | 128×128 | 0 | 0 |
+| pickups/armour_vest.glb | 1512 | 200–2000 | 216.8 | 128×128 | 0 | 0 |
+| pickups/bullet_clip.glb | 480 | 200–2000 | 77.8 | 128×128 | 0 | 0 |
+| pickups/keycard_blue.glb | 668 | 200–2000 | 112.2 | 128×128 | 0 | 0 |
+| pickups/keycard_red.glb | 776 | 200–2000 | 125.2 | 128×128 | 0 | 0 |
+| pickups/medkit_large.glb | 1188 | 200–2000 | 177.5 | 128×128 | 0 | 0 |
+| pickups/medkit_small.glb | 972 | 200–2000 | 151.5 | 128×128 | 0 | 0 |
+| pickups/phoenix_orb.glb | 1384 | 200–2000 | 141.8 | 128×128 | 0 | 0 |
+| pickups/pickup_chaingun.glb | 5768 | 4000–10000 | 585.6 | 128×128 | 0 | 0 |
+| pickups/pickup_pistol.glb | 4320 | 4000–10000 | 515.3 | 128×128 | 0 | 0 |
+| pickups/pickup_rocket_launcher.glb | 5688 | 4000–10000 | 644.8 | 128×128 | 0 | 0 |
+| pickups/pickup_shotgun.glb | 4356 | 4000–10000 | 500.9 | 128×128 | 0 | 0 |
+| pickups/rocket_box.glb | 440 | 200–2000 | 73.7 | 128×128 | 0 | 0 |
+| pickups/shell_box.glb | 480 | 200–2000 | 69.9 | 128×128 | 0 | 0 |
 | props/ceiling_lamp.glb | 1044 | 200–2000 | 106.8 | 128×128 | 0 | 0 |
 | props/ceiling_lamp_broken.glb | 876 | 200–2000 | 100.1 | 128×128 | 0 | 0 |
 | props/explosive_barrel.glb | 1236 | 200–2000 | 136.2 | 128×128 | 0 | 0 |

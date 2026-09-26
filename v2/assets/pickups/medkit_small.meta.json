@@ -1,0 +1,15 @@
+{
+  "file": "pickups/medkit_small.glb",
+  "type": "pickups",
+  "size_m": [
+    0.328,
+    0.3075,
+    0.2049
+  ],
+  "triangles": 972,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Ground-level origin; rotate root for idle pickup spin."
+}

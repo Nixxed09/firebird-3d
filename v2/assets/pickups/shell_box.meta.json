@@ -1,0 +1,15 @@
+{
+  "file": "pickups/shell_box.glb",
+  "type": "pickups",
+  "size_m": [
+    0.34,
+    0.26,
+    0.169
+  ],
+  "triangles": 480,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Ground-level origin; rotate root for idle pickup spin."
+}
