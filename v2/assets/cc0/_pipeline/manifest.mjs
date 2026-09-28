@@ -25,6 +25,8 @@ var assets = sources.map(function (s) {
   // the renderer only puts an authored gun in the player's hands if it says it
   // was made for a first-person view (src/render/renderer.js fitsView)
   if (s.view) entry.view = s.view;
+  // grey on purpose: asset-render warns instead of failing its near-grey check
+  if (s.grey) entry.grey = s.grey;
   else if (s.type === 'weapon') console.log('note: ' + s.id + ' has no "view" in sources.json, so the game keeps its built-in ' + s.id + ' in first person');
   return entry;
 });

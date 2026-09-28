@@ -5,9 +5,8 @@ Quaternius also asks that the models not be resold or redistributed *as an asset
 
 | In game | Model | Author | Licence | Source | What we changed |
 |---|---|---|---|---|---|
-| `imp` | Demon | Quaternius | CC0 1.0 | https://poly.pizza/m/LnfIziKv4o | scaled to 1.7 m tall; clips renamed to idle/walk/attack_windup/attack/pain/death, others dropped; recoloured |
-| `gnasher` | Yeti | Quaternius | CC0 1.0 | https://poly.pizza/m/S1E7idPFhe | scaled to 1.4 m tall; clips renamed to idle/walk/attack/pain/death, others dropped; recoloured |
-| `knight` | Blue Demon | Quaternius | CC0 1.0 | https://poly.pizza/m/S7jYW6Amye | scaled to 2.6 m tall; clips renamed to idle/walk/attack_windup/attack/pain/death, others dropped; recoloured |
+| `imp` | Zombie | Quaternius | CC0 1.0 | https://poly.pizza/m/VlXjG0N8Eg | scaled to 1.7 m tall; clips renamed to idle/walk/attack_windup/attack/pain/death, others dropped |
+| `gnasher` | Wolf | Quaternius | CC0 1.0 | https://poly.pizza/m/P1gU3Qkr9r | scaled to 1.2 m tall; clips renamed to idle/walk/attack/pain/death, others dropped |
 | `riley` | Adventurer | Quaternius | CC0 1.0 | https://poly.pizza/m/ZwF0K7WBmu | scaled to 1.9 m tall; clips renamed to idle/walk/attack_windup/attack/pain/death/roll/punch/run_shoot, others dropped; recoloured (gold accents are her attack tell); added a shield bubble |
 | `pistol` | Pistol | Quaternius | CC0 1.0 | https://poly.pizza/m/52kQzphmeF | scaled to 0.24 m long, muzzle to +Z, origin at the grip |
 | `shotgun` | Shotgun | Quaternius | CC0 1.0 | https://poly.pizza/m/8Z4HaN1NyS | scaled to 0.95 m long, muzzle to +Z, origin at the grip |

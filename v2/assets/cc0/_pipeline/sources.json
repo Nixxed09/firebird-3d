@@ -4,92 +4,42 @@
     {
       "id": "imp",
       "type": "demon",
-      "title": "Demon",
+      "title": "Zombie",
       "author": "Quaternius",
       "license": "CC0 1.0",
-      "page": "https://poly.pizza/m/LnfIziKv4o",
-      "url": "https://static.poly.pizza/46b52ba4-5d2a-4fc8-85cc-3e980f199141.glb",
-      "sha256": "7da854e1d43428b89b1afca0feca3f323b869b1d8ed7df74d17354260b607262",
+      "note": "Old Earth: the Hollow, a hunched ash-shell husk (the game applies the ash-shell material)",
+      "page": "https://poly.pizza/m/VlXjG0N8Eg",
+      "url": "https://static.poly.pizza/c4002f69-6979-42e8-ad6e-2f4e14fc3a9d.glb",
+      "sha256": "3afd2837b117f264afd037a350759b96d6f837fc9b381cca35cf6796b4bab09d",
       "height": 1.7,
       "clips": {
         "idle": "Idle",
         "walk": "Walk",
-        "attack_windup": "Wave",
+        "attack_windup": "Idle_Attack",
         "attack": "Punch",
         "pain": "HitReact",
         "death": "Death"
-      },
-      "recolor": {
-        "Eye_White": {
-          "color": "#ffcc66",
-          "emit": 1.2
-        }
       }
     },
     {
       "id": "gnasher",
       "type": "demon",
-      "title": "Yeti",
+      "title": "Wolf",
       "author": "Quaternius",
       "license": "CC0 1.0",
-      "page": "https://poly.pizza/m/S1E7idPFhe",
-      "url": "https://static.poly.pizza/085b078d-b72a-4d8e-a030-000d36c58447.glb",
-      "sha256": "20aaa4fc5fc3b9fe30b6109f88061f2d6f49e03b26a51ebee08f50bd1c26caaf",
-      "height": 1.4,
+      "note": "Old Earth: the Hollow Hound, a low quadruped charger",
+      "page": "https://poly.pizza/m/P1gU3Qkr9r",
+      "url": "https://static.poly.pizza/f1d12388-e39b-4157-b32a-646a1d089fc4.glb",
+      "sha256": "16ac96339d06f7def9af20d5d9b27622d61e53580dab43970c9edb1bffbe8f84",
+      "height": 1.2,
       "clips": {
         "idle": "Idle",
-        "walk": "Walk",
-        "attack": "Bite_Front",
-        "pain": "HitRecieve",
+        "walk": "Gallop",
+        "attack": "Attack",
+        "pain": "Idle_HitReact_Left",
         "death": "Death"
       },
-      "recolor": {
-        "Yeti_Main": {
-          "color": "#c0587a"
-        },
-        "Yeti_Secondary": {
-          "color": "#5a1a2e"
-        },
-        "Eye_White": {
-          "color": "#ffe9a0",
-          "emit": 0.3
-        }
-      }
-    },
-    {
-      "id": "knight",
-      "type": "demon",
-      "title": "Blue Demon",
-      "author": "Quaternius",
-      "license": "CC0 1.0",
-      "page": "https://poly.pizza/m/S7jYW6Amye",
-      "url": "https://static.poly.pizza/6fbb8914-bd11-45e1-a906-51ace2ca5d2d.glb",
-      "sha256": "6a8e743deba6f43f0f9b1e702016b04ddba1d3bf73b7101d2c86d64ae526f87c",
-      "height": 2.6,
-      "clips": {
-        "idle": "Idle",
-        "walk": "Walk",
-        "attack_windup": "Wave",
-        "attack": "Weapon",
-        "pain": "HitReact",
-        "death": "Death"
-      },
-      "recolor": {
-        "BlueDemon_Main": {
-          "color": "#6e2412"
-        },
-        "BlueDemon_Secondary": {
-          "color": "#ff8a2a",
-          "emit": 0.9
-        },
-        "Straps": {
-          "color": "#2a1a14"
-        },
-        "Eye_White": {
-          "color": "#ffd23e",
-          "emit": 1.6
-        }
-      }
+      "grey": "a grey wolf by design; in game the Old Earth ash-shell pass colours it anyway"
     },
     {
       "id": "riley",

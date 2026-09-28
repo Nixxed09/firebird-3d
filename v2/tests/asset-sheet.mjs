@@ -1,7 +1,9 @@
 // Contact sheet for 3D models: renders each .glb in a pose, in the game's
 // retro-modern look (a third of the resolution, nearest-pixel upscale, warm
 // key light, cool rim, fog), in real Chrome. For choosing and reviewing assets.
-//   node tests/asset-sheet.mjs out.png "model.glb|Clip|label" ...
+//   node tests/asset-sheet.mjs [--ash] out.png "model.glb|Clip|label" ...
+// --ash previews the Old Earth "ash shell" pass the game applies to authored
+// demons (soot-grey base, crimson emissive seams), to judge silhouettes as played.
 // Clip is an animation name (posed 40% through); leave it empty for a still.
 import puppeteer from 'puppeteer-core';
 import { build } from 'esbuild';
@@ -10,14 +12,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 var here = path.dirname(fileURLToPath(import.meta.url));
-var args = process.argv.slice(2), out = args.shift();
+var args = process.argv.slice(2), ASH = args.indexOf('--ash') >= 0;
+args = args.filter(function (a) { return a !== '--ash'; });
+var out = args.shift();
 if (!out || !args.length) { console.log('usage: node tests/asset-sheet.mjs out.png "file.glb|Clip|label" ...'); process.exit(1); }
 
 var VIEWER = `
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 var CELL = 240, LOW = 3;
-window.renderSheet = async function (models, cols) {
+window.renderSheet = async function (models, cols, ash) {
   var rows = Math.ceil(models.length / cols);
   var out = document.createElement('canvas');
   out.width = cols * CELL; out.height = rows * (CELL + 18);
@@ -39,6 +43,11 @@ window.renderSheet = async function (models, cols) {
     var key = new THREE.DirectionalLight(0xffc080, 2.2); key.position.set(2, 3, 2); scene.add(key);
     var rim = new THREE.DirectionalLight(0x60c0ff, 1.2); rim.position.set(-2, 2, -3); scene.add(rim);
     var obj = gltf.scene; scene.add(obj);
+    if (ash) obj.traverse(function (o) {
+      if (!o.isMesh) return;
+      var bright = [].concat(o.material).some(function (m) { return m.emissive && m.emissive.getHex() > 0; });
+      o.material = new THREE.MeshStandardMaterial({ color: 0x3a3532, roughness: 0.95, emissive: bright ? 0xc81e1e : 0x000000, emissiveIntensity: 1.2 });
+    });
     var mixer = new THREE.AnimationMixer(obj), clip = null;
     if (m.clip) clip = gltf.animations.find(function (a) { return a.name.replace(/^.*\\|/, '') === m.clip; });
     if (clip) { mixer.clipAction(clip).play(); mixer.update(clip.duration * 0.4); }
@@ -74,7 +83,7 @@ var page = await browser.newPage();
 page.on('pageerror', function (e) { console.log('page error: ' + e.message); });
 await page.setContent('<html><body></body></html>');
 await page.addScriptTag({ content: bundle.outputFiles[0].text });
-var url = await page.evaluate(function (m) { return window.renderSheet(m, 4); }, models);
+var url = await page.evaluate(function (m, a) { return window.renderSheet(m, 4, a); }, models, ASH);
 fs.writeFileSync(out, Buffer.from(url.split(',')[1], 'base64'));
 await browser.close();
 console.log('wrote ' + out);

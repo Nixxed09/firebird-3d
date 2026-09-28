@@ -40,7 +40,7 @@ DIRS.forEach(function (d) {
     if (a.type === 'texture' || !a.file || !/\.glb$/i.test(a.file)) return;   // models only (the older manifest also lists previews and notes)
     if (entries.some(function (x) { return x.dir === d && x.file === a.file; })) return;
     var type = /demon/.test(a.type) ? 'demon' : /weapon/.test(a.type) ? 'weapon' : 'prop';
-    entries.push({ dir: d, id: a.id || norm(a.file), file: a.file, type: type });
+    entries.push({ dir: d, id: a.id || norm(a.file), file: a.file, type: type, grey: a.grey });
   });
 });
 var credits = fs.existsSync(path.join(root, 'assets/cc0/CREDITS.md')) ? fs.readFileSync(path.join(root, 'assets/cc0/CREDITS.md'), 'utf8') : '';
@@ -112,7 +112,10 @@ for (var e of entries) {
   if (e.type === 'demon') {
     var missing = NEEDED.filter(function (c) { return !hasClip(s.clips, c); });
     if (missing.length) problems.push('no clip for ' + missing.join(', ') + ' (has: ' + (s.clips.join(', ') || 'none') + ')');
-    if (s.chroma < 20) problems.push('renders near-grey (colour ' + s.chroma.toFixed(0) + '/255): colour lost on export?');
+    if (s.chroma < 20) {
+      if (e.grey) notes.push('near-grey (colour ' + s.chroma.toFixed(0) + '/255), marked grey by design: ' + e.grey);
+      else problems.push('renders near-grey (colour ' + s.chroma.toFixed(0) + '/255): colour lost on export?');
+    }
   }
   else if (s.chroma < 3) notes.push('no colour at all (' + s.chroma.toFixed(1) + '/255): fine for bare metal, a bug for wood, fire or paint');
   if (s.lum < 18) problems.push('renders near-black (brightness ' + s.lum.toFixed(0) + '/255)');
