@@ -98,20 +98,24 @@ function gnasher() {
 function knight() {
   var root = new THREE.Group(), body = new THREE.Group();
   root.add(body);
-  var armor = std(0x8a2016, { roughness: 0.35, metalness: 0.6 }), trim = std(0x2a1410, { roughness: 0.5, metalness: 0.4 }), ember = glow(0xff5a10, 4);
+  // the Reset Warden: an Overseer construct of basalt plates in brass frames, a red-mercury heart
+  var armor = std(0x24201f, { roughness: 0.55, metalness: 0.3 }), trim = std(0x9a7640, { roughness: 0.3, metalness: 0.85 }), ember = glow(0xff1a30, 4);
   var chest = part(geo('box', BOX), armor, 0, 0.82, 0, body); chest.scale.set(0.5, 0.42, 0.3);
   var belly = part(geo('box', BOX), trim, 0, 0.55, 0, body); belly.scale.set(0.4, 0.16, 0.26);
   var core = part(geo('sph', SPH), ember, 0, 0.84, 0.16, body); core.scale.setScalar(0.07); core.userData.noFlash = true;
   var head = part(geo('box', BOX), armor, 0, 1.12, 0.02, body); head.scale.set(0.2, 0.18, 0.2);
-  var visor = part(geo('box', BOX), glow(0xff8a20, 5), 0, 1.13, 0.12, body); visor.scale.set(0.15, 0.03, 0.02); visor.userData.noFlash = true;
+  var visor = part(geo('box', BOX), glow(0xff2a3a, 5), 0, 1.13, 0.12, body); visor.scale.set(0.15, 0.03, 0.02); visor.userData.noFlash = true;
   [-1, 1].forEach(function (s) {
-    var horn = part(geo('cone', CONE), trim, s * 0.14, 1.26, 0, body); horn.scale.set(0.04, 0.2, 0.04); horn.rotation.z = -s * 0.7;
+    var seam = part(geo('box', BOX), glow(0xff1a30, 2), s * 0.12, 0.82, 0.152, body); seam.scale.set(0.02, 0.36, 0.01); seam.userData.noFlash = true;
     var pauldron = part(geo('sph', SPH), armor, s * 0.3, 1.0, 0, body); pauldron.scale.set(0.14, 0.1, 0.14);
     var arm = new THREE.Group(); arm.position.set(s * 0.33, 0.95, 0); body.add(arm); body.userData['arm' + s] = arm;
     var fore = part(geo('box', BOX), armor, 0, -0.25, 0, arm); fore.scale.set(0.13, 0.42, 0.13);
     var fist = part(geo('box', BOX), trim, 0, -0.5, 0.02, arm); fist.scale.set(0.15, 0.13, 0.15);
-    var leg = part(geo('box', BOX), trim, s * 0.13, 0.24, 0, body); leg.scale.set(0.15, 0.48, 0.17); body.userData['leg' + s] = leg;
+    var leg = part(geo('box', BOX), armor, s * 0.13, 0.24, 0, body); leg.scale.set(0.15, 0.48, 0.17); body.userData['leg' + s] = leg;
   });
+  // a brass spire on its head instead of horns: the reset engine's antenna
+  var spire = part(geo('cone', CONE), trim, 0, 1.33, 0.02, body); spire.scale.set(0.05, 0.24, 0.05);
+  var ringH = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.015, 6, 20), trim); ringH.rotation.x = Math.PI / 2; ringH.position.set(0, 1.22, 0.02); body.add(ringH);
   var mats = flashable(root);
   return {
     obj: root, mats: mats,
@@ -167,10 +171,11 @@ function riley() {
 
 function barrel() {
   var root = new THREE.Group();
-  var drum = part(geo('cyl', CYL), std(0x4a5a3a, { roughness: 0.45, metalness: 0.5 }), 0, 0.28, 0, root); drum.scale.set(0.2, 0.55, 0.2);
-  [0.08, 0.48].forEach(function (y) { var band = part(geo('cyl', CYL), std(0x2a2e26, { metalness: 0.6, roughness: 0.4 }), 0, y, 0, root); band.scale.set(0.205, 0.03, 0.205); });
-  var goo = part(geo('cyl', CYL), glow(0x6aff3a, 2.5), 0, 0.56, 0, root); goo.scale.set(0.16, 0.01, 0.16); goo.userData.noFlash = true;
-  var sym = part(geo('box', BOX), glow(0xffd23e, 1.5), 0, 0.3, 0.2, root); sym.scale.set(0.12, 0.12, 0.005); sym.rotation.z = Math.PI / 4; sym.userData.noFlash = true;
+  // a mercury cask: a dark basalt-glass vessel in brass bands, red mercury glowing through a window
+  var drum = part(geo('cyl', CYL), std(0x2a2222, { roughness: 0.3, metalness: 0.4 }), 0, 0.28, 0, root); drum.scale.set(0.2, 0.55, 0.2);
+  [0.06, 0.28, 0.5].forEach(function (y) { var band = part(geo('cyl', CYL), std(0xa87e42, { metalness: 0.85, roughness: 0.3 }), 0, y, 0, root); band.scale.set(0.207, 0.035, 0.207); });
+  var goo = part(geo('cyl', CYL), glow(0xff1a30, 2.5), 0, 0.56, 0, root); goo.scale.set(0.16, 0.01, 0.16); goo.userData.noFlash = true;
+  var sym = part(geo('box', BOX), glow(0xff2a3a, 2), 0, 0.39, 0.2, root); sym.scale.set(0.1, 0.1, 0.005); sym.rotation.z = Math.PI / 4; sym.userData.noFlash = true;
   return { obj: root, mats: flashable(root), animate: function () { } };
 }
 
@@ -183,11 +188,13 @@ var MAKERS = { imp: imp, gnasher: gnasher, knight: knight, riley: riley, barrel:
 function ashShell(m, strength) {
   if (!m || m.userData.ash) return;
   m.userData.ash = true;
-  if (m.color) { var l = m.color.r * 0.3 + m.color.g * 0.55 + m.color.b * 0.15; m.color.setRGB(0.05 + l * 0.34 + m.color.r * 0.06, 0.05 + l * 0.3, 0.05 + l * 0.3); }
   m.onBeforeCompile = function (sh) {
     sh.uniforms.ashGlow = { value: 0.9 * strength };
     sh.vertexShader = 'varying vec3 vAshP;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvAshP = position;');
-    sh.fragmentShader = 'varying vec3 vAshP; uniform float ashGlow;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>', [
+    // soot: grey out whatever colour (or texture) the model brought, keeping its light and shade
+    sh.fragmentShader = 'varying vec3 vAshP; uniform float ashGlow;\n' + sh.fragmentShader.replace('#include <color_fragment>',
+      '#include <color_fragment>\n{ float l = dot(diffuseColor.rgb, vec3(0.3, 0.55, 0.15)); diffuseColor.rgb = mix(vec3(l), diffuseColor.rgb, 0.12) * vec3(0.5, 0.46, 0.45) + 0.03; }'
+    ).replace('#include <emissivemap_fragment>', [
       '#include <emissivemap_fragment>',
       '{ vec3 q = vAshP * 7.0;',
       '  float n = sin(q.x * 1.3 + sin(q.y * 1.7)) * sin(q.y * 1.1 + sin(q.z * 1.9)) * sin(q.z * 1.5 + sin(q.x * 1.2));',
