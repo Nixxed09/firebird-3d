@@ -22,6 +22,10 @@ var assets = sources.map(function (s) {
   var named = (j.nodes || []).map(function (n) { return n.name; }).filter(function (n) { return /^(shield|slide|pump|barrels|tube)$/.test(n); });
   if (named.length) entry.nodes = named;
   entry.source = s.title + ' by ' + s.author + ' (' + s.license + '), ' + s.page;
+  // the renderer only puts an authored gun in the player's hands if it says it
+  // was made for a first-person view (src/render/renderer.js fitsView)
+  if (s.view) entry.view = s.view;
+  else if (s.type === 'weapon') console.log('note: ' + s.id + ' has no "view" in sources.json, so the game keeps its built-in ' + s.id + ' in first person');
   return entry;
 });
 fs.writeFileSync(path.join(dir, 'assets.json'), JSON.stringify({ version: 1, assets: assets }, null, 2) + '\n');
