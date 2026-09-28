@@ -7,6 +7,7 @@ import { makeRng } from './sim/rng.js';
 import { createRenderer } from './render/renderer.js';
 import { createHud, fmtTime } from './ui/hud.js';
 import { loadAssets } from './render/assets.js';
+import RILEY from '../../js/riley.js';
 
 var SETTINGS = MENUS.SETTINGS, MENU = MENUS.MENU;
 var v = SETTINGS.v;
@@ -33,7 +34,10 @@ var hud = createHud(ctx, game, v);
 var mode = 'title', modeT = 0, started = false, mapOpen = false, locked = false, lockFailed = false;
 
 function diff() { return DIFFS[v.difficulty] || DIFFS[1]; }
-function applySettings() { SND.setVolume(v.volume / 10); gfx.camera.fov = v.fov; gfx.camera.updateProjectionMatrix(); }
+function applySettings() {
+  SND.setVolume(v.volume / 10); gfx.camera.fov = v.fov; gfx.camera.updateProjectionMatrix();
+  gfx.setQuality({ scale: v.quality || 1, bloom: v.bloom !== false, shake: v.shake !== false });
+}
 
 // ---- layout: the 3D view sits above the status bar -------------------------------------
 
@@ -154,82 +158,247 @@ function fireLine(y, t, seed) {
     ctx.fillRect(x, y - h2, 2, h2 + 4);
   }
 }
-function titleBg(c, t) {
-  ctx.fillStyle = 'rgba(8,6,4,0.55)'; ctx.fillRect(0, 0, W, H);
-  fireLine(H - 6, t, 0); fireLine(H - 2, t * 1.3, 2);
-  ART.drawText(ctx, 'FIREBIRD', W / 2, 10, { scale: 4, color: '#e03828', shadow: '#401008', center: true });
-  ART.drawText(ctx, 'FIREBIRD', W / 2 - 1, 9, { scale: 4, color: '#ff9a28', center: true });
-  ART.drawText(ctx, '3D', W / 2, 34, { scale: 5, color: '#ffd23e', shadow: '#803008', center: true });
-  ART.drawText(ctx, 'EPISODE ONE: KNEE-DEEP IN THE ASHES', W / 2, 64, { color: '#c8c0b0', center: true });
-  ART.drawText(ctx, 'A NIX GAMES PRODUCTION BY PHOENIX', W / 2, 72, { color: '#8a8478', center: true });
+// ---- the showcase: a live 3D scene behind the menus -----------------------------------------
+// A separate copy of the game, so menus never touch the real one. Each level has a
+// camera shot; the title opens on the Furnace reveal, and Level Select flies to
+// whichever level is highlighted.
+var showcase = createGame({ levels: LEVELS, rng: makeRng(7), storage: null, settings: { difficulty: 1, tips: false, seenTips: {} } });
+var SHOTS = {
+  0: { x: 19.5, z: 9.4, y: 2, ang: -1.6, pitch: 0.1, sway: 0.1 },                 // Riley in her sparring arena
+  1: { x: 17.5, z: 26.6, y: 2, ang: -Math.PI / 2, pitch: -0.2, sway: 0.18 },        // the Furnace from the gantry
+  2: null, 3: null                                                                   // classic layouts: from the start
+};
+var showLevel = -1, showG = null;
+function showLevelAt(i) {
+  if (i === showLevel) return;
+  showLevel = i;
+  showcase.startLevel(i, false);
+  showG = showcase.state();
+  var shot = SHOTS[i], p = showG.p;
+  if (shot) { p.x = shot.x; p.z = shot.z; p.y = shot.y; }
+  p.baseAng = shot ? shot.ang : p.ang; p.basePitch = shot ? shot.pitch : 0.05; p.sway = shot ? shot.sway : 0.3;
+  showG.msgs.length = 0; showG.notice = null;
 }
+function driveShowcase(t) {
+  var p = showG.p;
+  p.ang = p.baseAng + Math.sin(t * 0.11) * p.sway;
+  p.pitch = p.basePitch + Math.sin(t * 0.17) * 0.04;
+}
+
+// ---- menu look: a dark panel on the left, the scene on the right ---------------------------------
+var PANEL = 150;
+function panelBg(c, t) {
+  ctx.fillStyle = 'rgba(6,4,3,0.84)'; ctx.fillRect(0, 0, PANEL, H);
+  for (var i = 0; i < 40; i++) { ctx.fillStyle = 'rgba(6,4,3,' + (0.84 * (1 - i / 40)).toFixed(3) + ')'; ctx.fillRect(PANEL + i, 0, 1, H); }
+  ctx.fillStyle = '#ff7a18'; ctx.fillRect(PANEL - 1, 0, 1, H);
+  ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(0, H - 14, W, 14);
+}
+function logo(x, y) {
+  ART.drawText(ctx, 'FIREBIRD', x + 1, y + 1, { scale: 3, color: '#401008' });
+  ART.drawText(ctx, 'FIREBIRD', x, y, { scale: 3, color: '#ff9a28' });
+  ART.drawText(ctx, '3D', x + 98, y - 2, { scale: 4, color: '#ffd23e', shadow: '#803008' });
+  ART.drawText(ctx, 'EPISODE ONE: KNEE-DEEP IN THE ASHES', x, y + 21, { color: '#a8a090' });
+}
+function heading(text, y) {
+  ART.drawText(ctx, text, 14, y || 14, { scale: 2, color: '#ff9a28', shadow: '#401008' });
+  ctx.fillStyle = '#5e2a10'; ctx.fillRect(14, (y || 14) + 13, PANEL - 28, 1);
+}
+function wrapText(text, n) {
+  var words = String(text).split(' '), out = [], cur = '';
+  words.forEach(function (w) { var nx = cur ? cur + ' ' + w : w; if (nx.length > n && cur) { out.push(cur); cur = w; } else cur = nx; });
+  if (cur) out.push(cur);
+  return out;
+}
+// what the highlighted item does, under the menu
+function infoLine(y) {
+  var it = MENU.selected(), info = it && (typeof it.info === 'function' ? it.info() : it.info);
+  if (!info) return;
+  wrapText(info, 33).forEach(function (l, i) { ART.drawText(ctx, l, 14, (y || 150) + i * 8, { color: '#a8a090' }); });
+}
+function footerHint(text) { ART.drawText(ctx, text || 'ARROWS / MOUSE: CHOOSE   ENTER: SELECT   ESC: BACK', 14, H - 10, { color: '#6a655c' }); }
+function chip(x, y, text, lit, col) {
+  var w = ART.textWidth(text, 1) + 6;
+  ctx.fillStyle = lit ? (col || '#ffd23e') : '#2e2a24'; ctx.fillRect(x, y, w, 9);
+  ctx.fillStyle = lit ? '#1a0e06' : '#14110d'; ctx.fillRect(x + 1, y + 1, w - 2, 7);
+  ART.drawText(ctx, text, x + 3, y + 2, { color: lit ? (col || '#ffd23e') : '#4a463c' });
+  return w + 3;
+}
+function onOff(b) { return b ? 'ON' : 'OFF'; }
+var MENU_BOX = { alignLeft: true, x0: 20, x1: 138, footer: '' };
+function screen(o) { var s = {}; for (var k in MENU_BOX) s[k] = MENU_BOX[k]; for (var k2 in o) s[k2] = o[k2]; return s; }
+
+// Riley on the title: she remembers whether you've met
+var rileyMem = (function () { try { return RILEY.recall(window.localStorage); } catch (e) { return { fights: 0, wins: 0 }; } })();
+function rileyGreeting() {
+  if (!rileyMem.fights) return "HI! I'M RILEY. COME FIND ME AT THE TOP OF E1M1.";
+  if (rileyMem.wins) return "WELCOME BACK. I'VE BEEN PRACTISING SINCE YOU BEAT ME.";
+  return 'WELCOME BACK. I STILL REMEMBER HOW YOU FIGHT.';
+}
+
+function titleBg(c, t) {
+  panelBg(c, t);
+  logo(14, 16);
+  ART.drawText(ctx, 'A NIX GAMES PRODUCTION BY PHOENIX', 14, H - 24, { color: '#6a655c' });
+  // Riley's line, in the scene
+  var lines = wrapText('RILEY: ' + rileyGreeting(), 34);
+  ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(170, 150 - 4, 144, lines.length * 8 + 6);
+  lines.forEach(function (l, i) { ART.drawText(ctx, l, 174, 150 + i * 8, { color: '#6fe0ec', shadow: true }); });
+}
+
+var BLURBS = {
+  E1M1: 'RILEY TEACHES YOU THE ROPES ON THE WAY UP, THEN SPARS WITH YOU IN HER ARENA.',
+  E1M2: 'DRAIN THE FURNACE, TAKE THE RED KEY, AND SURVIVE THE FORGE.',
+  E1M3: 'THE EMBER KNIGHT WAITS ON THE DEMON THRONE.',
+  E1M4: 'RILEY REMEMBERS HOW YOU FOUGHT. THIS TIME SHE IS NOT HOLDING BACK.'
+};
+
+function mainScreen() {
+  var pr = SETTINGS.progress;
+  return screen({
+    drawBg: titleBg, scale: 2, top: 62, gap: 14,
+    drawExtra: function () { infoLine(136); footerHint(); },
+    items: function () {
+      var list = [];
+      if (pr.unlocked > 0) list.push({ label: 'CONTINUE', action: function () { launch(pr.unlocked); }, info: function () { return LEVELS[pr.unlocked].name + ' ON ' + diff().name + '.'; } });
+      list.push(
+        { label: 'NEW GAME', action: function () { MENU.push(diffScreen(0)); }, info: 'START THE EPISODE FROM THE BEGINNING.' },
+        { label: 'LEVELS', action: function () { MENU.push(levelScreen()); }, info: 'PICK A LEVEL, SEE YOUR BEST TIMES AND MEDALS.' },
+        { label: 'OPTIONS', action: function () { MENU.push(optionsScreen(0)); }, info: 'CONTROLS, VIDEO, AUDIO AND GAMEPLAY.' },
+        { label: 'CONTROLS', action: function () { MENU.push(controlsScreen()); }, info: 'EVERY KEY, ON ONE PAGE.' }
+      );
+      return list;
+    }
+  });
+}
+
+function diffScreen(idx) {
+  var list = DIFFS.map(function (d, i) { return { label: d.name, info: d.desc, action: function () { v.difficulty = i; SETTINGS.save(); launch(idx); } }; });
+  list.push({ label: 'BACK', action: function () { MENU.back(); } });
+  return screen({
+    drawBg: panelBg, scale: 2, top: 46, gap: 16, sel: v.difficulty, items: list,
+    drawExtra: function () { heading('DIFFICULTY'); infoLine(118); ART.drawText(ctx, LEVELS[idx].name, 14, 32, { color: '#c8c0b0' }); footerHint(); }
+  });
+}
+
+function levelScreen() {
+  var list = LEVELS.map(function (L, i) {
+    var open = i <= SETTINGS.progress.unlocked, code = L.name.split(':')[0];
+    return {
+      label: open ? L.name.replace(': ', '  ') : code + '  LOCKED', level: i,
+      disabled: function () { return !open; },
+      action: function () { MENU.push(diffScreen(i)); }
+    };
+  });
+  list.push({ label: 'BACK', action: function () { MENU.back(); } });
+  var sel = Math.min(SETTINGS.progress.unlocked, LEVELS.length - 1);
+  return screen({
+    drawBg: panelBg, scale: 1, top: 40, gap: 13, sel: sel, items: list,
+    drawExtra: function () {
+      heading('LEVELS');
+      var it = MENU.selected(), i = it && it.level !== undefined ? it.level : showLevel;
+      if (it && it.level !== undefined) showLevelAt(i);
+      levelCardInfo(i);
+      footerHint();
+    }
+  });
+}
+
+// the level card, on the right over the preview
+function levelCardInfo(i) {
+  var L = LEVELS[i], code = L.name.split(':')[0], name = L.name.split(': ')[1] || L.name;
+  var open = i <= SETTINGS.progress.unlocked, best = SETTINGS.best ? SETTINGS.best(i) : null;
+  var x = 172, blurb = wrapText(BLURBS[code] || '', 34), cardH = 58 + blurb.length * 8, y = 166 - cardH;
+  ctx.fillStyle = 'rgba(6,4,3,0.72)'; ctx.fillRect(x - 6, y - 6, W - x, cardH);
+  ctx.fillStyle = '#ff7a18'; ctx.fillRect(x - 6, y - 6, 1, cardH);
+  ART.drawText(ctx, code + (L.heights ? '   REBUILT IN 3D' : '   CLASSIC LAYOUT'), x, y, { color: L.heights ? '#8fe0a0' : '#8a8478' });
+  ART.drawText(ctx, name, x, y + 9, { scale: 2, color: '#ff9a28', shadow: '#401008' });
+  blurb.forEach(function (l, k) { ART.drawText(ctx, l, x, y + 25 + k * 8, { color: '#c8c0b0' }); });
+  var info = game.levelInfo(L), row = y + 28 + blurb.length * 8;
+  if (info.boss) chip(x, row - 1, 'BOSS: RILEY', true, '#6fe0ec');
+  ART.drawText(ctx, 'PAR ' + fmtTime(L.par) + (best && best.time !== null ? '   BEST ' + fmtTime(best.time) : ''), info.boss ? x + 60 : x, row + 1, { color: '#a8a090' });
+  var cx = x;
+  (SETTINGS.MEDALS || ['PAR', 'KILLS', 'ITEMS', 'SECRETS']).forEach(function (m) { cx += chip(cx, row + 12, m, !!(best && best.medals && best.medals[m])); });
+  if (!open) {
+    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(x - 5, y - 5, W - x - 1, cardH - 2);
+    ART.drawText(ctx, 'LOCKED', x + 60, y + 22, { scale: 2, color: '#ff9a28', shadow: true });
+    ART.drawText(ctx, 'FINISH THE LEVEL BEFORE IT', x + 30, y + 42, { color: '#a8a090' });
+  }
+}
+
+var OPTION_TABS = ['CONTROLS', 'VIDEO', 'AUDIO', 'GAMEPLAY'];
+var DEFAULTS2 = { sens: 5, invertY: false, fov: 78, quality: 1, bloom: true, shake: true, fps: false, volume: 7, crosshair: true, goalMarker: true, tips: true, difficulty: 1 };
+function optionsScreen(tab) {
+  function step(key, min, max, by) { return function (dir) { var n = +(v[key] + dir * (by || 1)).toFixed(2); v[key] = n > max ? min : n < min ? max : n; SETTINGS.save(); applySettings(); }; }
+  function toggle(key) { return function () { v[key] = !v[key]; SETTINGS.save(); applySettings(); }; }
+  var section = {
+    label: 'SECTION', value: function () { return OPTION_TABS[tab]; },
+    adjust: function (dir) { MENU.replace(optionsScreen((tab + dir + OPTION_TABS.length) % OPTION_TABS.length)); },
+    info: 'LEFT AND RIGHT TO SWITCH BETWEEN CONTROLS, VIDEO, AUDIO AND GAMEPLAY.'
+  };
+  var pages = [
+    [
+      { label: 'MOUSE SPEED', slider: [0, 10, function () { return v.sens; }], adjust: step('sens', 1, 10), info: 'HOW FAST THE VIEW TURNS.' },
+      { label: 'INVERT Y', value: function () { return onOff(v.invertY); }, adjust: toggle('invertY'), info: 'PUSH THE MOUSE FORWARD TO LOOK DOWN INSTEAD OF UP.' },
+      { label: 'FIELD OF VIEW', value: function () { return v.fov; }, adjust: step('fov', 60, 110, 5), info: 'HOW WIDE YOU SEE, IN DEGREES. WIDER SHOWS MORE.' }
+    ],
+    [
+      { label: 'RESOLUTION', value: function () { return Math.round((v.quality || 1) * 100) + '%'; }, adjust: step('quality', 0.5, 1, 0.25), info: 'LOWER IS FASTER ON SLOW COMPUTERS, AND CHUNKIER.' },
+      { label: 'GLOW', value: function () { return onOff(v.bloom !== false); }, adjust: toggle('bloom'), info: 'THE SOFT GLOW AROUND FIRE, LAVA AND LIGHTS.' },
+      { label: 'SCREEN SHAKE', value: function () { return onOff(v.shake !== false); }, adjust: toggle('shake'), info: 'THE VIEW KICKS ON SHOTS, HITS AND EXPLOSIONS.' },
+      { label: 'SHOW FPS', value: function () { return onOff(!!v.fps); }, adjust: toggle('fps'), info: 'FRAMES PER SECOND, IN THE CORNER.' }
+    ],
+    [
+      { label: 'VOLUME', slider: [0, 10, function () { return v.volume; }], adjust: step('volume', 0, 10), info: 'LOUDNESS OF EVERYTHING.' },
+      { label: 'MUSIC', value: function () { return onOff(SND.isMusicOn()); }, adjust: function () { SND.setMusic(!SND.isMusicOn()); }, info: 'PRESS M DURING PLAY TO TOGGLE IT TOO.' }
+    ],
+    [
+      { label: 'DIFFICULTY', value: function () { return diff().name; }, adjust: step('difficulty', 0, 2), info: function () { return diff().desc; } },
+      { label: 'CROSSHAIR', value: function () { return onOff(v.crosshair); }, adjust: toggle('crosshair'), info: 'A SMALL AIMING MARK. TURNS RED OVER A DEMON.' },
+      { label: 'GOAL MARKER', value: function () { return onOff(v.goalMarker); }, adjust: toggle('goalMarker'), info: 'POINTS AT YOUR GOAL ONCE YOU HAVE SEEN IT.' },
+      { label: 'TIPS', value: function () { return onOff(v.tips); }, adjust: function () { v.tips = !v.tips; if (v.tips) v.seenTips = {}; SETTINGS.save(); }, info: 'SHORT HINTS THE FIRST TIME SOMETHING NEW HAPPENS. ON AGAIN SHOWS THEM ALL.' },
+      { label: 'RESET ALL', action: function () { MENU.push(confirmScreen('RESET?', 'EVERY OPTION BACK TO ITS DEFAULT.', function () { for (var k in DEFAULTS2) v[k] = DEFAULTS2[k]; SETTINGS.save(); applySettings(); MENU.back(); })); }, info: 'EVERY OPTION BACK TO ITS DEFAULT. PROGRESS AND MEDALS ARE KEPT.' }
+    ]
+  ];
+  var items = [section].concat(pages[tab]).concat([{ label: 'BACK', action: function () { MENU.back(); } }]);
+  return screen({
+    drawBg: panelBg, x1: 142, scale: 1, top: 44, gap: 13, items: items,
+    drawExtra: function () {
+      heading('OPTIONS');
+      // the tab strip
+      var x = 14;
+      OPTION_TABS.forEach(function (t2, i) { x += chip(x, 32, t2, i === tab); });
+      infoLine(44 + items.length * 13 + 6);
+      footerHint('ARROWS / MOUSE: CHOOSE   LEFT / RIGHT: CHANGE   ESC: BACK');
+    }
+  });
+}
+
+var CONTROLS = [
+  ['MOVE', 'W A S D  /  ARROWS'], ['LOOK AND AIM', 'MOUSE'], ['FIRE', 'LEFT CLICK  /  CTRL'],
+  ['JUMP', 'SPACE  /  RIGHT CLICK'], ['CROUCH', 'C'], ['USE / OPEN', 'E'], ['RUN', 'HOLD SHIFT'],
+  ['WEAPONS', '1 2 3  /  WHEEL'], ['LAST WEAPON', 'Q'], ['MAP', 'TAB'], ['MUSIC', 'M'], ['PAUSE', 'ESC']
+];
+function controlsScreen() {
+  return screen({
+    drawBg: panelBg, scale: 2, top: 172, gap: 12, items: [{ label: 'BACK', action: function () { MENU.back(); } }],
+    drawExtra: function () {
+      heading('CONTROLS');
+      CONTROLS.forEach(function (c, i) {
+        var y = 36 + i * 11;
+        ART.drawText(ctx, c[0], 14, y, { color: '#c8c0b0' });
+        ART.drawText(ctx, c[1], 76, y, { color: '#ffd23e' });
+      });
+      footerHint();
+    }
+  });
+}
+
 function menuBg(c, t) {
   ctx.fillStyle = mode === 'game' ? 'rgba(4,3,2,0.8)' : 'rgba(8,6,4,0.7)';
   ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = '#5e2a10'; ctx.fillRect(40, 33, W - 80, 1);
 }
-function onOff(b) { return b ? 'ON' : 'OFF'; }
 
-function mainScreen() {
-  var pr = SETTINGS.progress;
-  return {
-    drawBg: titleBg, scale: 2, top: 86, gap: 13, descY: 156, footerY: 172,
-    items: function () {
-      var list = [];
-      if (pr.unlocked > 0) list.push({ label: 'CONTINUE', action: function () { launch(pr.unlocked); }, desc: function () { return 'START ' + LEVELS[pr.unlocked].name + ' ON ' + diff().name + '.'; } });
-      list.push(
-        { label: 'NEW GAME', action: function () { MENU.push(diffScreen(0)); }, desc: 'START EPISODE ONE FROM THE BEGINNING.' },
-        { label: 'LEVEL SELECT', action: function () { MENU.push(levelScreen()); }, desc: 'REPLAY ANY LEVEL YOU HAVE REACHED.' },
-        { label: 'OPTIONS', action: function () { MENU.push(optionsScreen()); }, desc: 'MOUSE, VOLUME, FIELD OF VIEW, CROSSHAIR, TIPS AND DIFFICULTY.' },
-        { label: 'CONTROLS', action: function () { MENU.push(controlsScreen()); }, desc: 'EVERY KEY, ON ONE PAGE.' }
-      );
-      return list;
-    }
-  };
-}
-function diffScreen(idx) {
-  var list = DIFFS.map(function (d, i) { return { label: d.name, desc: d.desc, action: function () { v.difficulty = i; SETTINGS.save(); launch(idx); } }; });
-  list.push({ label: 'BACK', action: function () { MENU.back(); } });
-  return { title: 'DIFFICULTY', drawBg: menuBg, scale: 2, top: 54, gap: 18, descY: 146, sel: v.difficulty, items: list };
-}
-function levelScreen() {
-  var list = LEVELS.map(function (L, i) {
-    var open = i <= SETTINGS.progress.unlocked;
-    return { label: open ? L.name : L.name.split(':')[0] + ': ???', disabled: function () { return !open; }, desc: 'PAR ' + fmtTime(L.par) + '.  STARTS WITH A PISTOL.', action: function () { MENU.push(diffScreen(i)); } };
-  });
-  list.push({ label: 'BACK', action: function () { MENU.back(); } });
-  return { title: 'LEVEL SELECT', drawBg: menuBg, top: 46, gap: 14, descY: 142, items: list };
-}
-function optionsScreen() {
-  function step(key, min, max, by) { return function (dir) { var n = v[key] + dir * (by || 1); v[key] = n > max ? min : n < min ? max : n; SETTINGS.save(); applySettings(); }; }
-  function toggle(key) { return function () { v[key] = !v[key]; SETTINGS.save(); }; }
-  return {
-    title: 'OPTIONS', drawBg: menuBg, top: 40, gap: 11, descY: 158,
-    items: [
-      { label: 'MOUSE SPEED', slider: [0, 10, function () { return v.sens; }], adjust: step('sens', 1, 10), desc: 'HOW FAST THE VIEW TURNS. LEFT AND RIGHT TO CHANGE.' },
-      { label: 'INVERT MOUSE Y', value: function () { return onOff(v.invertY); }, adjust: toggle('invertY'), desc: 'PUSH THE MOUSE FORWARD TO LOOK DOWN INSTEAD OF UP.' },
-      { label: 'FIELD OF VIEW', value: function () { return v.fov + ' DEG'; }, adjust: step('fov', 60, 110, 5), desc: 'HOW WIDE YOU SEE. WIDER SHOWS MORE, NARROWER ZOOMS IN.' },
-      { label: 'SOUND VOLUME', slider: [0, 10, function () { return v.volume; }], adjust: step('volume', 0, 10), desc: 'LOUDNESS OF EVERYTHING.' },
-      { label: 'MUSIC', value: function () { return onOff(SND.isMusicOn()); }, adjust: function () { SND.setMusic(!SND.isMusicOn()); }, desc: 'PRESS M DURING PLAY TO TOGGLE IT TOO.' },
-      { label: 'CROSSHAIR', value: function () { return onOff(v.crosshair); }, adjust: toggle('crosshair'), desc: 'A SMALL AIMING MARK. TURNS RED OVER A DEMON.' },
-      { label: 'GOAL MARKER', value: function () { return onOff(v.goalMarker); }, adjust: toggle('goalMarker'), desc: 'POINTS AT YOUR GOAL ONCE YOU HAVE SEEN IT.' },
-      { label: 'TIPS', value: function () { return onOff(v.tips); }, adjust: function () { v.tips = !v.tips; if (v.tips) v.seenTips = {}; SETTINGS.save(); }, desc: 'SHORT HINTS THE FIRST TIME SOMETHING NEW HAPPENS.' },
-      { label: 'DIFFICULTY', value: function () { return diff().name; }, adjust: step('difficulty', 0, 2), desc: function () { return diff().desc; } },
-      { label: 'BACK', action: function () { MENU.back(); } }
-    ]
-  };
-}
-var CONTROLS = [
-  ['MOVE', 'W A S D   OR   ARROW KEYS'], ['LOOK AND AIM', 'MOUSE (UP AND DOWN TOO)'], ['FIRE', 'LEFT CLICK   OR   CTRL'],
-  ['JUMP', 'SPACE   OR   RIGHT CLICK'], ['CROUCH', 'C'], ['USE / OPEN', 'E'], ['RUN', 'HOLD SHIFT'],
-  ['WEAPONS', '1 2 3   OR   MOUSE WHEEL'], ['LAST WEAPON', 'Q'], ['MAP', 'TAB'], ['PAUSE', 'ESC']
-];
-function controlsScreen() {
-  return {
-    title: 'CONTROLS', drawBg: menuBg, top: 170, gap: 12, items: [{ label: 'BACK', action: function () { MENU.back(); } }],
-    drawExtra: function () { CONTROLS.forEach(function (c, i) { var y = 40 + i * 11; ART.drawText(ctx, c[0], 140, y, { color: '#c8c0b0', right: true }); ART.drawText(ctx, c[1], 152, y, { color: '#ffd23e' }); }); }
-  };
-}
 function confirmScreen(q, detail, yes) {
   return { title: q, drawBg: menuBg, scale: 2, top: 86, gap: 18, sel: 1, drawExtra: function () { ART.drawText(ctx, detail, W / 2, 56, { color: '#a8a090', center: true }); }, items: [{ label: 'YES', action: yes }, { label: 'NO', action: function () { MENU.back(); } }] };
 }
@@ -311,9 +480,8 @@ function playEvents(G) {
 
 var STEP = 1 / 60, acc = 0, last = performance.now(), lastMode = '', frames = [];
 var frozen = false, FROZEN_T = 10; // ?debug freeze(): no sim steps, a pinned render clock
-// the title screen shows a slow fly-through of E1M1 behind the menu
-game.startLevel(0, false);
-var attract = game.state();
+var weaponShown = null;
+function showWeapon(on) { if (on !== weaponShown) { weaponShown = on; gfx.setQuality({ weapon: on }); } }
 function frame(now) {
   var dt = Math.min(0.1, (now - last) / 1000); last = now;
   var gm = game.mode(), m = mode === 'title' ? 'title' : gm;
@@ -322,10 +490,12 @@ function frame(now) {
   frames.push(dt); if (frames.length > 240) frames.shift();
   var G = game.state();
   if (mode === 'title') {
-    // attract mode: drift the camera through the level
-    var p = attract.p, t = now / 1000;
-    p.ang = t * 0.12; p.pitch = Math.sin(t * 0.3) * 0.15; p.x = 5.5 + Math.sin(t * 0.07) * 0.5; p.z = 17.5;
-    gfx.render(attract, t, dt);
+    // the showcase: a slow cinematic shot of a level behind the menu
+    var t = now / 1000;
+    if (!showG) showLevelAt(1);
+    driveShowcase(t);
+    showWeapon(false);
+    gfx.render(showG, t, dt);
     ctx.clearRect(0, 0, W, H);
     if (!assetsSettled) {
       titleBg(ctx, modeT);
@@ -345,9 +515,14 @@ function frame(now) {
       }
     } else acc = 0;
     G = game.state();
+    showWeapon(true);
     gfx.render(G, frozen ? FROZEN_T : now / 1000, paused ? 0 : dt, frozen);
     G.events.length = 0;
     hud.draw(G, { map: mapOpen, menu: MENU.isOpen(), camera: gfx.camera });
+    if (v.fps) {
+      var sorted = frames.slice().sort(function (a2, b2) { return a2 - b2; }), med = sorted[sorted.length >> 1] || 0.016;
+      ART.drawText(ctx, Math.round(1 / med) + ' FPS', W - 4, VH - 9, { color: '#8fe0a0', shadow: true, right: true });
+    }
     if (gm === 'inter') interScreen(modeT);
     else if (gm === 'victory') victoryScreen(modeT);
     else if (!started) levelCard(modeT);

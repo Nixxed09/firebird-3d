@@ -15,7 +15,9 @@ var FOG = { slab: 0x0c0907, tech: 0x06090c, hell: 0x160604 };
 export function createRenderer(canvas, opts) {
   opts = opts || {};
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: !!opts.preserve });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  var quality = { scale: 1, bloom: true, shake: true, weapon: true };
+  function pixelRatio() { return Math.min(window.devicePixelRatio || 1, 1.5) * quality.scale; }
+  renderer.setPixelRatio(pixelRatio());
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.45;
   // something for metal to reflect: without it, guns and armour render black
@@ -138,6 +140,7 @@ export function createRenderer(canvas, opts) {
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
     bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.75, 0.55, 0.82);
+    bloom.enabled = quality.bloom;
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
     resize(canvas.clientWidth, canvas.clientHeight);
@@ -279,7 +282,7 @@ export function createRenderer(canvas, opts) {
     G.events.forEach(function (e) { if (e.t === 'fx') fx.event(e); });
     fx.update(dt, viewport.h * 0.9);
     // camera at the eye, with shake
-    var sk = G.shake * 0.004;
+    var sk = quality.shake ? G.shake * 0.004 : 0;
     camera.position.set(p.x + (Math.random() - 0.5) * sk, p.y + p.eyeH + (Math.random() - 0.5) * sk, p.z + (Math.random() - 0.5) * sk);
     camera.rotation.y = -Math.PI / 2 - p.ang;
     camera.rotation.x = p.pitch;
@@ -289,6 +292,7 @@ export function createRenderer(canvas, opts) {
     renderer.autoClear = false;
     renderer.clearDepth();
     drawView(G, t, dt);
+    gunRig.visible = quality.weapon;
     renderer.render(viewScene, viewCam);
     renderer.autoClear = true;
   }
@@ -296,6 +300,13 @@ export function createRenderer(canvas, opts) {
   return {
     // swap in authored art once it has loaded; the scene rebuilds on the next frame
     setAssets: function (reg) { assets = reg; makeGuns(); G0 = null; },
+    // video options, and hiding the gun for menu showcase shots
+    setQuality: function (q) {
+      for (var k in q) quality[k] = q[k];
+      renderer.setPixelRatio(pixelRatio());
+      if (bloom) bloom.enabled = quality.bloom;
+      resize(viewport.w, viewport.h);
+    },
     assets: function () { return assets; },
     debugModels: function () { var out = []; models.forEach(function (m) { if (m.debug) out.push(m.debug()); }); return out; },
     render: render, resize: resize, renderer: renderer, camera: camera,
