@@ -7,7 +7,7 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { buildLevel } from './level.js';
 import { makeMob, makePickup, makeTorch, shotgunModel, pistolModel, fistModel, addHand } from './models.js';
-import { makeFx } from './fx.js';
+import { makeFx, flashTex } from './fx.js';
 import { emptyAssets, instance } from './assets.js';
 
 var FOG = { slab: 0x0c0907, tech: 0x06090c, hell: 0x160604 };
@@ -15,7 +15,7 @@ var FOG = { slab: 0x0c0907, tech: 0x06090c, hell: 0x160604 };
 export function createRenderer(canvas, opts) {
   opts = opts || {};
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: !!opts.preserve });
-  var quality = { scale: 1, bloom: true, shake: true, weapon: true };
+  var quality = { scale: 1, bloom: true, shake: true, weapon: true }, baseFov = 78;
   function pixelRatio() { return Math.min(window.devicePixelRatio || 1, 1.5) * quality.scale; }
   renderer.setPixelRatio(pixelRatio());
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -51,6 +51,7 @@ export function createRenderer(canvas, opts) {
     guns = {};
     Object.keys(GUN_POSE).forEach(function (k) {
       var entry = assets.model(k), g;
+      if (entry && !fitsView(entry, k)) entry = null; // not built for a first-person view: keep the built-in gun
       if (entry) {
         g = new THREE.Group();
         var inst = instance(entry); g.add(inst.obj);
@@ -73,6 +74,18 @@ export function createRenderer(canvas, opts) {
       gunRig.add(g); guns[k] = g;
     });
   }
+  // An authored first-person gun must run along Z (its length is its longest side), be
+  // about gun-sized, and not bring its own arm. Otherwise the built-in gun is used.
+  function fitsView(entry, k) {
+    var box = new THREE.Box3().setFromObject(entry.scene, true), d = box.getSize(new THREE.Vector3());
+    // it must say it was made for first person (many CC0 guns are chunky third-person props)
+    if (!(entry.meta && (entry.meta.view === 'first-person' || entry.meta.firstPerson))) return false;
+    var ok = d.z >= d.x && d.z >= d.y * 1.2 && d.z > 0.08 && d.z < 1.6;
+    var arm = false;
+    entry.scene.traverse(function (o) { if (/arm|hand|sleeve|glove/i.test(o.name || '') || (o.material && /skin|sleeve|glove|hand/i.test(o.material.name || ''))) arm = true; });
+    if (!ok && typeof console !== 'undefined') console.info('[assets] ' + k + ' is not a first-person gun shape (' + d.x.toFixed(2) + ' x ' + d.y.toFixed(2) + ' x ' + d.z.toFixed(2) + ' m); using the built-in one');
+    return ok && !arm;
+  }
   makeGuns();
   // moving parts slide along their own z from wherever the artist put them
   function offsetZ(node, dz) {
@@ -80,8 +93,14 @@ export function createRenderer(canvas, opts) {
     if (node.userData.z0 === undefined) node.userData.z0 = node.position.z;
     node.position.z = node.userData.z0 + dz;
   }
-  var flashSprite = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffd080, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+  var flashSprite = new THREE.Group();
+  var flashMat = new THREE.MeshBasicMaterial({ map: flashTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+  var flashFront = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), flashMat);
+  var flashSide = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.6), flashMat); flashSide.rotation.y = Math.PI / 2; flashSide.position.z = -0.25;
+  flashSprite.add(flashFront, flashSide);
   flashSprite.scale.setScalar(0.035);
+  // camera recoil: the view kicks up and settles (it doesn't move your aim)
+  var punch = { pitch: 0, vel: 0, fov: 0, roll: 0, lastFire: 1 };
   viewScene.add(flashSprite);
   var bob = 0, sway = { x: 0, y: 0 }, lastAng = 0, lastPitch = 0, G0 = null, viewport = { w: 1, h: 1, top: 0 };
 
@@ -98,6 +117,7 @@ export function createRenderer(canvas, opts) {
     level = buildLevel(G, assets);
     scene.add(level.group);
     fx = makeFx(scene);
+    fx.onTink = function (pos) { if (opts.onSound) opts.onSound('casingTink', pos); };
     models.clear(); projs.clear(); torchLights = [];
     // a warm light at every torch (a fixed number, so shaders never recompile mid-fight)
     G.ents.forEach(function (e) {
@@ -242,8 +262,13 @@ export function createRenderer(canvas, opts) {
     if (!g) return;
     var ft = p.fireT, kick = ft < 0.12 ? Math.sin(ft / 0.12 * Math.PI) : 0;
     var raise = p.lowerT > 0 ? (1 - p.lowerT / 0.15) : p.raiseT > 0 ? p.raiseT / 0.15 : 0;
-    gunRig.position.set(Math.sin(bob) * 0.012 * bobAmt + sway.x * 0.1, -Math.abs(Math.cos(bob)) * 0.01 * bobAmt + sway.y * 0.1 - raise * 0.25 - p.landT * 0.1, 0);
-    gunRig.rotation.set(0, 0, 0);
+    // figure-8 walk bob, a lean into strafes, the gun dips when you land and lowers when you run
+    var strafe = G.input.strafe || 0, running = speed > 4.2;
+    punch.roll += (-strafe * 0.06 - punch.roll) * Math.min(1, dt * 8);
+    var runDrop = running ? 0.03 : 0;
+    gunRig.position.set(Math.sin(bob) * 0.014 * bobAmt + sway.x * 0.1,
+      -Math.abs(Math.sin(bob)) * 0.012 * bobAmt + Math.sin(bob * 2) * 0.004 * bobAmt + sway.y * 0.1 - raise * 0.25 - p.landT * 0.12 - runDrop, 0);
+    gunRig.rotation.set(running ? 0.12 : 0, running ? -0.15 : 0, punch.roll);
     if (p.weapon === 'fist') {
       g.position.z = g.userData.baseZ - (ft < 0.2 ? Math.sin(ft / 0.2 * Math.PI) * 0.18 : 0);
       g.rotation.x = ft < 0.2 ? -Math.sin(ft / 0.2 * Math.PI) * 0.3 : 0;
@@ -257,8 +282,14 @@ export function createRenderer(canvas, opts) {
     }
     var flashing = ft < 0.06 && p.weapon !== 'fist' && !p.dead;
     flashSprite.visible = flashing;
-    flashSprite.position.set(g.position.x, g.position.y + (p.weapon === 'shotgun' ? 0 : 0.02), g.position.z - (p.weapon === 'shotgun' ? 0.7 : 0.18));
-    flashSprite.scale.setScalar((p.weapon === 'shotgun' ? 0.06 : 0.035) * (0.8 + Math.random() * 0.4));
+    flashSprite.position.set(g.position.x, g.position.y + (p.weapon === 'shotgun' ? 0 : 0.02), g.position.z - (p.weapon === 'shotgun' ? 0.72 : 0.2));
+    flashSprite.scale.setScalar((p.weapon === 'shotgun' ? 0.2 : 0.11) * (0.8 + Math.random() * 0.45));
+    flashFront.rotation.z = Math.random() * Math.PI * 2;
+    // a new shot: kick the view
+    if (ft < punch.lastFire && p.weapon !== 'fist') { punch.vel += p.weapon === 'shotgun' ? 1.6 : 0.55; punch.fov = p.weapon === 'shotgun' ? 3 : 0.8; }
+    punch.lastFire = ft;
+    punch.vel -= punch.pitch * 180 * dt; punch.vel *= Math.exp(-dt * 16); punch.pitch += punch.vel * dt;
+    punch.fov *= Math.exp(-dt * 10);
     viewLight.intensity = flashing ? 3 : 0;
     viewLight.position.copy(flashSprite.position);
   }
@@ -280,13 +311,15 @@ export function createRenderer(canvas, opts) {
     syncEntities(G, t, dt);
     updateTorches(t);
     G.events.forEach(function (e) { if (e.t === 'fx') fx.event(e); });
-    fx.update(dt, viewport.h * 0.9);
+    fx.update(dt, viewport.h * 0.9, function (x, z) { var cx = Math.floor(x), cz = Math.floor(z); return cx >= 0 && cz >= 0 && cx < G.mw && cz < G.mh ? G.W.floor[cz * G.mw + cx] : 0; });
     // camera at the eye, with shake
     var sk = quality.shake ? G.shake * 0.004 : 0;
     camera.position.set(p.x + (Math.random() - 0.5) * sk, p.y + p.eyeH + (Math.random() - 0.5) * sk, p.z + (Math.random() - 0.5) * sk);
     camera.rotation.y = -Math.PI / 2 - p.ang;
-    camera.rotation.x = p.pitch;
-    camera.rotation.z = p.dead ? Math.min(0.5, p.deadT * 0.6) : 0;
+    camera.rotation.x = p.pitch + punch.pitch;
+    camera.rotation.z = p.dead ? Math.min(0.5, p.deadT * 0.6) : punch.roll * 0.35;
+    var wantFov = baseFov + punch.fov;
+    if (Math.abs(camera.fov - wantFov) > 0.01) { camera.fov = wantFov; camera.updateProjectionMatrix(); }
     composer.render(dt);
     // the weapon on top, with its own depth so it never clips into walls
     renderer.autoClear = false;
@@ -301,6 +334,7 @@ export function createRenderer(canvas, opts) {
     // swap in authored art once it has loaded; the scene rebuilds on the next frame
     setAssets: function (reg) { assets = reg; makeGuns(); G0 = null; },
     // video options, and hiding the gun for menu showcase shots
+    setFov: function (f) { baseFov = f; },
     setQuality: function (q) {
       for (var k in q) quality[k] = q[k];
       renderer.setPixelRatio(pixelRatio());
@@ -308,6 +342,7 @@ export function createRenderer(canvas, opts) {
       resize(viewport.w, viewport.h);
     },
     assets: function () { return assets; },
+    fxStats: function () { return fx ? fx.stats() : null; },
     debugModels: function () { var out = []; models.forEach(function (m) { if (m.debug) out.push(m.debug()); }); return out; },
     render: render, resize: resize, renderer: renderer, camera: camera,
     info: function () { return renderer.info; }

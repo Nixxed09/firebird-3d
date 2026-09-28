@@ -270,9 +270,17 @@ export function createGame(opts) {
           slideMove(G.W, best, Math.cos(yaw) * kb, Math.sin(yaw) * kb, best.radius, best.h, STEP_UP);
         }
       }
-      ev('fx', best.barrel || best.kind === 'riley' ? 'spark' : 'blood', ox + dx * bestT, oy + dy * bestT, oz + dz * bestT, { dx: -dx, dy: -dy, dz: -dz });
+      var hx = ox + dx * bestT, hy = oy + dy * bestT, hz = oz + dz * bestT;
+      ev('fx', best.barrel || best.kind === 'riley' ? 'spark' : 'blood', hx, hy, hz, { dx: -dx, dy: -dy, dz: -dz, kill: best.state === 'die', floorY: best.y });
+      if (!isMelee) ev('fx', 'tracer', ox, oy, oz, { x2: hx, y2: hy, z2: hz });
+      if (!best.barrel && best.kind !== 'riley') sound(best.state === 'die' ? 'killConfirm' : 'hitFlesh');
     } else if (!isMelee && wall.kind !== 'none') {
-      ev('fx', 'puff', wall.x - dx * 0.03, wall.y - dy * 0.03, wall.z - dz * 0.03, { surface: wall.kind });
+      // where it hit and which way the surface faces, for the hole, the sparks and the ricochet
+      ev('fx', 'puff', wall.x - dx * 0.03, wall.y - dy * 0.03, wall.z - dz * 0.03, {
+        surface: wall.kind, dx: dx, dy: dy, dz: dz, cell: cellAt(G.W, wall.cx, wall.cz)
+      });
+      ev('fx', 'tracer', ox, oy, oz, { x2: wall.x, y2: wall.y, z2: wall.z });
+      if (rnd() < 0.35) sound('ricochet', { x: wall.x, y: wall.y, z: wall.z });
     } else if (isMelee) sound('whiff');
     return best;
   }
@@ -1059,7 +1067,12 @@ export function createGame(opts) {
         p.cool = wep.rate; p.fireT = 0;
         sound(p.weapon === 'fist' ? 'punch' : p.weapon);
         if (p.weapon === 'shotgun') sound('pump');
-        if (!wep.melee) { shake(wep.shake); ev('fx', 'muzzle', p.x + Math.cos(p.ang) * 0.4, eyeY() - 0.1, p.z + Math.sin(p.ang) * 0.4, { weapon: p.weapon }); }
+        if (!wep.melee) {
+          shake(wep.shake);
+          ev('fx', 'muzzle', p.x + Math.cos(p.ang) * 0.4, eyeY() - 0.1, p.z + Math.sin(p.ang) * 0.4, { weapon: p.weapon });
+          // the spent case (the shotgun ejects when it pumps)
+          ev('fx', 'casing', p.x, eyeY() - 0.15, p.z, { weapon: p.weapon, ang: p.ang, delay: p.weapon === 'shotgun' ? 0.45 : 0 });
+        }
         if (rileyActive(G.boss)) RILEY.noteShot(G.boss.profile, p.weapon, playerDist(G.boss.x, G.boss.z));
         G.shotId++; G.firing = true;
         if (wep.melee) fireHitscan(p.ang, p.pitch, wep.dmgMin, wep.dmgMax, true, wep.knock);

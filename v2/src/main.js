@@ -29,13 +29,17 @@ var game = createGame({
   onProgress: function (i, st) { SETTINGS.unlock(Math.min(i + 1, LEVELS.length - 1)); lastRecord = SETTINGS.record ? SETTINGS.record(i, st) : null; }
 });
 var lastRecord = null;
-var gfx = createRenderer(view, { preserve: DEBUG });
+var gfx = createRenderer(view, {
+  preserve: DEBUG,
+  // sounds the renderer makes (spent casings hitting the floor), placed around the listener
+  onSound: function (name, pos) { var G = game.state(); if (!G || mode !== 'game') return; var dx = pos.x - G.p.x, dz = pos.z - G.p.z; SND.play(name, Math.sqrt(dx * dx + dz * dz), Math.sin(Math.atan2(dz, dx) - G.p.ang) * 0.7); }
+});
 var hud = createHud(ctx, game, v);
 var mode = 'title', modeT = 0, started = false, mapOpen = false, locked = false, lockFailed = false;
 
 function diff() { return DIFFS[v.difficulty] || DIFFS[1]; }
 function applySettings() {
-  SND.setVolume(v.volume / 10); gfx.camera.fov = v.fov; gfx.camera.updateProjectionMatrix();
+  SND.setVolume(v.volume / 10); gfx.setFov(v.fov);
   gfx.setQuality({ scale: v.quality || 1, bloom: v.bloom !== false, shake: v.shake !== false });
 }
 
@@ -465,11 +469,13 @@ function victoryScreen(t) {
 
 // ---- sound: the simulation's events, placed around the listener ----------------------------------
 
+// v2's richer versions of classic sounds
+var SOUND_V2 = { pistol: 'pistol2', shotgun: 'shotgun2' };
 function playEvents(G) {
   var p = G.p;
   G.events.forEach(function (e) {
     if (e.t !== 'sound') return;
-    if (e.local) { SND.play(e.name); return; }
+    if (e.local) { SND.play(SOUND_V2[e.name] || e.name); return; }
     var dx = e.x - p.x, dz = e.z - p.z, d = Math.sqrt(dx * dx + dz * dz);
     var pan = Math.sin(Math.atan2(dz, dx) - p.ang) * 0.7;
     SND.play(e.name, d, pan);
@@ -564,6 +570,7 @@ if (DEBUG) {
     freeze: function (on) { frozen = !!on; },
     frozen: function () { return frozen; },
     models: function () { return gfx.debugModels(); },
+    fxStats: function () { return gfx.fxStats(); },
     // which authored assets loaded, and anything that failed
     assets: function () { return assetReg ? { ready: assetReg.ready, loaded: assetReg.loaded.slice(), problems: assetReg.problems.slice() } : { ready: false }; },
     frameStats: function () {

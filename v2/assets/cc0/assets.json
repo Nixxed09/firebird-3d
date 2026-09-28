@@ -66,7 +66,8 @@
       "id": "pistol",
       "type": "weapon",
       "file": "pistol.glb",
-      "source": "Pistol by Quaternius (CC0 1.0), https://poly.pizza/m/52kQzphmeF"
+      "source": "Pistol by Quaternius (CC0 1.0), https://poly.pizza/m/52kQzphmeF",
+      "view": "first-person"
     },
     {
       "id": "shotgun",
