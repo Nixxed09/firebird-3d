@@ -10,6 +10,5 @@ Quaternius also asks that the models not be resold or redistributed *as an asset
 | `riley` | Adventurer | Quaternius | CC0 1.0 | https://poly.pizza/m/ZwF0K7WBmu | scaled to 1.9 m tall; clips renamed to idle/walk/attack_windup/attack/pain/death/roll/punch/run_shoot, others dropped; recoloured (gold accents are her attack tell); added a shield bubble |
 | `pistol` | Pistol | Quaternius | CC0 1.0 | https://poly.pizza/m/52kQzphmeF | scaled to 0.24 m long, muzzle to +Z, origin at the grip |
 | `shotgun` | Shotgun | Quaternius | CC0 1.0 | https://poly.pizza/m/8Z4HaN1NyS | scaled to 0.95 m long, muzzle to +Z, origin at the grip |
-| `barrel` | Exploding Barrel | Quaternius | CC0 1.0 | https://poly.pizza/m/1orHe0kCc1 | scaled to 1.1 m tall |
 
 Rebuild from the originals: `node assets/cc0/_pipeline/fetch.mjs` (checks sha256), `blender -b -P assets/cc0/_pipeline/process.py`, `node assets/cc0/_pipeline/manifest.mjs`.

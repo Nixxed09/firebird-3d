@@ -1,5 +1,5 @@
 {
-  "about": "CC0 models used by Firebird v2, where they come from, and how _pipeline/process.py turns each into a contract-ready .glb (docs/ASSETS.md). Rebuild: node assets/cc0/_pipeline/fetch.mjs, then blender -b -P assets/cc0/_pipeline/process.py, then node assets/cc0/_pipeline/manifest.mjs. Weapons: set \"view\": \"first-person\" only for a model built to be held in view AND fitting the theme; the renderer (fitsView in src/render/renderer.js) uses an authored gun only with that flag and otherwise keeps its built-in one. The Old Earth reskin (STYLE_GUIDE.md) forbids real-world guns, so no CC0 gun is flagged.",
+  "about": "CC0 models used by Firebird v2, where they come from, and how _pipeline/process.py turns each into a contract-ready .glb (docs/ASSETS.md). Rebuild: node assets/cc0/_pipeline/fetch.mjs, then blender -b -P assets/cc0/_pipeline/process.py, then node assets/cc0/_pipeline/manifest.mjs. Weapons: set \"view\": \"first-person\" only for a model built to be held in view AND fitting the theme; the renderer (fitsView in src/render/renderer.js) uses an authored gun only with that flag and otherwise keeps its built-in one. The Old Earth reskin (STYLE_GUIDE.md) forbids real-world guns, so no CC0 gun is flagged. The CC0 hazard barrel is dropped too (its red-and-white hazard look is off-theme); the game draws its own mercury cask.",
   "sources": [
     {
       "id": "imp",
@@ -124,17 +124,6 @@
       "url": "https://static.poly.pizza/2739ab8d-2dd4-4d97-b05b-2c804d81276c.glb",
       "sha256": "96b88bd1b60ca70e22b6015873d5668f74cf16a955329c2de2a1fac8824c460c",
       "length": 0.95
-    },
-    {
-      "id": "barrel",
-      "type": "prop",
-      "title": "Exploding Barrel",
-      "author": "Quaternius",
-      "license": "CC0 1.0",
-      "page": "https://poly.pizza/m/1orHe0kCc1",
-      "url": "https://static.poly.pizza/dbb58868-50d4-4ef0-945a-12b07222fb69.glb",
-      "sha256": "730a8da4cb342533ddc20fdb8f52a47f3befd20d0bafa44b668eac066252f2f3",
-      "height": 1.1
     }
   ]
 }
