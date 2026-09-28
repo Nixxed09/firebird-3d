@@ -23,12 +23,12 @@ var holeTex = canvasTex(32, function (c, n) {
   c.strokeStyle = 'rgba(190,175,150,0.55)'; c.lineWidth = 1.5; c.beginPath(); c.arc(n / 2, n / 2, n * 0.2, 0, 6.28); c.stroke();
   for (var i = 0; i < 9; i++) { var a = Math.random() * 6.28, r = 5 + Math.random() * 6; c.fillStyle = i % 3 ? 'rgba(20,16,12,0.7)' : 'rgba(200,185,160,0.6)'; c.fillRect(n / 2 + Math.cos(a) * r, n / 2 + Math.sin(a) * r, 2, 2); }
 });
-// a blood splat on the floor: a chunky blob with droplets (kid-level, not gory)
-var bloodTex = canvasTex(32, function (c, n) {
-  c.fillStyle = 'rgba(120,8,8,0.9)';
-  for (var i = 0; i < 7; i++) { var a = Math.random() * 6.28, r = Math.random() * 7; c.beginPath(); c.arc(n / 2 + Math.cos(a) * r, n / 2 + Math.sin(a) * r, 3 + Math.random() * 4, 0, 6.28); c.fill(); }
-  c.fillStyle = 'rgba(90,4,4,0.85)';
-  for (var j = 0; j < 8; j++) { var b = Math.random() * 6.28, d = 9 + Math.random() * 5; c.fillRect(n / 2 + Math.cos(b) * d, n / 2 + Math.sin(b) * d, 2, 2); }
+// ash on the floor where a Hollow's shell cracked: soft soot with a few flakes
+var ashTex = canvasTex(32, function (c, n) {
+  var g = c.createRadialGradient(n / 2, n / 2, 1, n / 2, n / 2, n / 2);
+  g.addColorStop(0, 'rgba(18,16,15,0.85)'); g.addColorStop(0.6, 'rgba(30,27,25,0.5)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = g; c.fillRect(0, 0, n, n);
+  for (var j = 0; j < 14; j++) { var b = Math.random() * 6.28, d = 4 + Math.random() * 11; c.fillStyle = j % 4 ? 'rgba(70,64,60,0.8)' : 'rgba(150,140,130,0.7)'; c.fillRect(n / 2 + Math.cos(b) * d, n / 2 + Math.sin(b) * d, 2, 2); }
 });
 // the muzzle flash: a hot core and a ragged four-point star
 export var flashTex = canvasTex(64, function (c, n) {
@@ -37,11 +37,11 @@ export var flashTex = canvasTex(64, function (c, n) {
     var len = k % 2 ? n * 0.22 : n * 0.48;
     c.rotate(Math.PI / 4);
     var g = c.createLinearGradient(0, 0, len, 0);
-    g.addColorStop(0, 'rgba(255,250,220,1)'); g.addColorStop(0.4, 'rgba(255,190,80,0.9)'); g.addColorStop(1, 'rgba(255,90,20,0)');
+    g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.4, 'rgba(230,230,230,0.85)'); g.addColorStop(1, 'rgba(160,160,160,0)');
     c.fillStyle = g; c.beginPath(); c.moveTo(0, -n * 0.05); c.lineTo(len, 0); c.lineTo(0, n * 0.05); c.fill();
   }
   var core = c.createRadialGradient(0, 0, 0, 0, 0, n * 0.2);
-  core.addColorStop(0, 'rgba(255,255,240,1)'); core.addColorStop(1, 'rgba(255,160,60,0)');
+  core.addColorStop(0, 'rgba(255,255,255,1)'); core.addColorStop(1, 'rgba(200,200,200,0)');
   c.fillStyle = core; c.beginPath(); c.arc(0, 0, n * 0.2, 0, 6.28); c.fill();
 });
 
@@ -100,7 +100,7 @@ export function makeFx(scene) {
   // decals: bullet holes and blood splats that stay (oldest reused first)
   var decalGeo = new THREE.PlaneGeometry(1, 1), decals = [], nextDecal = 0, MAX_DECALS = 180;
   var holeMat = new THREE.MeshBasicMaterial({ map: holeTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
-  var bloodMat = new THREE.MeshBasicMaterial({ map: bloodTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
+  var ashMat = new THREE.MeshBasicMaterial({ map: ashTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
   function decal(x, y, z, nx, ny, nz, size, mat) {
     var d = decals[nextDecal];
     if (!d) { d = new THREE.Mesh(decalGeo, mat); d.renderOrder = 1; scene.add(d); decals[nextDecal] = d; }
@@ -121,7 +121,7 @@ export function makeFx(scene) {
     return [0, 0, e.dz > 0 ? -1 : 1];
   }
   // tracers: a bright streak from the muzzle to the hit, gone in a few frames
-  var tracerMat = new THREE.MeshBasicMaterial({ color: 0xffd890, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+  var tracerMat = new THREE.MeshBasicMaterial({ color: 0xd8f8ff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
   var tracerGeo = new THREE.BoxGeometry(0.012, 0.012, 1), tracers = [], nextTracer = 0;
   for (var ti = 0; ti < 24; ti++) { var tm = new THREE.Mesh(tracerGeo, tracerMat.clone()); tm.visible = false; tm.userData.t = 0; scene.add(tm); tracers.push(tm); }
   function tracer(e) {
@@ -136,10 +136,10 @@ export function makeFx(scene) {
     tm.scale.set(1, 1, seg);
     tm.visible = true; tm.userData.t = 0.05; tm.material.opacity = 0.9;
   }
-  // shell casings: little brass (or red shotgun) cases that fly out right, bounce and settle
+  // spent cells: little brass spark cells (or fat bronze bell charges) that fly out right, bounce and settle
   var casingGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.04, 6), shellGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.07, 8);
   var brass = new THREE.MeshStandardMaterial({ color: 0xc89a40, metalness: 0.9, roughness: 0.3 });
-  var red = new THREE.MeshStandardMaterial({ color: 0xa02818, roughness: 0.5 });
+  var red = new THREE.MeshStandardMaterial({ color: 0x9a6428, metalness: 0.8, roughness: 0.35 });
   var casings = [], nextCasing = 0, pending = [];
   function casing(e) {
     var c = casings[nextCasing];
@@ -155,11 +155,16 @@ export function makeFx(scene) {
   }
 
   var FX = {
+    // a hit on a Hollow (the sim calls it 'blood'): ash chips off the shell, the mercury seam
+    // under it spits, and a little of the trapped light gets out
     blood: function (e) {
-      var n = e.kill ? 26 : 14;
-      for (var i = 0; i < n; i++) spawn(e.x, e.y, e.z, -e.dx * (1.5 + Math.random() * 2) + r(1.2), r(1) + 1.2, -e.dz * (1.5 + Math.random() * 2) + r(1.2), [0.55, 0.02, 0.02], 0.05 + Math.random() * 0.05, 0.6, 9);
-      // a splat on the floor behind the demon, sometimes
-      if (e.floorY !== undefined && (e.kill || Math.random() < 0.35)) decal(e.x - e.dx * 0.5 + r(0.3), e.floorY + 0.002, e.z - e.dz * 0.5 + r(0.3), 0, 1, 0, e.kill ? 0.7 : 0.4, bloodMat);
+      var n = e.kill ? 18 : 10;
+      for (var i = 0; i < n; i++) spawn(e.x, e.y, e.z, -e.dx * (1.2 + Math.random() * 1.6) + r(1.2), r(1) + 1, -e.dz * (1.2 + Math.random() * 1.6) + r(1.2), [0.16, 0.14, 0.13], 0.05 + Math.random() * 0.05, 0.7, 6);
+      for (var j = 0; j < 6; j++) spawn(e.x, e.y, e.z, -e.dx * 2 + r(2), r(1.5) + 0.8, -e.dz * 2 + r(2), [1.8, 0.12, 0.22], 0.025, 0.25, 7);
+      for (var k = 0; k < (e.kill ? 10 : 3); k++) spawn(e.x + r(0.1), e.y, e.z + r(0.1), r(0.3), 0.6 + Math.random() * 0.8, r(0.3), [1.8, 1.6, 1.1], 0.035, 0.8, -0.6);
+      flash(e.x, e.y, e.z, 0xff2a3a, e.kill ? 1.6 : 0.8, 0.06, 2);
+      // ash settles on the floor behind it, sometimes
+      if (e.floorY !== undefined && (e.kill || Math.random() < 0.35)) decal(e.x - e.dx * 0.5 + r(0.3), e.floorY + 0.002, e.z - e.dz * 0.5 + r(0.3), 0, 1, 0, e.kill ? 0.8 : 0.45, ashMat);
     },
     spark: function (e) {
       for (var i = 0; i < 12; i++) spawn(e.x, e.y, e.z, r(3), r(3) + 1, r(3), [1.4, 1.1, 0.5], 0.025, 0.35, 8);
@@ -179,13 +184,13 @@ export function makeFx(scene) {
     casing: function (e) { if (e.delay) pending.push({ t: e.delay, e: e }); else casing(e); },
     muzzle: function (e) {
       var big = e.weapon === 'shotgun';
-      flash(e.x, e.y, e.z, 0xffb060, big ? 7 : 4, 0.07, big ? 9 : 6);
+      flash(e.x, e.y, e.z, big ? 0xffc060 : 0x9fe8ff, big ? 7 : 4, 0.07, big ? 9 : 6);
       // a curl of smoke from the barrel that hangs for a moment
       for (var i = 0; i < (big ? 8 : 3); i++) spawn(e.x, e.y + 0.05, e.z, r(0.15), 0.25 + Math.random() * 0.3, r(0.15), [0.2, 0.19, 0.18], 0.06, 0.9 + Math.random() * 0.5, -0.3, 0.12);
     },
     fireBurst: function (e) {
-      for (var i = 0; i < 22; i++) spawn(e.x, e.y, e.z, r(2), r(2) + 0.5, r(2), [1.8, 0.7, 0.15], 0.06, 0.35, 2, -0.1);
-      flash(e.x, e.y, e.z, 0xff7a20, 4, 0.25, 5);
+      for (var i = 0; i < 22; i++) spawn(e.x, e.y, e.z, r(2), r(2) + 0.5, r(2), i % 3 ? [1.8, 0.14, 0.24] : [2, 1.2, 1.1], 0.06, 0.35, 2, -0.1);
+      flash(e.x, e.y, e.z, 0xff2a3a, 4, 0.25, 5);
     },
     greenBurst: function (e) {
       for (var i = 0; i < 22; i++) spawn(e.x, e.y, e.z, r(2), r(2) + 0.5, r(2), [0.3, 1.6, 1.8], 0.06, 0.35, 2, -0.1);
@@ -194,19 +199,22 @@ export function makeFx(scene) {
     explosion: function (e) {
       for (var i = 0; i < 90; i++) {
         var hot = Math.random() < 0.5;
-        spawn(e.x, e.y, e.z, r(4), r(3) + 2, r(4), hot ? [2, 1.2, 0.3] : [1.4, 0.4, 0.05], 0.12 + Math.random() * 0.1, 0.5 + Math.random() * 0.4, 3, 0.4);
+        spawn(e.x, e.y, e.z, r(4), r(3) + 2, r(4), hot ? [2, 1.3, 1.1] : [1.7, 0.1, 0.2], 0.12 + Math.random() * 0.1, 0.5 + Math.random() * 0.4, 3, 0.4);
       }
       for (var j = 0; j < 30; j++) spawn(e.x, e.y + 0.3, e.z, r(1), Math.random() * 1.5, r(1), [0.18, 0.15, 0.13], 0.35, 1.4, -0.5, 0.6);
-      flash(e.x, e.y + 0.5, e.z, 0xff8a30, 14, 0.5, 9);
+      flash(e.x, e.y + 0.5, e.z, 0xff3a48, 14, 0.5, 9);
     },
     gib: function (e) {
-      var c = e.kind === 'gnasher' ? [0.6, 0.15, 0.2] : [0.5, 0.05, 0.02];
-      for (var i = 0; i < 26; i++) spawn(e.x, e.y, e.z, r(2), Math.random() * 3, r(2), c, 0.06 + Math.random() * 0.05, 0.9, 9);
+      for (var i = 0; i < 30; i++) spawn(e.x + r(0.2), e.y, e.z + r(0.2), r(1.6), Math.random() * 2, r(1.6), [0.15, 0.13, 0.12], 0.07 + Math.random() * 0.06, 1.1, 5, 0.2);
+      if (e.kind !== 'riley') {
+        for (var k2 = 0; k2 < 28; k2++) spawn(e.x + r(0.25), e.y - 0.2 + Math.random() * 0.5, e.z + r(0.25), r(0.25), 1.2 + Math.random() * 1.6, r(0.25), k2 % 5 ? [1.5, 1.3, 0.9] : [0.5, 1.3, 1.6], 0.03 + Math.random() * 0.025, 1.2 + Math.random() * 0.6, -0.8);
+        flash(e.x, e.y + 0.4, e.z, 0xfff0c8, 2, 0.4, 4);
+      }
       if (e.kind === 'riley') for (var k = 0; k < 60; k++) spawn(e.x, e.y + Math.random(), e.z, r(1), Math.random() * 1.5, r(1), [0.3, 1.5, 1.7], 0.04, 1.4, -0.4);
     },
     summon: function (e) {
-      for (var i = 0; i < 50; i++) spawn(e.x + r(0.4), e.y, e.z + r(0.4), r(0.5), Math.random() * 2.5, r(0.5), [1.8, 0.5, 0.1], 0.07, 0.8, -1);
-      flash(e.x, e.y + 0.5, e.z, 0xff5a10, 6, 0.6, 6);
+      for (var i = 0; i < 50; i++) spawn(e.x + r(0.4), e.y, e.z + r(0.4), r(0.5), Math.random() * 2.5, r(0.5), [1.8, 0.12, 0.22], 0.07, 0.8, -1);
+      flash(e.x, e.y + 0.5, e.z, 0xff2a3a, 6, 0.6, 6);
     },
     pickup: function (e) {
       for (var i = 0; i < 16; i++) spawn(e.x, e.y, e.z, r(1), Math.random() * 1.5, r(1), [1.4, 1.2, 0.5], 0.03, 0.5, -1);
@@ -220,9 +228,9 @@ export function makeFx(scene) {
         casings: casings.filter(function (c) { return c && c.visible; }).length };
     },
     event: function (e) { if (FX[e.name]) FX[e.name](e); },
-    // a trail behind anything glowing that moves (fireballs)
+    // a trail behind anything glowing that moves (Hollow embers are red mercury)
     trail: function (x, y, z, green) {
-      spawn(x, y, z, r(0.2), r(0.2), r(0.2), green ? [0.3, 1.4, 1.6] : [1.8, 0.6, 0.1], 0.07, 0.3, 0, -0.15);
+      spawn(x, y, z, r(0.2), r(0.2), r(0.2), green ? [0.3, 1.4, 1.6] : [1.8, 0.12, 0.22], 0.07, 0.3, 0, -0.15);
     },
     ember: function (x, y, z) { spawn(x + r(0.05), y, z + r(0.05), r(0.15), 0.4 + Math.random() * 0.4, r(0.15), [1.6, 0.6, 0.1], 0.02, 1.1, -0.2); },
     update: function (dt, pixelScale, floorAt) {

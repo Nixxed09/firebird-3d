@@ -251,9 +251,9 @@ function titleBg(c, t) {
 
 var BLURBS = {
   E1M1: 'RILEY TEACHES YOU THE ROPES ON THE WAY UP, THEN SPARS WITH YOU IN HER ARENA.',
-  E1M2: 'DRAIN THE FURNACE, TAKE THE RED KEY, AND SURVIVE THE FORGE.',
-  E1M3: 'THE EMBER KNIGHT WAITS ON THE DEMON THRONE.',
-  E1M4: 'RILEY REMEMBERS HOW YOU FOUGHT. THIS TIME SHE IS NOT HOLDING BACK.'
+  E1M2: 'DRAIN THE OVERSEERS\' FURNACE, TAKE THE RED KEYSTONE, AND SURVIVE THE FORGE.',
+  E1M3: 'THE RESET WARDEN GUARDS THE ENGINE THAT IS BURYING ASHGATE. SHUT IT DOWN.',
+  E1M4: 'RILEY\'S TRIAL. SHE REMEMBERS HOW YOU FOUGHT, AND THIS TIME SHE IS NOT HOLDING BACK.'
 };
 
 function mainScreen() {
@@ -347,7 +347,7 @@ function optionsScreen(tab) {
     ],
     [
       { label: 'RESOLUTION', value: function () { return Math.round((v.quality || 1) * 100) + '%'; }, adjust: step('quality', 0.5, 1, 0.25), info: 'LOWER IS FASTER ON SLOW COMPUTERS, AND CHUNKIER.' },
-      { label: 'GLOW', value: function () { return onOff(v.bloom !== false); }, adjust: toggle('bloom'), info: 'THE SOFT GLOW AROUND FIRE, LAVA AND LIGHTS.' },
+      { label: 'GLOW', value: function () { return onOff(v.bloom !== false); }, adjust: toggle('bloom'), info: 'THE SOFT GLOW AROUND FIRE, RED MERCURY AND LIGHTS.' },
       { label: 'SCREEN SHAKE', value: function () { return onOff(v.shake !== false); }, adjust: toggle('shake'), info: 'THE VIEW KICKS ON SHOTS, HITS AND EXPLOSIONS.' },
       { label: 'SHOW FPS', value: function () { return onOff(!!v.fps); }, adjust: toggle('fps'), info: 'FRAMES PER SECOND, IN THE CORNER.' }
     ],
@@ -357,7 +357,7 @@ function optionsScreen(tab) {
     ],
     [
       { label: 'DIFFICULTY', value: function () { return diff().name; }, adjust: step('difficulty', 0, 2), info: function () { return diff().desc; } },
-      { label: 'CROSSHAIR', value: function () { return onOff(v.crosshair); }, adjust: toggle('crosshair'), info: 'A SMALL AIMING MARK. TURNS RED OVER A DEMON.' },
+      { label: 'CROSSHAIR', value: function () { return onOff(v.crosshair); }, adjust: toggle('crosshair'), info: 'A SMALL AIMING MARK. TURNS RED OVER A HOLLOW.' },
       { label: 'GOAL MARKER', value: function () { return onOff(v.goalMarker); }, adjust: toggle('goalMarker'), info: 'POINTS AT YOUR GOAL ONCE YOU HAVE SEEN IT.' },
       { label: 'TIPS', value: function () { return onOff(v.tips); }, adjust: function () { v.tips = !v.tips; if (v.tips) v.seenTips = {}; SETTINGS.save(); }, info: 'SHORT HINTS THE FIRST TIME SOMETHING NEW HAPPENS. ON AGAIN SHOWS THEM ALL.' },
       { label: 'RESET ALL', action: function () { MENU.push(confirmScreen('RESET?', 'EVERY OPTION BACK TO ITS DEFAULT.', function () { for (var k in DEFAULTS2) v[k] = DEFAULTS2[k]; SETTINGS.save(); applySettings(); MENU.back(); })); }, info: 'EVERY OPTION BACK TO ITS DEFAULT. PROGRESS AND MEDALS ARE KEPT.' }
@@ -420,7 +420,7 @@ function pauseScreen() {
       var G = game.state(), st = G.stats;
       ART.drawText(ctx, G.L.name + '   ' + diff().name, W / 2, 38, { color: '#c8c0b0', center: true });
       ART.drawText(ctx, 'GOAL: ' + game.objective(), W / 2, 48, { color: '#f0d848', center: true });
-      ART.drawText(ctx, 'KILLS ' + st.kills + '/' + st.totalKills + '   ITEMS ' + st.items + '/' + st.totalItems + '   SECRETS ' + st.secrets + '/' + st.totalSecrets + '   TIME ' + fmtTime(G.time), W / 2, 160, { color: '#8a8478', center: true });
+      ART.drawText(ctx, 'FREED ' + st.kills + '/' + st.totalKills + '   ITEMS ' + st.items + '/' + st.totalItems + '   SECRETS ' + st.secrets + '/' + st.totalSecrets + '   TIME ' + fmtTime(G.time), W / 2, 160, { color: '#8a8478', center: true });
     }
   };
 }
@@ -446,7 +446,7 @@ function interScreen(t) {
   ART.drawText(ctx, 'FINISHED!', W / 2, 42, { scale: 2, color: '#e8e0c8', shadow: true, center: true });
   var roll = interSkip ? 1 : Math.min(1, t / 1.2);
   function pct(a, b) { return b ? Math.round(a / b * 100 * roll) : 100; }
-  [['KILLS', st.kills, st.totalKills, 70], ['ITEMS', st.items, st.totalItems, 90], ['SECRETS', st.secrets, st.totalSecrets, 110]].forEach(function (r) {
+  [['FREED', st.kills, st.totalKills, 70], ['ITEMS', st.items, st.totalItems, 90], ['SECRETS', st.secrets, st.totalSecrets, 110]].forEach(function (r) {
     ART.drawText(ctx, r[0], 90, r[3], { scale: 2, color: '#c8c0b0' });
     var n = pct(r[1], r[2]);
     ART.drawText(ctx, n + '%', 240, r[3], { scale: 2, color: n >= 100 ? '#ffd23e' : '#e03828', right: true });
@@ -462,7 +462,7 @@ function victoryScreen(t) {
   ctx.fillStyle = 'rgba(8,6,4,0.9)'; ctx.fillRect(0, 0, W, H);
   fireLine(H - 8, t, 0); fireLine(H - 4, t * 1.3, 2);
   ART.drawText(ctx, 'YOU WIN!', W / 2, 30, { scale: 4, color: '#ffd23e', shadow: '#803008', center: true });
-  ['THE DEMON THRONE LIES IN ASHES,', 'AND RILEY TAPS OUT WITH A GRIN:', '"SAME TIME TOMORROW? I\'LL BE READY."', '', 'THE FIREBIRD CANNOT BE KILLED.', 'IT ONLY BURNS BRIGHTER.', '', 'THANKS FOR PLAYING, WARRIOR.']
+  ['THE RESET ENGINE IS SILENT.', 'ASHGATE\'S BELLS RING AGAIN,', 'AND RILEY TAPS OUT WITH A GRIN:', '"SAME TIME TOMORROW? I\'LL BE READY."', '', 'EVERY AGE ENDS IN ASH.', 'THE FIREBIRD IS WHAT RISES FROM IT.', '', 'THANKS FOR PLAYING, WARRIOR.']
     .forEach(function (l, i) { ART.drawText(ctx, l, W / 2, 74 + i * 10, { color: '#e8e0c8', center: true }); });
   if (t > 1 && (t % 1) < 0.7) ART.drawText(ctx, 'CLICK OR PRESS ENTER FOR THE TITLE SCREEN', W / 2, 170, { color: '#f0d848', shadow: true, center: true });
 }

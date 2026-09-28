@@ -2,6 +2,8 @@
 // drawing and no sound. The renderer and audio read G.events and the state.
 // Deterministic: every random roll goes through the injected rng.
 import RILEY from '../../../js/riley.js';
+// Riley names things the way this game does (Old Earth: STYLE_GUIDE.md)
+RILEY.setWords({ weapon: { fist: 'EMBER FIST', pistol: 'SPARK CASTER', shotgun: 'BELL BLASTER' }, shotgunShots: 'BELL BLASTS', minions: 'HOLLOWS' });
 import {
   buildWorld, DOOR_IDS, cellAt, doorAt, solidCell, floorAt, ceilAt, probe, slideMove,
   groundUnder, castRay, hasLOS, flood, updateLifts, nbrs, STEP_UP, JUMP_UP,
@@ -16,7 +18,7 @@ export var WEAPONS = {
   shotgun: { ammo: 'shells', rate: 0.95, pellets: 7, spread: 0.10, dmgMin: 5, dmgMax: 15, knock: 0.045, shake: 2.2 }
 };
 export var WEAPON_ORDER = ['fist', 'pistol', 'shotgun'];
-var AMMO_NAMES = { bullets: 'BULLETS', shells: 'SHELLS' };
+var AMMO_NAMES = { bullets: 'SPARKS', shells: 'BELL CHARGES' };
 
 // h = body height in cells (1 cell = 2 m)
 export var MOBS = {
@@ -28,21 +30,21 @@ export var MOBS = {
 var MOB_CHARS = { i: 'imp', g: 'gnasher', K: 'knight', Y: 'riley' };
 
 export var ITEMS = {
-  h: { msg: 'PICKED UP A STIMPACK.', snd: 'health' },
-  '+': { msg: 'PICKED UP A MEDIKIT.', snd: 'health' },
-  b: { msg: 'PICKED UP A CLIP.', snd: 'pickup' },
-  a: { msg: 'PICKED UP A BOX OF SHELLS.', snd: 'pickup' },
-  A: { msg: 'PICKED UP THE ARMOR!', snd: 'pickup' },
-  2: { msg: 'YOU GOT THE SHOTGUN!', snd: 'weaponUp' },
-  r: { msg: 'PICKED UP THE RED KEYCARD.', snd: 'keyPickup' },
-  u: { msg: 'PICKED UP THE BLUE KEYCARD.', snd: 'keyPickup' },
+  h: { msg: 'PICKED UP A LIFE SHARD.', snd: 'health' },
+  '+': { msg: 'PICKED UP A HEALING CRYSTAL.', snd: 'health' },
+  b: { msg: 'PICKED UP A SPARK CELL.', snd: 'pickup' },
+  a: { msg: 'PICKED UP BELL CHARGES.', snd: 'pickup' },
+  A: { msg: 'PICKED UP A BRASS WARD!', snd: 'pickup' },
+  2: { msg: 'YOU GOT THE BELL BLASTER!', snd: 'weaponUp' },
+  r: { msg: 'PICKED UP THE RED KEYSTONE.', snd: 'keyPickup' },
+  u: { msg: 'PICKED UP THE BLUE KEYSTONE.', snd: 'keyPickup' },
   P: { msg: 'PHOENIX ORB! YOU FEEL REBORN!', snd: 'orb' }
 };
 
 export var DIFFS = [
-  { name: 'ROOKIE', dmg: 0.5, ammo: 2, desc: 'DEMONS HIT HALF AS HARD AND AMMO IS DOUBLED. GREAT FOR A FIRST RUN.' },
+  { name: 'ROOKIE', dmg: 0.5, ammo: 2, desc: 'HOLLOWS HIT HALF AS HARD AND AMMO IS DOUBLED. GREAT FOR A FIRST RUN.' },
   { name: 'WARRIOR', dmg: 1, ammo: 1, desc: 'THE FIGHT AS IT WAS MEANT TO BE.' },
-  { name: 'INFERNO', dmg: 1.5, ammo: 1, desc: 'DEMONS HIT HARDER. FOR VETERANS WHO KNOW EVERY CORNER.' }
+  { name: 'INFERNO', dmg: 1.5, ammo: 1, desc: 'HOLLOWS HIT HARDER. FOR VETERANS WHO KNOW EVERY CORNER.' }
 ];
 
 var TIPS = {
@@ -51,17 +53,17 @@ var TIPS = {
   map: 'TIP: LOST? PRESS TAB FOR THE MAP.',
   weapons: 'TIP: PRESS 1 2 3, OR SCROLL THE MOUSE WHEEL, TO SWITCH WEAPONS. Q SWAPS BACK.',
   key: 'TIP: THE MATCHING DOOR IS MARKED IN COLOR ON YOUR MAP (TAB).',
-  lowAmmo: 'TIP: LOW ON AMMO? YOUR FIST (1) NEVER RUNS OUT, AND IT IS SILENT.',
-  lowHealth: 'TIP: LOW HEALTH! BACK OFF AND LOOK FOR STIMPACKS AND MEDIKITS.',
+  lowAmmo: 'TIP: LOW ON AMMO? YOUR EMBER FIST (1) NEVER RUNS OUT, AND IT IS SILENT.',
+  lowHealth: 'TIP: LOW HEALTH! BACK OFF AND LOOK FOR LIFE SHARDS AND HEALING CRYSTALS.',
   hurtDir: 'TIP: THE RED MARKS AROUND YOUR AIM POINT AT WHATEVER HIT YOU.',
-  secret: 'TIP: WALLS WITH A CRACK MAY HIDE SECRETS. PRESS E ON THEM.',
+  secret: 'TIP: CRACKED WALLS HIDE PIECES OF THE TRUE MAP. PRESS E ON THEM.',
   torches: 'TIP: A PAIR OF TORCHES BESIDE A DOOR MEANS IT MATTERS. FOLLOW THEM.',
   lift: 'TIP: STAND ON A GLOWING PLATFORM TO RIDE IT UP.',
-  barrel: 'TIP: A DEMON IS NEXT TO A BARREL. SHOOT THE BARREL!',
-  lava: 'TIP: LAVA BURNS! GET OUT, OR FIND A WAY TO DRAIN IT.',
-  meet_imp: 'TIP: IMPS THROW FIREBALLS. STRAFE WITH A AND D TO DODGE.',
-  meet_gnasher: 'TIP: GNASHERS CHARGE AND BITE. BACK AWAY WHILE YOU SHOOT.',
-  meet_knight: 'TIP: THE EMBER KNIGHT IS TOUGH. KEEP YOUR DISTANCE AND USE SHELLS.'
+  barrel: 'TIP: A HOLLOW IS NEXT TO A MERCURY CASK. SHOOT THE CASK!',
+  lava: 'TIP: RED MERCURY BURNS! GET OUT, OR FIND A WAY TO DRAIN IT.',
+  meet_imp: 'TIP: HOLLOWS THROW MERCURY EMBERS. STRAFE WITH A AND D TO DODGE.',
+  meet_gnasher: 'TIP: HOLLOW HOUNDS CHARGE AND BITE. BACK AWAY WHILE YOU SHOOT.',
+  meet_knight: 'TIP: THE RESET WARDEN IS TOUGH. KEEP YOUR DISTANCE AND RING THE BELL BLASTER.'
 };
 
 export function createGame(opts) {
@@ -205,10 +207,10 @@ export function createGame(opts) {
   function currentObjective() {
     if (!G) return '';
     var info = G.info, p = G.p;
-    if (info.keys.blue && !p.keys.blue) return 'FIND THE BLUE KEYCARD';
-    if (info.keys.red && !p.keys.red) return 'FIND THE RED KEYCARD';
+    if (info.keys.blue && !p.keys.blue) return 'FIND THE BLUE KEYSTONE';
+    if (info.keys.red && !p.keys.red) return 'FIND THE RED KEYSTONE';
     if (info.boss) return 'DEFEAT RILEY';
-    return 'FIND THE EXIT SWITCH';
+    return 'RELIGHT THE WAYSTONE';
   }
 
   // ---- weapons -----------------------------------------------------------------
@@ -323,7 +325,7 @@ export function createGame(opts) {
     wakeMob(e);
     if (def.boss) { /* no grudges */ }
     else if (src && src !== e && alive(src) && !src.barrel) {
-      if (e.target !== src && !G.infightSeen && playerDist(e.x, e.z) < 14) { G.infightSeen = true; message('THE DEMONS TURN ON EACH OTHER!'); }
+      if (e.target !== src && !G.infightSeen && playerDist(e.x, e.z) < 14) { G.infightSeen = true; message('THE HOLLOWS TURN ON EACH OTHER!'); }
       e.target = src; e.lostT = 0;
     } else if (!src) e.target = null;
     if (e.hp <= 0) {
@@ -537,11 +539,11 @@ export function createGame(opts) {
     if (!G || G.p.dead || G.exitT >= 0) return null;
     var u = useTarget();
     if (!u) return null;
-    if (u.kind === 'switch') return { verb: 'EXIT LEVEL', color: '#58e068' };
+    if (u.kind === 'switch') return { verb: 'RELIGHT THE WAYSTONE', color: '#6fe0ec' };
     if (u.kind === 'lever') return { verb: 'PULL THE SWITCH', color: '#ffd23e' };
     var d = u.door;
     if (d.secret && !d.found) return null;
-    if (d.locked && !G.p.keys[d.locked]) return { need: d.locked, text: d.locked.toUpperCase() + ' KEYCARD NEEDED', color: d.locked === 'red' ? '#ff5a3a' : '#6a98ff' };
+    if (d.locked && !G.p.keys[d.locked]) return { need: d.locked, text: d.locked.toUpperCase() + ' KEYSTONE NEEDED', color: d.locked === 'red' ? '#ff5a3a' : '#6a98ff' };
     if (d.state === 'closed' || d.state === 'closing') return { verb: 'OPEN', color: '#e8e0c8' };
     return null;
   }
@@ -552,7 +554,7 @@ export function createGame(opts) {
     if (u.kind === 'door') {
       var d = u.door;
       if (d.sealed) { sound('locked'); message('SEALED. SURVIVE!', '#ff9a28'); }
-      else if (d.locked && !p.keys[d.locked]) { sound('locked'); message('YOU NEED THE ' + d.locked.toUpperCase() + ' KEYCARD.'); tip('key'); }
+      else if (d.locked && !p.keys[d.locked]) { sound('locked'); message('YOU NEED THE ' + d.locked.toUpperCase() + ' KEYSTONE.'); tip('key'); }
       else openDoor(d, true);
     } else if (u.kind === 'lever') {
       G.W.cells[u.z * G.mw + u.x] = 13;
@@ -947,16 +949,16 @@ export function createGame(opts) {
       case 'h': if (p.hp >= 100) full = 'HEALTH'; else p.hp = Math.min(100, p.hp + 10); break;
       case '+': if (p.hp >= 100) full = 'HEALTH'; else p.hp = Math.min(100, p.hp + 25); break;
       case 'A': if (p.armor >= 100) full = 'ARMOR'; else { p.armor = 100; p.grinT = 1; } break;
-      case 'b': if (p.ammo.bullets >= 200) full = 'BULLETS'; else p.ammo.bullets = Math.min(200, p.ammo.bullets + 10 * am); break;
-      case 'a': if (p.ammo.shells >= 50) full = 'SHELLS'; else p.ammo.shells = Math.min(50, p.ammo.shells + 4 * am); break;
+      case 'b': if (p.ammo.bullets >= 200) full = 'SPARKS'; else p.ammo.bullets = Math.min(200, p.ammo.bullets + 10 * am); break;
+      case 'a': if (p.ammo.shells >= 50) full = 'BELL CHARGES'; else p.ammo.shells = Math.min(50, p.ammo.shells + 4 * am); break;
       case '2':
         p.weapons.shotgun = true; p.ammo.shells = Math.min(50, p.ammo.shells + 8 * am); p.grinT = 1.2;
         if (p.weapon !== 'shotgun') switchWeapon('shotgun', true);
-        notice('SHOTGUN!  PRESS 3', '#ffd23e', 2.5); tip('weapons'); break;
+        notice('BELL BLASTER!  PRESS 3', '#ffd23e', 2.5); tip('weapons'); break;
       case 'r': case 'u':
         var col = e.item === 'r' ? 'red' : 'blue';
         p.keys[col] = true; p.grinT = 1;
-        notice(col.toUpperCase() + ' KEYCARD', col === 'red' ? '#ff5a3a' : '#6a98ff', 2.5); tip('key'); break;
+        notice(col.toUpperCase() + ' KEYSTONE', col === 'red' ? '#ff5a3a' : '#6a98ff', 2.5); tip('key'); break;
       case 'P': p.hp = Math.min(200, p.hp + 100); p.grinT = 1.2; break;
     }
     if (full) { e.touching = true; message(full + ' ALREADY FULL', '#8a8478', 1.5); return; }
@@ -1103,7 +1105,7 @@ export function createGame(opts) {
     // secret floors
     var pcx = Math.floor(p.x), pcz = Math.floor(p.z);
     G.secrets.forEach(function (sec) {
-      if (!sec.found && sec.x === pcx && sec.z === pcz) { sec.found = true; G.stats.secrets++; sound('secret'); notice('SECRET AREA FOUND!', '#ffd23e', 2.5); }
+      if (!sec.found && sec.x === pcx && sec.z === pcz) { sec.found = true; G.stats.secrets++; sound('secret'); notice('TRUE-MAP FRAGMENT FOUND!', '#ffd23e', 2.5); }
     });
   }
 

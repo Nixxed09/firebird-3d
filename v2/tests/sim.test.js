@@ -228,7 +228,7 @@ test('E1M2 plays out: drain the pit, take the key, survive the forge waves, exit
   var plinth = 2 * W.mw + 17;
   assert.ok(Math.abs(W.floor[plinth] - 0.5) < 1e-6, 'the plinth sank (' + W.floor[plinth] + ')');
   p.x = 17.5; p.z = 2.6; p.y = 0.5; p.ang = -Math.PI / 2;
-  assert.strictEqual(g.usePrompt().verb, 'EXIT LEVEL');
+  assert.strictEqual(g.usePrompt().verb, 'RELIGHT THE WAYSTONE');
   g.useAction(); run(g, 1.2);
   assert.strictEqual(g.mode(), 'inter');
 });

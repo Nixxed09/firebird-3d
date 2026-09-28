@@ -112,19 +112,19 @@ events = [
             {'kind': 'imp', 'x': 25, 'z': 5}]}]}]},
     {'when': {'cleared': 'forge2'}, 'do': [
         {'notice': 'FORGE CLEARED!'}, {'open': ['17,11']},
-        {'say': "THAT WAS AWESOME. THE EXIT SWITCH IS BEHIND THE PLINTH. IT'S SINKING NOW."},
+        {'say': "THAT WAS AWESOME. THE WAYSTONE IS BEHIND THE PLINTH. IT'S SINKING NOW."},
         {'lower': [17, 2, 17, 2], 'to': 0.5, 'speed': 0.6}]},
 ]
 
 triggers = [
-    {'box': [14, 24, 21, 27], 'say': "WELCOME TO THE FURNACE! SEE THE LAVA PIT? A SWITCH SOMEWHERE DRAINS IT. THE RED DOOR BEHIND IT LEADS OUT."},
-    {'box': [1, 11, 6, 24], 'say': "DARK IN HERE. LISTEN FOR THE IMPS BEFORE YOU SEE THEM."},
-    {'box': [29, 12, 34, 24], 'say': "THE RED KEYCARD IS UP ON THE TANKS. THE STAIRS ARE ON THE FAR WALL."},
+    {'box': [14, 24, 21, 27], 'say': "THE OVERSEERS' FURNACE. THAT PIT IS RED MERCURY. A SWITCH SOMEWHERE DRAINS IT. THE RED DOOR BEHIND IT LEADS ON."},
+    {'box': [1, 11, 6, 24], 'say': "DARK IN HERE. LISTEN FOR THE HOLLOWS BEFORE YOU SEE THEM."},
+    {'box': [29, 12, 34, 24], 'say': "THE RED KEYSTONE IS UP ON THE TANKS. THE STAIRS ARE ON THE FAR WALL."},
 ]
 
 lights = [
-    {'id': 'pit', 'x': 17.5, 'z': 17, 'y': 1.2, 'color': 0xff6a1a, 'intensity': 5, 'dist': 14},
-    {'id': 'forge', 'x': 17.5, 'z': 5, 'y': 3, 'color': 0xff4a10, 'intensity': 4, 'dist': 14},
+    {'id': 'pit', 'x': 17.5, 'z': 17, 'y': 1.2, 'color': 0xff2a30, 'intensity': 5, 'dist': 14},
+    {'id': 'forge', 'x': 17.5, 'z': 5, 'y': 3, 'color': 0xff3a24, 'intensity': 4, 'dist': 14},
     {'id': 'tanks', 'x': 31.5, 'z': 16, 'y': 3.5, 'color': 0x6aa8ff, 'intensity': 2.5, 'dist': 12},
     {'id': 'bunkerflicker', 'x': 3.5, 'z': 16, 'y': 2.5, 'color': 0xffc080, 'intensity': 1.6, 'dist': 8, 'flicker': True},
 ]

@@ -16,8 +16,8 @@ var E1M1 = {
   triggers: [
     { box: [2, 25, 8, 30], say: "HI! I'M RILEY. I'M WAITING FOR YOU AT THE TOP. LOOK AROUND WITH THE MOUSE, MOVE WITH WASD." },
     { box: [7, 26, 9, 28], say: "DOORS OPEN WITH E. GO ON, TRY IT." },
-    { box: [15, 23, 28, 29], say: "SEE THE SHOTGUN UP THERE? JUMP WITH SPACE." },
-    { box: [14, 20, 28, 22], say: "NICE VIEW. THE BLUE KEYCARD IS DOWN IN THE HALL. THE BLUE DOOR IS ACROSS FROM YOU." },
+    { box: [15, 23, 28, 29], say: "SEE THE BELL BLASTER UP THERE? JUMP WITH SPACE." },
+    { box: [14, 20, 28, 22], say: "NICE VIEW. THE BLUE KEYSTONE IS DOWN IN THE HALL. THE BLUE DOOR IS ACROSS FROM YOU." },
     { box: [2, 17, 5, 21], say: "GOT IT? NOW THE BLUE DOOR. THE LIFT BEHIND IT BRINGS YOU UP TO ME." },
     { box: [20, 11, 28, 15], say: "LAST STOP. GRAB WHAT YOU NEED. WHEN MY VISOR FLASHES WHITE, I'M ABOUT TO SHOOT. MOVE!" }
   ],
@@ -129,6 +129,8 @@ var E1M1 = {
 // the rest keep their classic flat layouts until they get their height pass
 // E1M2 is the first level built to the full contract (sections 3 and 3b); the
 // rest keep their classic flat layouts until they get the same treatment
+// v2 is set in Ashgate, the buried star-city of the Old Earth canon (STYLE_GUIDE.md)
+var OLD_EARTH_NAMES = { 'E1M3: DEMON THRONE': 'E1M3: THE RESET ENGINE', "E1M4: RILEY'S ARENA": "E1M4: RILEY'S TRIAL" };
 export var LEVELS = [E1M1, E1M2].concat(CLASSIC.slice(2).map(function (L) {
-  return Object.assign({ ceilHeight: 2 }, L);
+  return Object.assign({ ceilHeight: 2 }, L, { name: OLD_EARTH_NAMES[L.name] || L.name });
 }));

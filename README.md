@@ -4,6 +4,14 @@ A classic 90s-style first-person shooter in the spirit of the original DOOM,
 built as a NIX GAMES project. Chunky pixels, sprite demons, keycards, secret
 walls, exploding barrels, and a status bar face that gets beat up as you do.
 
+**FIREBIRD v2** (the WebGL rebuild, https://nixxed09.github.io/firebird-3d/v2/)
+is set in the shared Old Earth world of every NIX GAMES title: the Firebird
+fights through Ashgate, a buried Tartarian star-city, and cracks open the
+Overseers' Hollows to free the light inside. The look, names and rules are in
+[STYLE_GUIDE.md](STYLE_GUIDE.md), and its laws are in [LILA_ALIGNMENT.md](LILA_ALIGNMENT.md).
+v2's levels are `E1M1: ASH GATES`, `E1M2: THE FURNACE`, `E1M3: THE RESET ENGINE`
+and `E1M4: RILEY'S TRIAL`. The classic game below keeps its original demons.
+
 **Episode One: Knee-Deep in the Ashes** — 4 levels:
 
 1. `E1M1: ASH GATES`

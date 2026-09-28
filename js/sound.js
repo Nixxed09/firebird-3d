@@ -194,20 +194,26 @@ var SND = (function () {
       tone({ f0: 160, f1: 55, dur: 0.12, type: 'sine', gain: 0.45 * v, pan: pan });                               // the thump
       noise({ dur: 0.05, gain: 0.55 * v, f0: 5200, f1: 1800, type: 'highpass', q: 0.7, pan: pan });              // the crack
       noise({ dur: 0.32, gain: 0.22 * v, f0: 1400, f1: 180, pan: pan, delay: 0.02 });                            // the tail in the room
+      tone({ f0: 2400, f1: 1100, dur: 0.09, type: 'triangle', gain: 0.1 * v, pan: pan });                          // the Spark Caster's aether chirp
     },
     shotgun2: function (v, pan) {
       tone({ f0: 110, f1: 32, dur: 0.34, type: 'sine', gain: 0.8 * v, pan: pan });
       tone({ f0: 70, f1: 30, dur: 0.22, type: 'triangle', gain: 0.4 * v, pan: pan });
       noise({ dur: 0.09, gain: 0.8 * v, f0: 4200, f1: 900, type: 'highpass', q: 0.6, pan: pan });
       noise({ dur: 0.6, gain: 0.35 * v, f0: 1100, f1: 90, pan: pan, delay: 0.03 });
+      // the Bell Blaster rings: a bell's inharmonic partials under the boom
+      [[392, 0.12], [392 * 2.76, 0.06], [392 * 5.4, 0.03]].forEach(function (b) { tone({ f0: b[0], f1: b[0] * 0.995, dur: 0.9, type: 'sine', gain: b[1] * v, pan: pan, delay: 0.02 }); });
     },
+    // a hit on a Hollow: a dull knock on its ash shell and a dry crackle (v2 keeps the old name)
     hitFlesh: function (v, pan) {
-      tone({ f0: 180, f1: 70, dur: 0.07, type: 'sine', gain: 0.35 * v, pan: pan });
-      noise({ dur: 0.06, gain: 0.25 * v, f0: 700, type: 'bandpass', q: 1.2, pan: pan });
+      tone({ f0: 210, f1: 90, dur: 0.07, type: 'triangle', gain: 0.3 * v, pan: pan });
+      noise({ dur: 0.05, gain: 0.28 * v, f0: 2600, type: 'bandpass', q: 1.6, pan: pan });
     },
     killConfirm: function (v, pan) {
       tone({ f0: 90, f1: 40, dur: 0.18, type: 'sine', gain: 0.5 * v, pan: pan });
-      tone({ f0: 660, f1: 990, dur: 0.07, type: 'square', gain: 0.07 * v, pan: pan, delay: 0.03 });
+      noise({ dur: 0.08, gain: 0.3 * v, f0: 5200, f1: 2600, type: 'highpass', q: 0.8, pan: pan });                // the shell cracks like glass
+      tone({ f0: 660, f1: 990, dur: 0.25, type: 'sine', gain: 0.08 * v, pan: pan, delay: 0.04 });                  // and the light goes up
+      tone({ f0: 990, f1: 1480, dur: 0.3, type: 'sine', gain: 0.05 * v, pan: pan, delay: 0.1 });
     },
     ricochet: function (v, pan) {
       var f = 1800 + Math.random() * 2400;

@@ -114,8 +114,9 @@ function stone(base, dark, seed) {
     var fu = cu - Math.floor(cu), fv = cv - Math.floor(cv), bid = hash(Math.floor(cu) % 3, Math.floor(cv) % 4, seed);
     var e = Math.min(fu, 1 - fu, (fv < 0.5 ? fv : 1 - fv) * 1.5);
     var n = fbm(u * 6, v * 6, 5, seed);
+    if (e < 0.012) return { c: [0.62, 0.42, 0.2], h: 0.35, r: 0.35 };   // a bronze seam inlaid in the joint
     if (e < 0.035) return { c: [D[0] * 0.5, D[1] * 0.5, D[2] * 0.5], h: 0.1, r: 0.95 };
-    var t = clamp01(n * 0.8 + bid * 0.4), s = 0.75 + n * 0.4;
+    var t = clamp01(n * 0.8 + bid * 0.4), s = 0.8 + n * 0.3;
     return { c: [mix(D[0], B[0], t) * s, mix(D[1], B[1], t) * s, mix(D[2], B[2], t) * s], h: 0.5 + n * 0.5, r: 0.9 };
   };
 }
@@ -135,7 +136,7 @@ function metal(base, dark, seed) {
 }
 
 function tech(seed) {
-  var m = metal(0x4c5260, 0x1e2128, seed);
+  var m = metal(0x5e4c34, 0x221a12, seed);   // dark bronze housing
   return function (u, v, x, y) {
     var o = m(u, v, x, y);
     var strip = Math.abs(v - 0.5) < 0.025 && (u * 4) % 1 > 0.15 && (u * 4) % 1 < 0.85;
@@ -147,23 +148,37 @@ function tech(seed) {
   };
 }
 
-function hellrock(seed) {
+// Overseer basalt: big dark cut blocks with red mercury glowing in the joints
+function hellrock(seed, dim) {
   return function (u, v) {
-    var n = fbm(u * 5, v * 5, 5, seed), ridge = 1 - Math.abs(fbm(u * 4, v * 4, 4, seed + 9) - 0.5) * 2;
-    var lava = ridge > 0.9 ? clamp01((ridge - 0.9) * 10) : 0;
-    var s = 0.35 + n * 0.5;
-    var c = [0.32 * s + lava * 0.9, 0.12 * s + lava * 0.35, 0.08 * s];
-    return { c: c, h: n - lava * 0.4, r: 0.9 - lava * 0.5, e: [lava * 1.0, lava * 0.35, lava * 0.05] };
+    var cu = u * 2, row = Math.floor(v * 3), cv = v * 3;
+    cu += (row % 2) * 0.5;
+    var fu = cu - Math.floor(cu), fv = cv - row;
+    var e = Math.min(fu, 1 - fu, fv, 1 - fv) * 2;
+    var n = fbm(u * 6, v * 6, 5, seed), bid = hash(Math.floor(cu) & 1, row % 3, seed);
+    var s = 0.55 + n * 0.45 + bid * 0.15;
+    if (e < 0.025) return dim ? { c: [0.25, 0.03, 0.04], h: 0.05, r: 0.6, e: [0.12, 0.01, 0.02] } : { c: [0.9, 0.06, 0.12], h: 0.05, r: 0.3, e: [0.9, 0.04, 0.1] };   // the mercury seam (dim underfoot and overhead)
+    if (e < 0.05) return { c: [0.05, 0.04, 0.045], h: 0.15, r: 0.9, e: [0.18, 0.01, 0.02] };         // scorched edge
+    return { c: [0.13 * s, 0.115 * s, 0.12 * s], h: 0.5 + n * 0.5, r: 0.85 - n * 0.2, e: [0, 0, 0] };
+  };
+}
+// red mercury as a liquid: bright and heavy, with darker cooling swirls
+function mercury(seed) {
+  return function (u, v) {
+    var n = fbm(u * 4, v * 4, 4, seed), w = fbm(u * 9 + n * 2, v * 9, 3, seed + 3);
+    var k = clamp01(0.35 + w * 0.9 - (n > 0.62 ? (n - 0.62) * 3 : 0));
+    return { c: [0.3 + k * 0.55, 0.01 + k * 0.04, 0.03 + k * 0.06], h: 0.2 + w * 0.2, r: 0.2, e: [0.18 + k * 0.62, k * 0.03, 0.02 + k * 0.06] };
   };
 }
 
 function door(stripe) {
-  var m = metal(0x6a6f78, 0x2c2e34, 31);
+  var m = metal(0x8a6a42, 0x30241a, 31);
   var S = stripe === 'red' ? [0.9, 0.12, 0.08] : stripe === 'blue' ? [0.15, 0.35, 1.0] : null;
   return function (u, v, x, y) {
     var o = m(u, v, x, y);
-    var hazard = v > 0.88 && ((Math.floor(u * 16 + v * 16) % 2) === 0);
-    if (v > 0.88) return { c: hazard ? [0.85, 0.65, 0.1] : [0.08, 0.08, 0.08], h: 0.6, r: 0.6, e: [0, 0, 0] };
+    // a gold band with a row of inset diamonds (Tartarian ornament, not a hazard stripe)
+    var bu = (u * 8) % 1, bv = (v - 0.88) / 0.12, inset = Math.abs(bu - 0.5) + Math.abs(bv - 0.5) < 0.32;
+    if (v > 0.88) return { c: inset ? [0.2, 0.13, 0.07] : [0.9, 0.68, 0.3], h: inset ? 0.3 : 0.85, r: inset ? 0.7 : 0.3, e: [0, 0, 0] };
     if (Math.abs(u - 0.5) < 0.012) return { c: [0.05, 0.05, 0.05], h: 0, r: 0.8, e: [0, 0, 0] }; // centre seam
     if (S && Math.abs(v - 0.45) < 0.05) return { c: S, h: 0.7, r: 0.3, e: [S[0] * 0.8, S[1] * 0.8, S[2] * 0.8] };
     o.e = [0, 0, 0];
@@ -172,14 +187,14 @@ function door(stripe) {
 }
 
 function switchPanel(on) {
-  var m = metal(0x5a5f68, 0x26282e, 41);
+  var m = metal(0x7a5e3a, 0x2a2016, 41);
   return function (u, v, x, y) {
     var o = m(u, v, x, y);
     var inBox = Math.abs(u - 0.5) < 0.18 && Math.abs(v - 0.5) < 0.26;
     if (inBox) {
       var lever = Math.abs(u - 0.5) < 0.04 && (on ? v > 0.5 && v < 0.72 : v > 0.28 && v < 0.5);
       var lamp = Math.abs(u - 0.5) < 0.08 && Math.abs(v - (on ? 0.3 : 0.7)) < 0.04;
-      var L = on ? [0.2, 1, 0.3] : [1, 0.15, 0.1];
+      var L = on ? [0.35, 0.95, 1] : [1, 0.1, 0.16];
       if (lamp) return { c: L, h: 0.9, r: 0.2, e: L };
       if (lever) return { c: [0.8, 0.8, 0.75], h: 1, r: 0.3, e: [0, 0, 0] };
       return { c: [0.06, 0.07, 0.06], h: 0.2, r: 0.7, e: [0, 0, 0] };
@@ -202,12 +217,12 @@ function floorTiles(base, dark, seed, grate) {
 }
 
 function lavaFloor(seed) {
-  var h = hellrock(seed);
+  var h = hellrock(seed, true);
   return function (u, v) {
     var o = h(u, v), pool = fbm(u * 3, v * 3, 3, seed + 20) > 0.66;
     if (pool) {
       var n = fbm(u * 10, v * 10, 3, seed + 21);
-      return { c: [1, 0.45 + n * 0.3, 0.08], h: 0, r: 0.4, e: [1.2, 0.45 + n * 0.3, 0.05] };
+      return { c: [1, 0.1 + n * 0.18, 0.16], h: 0, r: 0.25, e: [1.3, 0.08 + n * 0.16, 0.18] };
     }
     return o;
   };
@@ -224,9 +239,9 @@ function once(key, fn, opts) { return cache[key] || (cache[key] = bake(fn, opts)
 // wall ids from world.js; 11 (secret) copies its host wall per level
 export function wallSet(id) {
   switch (id) {
-    case 1: return once('brick', brick(0x8a4232, 0x4a1e14, 0x2a1d18, 1), { bump: 4 });
-    case 2: return once('stone', stone(0x8a8578, 0x4a463c, 2), { bump: 4 });
-    case 3: return once('metal', metal(0x5a5f68, 0x26282e, 3), { bump: 3 });
+    case 1: return once('brick', brick(0x7e4632, 0x3e2016, 0x3a3026, 1), { bump: 4 });   // mudflood brick
+    case 2: return once('stone', stone(0xbcae92, 0x6e6452, 2), { bump: 4 });   // Tartarian limestone
+    case 3: return once('metal', metal(0x9a7a46, 0x3a2a16, 3), { bump: 3 });   // aged brass
     case 4: return once('tech', tech(4), { emissive: true, bump: 3 });
     case 5: return once('hell', hellrock(5), { emissive: true, bump: 5 });
     case 6: return once('door', door(null), { emissive: true, bump: 3 });
@@ -264,12 +279,13 @@ export function crackOverlay() {
 
 export function floorSet(name) {
   switch (name) {
-    case 'tech': return once('fTech', floorTiles(0x4a4e56, 0x1c1e22, 11, true), { bump: 3 });
+    case 'tech': return once('fTech', floorTiles(0x6a5638, 0x241c12, 11, true), { bump: 3 });
     case 'hell': return once('fHell', lavaFloor(12), { emissive: true, bump: 4 });
-    case 'ceilTech': return once('cTech', floorTiles(0x3a3e46, 0x14161a, 13, true), { bump: 2 });
-    case 'ceilHell': return once('cHell', hellrock(14), { emissive: true, bump: 4 });
+    case 'mercury': return once('fMercury', mercury(16), { emissive: true, bump: 1 });
+    case 'ceilTech': return once('cTech', floorTiles(0x4a3e2c, 0x18140e, 13, true), { bump: 2 });
+    case 'ceilHell': return once('cHell', hellrock(14, true), { emissive: true, bump: 4 });
     case 'ceilDark': return once('cDark', ceilingPanels(15), { bump: 2 });
-    default: return once('fSlab', floorTiles(0x6a645a, 0x2e2a24, 10, false), { bump: 3 });
+    default: return once('fSlab', floorTiles(0x8e846e, 0x3c362a, 10, false), { bump: 3 });   // limestone paving
   }
 }
 

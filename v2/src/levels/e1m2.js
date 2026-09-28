@@ -246,7 +246,7 @@ export var E1M2 = {
      ]
     },
     {
-     "say": "THAT WAS AWESOME. THE EXIT SWITCH IS BEHIND THE PLINTH. IT'S SINKING NOW."
+     "say": "THAT WAS AWESOME. THE WAYSTONE IS BEHIND THE PLINTH. IT'S SINKING NOW."
     },
     {
      "lower": [
@@ -269,7 +269,7 @@ export var E1M2 = {
     21,
     27
    ],
-   "say": "WELCOME TO THE FURNACE! SEE THE LAVA PIT? A SWITCH SOMEWHERE DRAINS IT. THE RED DOOR BEHIND IT LEADS OUT."
+   "say": "THE OVERSEERS' FURNACE. THAT PIT IS RED MERCURY. A SWITCH SOMEWHERE DRAINS IT. THE RED DOOR BEHIND IT LEADS ON."
   },
   {
    "box": [
@@ -278,7 +278,7 @@ export var E1M2 = {
     6,
     24
    ],
-   "say": "DARK IN HERE. LISTEN FOR THE IMPS BEFORE YOU SEE THEM."
+   "say": "DARK IN HERE. LISTEN FOR THE HOLLOWS BEFORE YOU SEE THEM."
   },
   {
    "box": [
@@ -287,7 +287,7 @@ export var E1M2 = {
     34,
     24
    ],
-   "say": "THE RED KEYCARD IS UP ON THE TANKS. THE STAIRS ARE ON THE FAR WALL."
+   "say": "THE RED KEYSTONE IS UP ON THE TANKS. THE STAIRS ARE ON THE FAR WALL."
   }
  ],
  "lights": [
@@ -296,7 +296,7 @@ export var E1M2 = {
    "x": 17.5,
    "z": 17,
    "y": 1.2,
-   "color": 16738842,
+   "color": 16722480,
    "intensity": 5,
    "dist": 14
   },
@@ -305,7 +305,7 @@ export var E1M2 = {
    "x": 17.5,
    "z": 5,
    "y": 3,
-   "color": 16730640,
+   "color": 16726564,
    "intensity": 4,
    "dist": 14
   },

@@ -59,8 +59,8 @@ export function createHud(ctx, game, settings) {
       ctx.drawImage(ART.things[k[1]].canvas, 236, VH + k[2]);
       ctx.globalAlpha = 1;
     });
-    ART.drawText(ctx, 'BULL ' + p.ammo.bullets + '/200', 254, VH + 8, { color: wep.ammo === 'bullets' ? '#ffd23e' : '#c8c0b0' });
-    ART.drawText(ctx, 'SHEL ' + p.ammo.shells + '/50', 254, VH + 19, { color: !p.weapons.shotgun ? '#6a655c' : wep.ammo === 'shells' ? '#ffd23e' : '#c8c0b0' });
+    ART.drawText(ctx, 'SPRK ' + p.ammo.bullets + '/200', 254, VH + 8, { color: wep.ammo === 'bullets' ? '#ffd23e' : '#c8c0b0' });
+    ART.drawText(ctx, 'BELL ' + p.ammo.shells + '/50', 254, VH + 19, { color: !p.weapons.shotgun ? '#6a655c' : wep.ammo === 'shells' ? '#ffd23e' : '#c8c0b0' });
   }
 
   function crosshair(G) {
@@ -140,16 +140,16 @@ export function createHud(ctx, game, settings) {
   }
 
   var OBITS = {
-    imp: ['AN IMP BURNED YOU DOWN.', 'TIP: STRAFE WITH A AND D TO SIDESTEP FIREBALLS.'],
-    gnasher: ['A GNASHER CHEWED YOU UP.', 'TIP: BACK AWAY WHILE YOU SHOOT, OR JUMP UP WHERE IT CAN\'T FOLLOW.'],
-    knight: ['THE EMBER KNIGHT CRUSHED YOU.', 'TIP: KEEP YOUR DISTANCE AND BRING SHOTGUN SHELLS.'],
+    imp: ['A HOLLOW BURNED YOU DOWN.', 'TIP: STRAFE WITH A AND D TO SIDESTEP ITS EMBERS.'],
+    gnasher: ['A HOLLOW HOUND RAN YOU DOWN.', 'TIP: BACK AWAY WHILE YOU SHOOT, OR JUMP UP WHERE IT CAN\'T FOLLOW.'],
+    knight: ['THE RESET WARDEN CRUSHED YOU.', 'TIP: KEEP YOUR DISTANCE AND BRING BELL CHARGES.'],
     riley: ['RILEY OUTPLAYED YOU.', 'TIP: WHEN HER VISOR FLASHES WHITE, SHE IS ABOUT TO SHOOT. MOVE!'],
-    barrel: ['A BARREL BLEW UP IN YOUR FACE.', 'TIP: SHOOT BARRELS FROM FAR AWAY, WHEN DEMONS ARE NEAR THEM.']
+    barrel: ['A MERCURY CASK BURST IN YOUR FACE.', 'TIP: SHOOT CASKS FROM FAR AWAY, WHEN HOLLOWS ARE NEAR THEM.']
   };
   function death(G) {
     var p = G.p;
     if (!p.dead || p.deadT < 1) return;
-    var ob = OBITS[G.killer] || ['YOU WERE OVERWHELMED.', 'TIP: FIGHT FROM HIGH GROUND SO DEMONS COME TO YOU ONE AT A TIME.'];
+    var ob = OBITS[G.killer] || ['YOU WERE OVERWHELMED.', 'TIP: FIGHT FROM HIGH GROUND SO HOLLOWS COME TO YOU ONE AT A TIME.'];
     ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0, 44, W, 72);
     ART.drawText(ctx, 'YOU DIED', W / 2, 50, { scale: 3, color: HUD_RED, shadow: true, center: true });
     ART.drawText(ctx, ob[0], W / 2, 72, { color: '#e8e0c8', shadow: true, center: true });
@@ -210,7 +210,7 @@ export function createHud(ctx, game, settings) {
     ART.drawText(ctx, 'TAB: CLOSE', W - 6, 4, { color: '#8a8478', right: true });
     ART.drawText(ctx, 'GOAL: ' + game.objective(), 6, 12, { color: '#f0d848', shadow: true });
     var st = G.stats;
-    ART.drawText(ctx, 'KILLS ' + st.kills + '/' + st.totalKills + '  ITEMS ' + st.items + '/' + st.totalItems + '  SECRETS ' + st.secrets + '/' + st.totalSecrets + '  TIME ' + fmtTime(G.time), W - 6, 12, { color: '#c8c0b0', right: true });
+    ART.drawText(ctx, 'FREED ' + st.kills + '/' + st.totalKills + '  ITEMS ' + st.items + '/' + st.totalItems + '  SECRETS ' + st.secrets + '/' + st.totalSecrets + '  TIME ' + fmtTime(G.time), W - 6, 12, { color: '#c8c0b0', right: true });
     ART.drawText(ctx, 'BRIGHTER FLOOR = HIGHER GROUND', 6, VH - 9, { color: '#a8a090' });
   }
 

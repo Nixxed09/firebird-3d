@@ -178,14 +178,37 @@ var MAKERS = { imp: imp, gnasher: gnasher, knight: knight, riley: riley, barrel:
 
 // An authored (glTF) demon or prop: clips follow the simulation's state.
 // Clip names: idle, walk, attack_windup, attack, pain, death.
+// Hollows (STYLE_GUIDE.md): an ash crust over trapped light. The base colour goes to soot
+// and a network of thin red-mercury cracks glows through it, fixed to the body.
+function ashShell(m, strength) {
+  if (!m || m.userData.ash) return;
+  m.userData.ash = true;
+  if (m.color) { var l = m.color.r * 0.3 + m.color.g * 0.55 + m.color.b * 0.15; m.color.setRGB(0.05 + l * 0.34 + m.color.r * 0.06, 0.05 + l * 0.3, 0.05 + l * 0.3); }
+  m.onBeforeCompile = function (sh) {
+    sh.uniforms.ashGlow = { value: 0.9 * strength };
+    sh.vertexShader = 'varying vec3 vAshP;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvAshP = position;');
+    sh.fragmentShader = 'varying vec3 vAshP; uniform float ashGlow;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>', [
+      '#include <emissivemap_fragment>',
+      '{ vec3 q = vAshP * 7.0;',
+      '  float n = sin(q.x * 1.3 + sin(q.y * 1.7)) * sin(q.y * 1.1 + sin(q.z * 1.9)) * sin(q.z * 1.5 + sin(q.x * 1.2));',
+      '  float crack = smoothstep(0.07, 0.0, abs(n));',
+      '  totalEmissiveRadiance += vec3(1.0, 0.07, 0.14) * crack * ashGlow; }'
+    ].join('\n'));
+  };
+  m.customProgramCacheKey = function () { return 'ash' + strength; };
+  m.needsUpdate = true;
+}
+
 function authored(entry, e) {
   var inst = instance(entry), root = new THREE.Group();
   inst.obj.scale.setScalar(1 / CELL);
   root.add(inst.obj);
   var mats = [], tell = [], shield = inst.obj.getObjectByName('shield');
+  var hollow = e && (e.kind === 'imp' || e.kind === 'gnasher' || e.kind === 'knight');
   inst.obj.traverse(function (o) {
     if (!o.isMesh) return;
     (Array.isArray(o.material) ? o.material : [o.material]).forEach(function (m) {
+      if (hollow) ashShell(m, e.kind === 'knight' ? 1.4 : 1);
       // authored glow is capped so eyes and accents don't bloom into a glare
       if (m.emissive && m.emissiveIntensity > 1.2) m.emissiveIntensity = 1.2;
       if (/tell/i.test(m.name) || /tell/i.test(o.name)) tell.push(m); else if (m.emissive) mats.push(m);
@@ -270,31 +293,36 @@ export function makePickup(e, assets) {
   if (entry) {
     var pi = instance(entry); pi.obj.scale.setScalar(1 / CELL); inner.add(pi.obj);
   } else if (it === 'h' || it === '+') {
-    var big = it === '+';
-    var box = part(geo('box', BOX), std(0xf0ece0, { roughness: 0.5 }), 0, 0.1, 0, inner); box.scale.set(big ? 0.34 : 0.2, big ? 0.2 : 0.14, big ? 0.24 : 0.14);
-    var c1 = part(geo('box', BOX), glow(0xff2a1a, 2), 0, 0.1, 0, inner); c1.scale.set(big ? 0.22 : 0.13, big ? 0.06 : 0.04, big ? 0.245 : 0.145);
-    var c2 = part(geo('box', BOX), glow(0xff2a1a, 2), 0, 0.1, 0, inner); c2.scale.set(big ? 0.07 : 0.045, big ? 0.06 : 0.04, big ? 0.245 : 0.145);
-    c2.scale.set(big ? 0.345 : 0.205, big ? 0.06 : 0.04, big ? 0.07 : 0.045);
+    // a life shard (h) or a healing crystal (+): warm gold light in a brass setting
+    var big = it === '+', oct = geo('oct', function () { return new THREE.OctahedronGeometry(1, 0); });
+    var base = part(geo('cyl', CYL), std(0x9a7640, { metalness: 0.85, roughness: 0.35 }), 0, 0.03, 0, inner); base.scale.set(big ? 0.13 : 0.08, 0.03, big ? 0.13 : 0.08);
+    var gem = part(oct, glow(0xffd070, 2.4), 0, big ? 0.2 : 0.14, 0, inner); gem.scale.set(big ? 0.09 : 0.055, big ? 0.16 : 0.1, big ? 0.09 : 0.055);
+    if (big) [-1, 1].forEach(function (sd) { var sm = part(oct, glow(0xffe8b0, 2), sd * 0.1, 0.1, 0, inner); sm.scale.set(0.04, 0.07, 0.04); });
   } else if (it === 'b') {
-    var clip = part(geo('box', BOX), std(0x6a6458, { metalness: 0.5, roughness: 0.4 }), 0, 0.08, 0, inner); clip.scale.set(0.1, 0.16, 0.06);
-    var tip = part(geo('box', BOX), std(0xd8a040, { metalness: 0.8, roughness: 0.3 }), 0, 0.17, 0, inner); tip.scale.set(0.08, 0.03, 0.04);
+    // a spark cell: a brass canister with a cyan charge window
+    var clip = part(geo('cyl', CYL), std(0xb08a48, { metalness: 0.85, roughness: 0.3 }), 0, 0.09, 0, inner); clip.scale.set(0.05, 0.16, 0.05);
+    var tip = part(geo('cyl', CYL), glow(0x8ff0ff, 2), 0, 0.09, 0, inner); tip.scale.set(0.052, 0.07, 0.052);
   } else if (it === 'a') {
-    var sb = part(geo('box', BOX), std(0xa02818, { roughness: 0.6 }), 0, 0.09, 0, inner); sb.scale.set(0.3, 0.18, 0.18);
-    for (var i = 0; i < 4; i++) { var sh = part(geo('cyl', CYL), std(0xd8a040, { metalness: 0.8, roughness: 0.3 }), -0.1 + i * 0.066, 0.2, 0, inner); sh.scale.set(0.022, 0.06, 0.022); }
+    // bell charges: a bronze-banded crate of fat gold charges
+    var sb = part(geo('box', BOX), std(0x5a3e24, { roughness: 0.7 }), 0, 0.09, 0, inner); sb.scale.set(0.3, 0.18, 0.18);
+    var bd = part(geo('box', BOX), std(0xb08a48, { metalness: 0.85, roughness: 0.3 }), 0, 0.09, 0, inner); bd.scale.set(0.31, 0.04, 0.185);
+    for (var i = 0; i < 4; i++) { var sh = part(geo('cyl', CYL), std(0xe0b050, { metalness: 0.9, roughness: 0.25 }), -0.1 + i * 0.066, 0.2, 0, inner); sh.scale.set(0.026, 0.06, 0.026); }
   } else if (it === 'A') {
-    var vest = part(geo('box', BOX), std(0x2e8a3a, { metalness: 0.4, roughness: 0.4 }), 0, 0.2, 0, inner); vest.scale.set(0.34, 0.36, 0.14);
-    var plate = part(geo('box', BOX), glow(0x7aff8a, 1.2), 0, 0.26, 0.075, inner); plate.scale.set(0.16, 0.1, 0.01);
+    // the brass ward: a breastplate with an aether star at its heart
+    var vest = part(geo('box', BOX), std(0xb08a48, { metalness: 0.85, roughness: 0.3 }), 0, 0.2, 0, inner); vest.scale.set(0.34, 0.36, 0.14);
+    var plate = part(geo('oct', function () { return new THREE.OctahedronGeometry(1, 0); }), glow(0x8ff0ff, 1.8), 0, 0.26, 0.075, inner); plate.scale.set(0.07, 0.07, 0.02);
   } else if (it === '2') {
     var gun = shotgunModel(true); gun.scale.setScalar(0.9); gun.rotation.z = 0.2; gun.position.y = 0.15; inner.add(gun);
   } else if (it === 'r' || it === 'u') {
     var col = it === 'r' ? 0xff2a1a : 0x3a7aff;
-    var card = part(geo('box', BOX), glow(col, 2.5), 0, 0.2, 0, inner); card.scale.set(0.16, 0.22, 0.015);
-    var stripe = part(geo('box', BOX), std(0xf0ead8), 0, 0.25, 0, inner); stripe.scale.set(0.12, 0.03, 0.02);
+    // a keystone: a glowing wedge of crystal in a brass collar
+    var card = part(geo('oct', function () { return new THREE.OctahedronGeometry(1, 0); }), glow(col, 2.5), 0, 0.22, 0, inner); card.scale.set(0.09, 0.15, 0.05);
+    var stripe = part(geo('box', BOX), std(0xb08a48, { metalness: 0.85, roughness: 0.3 }), 0, 0.22, 0, inner); stripe.scale.set(0.12, 0.03, 0.07);
   } else if (it === 'P') {
     var orb = part(geo('sph', SPH), glow(0xffb040, 4), 0, 0.3, 0, inner); orb.scale.setScalar(0.14);
     var halo = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.012, 6, 32), glow(0xffd23e, 3)); halo.position.y = 0.3; inner.add(halo);
   }
-  var spin = it === 'r' || it === 'u' || it === 'P' || it === '2';
+  var spin = it === 'r' || it === 'u' || it === 'P' || it === '2' || it === 'h' || it === '+';
   return {
     obj: root,
     update: function (t) {
@@ -337,7 +365,9 @@ var gunMetal = function () { return std(0x3a3d44, { metalness: 0.9, roughness: 0
 var blued = function () { return std(0x1c1e24, { metalness: 0.85, roughness: 0.4 }); };
 var gunWood = function () { return std(0x6a3a1a, { roughness: 0.55, metalness: 0.05 }); };
 var gloveMat = function () { return std(0x2a211c, { roughness: 0.85 }); };
-var sleeveMat = function () { return std(0x3a4230, { roughness: 0.9 }); };
+var sleeveMat = function () { return std(0x4a3426, { roughness: 0.9 }); };   // soot-brown leather
+var brassMat = function () { return std(0xb08a48, { metalness: 0.9, roughness: 0.3 }); };
+var bronzeMat = function () { return std(0x4e3620, { metalness: 0.85, roughness: 0.4 }); };
 
 // authored guns without arms get the built-in gloved hand at the grip
 export function addHand(gun, weapon) {
@@ -356,21 +386,26 @@ function hand(parent, x, y, z, rx) {
   return h;
 }
 
+// The Bell Blaster (slot 3): a Tartarian bell on a brass barrel. One ring, seven tones.
+// Same node layout as the old shotgun (pump, hands) so the view model animates it.
 export function shotgunModel(noHands) {
-  var g = new THREE.Group(), metal = gunMetal(), dark = blued(), wood = gunWood();
-  [-0.019, 0.019].forEach(function (x) {
-    var b = new THREE.Mesh(geo('cyl', CYL), metal); b.scale.set(0.019, 0.62, 0.019); b.rotation.x = Math.PI / 2; b.position.set(x, 0, -0.36); g.add(b);
-    var bore = new THREE.Mesh(geo('cyl', CYL), std(0x050505)); bore.scale.set(0.013, 0.01, 0.013); bore.rotation.x = Math.PI / 2; bore.position.set(x, 0, -0.672); g.add(bore);
-  });
-  var rib = new THREE.Mesh(rbox('rib', 0.012, 0.01, 0.6, 0.004), dark); rib.position.set(0, 0.022, -0.36); g.add(rib);
-  var bead = new THREE.Mesh(geo('sph', SPH), glow(0xffe0a0, 1.2)); bead.scale.setScalar(0.006); bead.position.set(0, 0.03, -0.66); g.add(bead);
-  var pump = new THREE.Group(); pump.position.set(0, -0.034, -0.3); g.add(pump); g.userData.pump = pump;
-  var fore = new THREE.Mesh(rbox('fore', 0.066, 0.05, 0.2, 0.015), wood); pump.add(fore);
-  for (var i = 0; i < 5; i++) { var gr = new THREE.Mesh(rbox('grip', 0.068, 0.006, 0.012, 0.002), std(0x3a1e0c)); gr.position.set(0, -0.022, -0.08 + i * 0.04); pump.add(gr); }
-  var recv = new THREE.Mesh(rbox('recv', 0.075, 0.085, 0.2, 0.012), dark); recv.position.set(0, -0.012, 0.02); g.add(recv);
-  var port = new THREE.Mesh(rbox('port', 0.005, 0.03, 0.07, 0.003), std(0x0a0a0a)); port.position.set(0.039, 0.0, 0.0); g.add(port);
-  var guard = new THREE.Mesh(new THREE.TorusGeometry(0.025, 0.005, 6, 14, Math.PI), dark); guard.position.set(0, -0.055, 0.07); guard.rotation.set(0, Math.PI / 2, Math.PI); g.add(guard);
-  var stock = new THREE.Mesh(rbox('stock', 0.064, 0.1, 0.28, 0.02), wood); stock.position.set(0, -0.055, 0.24); stock.rotation.x = -0.14; g.add(stock);
+  var g = new THREE.Group(), brass = brassMat(), dark = bronzeMat(), wood = gunWood();
+  var tube = new THREE.Mesh(geo('cyl', CYL), brass); tube.scale.set(0.026, 0.46, 0.026); tube.rotation.x = Math.PI / 2; tube.position.set(0, 0, -0.33); g.add(tube);
+  [-0.2, -0.33, -0.46].forEach(function (z) { var ring = new THREE.Mesh(geo('ring', function () { return new THREE.TorusGeometry(0.031, 0.007, 6, 18); }), dark); ring.position.set(0, 0, z); g.add(ring); });
+  // the bell: flared, open, bronze outside and gold-lit inside
+  var bell = new THREE.Mesh(geo('bell', function () { return new THREE.CylinderGeometry(0.03, 0.078, 0.13, 20, 1, true); }), std(0xc89a50, { metalness: 0.9, roughness: 0.25, side: THREE.DoubleSide }));
+  bell.rotation.x = Math.PI / 2; bell.position.set(0, 0, -0.62); g.add(bell);
+  var lip = new THREE.Mesh(geo('lip', function () { return new THREE.TorusGeometry(0.078, 0.008, 6, 24); }), dark); lip.position.set(0, 0, -0.685); g.add(lip);
+  var throat = new THREE.Mesh(geo('sph', SPH), glow(0xffc860, 1.4)); throat.scale.set(0.028, 0.028, 0.01); throat.position.set(0, 0, -0.57); g.add(throat);
+  var pump = new THREE.Group(); pump.position.set(0, -0.036, -0.28); g.add(pump); g.userData.pump = pump;
+  var fore = new THREE.Mesh(rbox('fore', 0.064, 0.048, 0.19, 0.015), wood); pump.add(fore);
+  [-0.06, 0.06].forEach(function (z) { var band = new THREE.Mesh(rbox('band', 0.068, 0.052, 0.014, 0.004), brass); band.position.z = z; pump.add(band); });
+  var recv = new THREE.Mesh(rbox('recv', 0.078, 0.09, 0.2, 0.014), brass); recv.position.set(0, -0.012, 0.02); g.add(recv);
+  // the resonance crystal in the receiver: it glows while the bell is charged
+  [-1, 1].forEach(function (sd) { var win = new THREE.Mesh(rbox('win', 0.006, 0.04, 0.08, 0.003), glow(0xffc860, 1.8)); win.position.set(sd * 0.04, -0.005, 0.02); g.add(win); });
+  var guard = new THREE.Mesh(new THREE.TorusGeometry(0.025, 0.005, 6, 14, Math.PI), dark); guard.position.set(0, -0.058, 0.07); guard.rotation.set(0, Math.PI / 2, Math.PI); g.add(guard);
+  var stock = new THREE.Mesh(rbox('stock', 0.062, 0.1, 0.27, 0.02), wood); stock.position.set(0, -0.055, 0.24); stock.rotation.x = -0.14; g.add(stock);
+  var cap = new THREE.Mesh(rbox('cap', 0.066, 0.104, 0.02, 0.006), brass); cap.position.set(0, -0.075, 0.37); cap.rotation.x = -0.14; g.add(cap);
   if (!noHands) {
     g.userData.pumpHand = hand(pump, -0.005, -0.045, 0.01, 0.1);
     hand(g, 0.01, -0.08, 0.1, 0.4);
@@ -378,16 +413,17 @@ export function shotgunModel(noHands) {
   return g;
 }
 
+// The Spark Caster (slot 2): a brass caster with copper coils and an aether crystal at the tip.
 export function pistolModel() {
-  var g = new THREE.Group(), metal = gunMetal(), dark = blued();
-  var slide = new THREE.Mesh(rbox('slide', 0.042, 0.042, 0.19, 0.008), metal); slide.position.set(0, 0.02, -0.07); g.add(slide); g.userData.slide = slide;
-  for (var i = 0; i < 6; i++) { var ser = new THREE.Mesh(rbox('ser', 0.044, 0.03, 0.004, 0.001), dark); ser.position.set(0, 0.022, 0.0 + i * 0.008 - 0.02); slide.add(ser); ser.position.set(0, 0, 0.06 + i * 0.008); }
-  var frame = new THREE.Mesh(rbox('frame', 0.038, 0.03, 0.16, 0.008), dark); frame.position.set(0, -0.012, -0.06); g.add(frame);
-  var barrel = new THREE.Mesh(geo('cyl', CYL), std(0x080808)); barrel.scale.set(0.009, 0.01, 0.009); barrel.rotation.x = Math.PI / 2; barrel.position.set(0, 0.022, -0.166); g.add(barrel);
-  var grip = new THREE.Mesh(rbox('pgrip', 0.036, 0.11, 0.05, 0.01), std(0x2a2420, { roughness: 0.8 })); grip.position.set(0, -0.07, 0.01); grip.rotation.x = 0.28; g.add(grip);
+  var g = new THREE.Group(), brass = brassMat(), dark = bronzeMat();
+  var slide = new THREE.Mesh(rbox('slide', 0.042, 0.04, 0.18, 0.01), brass); slide.position.set(0, 0.02, -0.07); g.add(slide); g.userData.slide = slide;
+  for (var i = 0; i < 3; i++) { var coil = new THREE.Mesh(geo('coil', function () { return new THREE.TorusGeometry(0.024, 0.005, 6, 16); }), std(0xb8683a, { metalness: 0.9, roughness: 0.3 })); coil.position.set(0, 0, -0.02 - i * 0.03); slide.add(coil); }
+  var frame = new THREE.Mesh(rbox('frame', 0.036, 0.03, 0.15, 0.008), dark); frame.position.set(0, -0.012, -0.055); g.add(frame);
+  var crystal = new THREE.Mesh(geo('oct', function () { return new THREE.OctahedronGeometry(1, 0); }), glow(0x8ff0ff, 2.2)); crystal.scale.set(0.014, 0.014, 0.03); crystal.position.set(0, 0.02, -0.175); g.add(crystal);
+  var grip = new THREE.Mesh(rbox('pgrip', 0.036, 0.11, 0.05, 0.012), gunWood()); grip.position.set(0, -0.07, 0.01); grip.rotation.x = 0.28; g.add(grip);
+  var pommel = new THREE.Mesh(rbox('pom', 0.04, 0.014, 0.054, 0.005), brass); pommel.position.set(0, -0.123, 0.026); pommel.rotation.x = 0.28; g.add(pommel);
   var guard = new THREE.Mesh(new THREE.TorusGeometry(0.018, 0.004, 6, 14, Math.PI), dark); guard.position.set(0, -0.03, -0.035); guard.rotation.set(0, Math.PI / 2, Math.PI); g.add(guard);
-  var sight = new THREE.Mesh(rbox('sight', 0.006, 0.01, 0.01, 0.002), glow(0xff5a2a, 1.5)); sight.position.set(0, 0.046, -0.155); g.add(sight);
-  var rear = new THREE.Mesh(rbox('rear', 0.03, 0.01, 0.008, 0.002), dark); rear.position.set(0, 0.046, 0.02); g.add(rear);
+  var sight = new THREE.Mesh(rbox('sight', 0.006, 0.01, 0.01, 0.002), glow(0x8ff0ff, 1.5)); sight.position.set(0, 0.046, -0.14); g.add(sight);
   hand(g, 0, -0.07, 0.04, 0.3);
   return g;
 }

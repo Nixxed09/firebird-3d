@@ -208,7 +208,7 @@ export function createRenderer(canvas, opts) {
       if (e.kind === 'proj') {
         var pm = projs.get(e);
         if (!pm) {
-          pm = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), new THREE.MeshBasicMaterial({ color: e.green ? 0x9ffcff : 0xffb040 }));
+          pm = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), new THREE.MeshBasicMaterial({ color: e.green ? 0x9ffcff : 0xff3a4a }));
           scene.add(pm); projs.set(e, pm);
         }
         pm.position.set(e.x, e.y, e.z);
@@ -285,6 +285,9 @@ export function createRenderer(canvas, opts) {
     flashSprite.position.set(g.position.x, g.position.y + (p.weapon === 'shotgun' ? 0 : 0.02), g.position.z - (p.weapon === 'shotgun' ? 0.72 : 0.2));
     flashSprite.scale.setScalar((p.weapon === 'shotgun' ? 0.2 : 0.11) * (0.8 + Math.random() * 0.45));
     flashFront.rotation.z = Math.random() * Math.PI * 2;
+    // the Spark Caster flashes aether cyan, the Bell Blaster gold
+    flashMat.color.setHex(p.weapon === 'shotgun' ? 0xffd27a : 0xa8f0ff);
+    viewLight.color.setHex(p.weapon === 'shotgun' ? 0xffc070 : 0x9fe8ff);
     // a new shot: kick the view
     if (ft < punch.lastFire && p.weapon !== 'fist') { punch.vel += p.weapon === 'shotgun' ? 1.6 : 0.55; punch.fov = p.weapon === 'shotgun' ? 3 : 0.8; }
     punch.lastFire = ft;

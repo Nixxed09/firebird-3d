@@ -175,8 +175,8 @@ export function buildLevel(G, assets) {
   });
 
   // lava: a glowing, flowing surface on every molten cell, gone when drained
-  var lavaTex = (assets && assets.texture('tex:hell')) || floorSet('hell');
-  var lavaMat = new THREE.MeshStandardMaterial({ color: 0xff7a20, emissive: 0xff5a10, emissiveIntensity: 2.4, roughness: 0.4, map: lavaTex.map, emissiveMap: lavaTex.map });
+  var lavaTex = (assets && assets.texture('tex:mercury')) || floorSet('mercury');
+  var lavaMat = new THREE.MeshStandardMaterial({ color: 0x9a3030, emissive: 0xffffff, emissiveIntensity: 0.9, roughness: 0.2, map: lavaTex.map, emissiveMap: lavaTex.map });
   var lavaCells = [];
   for (var lz = 0; lz < W.mh; lz++) for (var lx = 0; lx < W.mw; lx++) {
     var li = lz * W.mw + lx;
@@ -238,7 +238,7 @@ export function buildLevel(G, assets) {
       movers.forEach(function (m) { m.position.set(m.userData.cx, W.floor[m.userData.i] - m.userData.depth / 2, m.userData.cz); });
       var t = performance.now() / 1000;
       lavaMat.map.offset.set(t * 0.02, t * 0.013);
-      lavaMat.emissiveIntensity = 2.2 + Math.sin(t * 2.3) * 0.3;
+      lavaMat.emissiveIntensity = 0.85 + Math.sin(t * 2.3) * 0.12;
       lavaCells.forEach(function (q) { q.visible = !!W.lava[q.userData.i]; q.position.y = W.floor[q.userData.i] + 0.04; });
     }
   };
