@@ -172,7 +172,21 @@ var RILEY = (function () {
 
   // ---- 4. say — every line is built from real counts ------------------------
 
-  var WEAPON_WORD = { fist: 'FISTS', pistol: 'PISTOL', shotgun: 'SHOTGUN' };
+  // The words she uses for your weapons and for the creatures she calls. Each
+  // game sets its own (setWords); the classic game keeps these. Every line is
+  // still built from real counts, only the names change.
+  var WORDS = {
+    weapon: { fist: 'FISTS', pistol: 'PISTOL', shotgun: 'SHOTGUN' },
+    shotgunShots: 'SHOTGUN BLASTS',
+    minions: 'IMPS'
+  };
+  function setWords(w) {
+    if (!w) return;
+    if (w.weapon) for (var k in w.weapon) WORDS.weapon[k] = w.weapon[k];
+    if (w.shotgunShots) WORDS.shotgunShots = w.shotgunShots;
+    if (w.minions) WORDS.minions = w.minions;
+  }
+  function words() { return JSON.parse(JSON.stringify(WORDS)); }
 
   // Returns a line for an insight the first time it is true, else null.
   function insight(pr, why) {
@@ -195,7 +209,7 @@ var RILEY = (function () {
         line = 'HIDING? I CAN FIND YOU. I KNOW THIS ARENA.';
         break;
       case 'shotgun':
-        line = pr.shots.shotgun + ' SHOTGUN BLASTS SO FAR. SHIELD UP!';
+        line = pr.shots.shotgun + ' ' + WORDS.shotgunShots + ' SO FAR. SHIELD UP!';
         break;
     }
     if (line) pr.said[why] = true;
@@ -223,7 +237,7 @@ var RILEY = (function () {
       case 'friendlyFire':
         return 'HEY! WATCH WHERE YOU THROW THOSE.';
       case 'impsTurned':
-        return 'YOU GOT MY IMPS FIGHTING ME? SMART.';
+        return 'YOU GOT MY ' + WORDS.minions + ' FIGHTING ME? SMART.';
       case 'playerDied': {
         var acc = accuracy(pr);
         return 'GOOD FIGHT! YOU HIT ME ' + pr.hits + (pr.hits === 1 ? ' TIME' : ' TIMES') +
@@ -231,7 +245,7 @@ var RILEY = (function () {
       }
       case 'defeated': {
         var fav = favWeapon(pr);
-        return 'OKAY, YOU WIN! ' + pr.hits + ' HITS' + (fav ? ' WITH MOSTLY THE ' + WEAPON_WORD[fav] : '') + '. NICE.';
+        return 'OKAY, YOU WIN! ' + pr.hits + ' HITS' + (fav ? ' WITH MOSTLY THE ' + WORDS.weapon[fav] : '') + '. NICE.';
       }
     }
     return null;
@@ -247,11 +261,11 @@ var RILEY = (function () {
   // One honest sentence about how this fight went, remembered for next time.
   function describeStyle(pr) {
     var fav = favWeapon(pr);
-    if (rusher(pr) > 0.5 && fav) return 'YOU RUSHED ME WITH THE ' + WEAPON_WORD[fav];
+    if (rusher(pr) > 0.5 && fav) return 'YOU RUSHED ME WITH THE ' + WORDS.weapon[fav];
     if (sniper(pr) > 0.5) return 'YOU FOUGHT ME FROM FAR AWAY';
     if (pr.longestHide > 6) return 'YOU HID FOR ' + Math.round(pr.longestHide) + ' SECONDS';
     if (strafeHabit(pr) > 0.5) return 'YOU KEPT DODGING ' + (strafeSide(pr) < 0 ? 'LEFT' : 'RIGHT');
-    if (fav) return 'YOU USED THE ' + WEAPON_WORD[fav] + ' THE MOST';
+    if (fav) return 'YOU USED THE ' + WORDS.weapon[fav] + ' THE MOST';
     return null;
   }
 
@@ -304,7 +318,8 @@ var RILEY = (function () {
     strafeSide: strafeSide, strafeHabit: strafeHabit, accuracy: accuracy,
     legalMoves: legalMoves, scoreMove: scoreMove, choose: choose,
     insight: insight, line: line, describeStyle: describeStyle,
-    recall: recall, save: save, settle: settle, tuning: tuning
+    recall: recall, save: save, settle: settle, tuning: tuning,
+    setWords: setWords, words: words
   };
 })();
 

@@ -20,6 +20,7 @@ import { LEVELS } from '../src/levels.js';
 import { makeRng } from '../src/sim/rng.js';
 import { PlayBot } from './playbot.js';
 import { Recorder, writeFlow } from './flow.js';
+import RILEY from '../../js/riley.js';
 
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
 var require = createRequire(import.meta.url);
@@ -91,13 +92,16 @@ function checkLine(text, fight, history) {
   if ((m = /YOU HIT ME (\d+) TIME/.exec(text))) claim('hits', +m[1], fight.hits, fight.ambiguous);
   if ((m = /WIN! (\d+) HITS/.exec(text))) claim('hits', +m[1], fight.hits, fight.ambiguous);
   if ((m = /(\d+)% ACCURACY/.exec(text))) claim('accuracy %', +m[1], Math.min(100, Math.round(fight.hits / fight.shotsTotal * 100)), Math.ceil(fight.ambiguous / fight.shotsTotal * 100));
-  if ((m = /(\d+) SHOTGUN BLASTS/.exec(text))) claim('shotgun blasts', +m[1], fight.shots.shotgun);
+  // Riley's names for weapons come from whatever the game set (RILEY.setWords)
+  var W = RILEY.words();
+  var blasts = text.indexOf(' ' + W.shotgunShots + ' SO FAR') >= 0 && /^RILEY: (\d+) /.exec(text);
+  if (blasts) claim('shotgun blasts', +blasts[1], fight.shots.shotgun);
   if ((m = /DODGE (LEFT|RIGHT)/.exec(text))) claim('dodge side', m[1], fight.strafeL > fight.strafeR ? 'LEFT' : 'RIGHT');
-  if ((m = /MOSTLY THE (\w+)/.exec(text))) claim('main weapon', m[1], ({ fist: 'FISTS', pistol: 'PISTOL', shotgun: 'SHOTGUN' })[mostUsed(fight.shots)]);
+  if ((m = /MOSTLY THE (.+?)\. NICE/.exec(text))) claim('main weapon', m[1], W.weapon[mostUsed(fight.shots)]);
   if ((m = /YOU BEAT ME (\d+) TIME/.exec(text))) claim('times beaten', +m[1], history.filter(function (f) { return f.won; }).length);
   if (/GOING A LITTLE EASIER/.test(text)) claim('lost last time', true, history.length > 0 && !history[history.length - 1].won);
-  if ((m = /LAST TIME YOU (?:USED|RUSHED ME WITH) THE (\w+)/.exec(text)) && history.length) {
-    claim('last fight weapon', m[1], ({ fist: 'FISTS', pistol: 'PISTOL', shotgun: 'SHOTGUN' })[mostUsed(history[history.length - 1].shots)]);
+  if ((m = /LAST TIME YOU (?:USED THE (.+?) THE MOST|RUSHED ME WITH THE (.+?))\./.exec(text)) && history.length) {
+    claim('last fight weapon', m[1] || m[2], W.weapon[mostUsed(history[history.length - 1].shots)]);
   }
   if ((m = /ROUND (\d+)/.exec(text))) claim('round number', +m[1], history.length + 1);
   return claims;

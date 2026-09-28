@@ -132,4 +132,23 @@ test('her last stand calls backup at half the summon cooldown', function () {
   assert.ok(R.legalMoves(state({ phase: 3, cool: cool })).indexOf('summon') >= 0, 'phase 3 calls with 8 s left');
 });
 
+test('each game can give her its own words, and the lines stay true and fit', function () {
+  var saved = R.words();
+  R.setWords({ weapon: { fist: 'FISTS', pistol: 'SPARK CASTER', shotgun: 'BELL BLASTER' }, shotgunShots: 'BELL BLASTS', minions: 'HOLLOWS' });
+  try {
+    var pr = R.newProfile();
+    for (var i = 0; i < 9; i++) R.noteShot(pr, 'shotgun', 2);
+    pr.hits = 6;
+    assert.strictEqual(R.line('impsTurned', pr), 'YOU GOT MY HOLLOWS FIGHTING ME? SMART.');
+    assert.strictEqual(R.insight(pr, 'shotgun'), '9 BELL BLASTS SO FAR. SHIELD UP!');
+    assert.strictEqual(R.line('defeated', pr), 'OKAY, YOU WIN! 6 HITS WITH MOSTLY THE BELL BLASTER. NICE.');
+    assert.strictEqual(R.describeStyle(pr), 'YOU RUSHED ME WITH THE BELL BLASTER');
+    var longest = 'RILEY: BACK AGAIN! LAST TIME ' + R.describeStyle(pr) + '.';
+    assert.ok(longest.length <= 78, 'too long: ' + longest);
+  } finally {
+    R.setWords(saved);
+  }
+  assert.strictEqual(R.line('impsTurned', R.newProfile()), 'YOU GOT MY IMPS FIGHTING ME? SMART.', 'classic words restored');
+});
+
 console.log(passed + ' Riley brain tests passed');

@@ -1,5 +1,5 @@
 {
-  "about": "CC0 models used by Firebird v2, where they come from, and how _pipeline/process.py turns each into a contract-ready .glb (docs/ASSETS.md). Rebuild: node assets/cc0/_pipeline/fetch.mjs, then blender -b -P assets/cc0/_pipeline/process.py, then node assets/cc0/_pipeline/manifest.mjs. Weapons: set \"view\": \"first-person\" only for a model built to be held in view; the renderer (fitsView in src/render/renderer.js) uses an authored gun only with that flag and otherwise keeps its built-in one.",
+  "about": "CC0 models used by Firebird v2, where they come from, and how _pipeline/process.py turns each into a contract-ready .glb (docs/ASSETS.md). Rebuild: node assets/cc0/_pipeline/fetch.mjs, then blender -b -P assets/cc0/_pipeline/process.py, then node assets/cc0/_pipeline/manifest.mjs. Weapons: set \"view\": \"first-person\" only for a model built to be held in view AND fitting the theme; the renderer (fitsView in src/render/renderer.js) uses an authored gun only with that flag and otherwise keeps its built-in one. The Old Earth reskin (STYLE_GUIDE.md) forbids real-world guns, so no CC0 gun is flagged.",
   "sources": [
     {
       "id": "imp",
@@ -162,8 +162,7 @@
       "page": "https://poly.pizza/m/52kQzphmeF",
       "url": "https://static.poly.pizza/7a31b522-5632-41d9-8274-031795af5d8d.glb",
       "sha256": "dd03cc48a55e4b95dabc513d494e5d1516f6b6b5a37f9ecc824850b5784f7acb",
-      "length": 0.24,
-      "view": "first-person"
+      "length": 0.24
     },
     {
       "id": "shotgun",
