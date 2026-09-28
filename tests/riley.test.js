@@ -117,4 +117,19 @@ test('memory survives broken or missing storage', function () {
   R.save(bad, { fights: 1 }); // must not throw
 });
 
+test('phase 3 keeps her "NO MORE HOLDING BACK!" promise', function () {
+  var pr = R.newProfile();
+  for (var i = 0; i < 12; i++) R.noteShot(pr, 'shotgun', 2.5); // a rusher: phase 1-2 Riley would back off
+  var two = state({ dist: 3, phase: 2, playerWeapon: 'shotgun' }), three = state({ dist: 3, phase: 3, playerWeapon: 'shotgun' });
+  assert.ok(R.scoreMove('backoff', pr, three).score < R.scoreMove('backoff', pr, two).score, 'gives less ground');
+  assert.ok(R.scoreMove('volley', pr, three).score > R.scoreMove('volley', pr, two).score, 'attacks harder');
+  assert.ok(R.scoreMove('close', pr, three).score > R.scoreMove('close', pr, two).score, 'closes in');
+});
+
+test('her last stand calls backup at half the summon cooldown', function () {
+  var cool = { volley: 5, lead: 5, summon: 8, shield: 5 };
+  assert.ok(R.legalMoves(state({ phase: 2, cool: cool })).indexOf('summon') < 0, 'phase 2 waits for the full cooldown');
+  assert.ok(R.legalMoves(state({ phase: 3, cool: cool })).indexOf('summon') >= 0, 'phase 3 calls with 8 s left');
+});
+
 console.log(passed + ' Riley brain tests passed');

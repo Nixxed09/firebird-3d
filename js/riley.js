@@ -104,7 +104,10 @@ var RILEY = (function () {
     } else {
       m.push('seek');
     }
-    if (s.phase >= 2 && s.impsAlive < 2 && s.cool.summon <= 0) m.push('summon');
+    // her last stand (phase 3) calls for backup with 9 s of the 18 s summon
+    // cooldown still to go, so the finale isn't a quiet one-on-one
+    var summonReady = s.cool.summon <= (s.phase >= 3 ? 9 : 0);
+    if (s.phase >= 2 && s.impsAlive < 2 && summonReady) m.push('summon');
     if (s.phase >= 2 && s.los && s.dist < 7 && s.cool.shield <= 0) m.push('shield');
     return m;
   }
@@ -140,6 +143,13 @@ var RILEY = (function () {
         sc = s.playerWeapon === 'shotgun' ? 1.4 : 0.25;
         if (s.playerWeapon === 'shotgun' && pr.shots.shotgun >= 6) why = 'shotgun';
         break;
+    }
+    // Phase 3 keeps the promise of her "NO MORE HOLDING BACK!" line: she presses
+    // the attack instead of giving ground, so the end of the fight is its peak
+    // (the playtest's per-episode intensity peak, contract P5).
+    if (s.phase >= 3) {
+      if (move === 'volley' || move === 'lead' || move === 'close' || move === 'summon') sc += 0.6;
+      if (move === 'backoff' || move === 'shield') sc *= 0.4;
     }
     return { move: move, score: sc, why: why };
   }
