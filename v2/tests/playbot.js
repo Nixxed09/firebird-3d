@@ -84,6 +84,7 @@ PlayBot.prototype.reset = function () {
   this.firstSeen = new Map();
   this.plan = null;
   this.decideT = 0;
+  this.exitCheckT = 0;
   this.stuckT = 0; this.lastX = 0; this.lastZ = 0; this.unstickT = 0; this.unstickDir = 1; this.stuckCount = 0;
   this.strafeDir = this.rng() < 0.5 + this.style.strafeHabit ? -1 : 1; this.strafeT = 0;
   this.dodgeT = 0; this.dodgeDir = 1;
@@ -255,11 +256,13 @@ PlayBot.prototype.options = function (threats) {
     opts.push({ kind: 'item', target: { x: sec.x + 0.5, z: sec.z + 0.5 }, score: 0.5 + st.curiosity * 0.6, key: 'area:' + sec.x + ',' + sec.z, gx: sec.x, gz: sec.z });
   });
 
+  var leversLeft = ((G.info && G.info.levers) || []).some(function (lv) { return self.cell(lv[0], lv[1]) === LEVER_OFF; });
   var bossAlive = G.boss && G.boss.state !== 'dead' && G.boss.state !== 'die';
   if (bossAlive && this.firstTimer && this.knows(Math.floor(G.boss.x), Math.floor(G.boss.z))) this.metBoss = true;
   if (bossAlive) {
     if (!this.firstTimer || this.metBoss) opts.push({ kind: 'boss', target: G.boss, score: 0.8 + st.aggression * 0.3 - st.completionism * 0.3, key: 'boss' });
-  } else if (G.exitCell && (!this.firstTimer || this.knows(G.exitCell.x, G.exitCell.z))) {
+  } else if (G.exitCell && !leversLeft && (!this.firstTimer || this.knows(G.exitCell.x, G.exitCell.z))) {
+    // (not while the objective still says to pull the seal levers)
     opts.push({ kind: 'exit', score: 0.7 + (1 - st.completionism) * 0.5, key: 'exit' });
   }
   // seal levers the level needs pulled (levelInfo().levers): a first-timer only
@@ -508,8 +511,14 @@ PlayBot.prototype.step = function (dt) {
       // the Warden falls, and he only wakes when you walk into his arena): a player
       // heads toward the goal anyway, so walk to the nearest reachable cell
       var exitGoal = function (x, z) { return self.adjacentTo(x, z, EXIT_SWITCH); };
-      if (!this.pathTo(exitGoal) && G.exitCell) {
-        var near = this.nearestReachable(G.exitCell.x, G.exitCell.z);
+      // a full path search is costly: check reachability at most once a second
+      if (!(this.exitCheckT > this.now)) { this.exitCheckT = this.now + 1; this.exitReachable = !!this.pathTo(exitGoal); }
+      if (!this.exitReachable && G.exitCell) {
+        // head for the level's stage marker if the exit waits on one (E1M3: the
+        // Warden's arena), else for the exit itself
+        var st = G.L && G.L.stage, tx = G.exitCell.x, tz = G.exitCell.z;
+        if (st && st.at && G.waves[st.wave] !== false && (!this.firstTimer || this.knows(st.at[0], st.at[1]))) { tx = st.at[0]; tz = st.at[1]; }
+        var near = this.nearestReachable(tx, tz);
         if (near) { this.plan = { kind: 'approach', key: 'approach:' + near.x + ',' + near.z, gx: near.x, gz: near.z, score: plan.score }; return; }
       }
     }
