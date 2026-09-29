@@ -179,7 +179,9 @@
   };
 
   var WEAPON_ORDER = ['fist', 'pistol', 'shotgun'];
-  var AMMO_NAMES = { bullets: 'BULLETS', shells: 'SHELLS' };
+  // what the player sees (STYLE_GUIDE.md): the sim keeps its old ids
+  var AMMO_NAMES = { bullets: 'SPARKS', shells: 'BELL CHARGES' };
+  var WEAPON_NAMES = { fist: 'EMBER FIST', pistol: 'SPARK CASTER', shotgun: 'BELL BLASTER' };
 
   function hasAmmo(p, name) {
     var w = WEAPONS[name];
@@ -200,11 +202,11 @@
     if (mode !== 'game' || !G || G.p.dead) return false;
     var p = G.p;
     if (!p.weapons[name]) {
-      if (!quiet) message('YOU HAVEN\'T FOUND THE ' + name.toUpperCase() + ' YET.');
+      if (!quiet) message('YOU HAVEN\'T FOUND THE ' + WEAPON_NAMES[name] + ' YET.');
       return false;
     }
     if (!hasAmmo(p, name)) {
-      if (!quiet) { message('NO ' + AMMO_NAMES[WEAPONS[name].ammo] + ' FOR THE ' + name.toUpperCase() + '.'); SND.play('noAmmo'); }
+      if (!quiet) { message('NO ' + AMMO_NAMES[WEAPONS[name].ammo] + ' FOR THE ' + WEAPON_NAMES[name] + '.'); SND.play('noAmmo'); }
       return false;
     }
     if (name === p.weapon) {
@@ -273,22 +275,22 @@
   }
 
   var ITEMS = {
-    h: { img: 'stim', h: 0.22, w: 0.24, msg: 'PICKED UP A STIMPACK.', snd: 'health' },
-    '+': { img: 'medkit', h: 0.3, w: 0.34, msg: 'PICKED UP A MEDIKIT.', snd: 'health' },
-    b: { img: 'clip', h: 0.18, w: 0.22, msg: 'PICKED UP A CLIP.', snd: 'pickup' },
-    a: { img: 'shells', h: 0.2, w: 0.3, msg: 'PICKED UP A BOX OF SHELLS.', snd: 'pickup' },
-    A: { img: 'armor', h: 0.32, w: 0.36, msg: 'PICKED UP THE ARMOR!', snd: 'pickup' },
-    2: { img: 'shotgunPickup', h: 0.2, w: 0.62, msg: 'YOU GOT THE SHOTGUN!', snd: 'weaponUp' },
-    r: { img: 'keyRed', h: 0.26, w: 0.18, msg: 'PICKED UP THE RED KEYCARD.', snd: 'keyPickup' },
-    u: { img: 'keyBlue', h: 0.26, w: 0.18, msg: 'PICKED UP THE BLUE KEYCARD.', snd: 'keyPickup' },
+    h: { img: 'stim', h: 0.22, w: 0.24, msg: 'PICKED UP A LIFE SHARD.', snd: 'health' },
+    '+': { img: 'medkit', h: 0.3, w: 0.34, msg: 'PICKED UP A HEALING CRYSTAL.', snd: 'health' },
+    b: { img: 'clip', h: 0.18, w: 0.22, msg: 'PICKED UP A SPARK CELL.', snd: 'pickup' },
+    a: { img: 'shells', h: 0.2, w: 0.3, msg: 'PICKED UP BELL CHARGES.', snd: 'pickup' },
+    A: { img: 'armor', h: 0.32, w: 0.36, msg: 'PICKED UP A BRASS WARD!', snd: 'pickup' },
+    2: { img: 'shotgunPickup', h: 0.2, w: 0.62, msg: 'YOU GOT THE BELL BLASTER!', snd: 'weaponUp' },
+    r: { img: 'keyRed', h: 0.26, w: 0.18, msg: 'PICKED UP THE RED KEYSTONE.', snd: 'keyPickup' },
+    u: { img: 'keyBlue', h: 0.26, w: 0.18, msg: 'PICKED UP THE BLUE KEYSTONE.', snd: 'keyPickup' },
     P: { img: 'orb', h: 0.3, w: 0.3, msg: 'PHOENIX ORB! YOU FEEL REBORN!', snd: 'orb' }
   };
 
-  // dmg scales what demons do to you; ammo scales what pickups give
+  // dmg scales what Hollows do to you; ammo scales what pickups give
   var DIFFS = [
     { name: 'ROOKIE', dmg: 0.5, ammo: 2, desc: 'HOLLOWS HIT HALF AS HARD AND AMMO IS DOUBLED. GREAT FOR A FIRST RUN.' },
     { name: 'WARRIOR', dmg: 1, ammo: 1, desc: 'THE FIGHT AS IT WAS MEANT TO BE.' },
-    { name: 'INFERNO', dmg: 1.5, ammo: 1, desc: 'HOLLOWS HIT HARDER. FOR VETERANS WHO KNOW EVERY CORNER.' }
+    { name: 'BLAZE', dmg: 1.5, ammo: 1, desc: 'HOLLOWS HIT HARDER. FOR VETERANS WHO KNOW EVERY CORNER.' }
   ];
   function diff() { return DIFFS[SETTINGS.v.difficulty] || DIFFS[1]; }
 
@@ -344,8 +346,8 @@
   function currentObjective() {
     if (!G) return '';
     var info = levelInfo(G.L), p = G.p;
-    if (info.keys.blue && !p.keys.blue) return 'FIND THE BLUE KEYCARD';
-    if (info.keys.red && !p.keys.red) return 'FIND THE RED KEYCARD';
+    if (info.keys.blue && !p.keys.blue) return 'FIND THE BLUE KEYSTONE';
+    if (info.keys.red && !p.keys.red) return 'FIND THE RED KEYSTONE';
     if (info.boss) return 'DEFEAT RILEY';
     return 'FIND THE EXIT SWITCH';
   }
@@ -356,15 +358,15 @@
     map: 'TIP: LOST? PRESS TAB FOR THE MAP.',
     weapons: 'TIP: PRESS 1 2 3, OR SCROLL THE MOUSE WHEEL, TO SWITCH WEAPONS. Q SWAPS BACK.',
     key: 'TIP: THE MATCHING DOOR IS MARKED IN COLOR ON YOUR MAP (TAB).',
-    lowAmmo: 'TIP: LOW ON AMMO? YOUR FIST (1) NEVER RUNS OUT, AND IT IS SILENT.',
-    lowHealth: 'TIP: LOW HEALTH! BACK OFF AND LOOK FOR STIMPACKS AND MEDIKITS.',
+    lowAmmo: 'TIP: LOW ON AMMO? YOUR EMBER FIST (1) NEVER RUNS OUT, AND IT IS SILENT.',
+    lowHealth: 'TIP: LOW HEALTH! BACK OFF AND LOOK FOR LIFE SHARDS AND HEALING CRYSTALS.',
     hurtDir: 'TIP: THE RED MARKS AROUND YOUR AIM POINT AT WHATEVER HIT YOU.',
-    secret: 'TIP: WALLS THAT LOOK DIFFERENT MAY HIDE SECRETS. PRESS E ON THEM.',
+    secret: 'TIP: CRACKED WALLS HIDE PIECES OF THE TRUE MAP. PRESS E ON THEM.',
     torches: 'TIP: A PAIR OF TORCHES BESIDE A DOOR MEANS IT MATTERS. FOLLOW THEM.',
     barrel: 'TIP: A HOLLOW IS NEXT TO A MERCURY CASK. SHOOT THE CASK!',
     meet_imp: 'TIP: HOLLOWS THROW MERCURY EMBERS. STRAFE WITH A AND D TO DODGE.',
     meet_gnasher: 'TIP: HOLLOW HOUNDS CHARGE AND BITE. BACK AWAY WHILE YOU SHOOT.',
-    meet_knight: 'TIP: THE RESET WARDEN IS TOUGH. KEEP YOUR DISTANCE AND USE SHELLS.'
+    meet_knight: 'TIP: THE RESET WARDEN IS TOUGH. KEEP YOUR DISTANCE AND RING THE BELL BLASTER.'
   };
   function tip(id) {
     if (!G || AUTO || !SETTINGS.v.tips || SETTINGS.v.seenTips[id]) return;
@@ -738,7 +740,7 @@
     if (u.kind === 'switch') return { verb: 'EXIT LEVEL', color: '#58e068' };
     var d = u.door;
     if (d.secret && !d.found) return null;
-    if (d.locked && !G.p.keys[d.locked]) return { need: d.locked, text: d.locked.toUpperCase() + ' KEYCARD NEEDED', color: d.locked === 'red' ? '#ff5a3a' : '#6a98ff' };
+    if (d.locked && !G.p.keys[d.locked]) return { need: d.locked, text: d.locked.toUpperCase() + ' KEYSTONE NEEDED', color: d.locked === 'red' ? '#ff5a3a' : '#6a98ff' };
     if (d.state === 'closed' || d.state === 'closing') return { verb: 'OPEN', color: '#e8e0c8' };
     return null;
   }
@@ -751,7 +753,7 @@
       var d = u.door;
       if (d.locked && !p.keys[d.locked]) {
         SND.play('locked');
-        message('YOU NEED THE ' + d.locked.toUpperCase() + ' KEYCARD.');
+        message('YOU NEED THE ' + d.locked.toUpperCase() + ' KEYSTONE.');
         tip('key');
       } else {
         openDoor(d, true);
@@ -1550,13 +1552,13 @@
         p.ammo.shells = Math.min(50, p.ammo.shells + 8 * am);
         p.grinT = 1.2;
         if (p.weapon !== 'shotgun') switchWeapon('shotgun', true);
-        notice('SHOTGUN!  PRESS 3', '#ffd23e', 2.5);
+        notice('BELL BLASTER!  PRESS 3', '#ffd23e', 2.5);
         tip('weapons');
         break;
       case 'r': case 'u':
         var col = e.item === 'r' ? 'red' : 'blue';
         p.keys[col] = true; p.grinT = 1;
-        notice(col.toUpperCase() + ' KEYCARD', col === 'red' ? '#ff5a3a' : '#6a98ff', 2.5);
+        notice(col.toUpperCase() + ' KEYSTONE', col === 'red' ? '#ff5a3a' : '#6a98ff', 2.5);
         tip('key');
         break;
       case 'P': p.hp = Math.min(200, p.hp + 100); p.grinT = 1.2; break;
@@ -1881,8 +1883,8 @@
 
     // ammo table, the type in use highlighted
     var bCol = wep.ammo === 'bullets' ? '#ffd23e' : '#c8c0b0', sCol = wep.ammo === 'shells' ? '#ffd23e' : '#c8c0b0';
-    ART.drawText(ctx, 'BULL ' + p.ammo.bullets + '/200', 254, VH + 8, { color: bCol });
-    ART.drawText(ctx, 'SHEL ' + p.ammo.shells + '/50', 254, VH + 19, { color: p.weapons.shotgun ? sCol : '#6a655c' });
+    ART.drawText(ctx, 'SPRK ' + p.ammo.bullets + '/200', 254, VH + 8, { color: bCol });
+    ART.drawText(ctx, 'BELL ' + p.ammo.shells + '/50', 254, VH + 19, { color: p.weapons.shotgun ? sCol : '#6a655c' });
   }
 
   // the demon (or barrel) under the crosshair, if any
@@ -1999,9 +2001,9 @@
   }
 
   var OBITS = {
-    imp: ['A MERCURY EMBER FROM A HOLLOW GOT YOU.', 'TIP: STRAFE WITH A AND D TO SIDESTEP MERCURY EMBERS.'],
-    gnasher: ['A HOLLOW HOUND RAN YOU DOWN.', 'TIP: BACK AWAY WHILE YOU SHOOT. HOLLOW HOUNDS ONLY BITE UP CLOSE.'],
-    knight: ['THE RESET WARDEN CRUSHED YOU.', 'TIP: KEEP YOUR DISTANCE AND BRING SHOTGUN SHELLS.'],
+    imp: ['A HOLLOW BURNED YOU DOWN.', 'TIP: STRAFE WITH A AND D TO SIDESTEP ITS EMBERS.'],
+    gnasher: ['A HOLLOW HOUND RAN YOU DOWN.', 'TIP: BACK AWAY WHILE YOU SHOOT. HOUNDS ONLY BITE UP CLOSE.'],
+    knight: ['THE RESET WARDEN CRUSHED YOU.', 'TIP: KEEP YOUR DISTANCE AND BRING BELL CHARGES.'],
     riley: ['RILEY OUTPLAYED YOU.', 'TIP: WHEN HER VISOR FLASHES WHITE, SHE IS ABOUT TO SHOOT. MOVE!'],
     barrel: ['A MERCURY CASK BURST IN YOUR FACE.', 'TIP: SHOOT CASKS FROM FAR AWAY, WHEN HOLLOWS ARE NEAR THEM.']
   };
@@ -2012,7 +2014,7 @@
     var ob = OBITS[G.killer] || ['YOU WERE OVERWHELMED.', 'TIP: FIGHT IN DOORWAYS SO HOLLOWS COME TO YOU ONE AT A TIME.'];
     ctx.fillStyle = 'rgba(0,0,0,0.45)';
     ctx.fillRect(0, 44, W, 72);
-    ART.drawText(ctx, 'YOU DIED', W / 2, 50, { scale: 3, color: HUD_RED, shadow: true, center: true });
+    ART.drawText(ctx, 'KNOCKED DOWN', W / 2, 50, { scale: 3, color: HUD_RED, shadow: true, center: true });
     ART.drawText(ctx, ob[0], W / 2, 72, { color: '#e8e0c8', shadow: true, center: true });
     ART.drawText(ctx, ob[1], W / 2, 84, { color: '#8fe0a0', shadow: true, center: true });
     if (p.deadT > 1.2 && (G.time % 1) < 0.7) {
@@ -2123,7 +2125,7 @@
     ART.drawText(ctx, 'TAB: CLOSE', W - 6, 4, { color: '#8a8478', right: true });
     ART.drawText(ctx, 'GOAL: ' + currentObjective(), 6, 12, { color: '#f0d848', shadow: true });
     var st = G.stats;
-    ART.drawText(ctx, 'KILLS ' + st.kills + '/' + st.totalKills + '  ITEMS ' + st.items + '/' + st.totalItems +
+    ART.drawText(ctx, 'FREED ' + st.kills + '/' + st.totalKills + '  ITEMS ' + st.items + '/' + st.totalItems +
       '  SECRETS ' + st.secrets + '/' + st.totalSecrets + '  TIME ' + fmtTime(G.time), W - 6, 12, { color: '#c8c0b0', right: true });
 
     // legend
@@ -2225,7 +2227,7 @@
         desc: function () {
           var b = SETTINGS.best(i);
           return (levelInfo(L).boss ? 'BOSS LEVEL.  ' : '') + 'PAR ' + fmtTime(L.par) +
-            (b && b.time !== null ? '   BEST ' + fmtTime(b.time) : '   NOT FINISHED YET') + '.  STARTS WITH A PISTOL.';
+            (b && b.time !== null ? '   BEST ' + fmtTime(b.time) : '   NOT FINISHED YET') + '.  STARTS WITH THE SPARK CASTER.';
         },
         action: function () { MENU.push(diffScreen(i)); }
       };
@@ -2336,7 +2338,7 @@
         ART.drawText(ctx, G.L.name + '   ' + diff().name, W / 2, 38, { color: '#c8c0b0', center: true });
         ART.drawText(ctx, 'GOAL: ' + currentObjective(), W / 2, 48, { color: '#f0d848', center: true });
         var st = G.stats;
-        ART.drawText(ctx, 'KILLS ' + st.kills + '/' + st.totalKills + '   ITEMS ' + st.items + '/' + st.totalItems +
+        ART.drawText(ctx, 'FREED ' + st.kills + '/' + st.totalKills + '   ITEMS ' + st.items + '/' + st.totalItems +
           '   SECRETS ' + st.secrets + '/' + st.totalSecrets + '   TIME ' + fmtTime(G.time), W / 2, 160, { color: '#8a8478', center: true });
       }
     };
@@ -2401,7 +2403,7 @@
       var v = pct(a, b);
       ART.drawText(ctx, v + '%', 240, y, { scale: 2, color: v >= 100 ? '#ffd23e' : HUD_RED, right: true });
     }
-    row('KILLS', st.kills, st.totalKills, 70);
+    row('FREED', st.kills, st.totalKills, 70);
     row('ITEMS', st.items, st.totalItems, 90);
     row('SECRETS', st.secrets, st.totalSecrets, 110);
     var beatPar = st.time <= st.par;
@@ -2425,7 +2427,7 @@
     ctx.fillRect(x, y, 34, 9);
     ctx.fillStyle = lit ? '#803008' : '#14110d';
     ctx.fillRect(x + 1, y + 1, 32, 7);
-    ART.drawText(ctx, name, x + 17, y + 2, { color: lit ? '#ffd23e' : '#4a463c', center: true });
+    ART.drawText(ctx, name === 'KILLS' ? 'FREED' : name, x + 17, y + 2, { color: lit ? '#ffd23e' : '#4a463c', center: true });
   }
 
   function renderVictory(t) {
@@ -2435,12 +2437,13 @@
     fireLine(H - 4, t * 1.3, 2);
     ART.drawText(ctx, 'YOU WIN!', W / 2, 30, { scale: 4, color: '#ffd23e', shadow: '#803008', center: true });
     var lines = [
-      'THE RESET ENGINE LIES SILENT,',
+      'THE RESET ENGINE IS SILENT.',
+      'ASHGATE\'S BELLS RING AGAIN,',
       'AND RILEY TAPS OUT WITH A GRIN:',
       '"SAME TIME TOMORROW? I\'LL BE READY."',
       '',
-      'THE FIREBIRD CANNOT BE KILLED.',
-      'IT ONLY BURNS BRIGHTER.',
+      'EVERY AGE ENDS IN ASH.',
+      'THE FIREBIRD IS WHAT RISES FROM IT.',
       '',
       'THANKS FOR PLAYING, WARRIOR.'
     ];

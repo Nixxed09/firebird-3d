@@ -63,9 +63,9 @@ test('her lines are built from real counts', function () {
   for (var i = 0; i < 9; i++) R.noteShot(pr, 'shotgun', 3);
   pr.hits = 6;
   assert.strictEqual(R.line('playerDied', pr), 'GOOD FIGHT! YOU HIT ME 6 TIMES, 67% ACCURACY. AGAIN?');
-  assert.strictEqual(R.line('noticed', pr), 'YOU RUSHED ME WITH THE SHOTGUN. I NOTICED.');
-  assert.strictEqual(R.line('defeated', pr), 'OKAY, YOU WIN! 6 HITS WITH MOSTLY THE SHOTGUN. NICE.');
-  assert.strictEqual(R.insight(pr, 'shotgun'), '9 SHOTGUN BLASTS SO FAR. SHIELD UP!');
+  assert.strictEqual(R.line('noticed', pr), 'YOU RUSHED ME WITH THE BELL BLASTER. I NOTICED.');
+  assert.strictEqual(R.line('defeated', pr), 'OKAY, YOU WIN! 6 HITS WITH MOSTLY THE BELL BLASTER. NICE.');
+  assert.strictEqual(R.insight(pr, 'shotgun'), '9 BELL BLASTS SO FAR. SHIELD UP!');
 });
 
 test('she makes no accuracy claim from too few shots', function () {
@@ -97,8 +97,8 @@ test('memory: losses ease her off, at most 3 notches, and a win resets it', func
   for (var n = 0; n < 5; n++) R.save(storage, R.settle(R.recall(storage), rushed, false));
   mem = R.recall(storage);
   assert.strictEqual(mem.ease, R.MAX_EASE);
-  assert.strictEqual(mem.lastStyle, 'YOU RUSHED ME WITH THE SHOTGUN');
-  assert.strictEqual(R.line('intro', R.newProfile(), { memory: mem }), 'BACK AGAIN! LAST TIME YOU RUSHED ME WITH THE SHOTGUN.');
+  assert.strictEqual(mem.lastStyle, 'YOU RUSHED ME WITH THE BELL BLASTER');
+  assert.strictEqual(R.line('intro', R.newProfile(), { memory: mem }), 'BACK AGAIN! LAST TIME YOU RUSHED ME WITH THE BELL BLASTER.');
   assert.ok(R.tuning(mem).hpScale < 1 && R.tuning(mem).dmgScale < 1);
   R.save(storage, R.settle(mem, rushed, true));
   mem = R.recall(storage);
@@ -135,21 +135,22 @@ test('her last stand calls backup at half the summon cooldown', function () {
 
 test('each game can give her its own words, and the lines stay true and fit', function () {
   var saved = R.words();
-  R.setWords({ weapon: { fist: 'FISTS', pistol: 'SPARK CASTER', shotgun: 'BELL BLASTER' }, shotgunShots: 'BELL BLASTS', minions: 'HOLLOWS' });
+  // another Old Earth game (a Living Quarry arena, say) with its own names
+  R.setWords({ weapon: { fist: 'FISTS', pistol: 'CRYSTAL SLING', shotgun: 'STONE HORN' }, shotgunShots: 'HORN BLASTS', minions: 'SHADES' });
   try {
     var pr = R.newProfile();
     for (var i = 0; i < 9; i++) R.noteShot(pr, 'shotgun', 2);
     pr.hits = 6;
-    assert.strictEqual(R.line('impsTurned', pr), 'YOU GOT MY HOLLOWS FIGHTING ME? SMART.');
-    assert.strictEqual(R.insight(pr, 'shotgun'), '9 BELL BLASTS SO FAR. SHIELD UP!');
-    assert.strictEqual(R.line('defeated', pr), 'OKAY, YOU WIN! 6 HITS WITH MOSTLY THE BELL BLASTER. NICE.');
-    assert.strictEqual(R.describeStyle(pr), 'YOU RUSHED ME WITH THE BELL BLASTER');
+    assert.strictEqual(R.line('impsTurned', pr), 'YOU GOT MY SHADES FIGHTING ME? SMART.');
+    assert.strictEqual(R.insight(pr, 'shotgun'), '9 HORN BLASTS SO FAR. SHIELD UP!');
+    assert.strictEqual(R.line('defeated', pr), 'OKAY, YOU WIN! 6 HITS WITH MOSTLY THE STONE HORN. NICE.');
+    assert.strictEqual(R.describeStyle(pr), 'YOU RUSHED ME WITH THE STONE HORN');
     var longest = 'RILEY: BACK AGAIN! LAST TIME ' + R.describeStyle(pr) + '.';
     assert.ok(longest.length <= 78, 'too long: ' + longest);
   } finally {
     R.setWords(saved);
   }
-  assert.strictEqual(R.line('impsTurned', R.newProfile()), 'YOU GOT MY IMPS FIGHTING ME? SMART.', 'classic words restored');
+  assert.strictEqual(R.line('impsTurned', R.newProfile()), 'YOU GOT MY HOLLOWS FIGHTING ME? SMART.', 'FIREBIRD words restored');
 });
 
 // ---- Riley's Trial rules (GamesOS ai-infusion/RILEY_BOSS_SPEC.md) ----------

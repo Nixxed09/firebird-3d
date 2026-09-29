@@ -185,12 +185,13 @@ var RILEY = (function () {
   // ---- 4. say — every line is built from real counts ------------------------
 
   // The words she uses for your weapons and for the creatures she calls. Each
-  // game sets its own (setWords); the classic game keeps these. Every line is
-  // still built from real counts, only the names change.
+  // game can set its own (setWords); the defaults are FIREBIRD's Old Earth
+  // names (STYLE_GUIDE.md). Every line is still built from real counts, only
+  // the names change.
   var WORDS = {
-    weapon: { fist: 'FISTS', pistol: 'PISTOL', shotgun: 'SHOTGUN' },
-    shotgunShots: 'SHOTGUN BLASTS',
-    minions: 'IMPS'
+    weapon: { fist: 'EMBER FIST', pistol: 'SPARK CASTER', shotgun: 'BELL BLASTER' },
+    shotgunShots: 'BELL BLASTS',
+    minions: 'HOLLOWS'
   };
   function setWords(w) {
     if (!w) return;

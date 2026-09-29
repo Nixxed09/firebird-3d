@@ -15,7 +15,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
-import { createGame } from '../src/sim/game.js';
+import { createGame, DIFFS as GAME_DIFFS } from '../src/sim/game.js';
 import { LEVELS } from '../src/levels.js';
 import { makeRng } from '../src/sim/rng.js';
 import { PlayBot } from './playbot.js';
@@ -32,7 +32,7 @@ function opt(name, def) { var i = argv.indexOf('--' + name); return i >= 0 ? arg
 var SEED = +opt('seed', 1);
 var SEEDS = +opt('seeds', 5);          // runs per persona per difficulty
 var DIFFS = opt('difficulties', '0,1,2').split(',').map(Number);
-var DIFF_NAMES = ['ROOKIE', 'WARRIOR', 'INFERNO'];
+var DIFF_NAMES = GAME_DIFFS.map(function (d) { return d.name; }); // the game's own names
 var ONLY = opt('personas', '');
 var FIRST_TIMER = argv.indexOf('--first-timer') >= 0; // bots know only what they have seen (tests/playbot.js)
 var OUT = opt('out', path.join(__dirname, '..', 'captures'));

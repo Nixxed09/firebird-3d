@@ -218,7 +218,7 @@ test('Riley: phases, summons, truthful defeat line, and the episode ends', funct
   assert.ok(said.indexOf('RILEY: ALRIGHT, NO MORE HOLDING BACK!') >= 0, 'phase 3 line');
   assert.ok(summoned, 'she should call imps in phase 2+');
   var last = said.filter(function (l) { return l.indexOf('YOU WIN') >= 0; })[0];
-  assert.strictEqual(last, 'RILEY: OKAY, YOU WIN! ' + r.profile.hits + ' HITS WITH MOSTLY THE SHOTGUN. NICE.');
+  assert.strictEqual(last, 'RILEY: OKAY, YOU WIN! ' + r.profile.hits + ' HITS WITH MOSTLY THE BELL BLASTER. NICE.');
   var mem = JSON.parse(store['firebird.riley.v1']);
   assert.strictEqual(mem.wins, 1);
   run(6);
@@ -269,7 +269,7 @@ test('the use prompt names what E will do, and keeps secret walls secret', funct
   G.p.x = 8.5; G.p.y = 17.5; G.p.ang = 0;           // facing the start room's door
   assert.strictEqual(FB.usePrompt().verb, 'OPEN');
   G.p.x = 23.5; G.p.y = 7.5; G.p.ang = -Math.PI / 2; // the blue door
-  assert.strictEqual(FB.usePrompt().text, 'BLUE KEYCARD NEEDED');
+  assert.strictEqual(FB.usePrompt().text, 'BLUE KEYSTONE NEEDED');
   G.p.keys.blue = true;
   assert.strictEqual(FB.usePrompt().verb, 'OPEN');
   G.p.x = 23.5; G.p.y = 1.5;                          // the exit switch
@@ -283,11 +283,11 @@ test('the use prompt names what E will do, and keeps secret walls secret', funct
 
 test('the objective follows the level: key first, then the exit or Riley', function () {
   var G = freshLevel(0);
-  assert.strictEqual(FB.objective(), 'FIND THE BLUE KEYCARD');
+  assert.strictEqual(FB.objective(), 'FIND THE BLUE KEYSTONE');
   G.p.keys.blue = true;
   assert.strictEqual(FB.objective(), 'FIND THE EXIT SWITCH');
   G = freshLevel(1);
-  assert.strictEqual(FB.objective(), 'FIND THE RED KEYCARD');
+  assert.strictEqual(FB.objective(), 'FIND THE RED KEYSTONE');
   G = freshLevel(3);
   G.p.keys.blue = true;
   assert.strictEqual(FB.objective(), 'DEFEAT RILEY');
@@ -296,10 +296,10 @@ test('the objective follows the level: key first, then the exit or Riley', funct
 test('weapons: no switching to guns you lack or cannot fire, and it says why', function () {
   var G = freshLevel(0), p = G.p;
   assert.strictEqual(FB.switchWeapon('shotgun'), false);
-  assert.ok(/HAVEN'T FOUND THE SHOTGUN/.test(lastMsg(G)), lastMsg(G));
+  assert.ok(/HAVEN'T FOUND THE BELL BLASTER/.test(lastMsg(G)), lastMsg(G));
   p.weapons.shotgun = true; p.ammo.shells = 0;
   assert.strictEqual(FB.switchWeapon('shotgun'), false);
-  assert.strictEqual(lastMsg(G), 'NO SHELLS FOR THE SHOTGUN.');
+  assert.strictEqual(lastMsg(G), 'NO BELL CHARGES FOR THE BELL BLASTER.');
   FB.cycleWeapon(1); // wheel skips the empty shotgun and wraps to the fist
   run(0.4);
   assert.strictEqual(p.weapon, 'fist');
@@ -317,7 +317,7 @@ test('running dry falls back to the best gun, and ammo brings it back', function
   p.ammo.bullets = 0; p.ang = Math.PI; // face a wall so nothing gets hit
   FB.setFire(true); run(0.2); FB.setFire(false); run(0.5);
   assert.strictEqual(p.weapon, 'fist');
-  assert.strictEqual(lastMsg(G), 'OUT OF BULLETS!');
+  assert.strictEqual(lastMsg(G), 'OUT OF SPARKS!');
   G.ents.push({ kind: 'pickup', item: 'b', x: p.x, y: p.y, z: 0, h: 0.2, w: 0.2 });
   run(0.5);
   assert.strictEqual(p.weapon, 'pistol', 'picking up bullets should re-arm the pistol');
