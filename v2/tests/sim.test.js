@@ -159,7 +159,7 @@ test('E1M1 ends in a sparring match: weaker Riley, taught moves only, then she t
   var sh = sharedStore(), g = createGame({ levels: LEVELS, rng: makeRng(5), storage: sh.storage });
   g.startLevel(0, false); var G = g.state(), r = G.boss, p = G.p;
   assert.ok(r && r.sparring, 'Riley is the E1M1 boss, sparring');
-  assert.ok(r.maxHp < 400, 'sparring Riley is weaker (' + r.maxHp + ')');
+  assert.ok(r.maxHp < 700, 'sparring Riley is weaker than the full fight (' + r.maxHp + ')');
   openAll(G); G.ents = G.ents.filter(function (e) { return e === r || !e.mob || e.barrel; });
   p.x = 21.5; p.z = 8.5; p.y = 2; p.weapons.shotgun = true; p.weapon = 'shotgun'; p.raiseT = 0;
   run(g, 0.6);
@@ -271,7 +271,9 @@ test('E1M3 plays out: pull three seals, beat the Warden, the city relights, exit
   assert.ok(G.ents.some(function (e) { return e.wave === 'answer1'; }), 'each seal lever called a wave of its own');
   assert.strictEqual(finale().length, 0, 'a warning beat first (P6)');
   run(g, 2, function () { p.hp = 9999; });
-  assert.strictEqual(finale().length, 3, 'the Warden comes with an escort');
+  assert.strictEqual(finale().length, 1, 'the Warden arrives alone: a duel first (M4)');
+  run(g, 7.6, function () { p.hp = 9999; });
+  assert.strictEqual(finale().length, 3, 'then its escort');
   var warden = G.ents.filter(function (e) { return e.wave === 'warden'; });
   assert.ok(warden.length === 1 && warden[0].kind === 'knight', 'the Warden arrives');
   warden[0].state = 'die'; warden[0].st = -1;

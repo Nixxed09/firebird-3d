@@ -371,7 +371,12 @@ export var E1M3 = {
          "z": 6
         }
        ]
-      },
+      }
+     ]
+    },
+    {
+     "after": 9,
+     "do": [
       {
        "wave": "escort",
        "spawn": [
@@ -390,7 +395,7 @@ export var E1M3 = {
      ]
     },
     {
-     "after": 10,
+     "after": 16,
      "do": [
       {
        "say": "IT'S CALLING HOLLOWS OUT OF THE WALLS!"
@@ -421,7 +426,7 @@ export var E1M3 = {
      ]
     },
     {
-     "after": 22,
+     "after": 26,
      "do": [
       {
        "say": "HERE COMES EVERYTHING IT'S GOT. DON'T STOP MOVING!"

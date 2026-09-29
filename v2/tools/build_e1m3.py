@@ -127,11 +127,12 @@ events = [
     {'when': {'enter': [9, 2, 26, 9]}, 'do': [
         {'seal': ['17,11', '18,11']}, {'notice': 'THE RESET WARDEN!'}, {'shake': 3},
         {'say': "THAT'S THE WARDEN. IT WAS A KNIGHT ONCE, SWORN TO A FIRE DRAKE, UNTIL THE OVERSEERS HOLLOWED IT OUT. STAY MOVING, USE THE PILLARS, RING IT WITH THE BELL BLASTER."},
-        {'after': 1.5, 'do': [{'wave': 'warden', 'spawn': [{'kind': 'knight', 'x': 17, 'z': 6}]},
-                              {'wave': 'escort', 'spawn': [{'kind': 'imp', 'x': 7, 'z': 3}, {'kind': 'imp', 'x': 28, 'z': 3}]}]},
-        {'after': 10, 'do': [{'say': "IT'S CALLING HOLLOWS OUT OF THE WALLS!"}, {'shake': 2}, {'wave': 'adds1', 'spawn': [
+        {'after': 1.5, 'do': [{'wave': 'warden', 'spawn': [{'kind': 'knight', 'x': 17, 'z': 6}]}]},
+        # the first seconds are a duel: the Warden alone, its eruptions the thing to dodge (codex M4)
+        {'after': 9, 'do': [{'wave': 'escort', 'spawn': [{'kind': 'imp', 'x': 7, 'z': 3}, {'kind': 'imp', 'x': 28, 'z': 3}]}]},
+        {'after': 16, 'do': [{'say': "IT'S CALLING HOLLOWS OUT OF THE WALLS!"}, {'shake': 2}, {'wave': 'adds1', 'spawn': [
             {'kind': 'gnasher', 'x': 9, 'z': 9}, {'kind': 'gnasher', 'x': 26, 'z': 9}, {'kind': 'imp', 'x': 12, 'z': 2}]}]},
-        {'after': 22, 'do': [{'say': "HERE COMES EVERYTHING IT'S GOT. DON'T STOP MOVING!"}, {'shake': 3}, {'wave': 'adds2', 'spawn': [
+        {'after': 26, 'do': [{'say': "HERE COMES EVERYTHING IT'S GOT. DON'T STOP MOVING!"}, {'shake': 3}, {'wave': 'adds2', 'spawn': [
             {'kind': 'imp', 'x': 7, 'z': 9}, {'kind': 'imp', 'x': 28, 'z': 9}, {'kind': 'imp', 'x': 23, 'z': 2},
             {'kind': 'gnasher', 'x': 12, 'z': 9}, {'kind': 'gnasher', 'x': 23, 'z': 9}]}]}]},
     # the engine dies: the mercury drains, the crimson goes out, Ashgate's cyan comes back on

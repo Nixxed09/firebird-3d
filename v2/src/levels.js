@@ -10,14 +10,17 @@ var E1M1 = {
   // Riley waits at the top to spar: she only uses what this level has taught,
   // taps out early, and remembers how you fought for the rematch in E1M4
   boss: {
-    sparring: true, hpScale: 0.4, moves: ['volley', 'lead', 'flank', 'close', 'backoff', 'seek', 'summon'],   // she calls backup once: the match is the level's peak (U12), and the Trial reuses it
+    sparring: true, hpScale: 0.65, moves: ['volley', 'lead', 'flank', 'close', 'backoff', 'seek'],
     intro: "THERE YOU ARE! LET'S SPAR. I'LL WATCH HOW YOU FIGHT. READY?"
   },
   // Riley on the radio: each line plays once, when you walk into its box [x0, z0, x1, z1]
   // the shortcut home (codex U8, contract S5): a stone gate between the hall and the start room sinks
   // once you reach the hall, so it opens from the far side
   events: [
-    { when: { enter: [2, 17, 19, 21] }, do: [{ lower: [7, 22, 7, 24], to: 0, speed: 1.2, look: 1 }, { say: "HEAR THAT? A SHORTCUT BACK TO WHERE YOU STARTED JUST OPENED." }] }
+    { when: { enter: [2, 17, 19, 21] }, do: [{ lower: [7, 22, 7, 24], to: 0, speed: 1.2, look: 1 }, { say: "HEAR THAT? A SHORTCUT BACK TO WHERE YOU STARTED JUST OPENED." }] },
+    // the sparring match is the level's climax (codex U12): 12 s in, Hollows join the fight
+    { when: { enter: [15, 1, 28, 8] }, do: [{ after: 12, do: [{ say: "HOLLOWS! THEY HEARD US. KEEP GOING, WE CAN TAKE THEM TOO." }, { shake: 2 },
+      { wave: 'sparAdds', spawn: [{ kind: 'imp', x: 15, z: 2 }, { kind: 'imp', x: 28, z: 2 }, { kind: 'gnasher', x: 21, z: 8 }] }] }] }
   ],
   triggers: [
     { box: [2, 25, 8, 30], say: "HI! I'M RILEY. I'M WAITING FOR YOU AT THE TOP. LOOK AROUND WITH THE MOUSE, MOVE WITH WASD, THEN HEAD FOR THAT DOOR AHEAD." },
@@ -47,12 +50,12 @@ var E1M1 = {
       '#######################U######',
       '##....................t.t...##',
       '##.t......%%......%%..g.....##',
-      '##u...g......i..............##',
+      '##u...g......................##',
       '##.t.......h................##',
       '##..........................##',
       '#######.############D#########',
       '###*Pa#.#######....t.t......##',
-      '####S##.#######.....i.....o.##',
+      '####S##.#######...........o.##',
       '##.......######..........io.##',
       '##.....b.######......h......##',
       '##..p....D........2.........##',

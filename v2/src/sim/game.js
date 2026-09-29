@@ -674,7 +674,14 @@ export function createGame(opts) {
     var stopDist = def.melee ? 0.95 : 1.6;
     if (d > stopDist) {
       var sx0 = e.x, sz0 = e.z;
-      var moved = slideMove(G.W, e, Math.cos(e.moveAng) * e.speed * dt, Math.sin(e.moveAng) * e.speed * dt, e.radius, e.h, STEP_UP);
+      var mvx = Math.cos(e.moveAng) * e.speed * dt, mvz = Math.sin(e.moveAng) * e.speed * dt;
+      // on your level, a Hollow doesn't step off a ledge that takes it away from you: it slides
+      // along the edge instead (the E1M1 balcony, where hounds kept falling off the narrow side)
+      if (!otherLevel && !tgt) {
+        var drops = function (ox, oz) { var fx = e.x + ox, fz = e.z + oz, n = Math.hypot(ox, oz) || 1; fx += ox / n * e.radius; fz += oz / n * e.radius; return floorAt(G.W, Math.floor(fx), Math.floor(fz)) < e.y - STEP_UP; };
+        if (drops(mvx, mvz)) { if (!drops(mvx, 0)) mvz = 0; else if (!drops(0, mvz)) mvx = 0; else { mvx = 0; mvz = 0; } }
+      }
+      var moved = slideMove(G.W, e, mvx, mvz, e.radius, e.h, STEP_UP);
       if (!moved && pathing !== null) {
         // hugging a ledge or corner: ease back toward the middle of this cell's lane
         var ccx = Math.floor(e.x) + 0.5 - e.x, ccz = Math.floor(e.z) + 0.5 - e.z;
