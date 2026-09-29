@@ -213,9 +213,13 @@ export function createGame(opts) {
     if (info.keys.red && !p.keys.red) return 'FIND THE RED KEYSTONE';
     var left = pendingLevers();
     if (left.length) return (G.L.leverGoal || 'PULL THE LEVERS') + ' (' + (info.levers.length - left.length) + '/' + info.levers.length + ')';
+    if (stagePending()) return G.L.stage.goal;
     if (info.boss) return 'DEFEAT RILEY';
     return 'RELIGHT THE WAYSTONE';
   }
+  // a level stage the exit waits for, e.g. { wave: 'warden', goal: 'SHUT DOWN THE ENGINE', at: [x, z] }:
+  // pending until that wave has been spawned and cleared (G.waves[id] goes true, then false)
+  function stagePending() { var st = G.L.stage; return !!st && G.waves[st.wave] !== false; }
   // required levers not pulled yet (a pulled lever's wall id goes 12 -> 13)
   function pendingLevers() {
     return G.info.levers.filter(function (v) { return G.W.cells[v[1] * G.mw + v[0]] === 12; });
@@ -989,6 +993,8 @@ export function createGame(opts) {
       });
       return best ? { x: best[0] + 0.5, y: 1, z: best[1] + 0.5, use: { x: best[0], z: best[1] } } : null;
     }
+    // a stage the exit waits for: point at where it happens (the objective stays honest, codex U7)
+    if (stagePending()) { var at = G.L.stage.at; return G.seen[at[1] * G.mw + at[0]] ? { x: at[0] + 0.5, y: floorAt(G.W, at[0], at[1]) + 0.8, z: at[1] + 0.5 } : null; }
     var ex = G.exitCell;
     if (!info.boss && ex && G.seen[ex.z * G.mw + ex.x]) return { x: ex.x + 0.5, y: 0.8, z: ex.z + 0.5 };
     var b = G.boss;

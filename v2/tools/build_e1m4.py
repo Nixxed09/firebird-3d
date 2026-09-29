@@ -85,7 +85,7 @@ put(33, 30, 'g')                                                   # the first h
 put(26, 31, 'o'); put(9, 32, 'o')                                  # mercury casks in the courtyard corners
 # pickups (E2: the arena gets the most; Riley is 900+ hp and summons)
 put(18, 35, 'b'); put(16, 35, 'a'); put(12, 30, 'h')
-put(3, 18, 'u'); put(6, 16, 'a'); put(4, 26, 'b'); put(5, 30, 'h')         # the blue keystone on the Trial of Ash
+put(3, 18, 'u'); put(6, 16, 'a'); put(4, 26, 'b'); put(5, 30, 'h'); put(3, 28, 'a')   # ammo for the ambush below         # the blue keystone on the Trial of Ash
 put(31, 17, 'r'); put(33, 16, '+'); put(30, 27, 'a'); put(34, 30, 'b')     # the red keystone on the island
 put(15, 14, 'a'); put(20, 14, 'b')                                  # on the gallery, before you drop in
 put(6, 3, 'A'); put(29, 3, '+'); put(6, 10, 'a'); put(29, 10, 'a')  # high ground pays (risk and reward)
@@ -101,6 +101,10 @@ events = [
         {'raise': [29, 19, 34, 23], 'to': 1.0, 'speed': 0.8},   # quick, so nobody waits in the pool as it rises
         {'say': "THERE IT GOES. THE KEYSTONE'S ON THE ISLAND. WATCH OUT, THE HOLLOWS HEARD THAT."},
         {'after': 3, 'do': [{'wave': 'island', 'spawn': [{'kind': 'imp', 'x': 32, 'z': 16}, {'kind': 'imp', 'x': 30, 'z': 16}]}]}]},
+    # the blue keystone taken: Hollows come in below, seen from the way down (fills the quiet walk back, U10)
+    {'when': {'pickup': 'u'}, 'do': [
+        {'say': "GOT IT! CAREFUL, SOMETHING HEARD YOU. LOOK DOWN."},
+        {'after': 1.5, 'do': [{'wave': 'ashAnswer', 'spawn': [{'kind': 'imp', 'x': 4, 'z': 29}, {'kind': 'imp', 'x': 5, 'z': 31}]}]}]},
     # into the arena: the gate seals behind you; the Trial begins
     {'when': {'enter': [5, 1, 30, 12]}, 'do': [
         {'seal': ['17,17', '18,17']}, {'notice': "RILEY'S TRIAL"}, {'shake': 1},

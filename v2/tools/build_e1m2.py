@@ -100,22 +100,22 @@ events = [
         {'say': "YOU DID IT! THE PIT'S DRAINING. THAT'S A SHORTCUT STRAIGHT TO THE RED DOOR."},
         {'lava': [14, 14, 21, 19], 'on': False},
         {'raise': [14, 14, 21, 19], 'to': 0.5, 'speed': 0.25}]},
-    # the finale: step into the forge -> doors seal, a warning, then the waves (P6, C5, C1-C4)
+    # the finale (codex U12: the level's peak). Waves overlap instead of queueing, the last and
+    # biggest one lands on the high ground you've been holding (the twist, U2), and then it's over
     {'when': {'enter': [12, 5, 23, 9]}, 'do': [
         {'seal': ['17,11']}, {'notice': 'SEALED IN!'}, {'shake': 2},
         {'say': "IT'S A TRAP! KEEP MOVING, USE THE PILLARS AND THE HIGH GROUND."},
         {'after': 2.0, 'do': [{'wave': 'forge1', 'spawn': [
-            {'kind': 'imp', 'x': 10, 'z': 3}, {'kind': 'imp', 'x': 25, 'z': 3}, {'kind': 'gnasher', 'x': 17, 'z': 3}]}]}]},
-    {'when': {'cleared': 'forge1'}, 'do': [
-        {'say': 'ONE MORE WAVE. THEY ALWAYS SEND ONE MORE.'},
-        {'after': 1.5, 'do': [{'wave': 'forge2', 'spawn': [
-            {'kind': 'gnasher', 'x': 10, 'z': 9}, {'kind': 'gnasher', 'x': 25, 'z': 9}, {'kind': 'imp', 'x': 10, 'z': 5},
-            {'kind': 'imp', 'x': 25, 'z': 5}]}]}]},
+            {'kind': 'imp', 'x': 10, 'z': 3}, {'kind': 'imp', 'x': 25, 'z': 3}, {'kind': 'gnasher', 'x': 17, 'z': 3}]}]},
+        # the second wave comes on a clock, whether or not the first is down: the pressure builds
+        {'after': 11.0, 'do': [{'say': 'MORE OF THEM, FROM THE SIDES!'}, {'shake': 2}, {'wave': 'forge2', 'spawn': [
+            {'kind': 'gnasher', 'x': 12, 'z': 9}, {'kind': 'gnasher', 'x': 23, 'z': 9}, {'kind': 'imp', 'x': 12, 'z': 5},
+            {'kind': 'imp', 'x': 23, 'z': 5}]}]}]},
     {'when': {'cleared': 'forge2'}, 'do': [
-        {'say': "THAT'S NOT ALL OF THEM. HOLD THE HIGH GROUND!"}, {'shake': 3},
-        {'after': 1.2, 'do': [{'wave': 'forge3', 'spawn': [
-            {'kind': 'gnasher', 'x': 13, 'z': 6}, {'kind': 'gnasher', 'x': 22, 'z': 6}, {'kind': 'imp', 'x': 10, 'z': 9},
-            {'kind': 'imp', 'x': 25, 'z': 9}, {'kind': 'imp', 'x': 17, 'z': 8}]}]}]},
+        {'say': "THEY'RE ON THE HIGH GROUND! GET THEM OFF IT!"}, {'shake': 3},
+        {'after': 0.8, 'do': [{'wave': 'forge3', 'spawn': [
+            {'kind': 'gnasher', 'x': 10, 'z': 4}, {'kind': 'gnasher', 'x': 25, 'z': 4}, {'kind': 'imp', 'x': 10, 'z': 8},
+            {'kind': 'imp', 'x': 25, 'z': 8}, {'kind': 'imp', 'x': 17, 'z': 8}, {'kind': 'gnasher', 'x': 17, 'z': 5}]}]}]},
     {'when': {'cleared': 'forge3'}, 'do': [
         {'notice': 'FORGE CLEARED!'}, {'open': ['17,11']},
         {'say': "THAT WAS AWESOME. THE WAYSTONE IS BEHIND THE PLINTH. IT'S SINKING NOW."},

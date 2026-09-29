@@ -189,41 +189,37 @@ export var E1M2 = {
        ]
       }
      ]
-    }
-   ]
-  },
-  {
-   "when": {
-    "cleared": "forge1"
-   },
-   "do": [
-    {
-     "say": "ONE MORE WAVE. THEY ALWAYS SEND ONE MORE."
     },
     {
-     "after": 1.5,
+     "after": 11.0,
      "do": [
+      {
+       "say": "MORE OF THEM, FROM THE SIDES!"
+      },
+      {
+       "shake": 2
+      },
       {
        "wave": "forge2",
        "spawn": [
         {
          "kind": "gnasher",
-         "x": 10,
+         "x": 12,
          "z": 9
         },
         {
          "kind": "gnasher",
-         "x": 25,
+         "x": 23,
          "z": 9
         },
         {
          "kind": "imp",
-         "x": 10,
+         "x": 12,
          "z": 5
         },
         {
          "kind": "imp",
-         "x": 25,
+         "x": 23,
          "z": 5
         }
        ]
@@ -238,41 +234,46 @@ export var E1M2 = {
    },
    "do": [
     {
-     "say": "THAT'S NOT ALL OF THEM. HOLD THE HIGH GROUND!"
+     "say": "THEY'RE ON THE HIGH GROUND! GET THEM OFF IT!"
     },
     {
      "shake": 3
     },
     {
-     "after": 1.2,
+     "after": 0.8,
      "do": [
       {
        "wave": "forge3",
        "spawn": [
         {
          "kind": "gnasher",
-         "x": 13,
-         "z": 6
+         "x": 10,
+         "z": 4
         },
         {
          "kind": "gnasher",
-         "x": 22,
-         "z": 6
+         "x": 25,
+         "z": 4
         },
         {
          "kind": "imp",
          "x": 10,
-         "z": 9
+         "z": 8
         },
         {
          "kind": "imp",
          "x": 25,
-         "z": 9
+         "z": 8
         },
         {
          "kind": "imp",
          "x": 17,
          "z": 8
+        },
+        {
+         "kind": "gnasher",
+         "x": 17,
+         "z": 5
         }
        ]
       }

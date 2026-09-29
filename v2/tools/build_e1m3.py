@@ -170,6 +170,7 @@ level = {
     'name': 'E1M3: THE RESET ENGINE', 'floor': 'slab', 'ceil': 'ceilDark', 'par': 330, 'playerAngle': -1.5707963,
     'ceilHeight': 2.5, 'map': rows(m), 'heights': rows(h), 'ceilings': rows(c),
     'levers': [[2, 15], [33, 15], [9, 15]], 'leverGoal': 'PULL THE SEAL LEVERS',
+    'stage': {'wave': 'warden', 'goal': 'SHUT DOWN THE ENGINE', 'at': [17, 11]},   # the waystone waits for the Warden
     'events': events, 'triggers': triggers, 'lights': lights,
     'darkZones': [[14, 35, 21, 38]],   # the buried street: only its flickering lamp
 }

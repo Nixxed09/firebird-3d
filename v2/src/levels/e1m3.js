@@ -150,6 +150,14 @@ export var E1M3 = {
   ]
  ],
  "leverGoal": "PULL THE SEAL LEVERS",
+ "stage": {
+  "wave": "warden",
+  "goal": "SHUT DOWN THE ENGINE",
+  "at": [
+   17,
+   11
+  ]
+ },
  "events": [
   {
    "when": {

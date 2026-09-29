@@ -220,12 +220,15 @@ test('E1M2 plays out: drain the pit, take the key, survive the forge waves, exit
   wave1.forEach(function (e) { e.hp = 1; g.state().ents; });
   wave1.forEach(function (e) { e.state = 'die'; e.st = -1; });
   run(g, 2, function () { p.hp = 9999; });
+  assert.strictEqual(G.ents.filter(function (e) { return e.wave === 'forge2'; }).length, 0, 'wave two waits for its clock');
+  run(g, 7.5, function () { p.hp = 9999; });
   var wave2 = G.ents.filter(function (e) { return e.wave === 'forge2'; });
-  assert.strictEqual(wave2.length, 4, 'then wave two');
+  assert.strictEqual(wave2.length, 4, 'then wave two, 11 s in, whether or not wave one is down');
   wave2.forEach(function (e) { e.state = 'die'; e.st = -1; });
-  run(g, 2, function () { p.hp = 9999; });
+  run(g, 0.95, function () { p.hp = 9999; });
   var wave3 = G.ents.filter(function (e) { return e.wave === 'forge3'; });
-  assert.strictEqual(wave3.length, 5, "then the forge's last and biggest wave (U12: end on the peak)");
+  assert.strictEqual(wave3.length, 6, "then the forge's last and biggest wave (U12: end on the peak)");
+  assert.ok(wave3.some(function (e) { return e.y > 1; }), 'some of it lands on the high ground (the twist)');
   assert.ok(d.sealed, 'still sealed until it is over');
   wave3.forEach(function (e) { e.state = 'die'; e.st = -1; });
   run(g, 3, function () { p.hp = 9999; });
@@ -257,7 +260,7 @@ test('E1M3 plays out: pull three seals, beat the Warden, the city relights, exit
   });
   run(g, 6, function () { p.hp = 9999; });
   assert.ok(Math.abs(seal(13) - 0.5) < 1e-6 && Math.abs(seal(15) - 0.5) < 1e-6 && Math.abs(seal(17) - 0.5) < 1e-6, 'all three seals sank');
-  assert.strictEqual(g.objective(), 'RELIGHT THE WAYSTONE');
+  assert.strictEqual(g.objective(), 'SHUT DOWN THE ENGINE', 'honest: the waystone waits for the Warden');
   assert.ok(G.lightsOff.relit, 'the cyan lights wait for the engine to die');
   // into the engine room: sealed in, a warning beat, then the Warden climbs out
   var d = G.doors['17,11']; d.open = 1; d.state = 'open'; d.timer = 99;
@@ -277,6 +280,7 @@ test('E1M3 plays out: pull three seals, beat the Warden, the city relights, exit
   assert.ok(!G.lightsOff.relit && G.lightsOff.engine, 'crimson out, cyan on');
   assert.ok(W.lava[8 * W.mw + 13] === 0 && W.lava[21 * W.mw + 15] === 0, 'the mercury drains');
   assert.ok(Math.abs(W.floor[1 * W.mw + 17] - 0.5) < 1e-6, 'the plinth sank');
+  assert.strictEqual(g.objective(), 'RELIGHT THE WAYSTONE');
   p.x = 17.5; p.z = 1.6; p.y = 0.5; p.ang = -Math.PI / 2;
   assert.strictEqual(g.usePrompt().verb, 'RELIGHT THE WAYSTONE');
   g.useAction(); run(g, 1.2);
