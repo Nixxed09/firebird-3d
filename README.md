@@ -10,14 +10,15 @@ fights through Ashgate, a buried Tartarian star-city, and cracks open the
 Overseers' Hollows to free the light inside. The look, names and rules are in
 [STYLE_GUIDE.md](STYLE_GUIDE.md), and its laws are in [LILA_ALIGNMENT.md](LILA_ALIGNMENT.md).
 v2's levels are `E1M1: ASH GATES`, `E1M2: THE FURNACE`, `E1M3: THE RESET ENGINE`
-and `E1M4: RILEY'S TRIAL`. The classic game below keeps its original demons.
+and `E1M4: RILEY'S TRIAL`. The classic game below now speaks the same world: see [THEME_ALIGNMENT.md](THEME_ALIGNMENT.md)
+(pack: dragon-age-earth). Its sprites are still the original art, so the v2 art pass follows that file.
 
 **Episode One: Knee-Deep in the Ashes** — 4 levels:
 
 1. `E1M1: ASH GATES`
 2. `E1M2: THE FURNACE`
-3. `E1M3: DEMON THRONE` (boss: the Ember Knight)
-4. `E1M4: RILEY'S ARENA` (final boss: Riley)
+3. `E1M3: THE RESET ENGINE` (boss: the Reset Warden, the old Ember Knight)
+4. `E1M4: RILEY'S TRIAL` (final boss: Riley)
 
 ## How To Play
 
@@ -57,7 +58,7 @@ Every level opens with a card showing its name and your goal.
 
 ## Reading the HUD
 
-- **Crosshair** turns red over a demon and orange over a barrel. Small ticks
+- **Crosshair** turns red over a Hollow and orange over a cask. Small ticks
   flash on a hit, red ticks on a kill, grey ticks when Riley's shield blocks.
 - **Red wedges** around the crosshair point at whatever just hurt you.
 - **Use prompt:** face a door or switch to see `[E] OPEN`, `[E] EXIT LEVEL`,
@@ -85,7 +86,7 @@ Every level opens with a card showing its name and your goal.
 ## Tips
 
 - The **shotgun** is hidden in the first big room of E1M1. Grab it.
-- Shoot the **barrels** when demons stand near them.
+- Shoot the **mercury casks** (the barrels) when Hollows stand near them.
 - Colored doors need the matching **keycard**.
 - Some walls are not what they seem. Press `E` on suspicious walls to find
   **secret areas** — the tally screen keeps score.
@@ -93,21 +94,21 @@ Every level opens with a card showing its name and your goal.
 
 ## The Monsters
 
-- **Imp** — throws fireballs. Keep moving sideways.
-- **Gnasher** — all mouth, charges you down. Backpedal and blast it.
-- **Ember Knight** — the big red one on E1M3. Bring shells.
+- **Hollow** — an ash-shell husk that throws mercury embers. Keep moving sideways.
+- **Hollow Hound** — all mouth, charges you down. Backpedal and blast it.
+- **Reset Warden** — the big armoured one on E1M3 (a broken dragon pact, once the Ember Knight). Bring shells.
 - **Riley** — the final boss. See below.
 
-## Smarter Demons
+## Smarter Hollows
 
 - **They hear you.** Gunfire carries through open rooms and open doors, and
-  wakes every demon it reaches. Closed doors block the sound. Punching is silent.
-- **They find you.** A demon that hears you walks around walls to reach you.
-- **They fight each other.** If an imp's fireball hits a gnasher, the gnasher
-  turns on the imp. Stand so that demons are between you and the imps, then
-  step back and watch. Demons of the same kind don't hurt each other.
-- **Wounded gnashers run away**, then come back snarling.
-- **Imps strafe** sideways instead of walking into your shotgun.
+  wakes every Hollow it reaches. Closed doors block the sound. Punching is silent.
+- **They find you.** A Hollow that hears you walks around walls to reach you.
+- **They fight each other.** If a Hollow's mercury ember hits a Hollow Hound, the hound
+  turns on the Hollow. Stand so that hounds are between you and the Hollows, then
+  step back and watch. Hollows of the same kind don't hurt each other.
+- **Wounded Hollow Hounds run away**, then come back snarling.
+- **Hollows strafe** sideways instead of walking into your shotgun.
 
 ## Riley, the Final Boss
 
@@ -121,7 +122,7 @@ from what she learns.
   things her counters actually saw ("YOU ALWAYS DODGE LEFT. I'M AIMING THERE NOW.").
 - Watch for her **attack tell**: her visor and chest flash white just before
   she shoots.
-- Three phases. At two-thirds health she calls imps. At one-third she speeds up.
+- Three phases. At two-thirds health she calls Hollows. At one-third she speeds up.
   In gold she's shielded, and shots bounce off.
 - **She remembers.** Next time she tells you how you fought her last time.
   Each time she beats you she goes a little easier (up to 3 notches), and she
@@ -166,9 +167,18 @@ status. Run the level checker after changing a map.
 node tests/riley.test.js      # Riley's brain
 node tests/headless.test.js   # the real engine, playing scripted scenarios (incl. HUD/menu logic)
 node tests/levels.contract.test.js  # every map vs the Level Design Contract
+node tests/theme.test.js      # dragon-age-earth: THEME_ALIGNMENT.md covers every level and enemy; ids and map sizes pinned
 node tests/secret-visibility.js  # renders each secret wall: is the crack hint visible at 5 tiles?
 node tests/playtest.js        # bot personas play the whole episode -> captures/playtest-report.md
 node tests/snapshot.js        # renders fight frames to captures/*.png
 ```
 
 Made by Phoenix of NIX GAMES, with Claude.
+
+## Changelog
+
+- **2026-09-28** — Theme pack: Firebird 3D joins **dragon-age-earth**. Added `THEME_ALIGNMENT.md` and
+  `tests/theme.test.js`. Player-facing words in the classic game now read as dragon-age Old Earth:
+  E1M3 is `THE RESET ENGINE`, E1M4 is `RILEY'S TRIAL`, imps/gnashers/the Ember Knight are shown as
+  Hollows/Hollow Hounds/the Reset Warden, level cards and finish screens carry one-line intro/outro
+  text from `js/levels.js`. Level ids, maps and mechanics are unchanged; nothing under `v2/` was touched.

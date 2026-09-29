@@ -286,9 +286,9 @@
 
   // dmg scales what demons do to you; ammo scales what pickups give
   var DIFFS = [
-    { name: 'ROOKIE', dmg: 0.5, ammo: 2, desc: 'DEMONS HIT HALF AS HARD AND AMMO IS DOUBLED. GREAT FOR A FIRST RUN.' },
+    { name: 'ROOKIE', dmg: 0.5, ammo: 2, desc: 'HOLLOWS HIT HALF AS HARD AND AMMO IS DOUBLED. GREAT FOR A FIRST RUN.' },
     { name: 'WARRIOR', dmg: 1, ammo: 1, desc: 'THE FIGHT AS IT WAS MEANT TO BE.' },
-    { name: 'INFERNO', dmg: 1.5, ammo: 1, desc: 'DEMONS HIT HARDER. FOR VETERANS WHO KNOW EVERY CORNER.' }
+    { name: 'INFERNO', dmg: 1.5, ammo: 1, desc: 'HOLLOWS HIT HARDER. FOR VETERANS WHO KNOW EVERY CORNER.' }
   ];
   function diff() { return DIFFS[SETTINGS.v.difficulty] || DIFFS[1]; }
 
@@ -361,10 +361,10 @@
     hurtDir: 'TIP: THE RED MARKS AROUND YOUR AIM POINT AT WHATEVER HIT YOU.',
     secret: 'TIP: WALLS THAT LOOK DIFFERENT MAY HIDE SECRETS. PRESS E ON THEM.',
     torches: 'TIP: A PAIR OF TORCHES BESIDE A DOOR MEANS IT MATTERS. FOLLOW THEM.',
-    barrel: 'TIP: A DEMON IS NEXT TO A BARREL. SHOOT THE BARREL!',
-    meet_imp: 'TIP: IMPS THROW FIREBALLS. STRAFE WITH A AND D TO DODGE.',
-    meet_gnasher: 'TIP: GNASHERS CHARGE AND BITE. BACK AWAY WHILE YOU SHOOT.',
-    meet_knight: 'TIP: THE EMBER KNIGHT IS TOUGH. KEEP YOUR DISTANCE AND USE SHELLS.'
+    barrel: 'TIP: A HOLLOW IS NEXT TO A MERCURY CASK. SHOOT THE CASK!',
+    meet_imp: 'TIP: HOLLOWS THROW MERCURY EMBERS. STRAFE WITH A AND D TO DODGE.',
+    meet_gnasher: 'TIP: HOLLOW HOUNDS CHARGE AND BITE. BACK AWAY WHILE YOU SHOOT.',
+    meet_knight: 'TIP: THE RESET WARDEN IS TOUGH. KEEP YOUR DISTANCE AND USE SHELLS.'
   };
   function tip(id) {
     if (!G || AUTO || !SETTINGS.v.tips || SETTINGS.v.seenTips[id]) return;
@@ -863,7 +863,7 @@
     } else if (src && src !== e && alive(src) && !src.barrel) {
       if (e.target !== src && !G.infightSeen && playerDist(e.x, e.y) < 14) {
         G.infightSeen = true;
-        message('THE DEMONS TURN ON EACH OTHER!');
+        message('THE HOLLOWS TURN ON EACH OTHER!');
       }
       e.target = src; e.lostT = 0;
     } else if (!src) {
@@ -1344,7 +1344,7 @@
           items: G.stats.items, totalItems: G.stats.totalItems, secrets: G.stats.secrets, totalSecrets: G.stats.totalSecrets };
         var rec = SETTINGS.record(levelIndex, rec0);
         interStats = {
-          name: G.L.name, time: G.time, par: G.L.par,
+          name: G.L.name, outro: G.L.outro, time: G.time, par: G.L.par,
           kills: G.stats.kills, totalKills: G.stats.totalKills,
           items: G.stats.items, totalItems: G.stats.totalItems,
           secrets: G.stats.secrets, totalSecrets: G.stats.totalSecrets,
@@ -1986,17 +1986,17 @@
   }
 
   var OBITS = {
-    imp: ['AN IMP BURNED YOU DOWN.', 'TIP: STRAFE WITH A AND D TO SIDESTEP FIREBALLS.'],
-    gnasher: ['A GNASHER CHEWED YOU UP.', 'TIP: BACK AWAY WHILE YOU SHOOT. GNASHERS ONLY BITE UP CLOSE.'],
-    knight: ['THE EMBER KNIGHT CRUSHED YOU.', 'TIP: KEEP YOUR DISTANCE AND BRING SHOTGUN SHELLS.'],
+    imp: ['A MERCURY EMBER FROM A HOLLOW GOT YOU.', 'TIP: STRAFE WITH A AND D TO SIDESTEP MERCURY EMBERS.'],
+    gnasher: ['A HOLLOW HOUND RAN YOU DOWN.', 'TIP: BACK AWAY WHILE YOU SHOOT. HOLLOW HOUNDS ONLY BITE UP CLOSE.'],
+    knight: ['THE RESET WARDEN CRUSHED YOU.', 'TIP: KEEP YOUR DISTANCE AND BRING SHOTGUN SHELLS.'],
     riley: ['RILEY OUTPLAYED YOU.', 'TIP: WHEN HER VISOR FLASHES WHITE, SHE IS ABOUT TO SHOOT. MOVE!'],
-    barrel: ['A BARREL BLEW UP IN YOUR FACE.', 'TIP: SHOOT BARRELS FROM FAR AWAY, WHEN DEMONS ARE NEAR THEM.']
+    barrel: ['A MERCURY CASK BURST IN YOUR FACE.', 'TIP: SHOOT CASKS FROM FAR AWAY, WHEN HOLLOWS ARE NEAR THEM.']
   };
 
   function renderDeath() {
     var p = G.p;
     if (!p.dead || p.deadT < 1) return;
-    var ob = OBITS[G.killer] || ['YOU WERE OVERWHELMED.', 'TIP: FIGHT IN DOORWAYS SO DEMONS COME TO YOU ONE AT A TIME.'];
+    var ob = OBITS[G.killer] || ['YOU WERE OVERWHELMED.', 'TIP: FIGHT IN DOORWAYS SO HOLLOWS COME TO YOU ONE AT A TIME.'];
     ctx.fillStyle = 'rgba(0,0,0,0.45)';
     ctx.fillRect(0, 44, W, 72);
     ART.drawText(ctx, 'YOU DIED', W / 2, 50, { scale: 3, color: HUD_RED, shadow: true, center: true });
@@ -2248,7 +2248,7 @@
         { label: 'MOUSE SPEED', slider: [0, 10, function () { return v.sens; }], adjust: step('sens', 1, 10), desc: 'HOW FAST THE VIEW TURNS WHEN YOU MOVE THE MOUSE. LEFT AND RIGHT TO CHANGE.' },
         { label: 'SOUND VOLUME', slider: [0, 10, function () { return v.volume; }], adjust: step('volume', 0, 10), desc: 'LOUDNESS OF EVERYTHING. LEFT AND RIGHT TO CHANGE.' },
         { label: 'MUSIC', value: function () { return onOff(SND.isMusicOn()); }, adjust: function () { SND.setMusic(!SND.isMusicOn()); }, desc: 'PRESS M DURING PLAY TO TOGGLE IT TOO.' },
-        { label: 'CROSSHAIR', value: function () { return onOff(v.crosshair); }, adjust: toggle('crosshair'), desc: 'A SMALL AIMING MARK. TURNS RED OVER A DEMON.' },
+        { label: 'CROSSHAIR', value: function () { return onOff(v.crosshair); }, adjust: toggle('crosshair'), desc: 'A SMALL AIMING MARK. TURNS RED OVER A HOLLOW.' },
         { label: 'GOAL MARKER', value: function () { return onOff(v.goalMarker); }, adjust: toggle('goalMarker'), desc: 'POINTS AT YOUR GOAL ONCE YOU HAVE SEEN IT. TURN OFF FOR CLASSIC EXPLORING.' },
         { label: 'SCREEN SHAKE', value: function () { return onOff(v.shake); }, adjust: toggle('shake'), desc: 'THE VIEW KICKS ON SHOTS, HITS AND EXPLOSIONS.' },
         { label: 'TIPS', value: function () { return onOff(v.tips); }, adjust: function () { v.tips = !v.tips; if (v.tips) v.seenTips = {}; SETTINGS.save(); }, desc: 'SHORT HINTS THE FIRST TIME SOMETHING NEW HAPPENS. TURNING THEM ON SHOWS THEM ALL AGAIN.' },
@@ -2360,6 +2360,7 @@
     ART.drawText(ctx, 'GOAL', W / 2, 60, { color: '#8a8478', center: true });
     ART.drawText(ctx, currentObjective(), W / 2, 69, { scale: 2, color: '#f0d848', shadow: true, center: true });
     ART.drawText(ctx, 'DIFFICULTY: ' + diff().name + '     PAR ' + fmtTime(G.L.par), W / 2, 88, { color: '#a8a090', center: true });
+    (G.L.intro || []).forEach(function (line, i) { ART.drawText(ctx, line, W / 2, 158 + i * 9, { color: '#c8c0b0', center: true }); });
     if ((t % 1) < 0.7) ART.drawText(ctx, 'CLICK TO BEGIN', W / 2, 106, { scale: 2, color: '#ffffff', shadow: true, center: true });
     if (lockFailed) ART.drawText(ctx, 'THE GAME NEEDS THE MOUSE. CLICK THE SCREEN AGAIN.', W / 2, 124, { color: '#ff9a28', center: true });
     ART.drawText(ctx, 'WASD MOVE   MOUSE AIM   CLICK FIRE   E USE   TAB MAP   ESC PAUSE', W / 2, 140, { color: '#8a8478', center: true });
@@ -2376,6 +2377,7 @@
     var st = interStats;
     ART.drawText(ctx, st.name, W / 2, 22, { scale: 2, color: '#ff9a28', shadow: true, center: true });
     ART.drawText(ctx, 'FINISHED!', W / 2, 42, { scale: 2, color: '#e8e0c8', shadow: true, center: true });
+    if (st.outro) ART.drawText(ctx, st.outro, W / 2, 60, { color: '#8a8478', center: true });
 
     // tally rolls up over time (click to skip)
     var roll = interRoll(t);
@@ -2420,7 +2422,7 @@
     fireLine(H - 4, t * 1.3, 2);
     ART.drawText(ctx, 'YOU WIN!', W / 2, 30, { scale: 4, color: '#ffd23e', shadow: '#803008', center: true });
     var lines = [
-      'THE DEMON THRONE LIES IN ASHES,',
+      'THE RESET ENGINE LIES SILENT,',
       'AND RILEY TAPS OUT WITH A GRIN:',
       '"SAME TIME TOMORROW? I\'LL BE READY."',
       '',

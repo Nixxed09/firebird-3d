@@ -5,9 +5,9 @@
 //         D door    R red-key door     U blue-key door
 //         X exit switch      S secret door (looks like a plain wall)
 // Floor:  . empty floor
-// Things: p player start     i imp        g gnasher     K ember knight
+// Things: p player start     i hollow     g hollow hound  K reset warden
 //         Y riley (final boss, one per level)
-//         o exploding barrel t torch      * secret area marker
+//         o mercury cask     t torch      * secret area marker
 //         Torches come in pairs beside doors that matter (key doors, exits,
 //         key rooms) so players learn to follow them.
 //         h stimpack  + medkit  A armor   P phoenix orb
@@ -17,6 +17,8 @@
 var LEVELS = [
   {
     name: 'E1M1: ASH GATES',
+    intro: ['THE OUTER GATES OF ASHGATE, BURIED IN ASH.', 'THE OLD DRAGON AGE STILL SLEEPS UNDER THE BRICK.'],
+    outro: 'THE FIRST WAYSTONE BURNS. ASHGATE REMEMBERS.',
     floor: 'slab', ceil: 'ceilDark',
     par: 75,
     playerAngle: 0, // facing east
@@ -47,6 +49,8 @@ var LEVELS = [
   },
   {
     name: 'E1M2: THE FURNACE',
+    intro: ['A FIRE DRAKE FORGED HERE ONCE. THE OVERSEERS', 'STOLE THE FURNACE AND FILLED IT WITH MERCURY.'],
+    outro: 'THE FURNACE BREATHES CLEAN FIRE AGAIN.',
     floor: 'tech', ceil: 'ceilTech',
     par: 120,
     playerAngle: -Math.PI / 2, // facing north
@@ -75,7 +79,9 @@ var LEVELS = [
     ]
   },
   {
-    name: 'E1M3: DEMON THRONE',
+    name: 'E1M3: THE RESET ENGINE',
+    intro: ['THE ENGINE BURYING ASHGATE. ITS WARDEN WAS A', 'KNIGHT WHOSE DRAGON PACT THE OVERSEERS BROKE.'],
+    outro: 'THE ENGINE STOPS. THE OLD PACT CAN BE REMEMBERED.',
     floor: 'hell', ceil: 'ceilHell',
     par: 150,
     playerAngle: -Math.PI / 2, // facing north
@@ -113,7 +119,8 @@ var LEVELS = [
   {
     // The finale. Riley waits in the arena at the top and has no exit switch:
     // beating her ends the episode.
-    name: 'E1M4: RILEY\'S ARENA',
+    name: 'E1M4: RILEY\'S TRIAL',
+    intro: ['A SEALED WAYSTONE ARENA. RILEY REMEMBERS', 'HOW YOU FOUGHT. SHE IS NOT HOLDING BACK.'],
     floor: 'tech', ceil: 'ceilTech',
     par: 240,
     playerAngle: -Math.PI / 2, // facing north
