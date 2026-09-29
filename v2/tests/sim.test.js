@@ -233,6 +233,48 @@ test('E1M2 plays out: drain the pit, take the key, survive the forge waves, exit
   assert.strictEqual(g.mode(), 'inter');
 });
 
+// ---- E1M3: three seal levers, the Reset Warden, the engine goes dark -----------------
+
+test('E1M3 plays out: pull three seals, beat the Warden, the city relights, exit', function () {
+  var g = game(5); g.startLevel(2, false); var G = clear(g), p = G.p, W = G.W;
+  assert.strictEqual(g.objective(), 'PULL THE SEAL LEVERS (0/3)');
+  var seal = function (z) { return W.floor[z * W.mw + 17]; };
+  assert.ok(seal(13) > 2 && seal(15) > 2 && seal(17) > 2, 'the corridor starts sealed');
+  // the goal marker points at a lever once you've seen it, and says to use it
+  G.seen[15 * W.mw + 2] = 1;
+  p.x = 2.5; p.z = 20.5;
+  assert.deepStrictEqual(g.goalTarget().use, { x: 2, z: 15 });
+  [[2, 15], [33, 15], [9, 15]].forEach(function (v, i) {
+    p.x = v[0] + 0.5; p.z = v[1] + 1.5; p.y = floorAt0(W, v[0], v[1] + 1); p.ang = -Math.PI / 2; p.hp = 9999;
+    assert.strictEqual(g.usePrompt().verb, 'PULL THE SWITCH', 'lever ' + i);
+    g.useAction(); run(g, 0.1);
+    if (i < 2) assert.strictEqual(g.objective(), 'PULL THE SEAL LEVERS (' + (i + 1) + '/3)');
+  });
+  run(g, 6, function () { p.hp = 9999; });
+  assert.ok(Math.abs(seal(13) - 0.5) < 1e-6 && Math.abs(seal(15) - 0.5) < 1e-6 && Math.abs(seal(17) - 0.5) < 1e-6, 'all three seals sank');
+  assert.strictEqual(g.objective(), 'RELIGHT THE WAYSTONE');
+  assert.ok(G.lightsOff.relit, 'the cyan lights wait for the engine to die');
+  // into the engine room: sealed in, a warning beat, then the Warden climbs out
+  var d = G.doors['17,11']; d.open = 1; d.state = 'open'; d.timer = 99;
+  p.x = 12.5; p.z = 6.5; p.y = 0.5;
+  run(g, 0.2, function () { p.hp = 9999; });
+  assert.ok(d.sealed && G.doors['18,11'].sealed, 'both doors seal behind you');
+  assert.strictEqual(G.ents.filter(function (e) { return e.wave; }).length, 0, 'a warning beat first (P6)');
+  run(g, 2, function () { p.hp = 9999; });
+  var warden = G.ents.filter(function (e) { return e.wave === 'warden'; });
+  assert.ok(warden.length === 1 && warden[0].kind === 'knight', 'the Warden arrives');
+  warden[0].state = 'die'; warden[0].st = -1;
+  run(g, 3, function () { p.hp = 9999; });
+  assert.ok(!d.sealed, 'the doors reopen');
+  assert.ok(!G.lightsOff.relit && G.lightsOff.engine, 'crimson out, cyan on');
+  assert.ok(W.lava[8 * W.mw + 13] === 0 && W.lava[21 * W.mw + 15] === 0, 'the mercury drains');
+  assert.ok(Math.abs(W.floor[1 * W.mw + 17] - 0.5) < 1e-6, 'the plinth sank');
+  p.x = 17.5; p.z = 1.6; p.y = 0.5; p.ang = -Math.PI / 2;
+  assert.strictEqual(g.usePrompt().verb, 'RELIGHT THE WAYSTONE');
+  g.useAction(); run(g, 1.2);
+  assert.strictEqual(g.mode(), 'inter');
+});
+
 test('lava burns the player, and demons path around it', function () {
   var g = game(); g.startLevel(1, false); var G = clear(g), p = G.p;
   p.x = 15.5; p.z = 15.5; p.y = 0; p.onGround = true;

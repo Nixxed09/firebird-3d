@@ -19,6 +19,7 @@ export var WEAPONS = {
 };
 export var WEAPON_ORDER = ['fist', 'pistol', 'shotgun'];
 var AMMO_NAMES = { bullets: 'SPARKS', shells: 'BELL CHARGES' };
+var WEAPON_NAMES = { fist: 'EMBER FIST', pistol: 'SPARK CASTER', shotgun: 'BELL BLASTER' };
 
 // h = body height in cells (1 cell = 2 m)
 export var MOBS = {
@@ -44,7 +45,7 @@ export var ITEMS = {
 export var DIFFS = [
   { name: 'ROOKIE', dmg: 0.5, ammo: 2, desc: 'HOLLOWS HIT HALF AS HARD AND AMMO IS DOUBLED. GREAT FOR A FIRST RUN.' },
   { name: 'WARRIOR', dmg: 1, ammo: 1, desc: 'THE FIGHT AS IT WAS MEANT TO BE.' },
-  { name: 'INFERNO', dmg: 1.5, ammo: 1, desc: 'HOLLOWS HIT HARDER. FOR VETERANS WHO KNOW EVERY CORNER.' }
+  { name: 'BLAZE', dmg: 1.5, ammo: 1, desc: 'HOLLOWS HIT HARDER. FOR VETERANS WHO KNOW EVERY CORNER.' }
 ];
 
 var TIPS = {
@@ -112,6 +113,7 @@ export function createGame(opts) {
     var s = L.map.join('');
     return {
       boss: s.indexOf('Y') >= 0,
+      levers: L.levers || [],     // [x, z] switches the level needs pulled before its exit means anything
       keys: { red: s.indexOf('R') >= 0 || s.indexOf('r') >= 0, blue: s.indexOf('U') >= 0 || s.indexOf('u') >= 0 }
     };
   }
@@ -209,8 +211,14 @@ export function createGame(opts) {
     var info = G.info, p = G.p;
     if (info.keys.blue && !p.keys.blue) return 'FIND THE BLUE KEYSTONE';
     if (info.keys.red && !p.keys.red) return 'FIND THE RED KEYSTONE';
+    var left = pendingLevers();
+    if (left.length) return (G.L.leverGoal || 'PULL THE LEVERS') + ' (' + (info.levers.length - left.length) + '/' + info.levers.length + ')';
     if (info.boss) return 'DEFEAT RILEY';
     return 'RELIGHT THE WAYSTONE';
+  }
+  // required levers not pulled yet (a pulled lever's wall id goes 12 -> 13)
+  function pendingLevers() {
+    return G.info.levers.filter(function (v) { return G.W.cells[v[1] * G.mw + v[0]] === 12; });
   }
 
   // ---- weapons -----------------------------------------------------------------
@@ -223,8 +231,8 @@ export function createGame(opts) {
   function switchWeapon(name, quiet) {
     if (mode !== 'game' || !G || G.p.dead) return false;
     var p = G.p;
-    if (!p.weapons[name]) { if (!quiet) message('YOU HAVEN\'T FOUND THE ' + name.toUpperCase() + ' YET.'); return false; }
-    if (!hasAmmo(p, name)) { if (!quiet) { message('NO ' + AMMO_NAMES[WEAPONS[name].ammo] + ' FOR THE ' + name.toUpperCase() + '.'); sound('noAmmo'); } return false; }
+    if (!p.weapons[name]) { if (!quiet) message('YOU HAVEN\'T FOUND THE ' + WEAPON_NAMES[name] + ' YET.'); return false; }
+    if (!hasAmmo(p, name)) { if (!quiet) { message('NO ' + AMMO_NAMES[WEAPONS[name].ammo] + ' FOR THE ' + WEAPON_NAMES[name] + '.'); sound('noAmmo'); } return false; }
     if (name === p.weapon) { if (p.nextWeapon && !(p.lowerT > 0)) p.nextWeapon = null; return false; }
     if (name === p.nextWeapon) return false;
     p.prevWeapon = p.weapon; p.nextWeapon = name; p.autoFist = false;
@@ -933,6 +941,17 @@ export function createGame(opts) {
     for (k in G.doors) {
       var d = G.doors[k];
       if (d.locked && !d.used && G.seen[d.z * G.mw + d.x]) return { x: d.x + 0.5, y: floorAt(G.W, d.x, d.z) + 0.8, z: d.z + 0.5 };
+    }
+    // levers the level needs: point at the nearest one you've seen (bots walk up and use it)
+    var left = pendingLevers();
+    if (left.length) {
+      var best = null, bd = 1e9;
+      left.forEach(function (v) {
+        if (!G.seen[v[1] * G.mw + v[0]]) return;
+        var dd = Math.hypot(v[0] + 0.5 - p.x, v[1] + 0.5 - p.z);
+        if (dd < bd) { bd = dd; best = v; }
+      });
+      return best ? { x: best[0] + 0.5, y: 1, z: best[1] + 0.5, use: { x: best[0], z: best[1] } } : null;
     }
     var ex = G.exitCell;
     if (!info.boss && ex && G.seen[ex.z * G.mw + ex.x]) return { x: ex.x + 0.5, y: 0.8, z: ex.z + 0.5 };

@@ -102,10 +102,60 @@ floor levels, 13 blocks to circle. Soft miss: range mix 0.55 (want 0.6).
 - Bots also tried to jump onto the stair from its side, so it now has a rail: you
   climb it from the bottom (S6).
 
+## E1M3: The Reset Engine (v2, Old Earth, built to the full contract)
+
+```
+THE IDEA:     shut down the engine that's burying Ashgate
+FANTASY:      breaking into the Overseers' machine room and switching the city back on
+ROLE IN ARC:  the peak before Riley's Trial; the first level with a real boss
+TEACHES:      levers as the level's objective (the HUD counts them: 0/3), a lift up to high ground
+TESTS:        everything so far: stairs and a railed climb (bell tower), mercury and a bridge
+              (foundry), a lift (gallery), sealed-arena waves, casks
+PLAYER GOAL:  pull the three seal levers -> beat the Reset Warden -> relight the waystone
+WEENIE:       the engine core in the hall's mercury moat, seen from the first step out of
+              the street (S2); the waystone itself is hidden behind the engine by design
+ARRIVAL:      a low, dark, buried street (compression), then the balcony breaks out high
+              over the hall (release, S3): two stairs and a drop, three ways down (M1)
+HUB:          the engine hall: a ring around the moat and core, brass pylons for cover,
+              the sealed corridor north with a torch pair marking it
+WINGS:        west = the bell works (Tartarian limestone, cyan light): the lever is up the
+              bell tower, whose railed stair you climb from the bottom
+              east = the mercury foundry (basalt): cross the stone bridge over a mercury
+              channel to the lever, with hounds on the floor and a Hollow on the island
+              north-west = the gallery: take the lift up; the lever and a view over the hall
+              each wing has two doors into the hall: a loop (S5)
+SET PIECE:    each lever drops one seal block in the corridor with a shake, and Riley names it
+FINALE:       the engine room: step in -> both doors seal, "THE RESET WARDEN!", and it climbs
+              out of the engine. Hollows join at 14 s, and hounds and a Hollow at 30 s.
+              Side platforms for high ground, pillars, a low wall and two mercury channels.
+              The Warden falls -> the mercury drains, the crimson lights go out, the room
+              floods cyan (the city relit), the doors open, and the plinth sinks off the waystone
+SECRET:       a cracked limestone wall at the bell works' south end: Phoenix Orb and a brass ward
+INTENSITY:    1 2 3 2 3 4 3 4 3 5 9 10 3 (street, balcony, hall, bell tower, foundry, gallery,
+              corridor, Warden, adds, relit)
+THREE MOMENTS: the reveal (the engine from the balcony), the set piece (a seal dropping),
+              the smile (the room turning cyan; Riley: "THE CITY'S LIGHTS ARE COMING BACK")
+BUILT BY:     tools/build_e1m3.py (edit that, then check with node tools/lab.mjs 2)
+```
+
+**Lab (node tools/lab.mjs 2):** passes every hard rule: 3 loops, 2 lanes, 4
+overlooks, 0 jump-scares, 4 wall materials, 8 floor levels and 18 blocks to
+circle. It has two soft misses:
+- The goal is seen late (the waystone is behind the engine on purpose; the core
+  is the landmark instead).
+- The range mix is 0.50 (the hall is big).
+
+**Sim test:** `E1M3 plays out` in tests/sim.test.js drives the whole story.
+
+**New in the sim:** `levers: [[x, z], ...]` plus `leverGoal` in level data. The
+HUD objective counts them, and `goalTarget()` points at the nearest lever you've
+seen (with `use: {x, z}` for bots).
+
 ## Status
 
 | Level | Built with height | Bot-played | Human-played |
 |---|---|---|---|
 | E1M1 Ash Gates (with Riley's sparring arena) | yes | needs a rerun after this change | the user played the earlier v2 E1M1 ("much better") |
 | E1M2 The Furnace | yes, rebuilt to the full contract | yes (first-timer bot clears it; intensity peaks at the forge) | no |
-| E1M3–E1M4 | not yet (classic flat layouts) | yes | no |
+| E1M3 The Reset Engine | yes, built to the full contract (Old Earth) | needs the bots' lever plan | no |
+| E1M4 Riley's Trial | not yet (classic flat layout) | yes | no |

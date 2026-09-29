@@ -170,7 +170,8 @@ var showcase = createGame({ levels: LEVELS, rng: makeRng(7), storage: null, sett
 var SHOTS = {
   0: { x: 19.5, z: 9.4, y: 2, ang: -1.6, pitch: 0.1, sway: 0.1 },                 // Riley in her sparring arena
   1: { x: 17.5, z: 26.6, y: 2, ang: -Math.PI / 2, pitch: -0.2, sway: 0.18 },        // the Furnace from the gantry
-  2: null, 3: null                                                                   // classic layouts: from the start
+  2: { x: 17.5, z: 33.3, y: 1.5, ang: -Math.PI / 2, pitch: -0.12, sway: 0.2 },    // the reset engine from the balcony
+  3: null                                                                            // classic layout: from the start
 };
 var showLevel = -1, showG = null;
 function showLevelAt(i) {
@@ -321,7 +322,7 @@ function levelCardInfo(i) {
   if (info.boss) chip(x, row - 1, 'BOSS: RILEY', true, '#6fe0ec');
   ART.drawText(ctx, 'PAR ' + fmtTime(L.par) + (best && best.time !== null ? '   BEST ' + fmtTime(best.time) : ''), info.boss ? x + 60 : x, row + 1, { color: '#a8a090' });
   var cx = x;
-  (SETTINGS.MEDALS || ['PAR', 'KILLS', 'ITEMS', 'SECRETS']).forEach(function (m) { cx += chip(cx, row + 12, m, !!(best && best.medals && best.medals[m])); });
+  (SETTINGS.MEDALS || ['PAR', 'KILLS', 'ITEMS', 'SECRETS']).forEach(function (m) { cx += chip(cx, row + 12, m === 'KILLS' ? 'FREED' : m, !!(best && best.medals && best.medals[m])); });
   if (!open) {
     ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(x - 5, y - 5, W - x - 1, cardH - 2);
     ART.drawText(ctx, 'LOCKED', x + 60, y + 22, { scale: 2, color: '#ff9a28', shadow: true });

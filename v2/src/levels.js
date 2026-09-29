@@ -3,6 +3,7 @@
 // 'L' in a map is a lift: it rests at its lowest neighbour and rises to its own height.
 import CLASSIC from '../../js/levels.js';
 import { E1M2 } from './levels/e1m2.js';
+import { E1M3 } from './levels/e1m3.js';
 
 var E1M1 = {
   name: 'E1M1: ASH GATES', floor: 'slab', ceil: 'ceilDark', par: 240, playerAngle: 0, ceilHeight: 2.5,
@@ -126,11 +127,10 @@ var E1M1 = {
   ]
 };
 
-// the rest keep their classic flat layouts until they get their height pass
-// E1M2 is the first level built to the full contract (sections 3 and 3b); the
-// rest keep their classic flat layouts until they get the same treatment
+// E1M2 and E1M3 are built to the full contract (sections 3 and 3b) by tools/build_e1m*.py;
+// E1M4 keeps its classic flat layout until it gets the same treatment
 // v2 is set in Ashgate, the buried star-city of the Old Earth canon (STYLE_GUIDE.md)
-var OLD_EARTH_NAMES = { 'E1M3: DEMON THRONE': 'E1M3: THE RESET ENGINE', "E1M4: RILEY'S ARENA": "E1M4: RILEY'S TRIAL" };
-export var LEVELS = [E1M1, E1M2].concat(CLASSIC.slice(2).map(function (L) {
+var OLD_EARTH_NAMES = { "E1M4: RILEY'S ARENA": "E1M4: RILEY'S TRIAL" };
+export var LEVELS = [E1M1, E1M2, E1M3].concat(CLASSIC.slice(3).map(function (L) {
   return Object.assign({ ceilHeight: 2 }, L, { name: OLD_EARTH_NAMES[L.name] || L.name });
 }));

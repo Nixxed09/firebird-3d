@@ -151,7 +151,7 @@ export function createHud(ctx, game, settings) {
     if (!p.dead || p.deadT < 1) return;
     var ob = OBITS[G.killer] || ['YOU WERE OVERWHELMED.', 'TIP: FIGHT FROM HIGH GROUND SO HOLLOWS COME TO YOU ONE AT A TIME.'];
     ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0, 44, W, 72);
-    ART.drawText(ctx, 'YOU DIED', W / 2, 50, { scale: 3, color: HUD_RED, shadow: true, center: true });
+    ART.drawText(ctx, 'KNOCKED DOWN', W / 2, 50, { scale: 3, color: HUD_RED, shadow: true, center: true });
     ART.drawText(ctx, ob[0], W / 2, 72, { color: '#e8e0c8', shadow: true, center: true });
     ART.drawText(ctx, ob[1], W / 2, 84, { color: '#8fe0a0', shadow: true, center: true });
     if (p.deadT > 1.2 && (G.time % 1) < 0.7) ART.drawText(ctx, 'CLICK OR PRESS ENTER TO TRY AGAIN', W / 2, 100, { color: '#f0d848', shadow: true, center: true });
