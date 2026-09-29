@@ -160,6 +160,36 @@ export function analyse(L, index, opts) {
   });
   var jumpScares = sightings.filter(function (d) { return d !== null && d < 3; }).length;
 
+  // Codex U3 / contract L3: meet each enemy kind alone first. For each kind, take the one seen earliest
+  // on the route and check that no other Hollow stands within 5 cells of it.
+  var firstK = mobs.map(function (e) {
+    var ep = { x: e.x + 0.5, y: floorAt(W, e.x, e.z) + 0.6, z: e.z + 0.5 };
+    for (var k = 0; k < path.length; k++) {
+      var pc = path[k];
+      if (canSee(W, pc % W.mw + 0.5, floorAt(W, pc % W.mw, (pc / W.mw) | 0) + EYE, ((pc / W.mw) | 0) + 0.5, ep, 20)) return k;
+    }
+    return Infinity;
+  });
+  var kinds = {}, aloneFirst = 0;
+  mobs.forEach(function (e, n) { if (!kinds[e.ch] || firstK[n] < firstK[kinds[e.ch]]) kinds[e.ch] = n; });
+  Object.keys(kinds).forEach(function (ch) {
+    var e = mobs[kinds[ch]];
+    if (!mobs.some(function (o) { return o !== e && Math.hypot(o.x - e.x, o.z - e.z) < 5; })) aloneFirst++;
+  });
+
+  // Codex U10: something to do or see every few seconds. A route cell is eventful when it is within
+  // 3 cells of a pickup, Hollow, torch, door, lever, lift, radio trigger or level event; report the
+  // longest quiet stretch of the route
+  var marks = find('h+AbaP2ruigKot=LDRU*').map(function (c) { return c; });
+  var boxes = (L.triggers || []).map(function (t) { return t.box; }).concat((L.events || []).map(function (ev) { return ev.when && ev.when.enter; }).filter(Boolean));
+  function eventful(c) {
+    var x = c % W.mw, z = (c / W.mw) | 0;
+    if (marks.some(function (mk) { return Math.max(Math.abs(mk.x - x), Math.abs(mk.z - z)) <= 3; })) return true;
+    return boxes.some(function (b) { return x >= b[0] && x <= b[2] && z >= b[1] && z <= b[3]; });
+  }
+  var quiet = 0, run = 0;
+  path.forEach(function (c) { run = eventful(c) ? 0 : run + 1; quiet = Math.max(quiet, run); });
+
   // S1: districts. Count distinct wall materials and floor heights used; a level with one of each has no districts.
   var mats = {}, heights = {};
   for (var q = 0; q < N; q++) { var id = W.cells[q]; if (id >= 1 && id <= 5) mats[id] = 1; if (reach.dist[q] >= 0) heights[W.floor[q].toFixed(2)] = 1; }
@@ -200,6 +230,7 @@ export function analyse(L, index, opts) {
   return {
     index: index, name: L.name, cells: nodes, loops: loops, lanes: lanes, ranges: ranges, rangeMix: rangeMix, pillars: pillars, deadEnds: deadEnds.length, deadEndsPaid: deadPaid,
     route: path.length, routeFirstSeesGoal: firstSight, overlooks: overlooks, jumpScares: jumpScares,
+    enemyKinds: Object.keys(kinds).length, aloneFirst: aloneFirst, quietStretch: quiet,
     demonsNeverSeenOnRoute: sightings.filter(function (d) { return d === null; }).length,
     districts: Object.keys(mats).length, floorLevels: Object.keys(heights).length, chokepoints: chokes,
     meanProspect: avg(walkable.map(function (c) { return prospect[c]; })),
@@ -363,6 +394,8 @@ export function verdicts(r) {
   rule('M1', r.lanes >= 2, r.lanes + ' separate lane(s) from start to goal (want 2+: more than one way to get there)', true);
   rule('M2', r.rangeMix >= 0.6, 'range mix ' + r.rangeMix.toFixed(2) + ' (close ' + r.ranges.close + ', mid ' + r.ranges.mid + ', long ' + r.ranges.long + ' cells; want 0.6+: a place for every weapon)', true);
   rule('M3', r.pillars >= 2, r.pillars + ' free-standing pillar(s) or blocks to circle (want 2+ in fight spaces)', true);
+  rule('U3', r.aloneFirst === r.enemyKinds, r.aloneFirst + '/' + r.enemyKinds + ' enemy kinds are met alone first (codex U3, contract L3: a safe first meeting)', true);
+  rule('U10', r.quietStretch <= 10, 'longest quiet stretch of the route: ' + r.quietStretch + ' cells, about ' + (r.quietStretch * 2) + ' m (codex U10: want 10 cells or fewer with nothing to see or do)', true);
   rule('C1', r.chokepoints <= r.route * 0.5, r.chokepoints + ' of ' + r.route + ' route cells are chokepoints (a very linear level if this is most of them)', true);
   return v;
 }
