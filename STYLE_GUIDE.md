@@ -127,4 +127,6 @@ Nix plays this game. So:
 - enemies are released, never tortured;
 - Riley never mocks the player.
 
+Plain game words are fine, and the players are treated like little adults (owner, 2026-09-28): "dead", "died", "kill" and "death" can appear in text. The rules above are about what's shown (gore, demon iconography, real guns), not about avoiding normal shooter words.
+
 These rules sit on top of the Level Design Contract (`games/LEVEL_DESIGN_CONTRACT.md`).
