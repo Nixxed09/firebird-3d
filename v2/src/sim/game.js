@@ -25,7 +25,7 @@ var WEAPON_NAMES = { fist: 'EMBER FIST', pistol: 'SPARK CASTER', shotgun: 'BELL 
 export var MOBS = {
   imp: { hp: 40, speed: 1.7, radius: 0.35, painChance: 0.75, ranged: true, melee: false, h: 0.85, attackDmg: [8, 20] },
   gnasher: { hp: 110, speed: 2.9, radius: 0.42, painChance: 0.5, ranged: false, melee: true, h: 0.7, attackDmg: [4, 16], fleeBelow: 0.4 },
-  knight: { hp: 700, speed: 1.9, radius: 0.48, painChance: 0.2, ranged: true, melee: true, h: 1.3, attackDmg: [10, 26] },
+  knight: { hp: 600, speed: 1.9, radius: 0.48, painChance: 0.2, ranged: true, melee: true, h: 1.3, attackDmg: [10, 26] },
   riley: { hp: 900, speed: 2.4, radius: 0.4, painChance: 0.12, ranged: true, melee: true, h: 0.95, attackDmg: [10, 20], boss: true }
 };
 var MOB_CHARS = { i: 'imp', g: 'gnasher', K: 'knight', Y: 'riley' };
@@ -611,7 +611,7 @@ export function createGame(opts) {
         ev('fx', 'summon', mx, my + 0.1, mz); sound('impShoot', { x: mx, y: my, z: mz });
         G.timers.push({ t: 1.0, fn: function () {
           ev('fx', 'fireBurst', mx, my + 0.3, mz);
-          if (!p.dead && Math.hypot(p.x - mx, p.z - mz) < 1.1 && p.y < my + 0.6) hurtPlayer(rndIn(18, 28) | 0, e);
+          if (!p.dead && Math.hypot(p.x - mx, p.z - mz) < 1.1 && p.y < my + 0.6) hurtPlayer(rndIn(14, 22) | 0, e);
         } });
       }
     }
@@ -918,6 +918,14 @@ export function createGame(opts) {
       var b = w.enter;
       if (p.x >= b[0] && p.x <= b[2] + 1 && p.z >= b[1] && p.z <= b[3] + 1) runEvent(evs[i], i);
     }
+    // a wave member that stays out of reach (no sight of you, far away) for 25 s releases its light
+    // and counts as cleared, so a wave can never trap a level (E1M2's forge3 once did)
+    G.ents.forEach(function (e) {
+      if (!e.wave || !alive(e) || e.state === 'die') return;
+      var far = !e.los && playerDist(e.x, e.z) > 6;
+      e.strayT = far ? (e.strayT || 0) + dt : 0;
+      if (e.strayT > 25) { e.state = 'die'; e.st = -1; e.hp = 0; ev('fx', 'gib', e.x, e.y + e.h * 0.6, e.z, { kind: e.kind }); }
+    });
     // a wave is cleared when all of its demons are down
     for (var id in G.waves) {
       if (!G.waves[id]) continue;

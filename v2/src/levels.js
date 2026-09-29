@@ -10,10 +10,15 @@ var E1M1 = {
   // Riley waits at the top to spar: she only uses what this level has taught,
   // taps out early, and remembers how you fought for the rematch in E1M4
   boss: {
-    sparring: true, hpScale: 0.4, moves: ['volley', 'lead', 'flank', 'close', 'backoff', 'seek'],
+    sparring: true, hpScale: 0.4, moves: ['volley', 'lead', 'flank', 'close', 'backoff', 'seek', 'summon'],   // she calls backup once: the match is the level's peak (U12), and the Trial reuses it
     intro: "THERE YOU ARE! LET'S SPAR. I'LL WATCH HOW YOU FIGHT. READY?"
   },
   // Riley on the radio: each line plays once, when you walk into its box [x0, z0, x1, z1]
+  // the shortcut home (codex U8, contract S5): a stone gate between the hall and the start room sinks
+  // once you reach the hall, so it opens from the far side
+  events: [
+    { when: { enter: [2, 17, 19, 21] }, do: [{ lower: [7, 22, 7, 24], to: 0, speed: 1.2 }, { say: "HEAR THAT? A SHORTCUT BACK TO WHERE YOU STARTED JUST OPENED." }] }
+  ],
   triggers: [
     { box: [2, 25, 8, 30], say: "HI! I'M RILEY. I'M WAITING FOR YOU AT THE TOP. LOOK AROUND WITH THE MOUSE, MOVE WITH WASD, THEN HEAD FOR THAT DOOR AHEAD." },
     { box: [7, 26, 9, 28], say: "DOORS OPEN WITH E. GO ON, TRY IT." },
@@ -41,13 +46,13 @@ var E1M1 = {
       '####################...L.....#',
       '#######################U######',
       '##....................t.t...##',
-      '##.t......%%......%%........##',
+      '##.t......%%......%%..g.....##',
       '##u...g......i..............##',
-      '##.t.......h.....g..........##',
+      '##.t.......h................##',
       '##..........................##',
-      '####################D#########',
-      '###*Pa#########....t.t......##',
-      '####S##########.....i.....o.##',
+      '#######.############D#########',
+      '###*Pa#.#######....t.t......##',
+      '####S##.#######.....i.....o.##',
       '##.......######..........io.##',
       '##.....b.######......h......##',
       '##..p....D........2.........##',
@@ -79,9 +84,9 @@ var E1M1 = {
       '000000000000000000000000000000',
       '000000000001234444444444444400',
       '000000000001234444444444444400',
-      '000000000000000000000000000000',
-      '000000000000000444444444444440',
-      '000000000000000444444444444440',
+      '0000000a0000000000000000000000',
+      '0000000a0000000444444444444440',
+      '0000000a0000000444444444444440',
       '000000000000000444444444444440',
       '000000000000000446664444444440',
       '000000000012344446664444444440',

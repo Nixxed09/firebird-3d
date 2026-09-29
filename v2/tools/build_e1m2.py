@@ -139,6 +139,7 @@ def rows(a): return [''.join(r) for r in a]
 level = {
     'name': 'E1M2: THE FURNACE', 'floor': 'slab', 'ceil': 'ceilDark', 'par': 300, 'playerAngle': -1.5707963,
     'ceilHeight': 2.5, 'map': rows(m), 'heights': rows(h), 'ceilings': rows(c),
+    'stage': {'wave': 'forge3', 'goal': 'CLEAR THE FORGE', 'at': [17, 6]},   # the plinth waits for the forge
     'events': events, 'triggers': triggers, 'lights': lights,
     'darkZones': [[1, 8, 6, 27]],   # no room fill light in the bunkers: only the flickering lamp
 }
