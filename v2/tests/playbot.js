@@ -85,6 +85,7 @@ PlayBot.prototype.reset = function () {
   this.plan = null;
   this.decideT = 0;
   this.exitCheckT = 0;
+  this.liftHop = null;
   this.stuckT = 0; this.lastX = 0; this.lastZ = 0; this.unstickT = 0; this.unstickDir = 1; this.stuckCount = 0;
   this.strafeDir = this.rng() < 0.5 + this.style.strafeHabit ? -1 : 1; this.strafeT = 0;
   this.dodgeT = 0; this.dodgeDir = 1;
@@ -120,7 +121,7 @@ PlayBot.prototype.passable = function (x, z) {
   // a player doesn't wade into molten mercury on purpose; only walk through it
   // to get out when already standing in it (drained pools are fine: lava off)
   var W = G.W, lava = W.lava;
-  if (lava && lava[z * W.mw + x] && !lava[Math.floor(G.p.z) * W.mw + Math.floor(G.p.x)]) return false;
+  if (lava && lava[z * W.mw + x] && !this.wadeLava && !lava[Math.floor(G.p.z) * W.mw + Math.floor(G.p.x)]) return false;
   if (c === 0) return true;
   if (!DOOR[c]) return false;
   var d = G.doors[x + ',' + z];
@@ -146,7 +147,10 @@ PlayBot.prototype.edges = function (x, z) {
     NB.forEach(function (o) {
       var nx = x + o[0], nz = z + o[1];
       if (!self.passable(nx, nz) || out.some(function (e) { return e.cx === nx && e.cz === nz; })) return;
-      if (Math.abs(floorAt(self.G().W, nx, nz) - lf.top) < 0.3) out.push({ cx: nx, cz: nz, cost: 3, kind: 'lift' });
+      var fl = floorAt(self.G().W, nx, nz);
+      if (Math.abs(fl - lf.top) < 0.3) out.push({ cx: nx, cz: nz, cost: 3, kind: 'lift' });
+      // two-way lifts: stand on it at the top and it takes you down (Doom-style)
+      else if (lf.top - lf.bottom > 0.3 && Math.abs(fl - lf.bottom) < 0.3) out.push({ cx: nx, cz: nz, cost: 3, kind: 'lift-down' });
     });
   }
   // stepping onto a lift that is up above you: it comes down when stood on
@@ -338,6 +342,14 @@ PlayBot.prototype.use = function () {
 // walk a path; handles doors, jumps and lifts; returns the heading or null
 PlayBot.prototype.follow = function (path, dt) {
   var G = this.G(), p = G.p;
+  // stepping off a lift so it counts as boarded again: get fully clear of it
+  // (to the next cell's centre), then walk back on once it has noticed
+  var hop = this.liftHop;
+  if (hop) {
+    var ready = hop.up ? !hop.lift.stayDown : (hop.lift.ridden || hop.lift.state !== 'top');
+    if (ready || this.now > hop.until) this.liftHop = null;
+    else return Math.hypot(hop.x + 0.5 - p.x, hop.z + 0.5 - p.z) > 0.15 ? Math.atan2(hop.z + 0.5 - p.z, hop.x + 0.5 - p.x) : null;
+  }
   if (!path || path.length < 2) return null;
   var next = path[1], c = this.cell(next.x, next.z);
   var toNext = Math.atan2(next.z + 0.5 - p.z, next.x + 0.5 - p.x);
@@ -356,10 +368,24 @@ PlayBot.prototype.follow = function (path, dt) {
     this.turnToward(toNext, dt);
     return toNext;
   }
-  if (next.kind === 'lift') {
-    // ride: stand on the lift's centre until it reaches the top
-    var lf = this.liftAt(path[0].x, path[0].z);
-    if (lf && Math.abs(lf.pos - lf.top) > 0.05) {
+  if (next.kind === 'lift' || next.kind === 'lift-down') {
+    // ride: stand on the lift's centre until it reaches the top (or the bottom)
+    var lf = this.liftAt(path[0].x, path[0].z), stop = lf && (next.kind === 'lift' ? lf.top : lf.bottom);
+    // a lift you rode up stays up while you stand on it; it takes you down
+    // when you step on at the top. So step off onto the upper floor first
+    // (the next path then steps back on).
+    // Likewise a lift you just rode down stays down until you step off it.
+    var hopDown = lf && next.kind === 'lift-down' && lf.state === 'top' && !lf.ridden;
+    var hopUp = lf && next.kind === 'lift' && lf.state === 'down' && lf.stayDown;
+    if (hopDown || hopUp) {
+      var W = G.W, off = null, level = hopDown ? lf.top : lf.bottom;
+      NB.forEach(function (o) {
+        var ox = path[0].x + o[0], oz = path[0].z + o[1];
+        if (!off && G.W.cells[oz * W.mw + ox] === 0 && Math.abs(floorAt(W, ox, oz) - level) < 0.3) off = { x: ox, z: oz };
+      });
+      if (off) { this.liftHop = { x: off.x, z: off.z, lift: lf, up: hopUp, until: this.now + 4 }; return this.follow(path, dt); }
+    }
+    if (lf && Math.abs(lf.pos - stop) > 0.05) {
       var toMid = Math.atan2(path[0].z + 0.5 - p.z, path[0].x + 0.5 - p.x);
       return Math.hypot(path[0].x + 0.5 - p.x, path[0].z + 0.5 - p.z) > 0.2 ? toMid : null;
     }
@@ -450,6 +476,9 @@ PlayBot.prototype.fight = function (e, dt) {
 
 PlayBot.prototype.goTo = function (goal, dt, arrive) {
   var path = this.pathTo(goal);
+  // no dry way there (marooned on E1M4's island with the pool undrained):
+  // a player wades through the mercury and takes the burn
+  if (!path) { this.wadeLava = true; path = this.pathTo(goal); this.wadeLava = false; }
   if (!path) { this.banned[this.plan.key] = this.now + 15; this.plan = null; return this.setMove(null); }
   if (path.length === 1 && arrive) return arrive();
   var h = this.follow(path, dt);
