@@ -137,7 +137,7 @@ events = [
         {'light': 'relit', 'on': True}, {'light': 'relitW', 'on': True}, {'light': 'relitE', 'on': True}, {'light': 'relitHall', 'on': True},
         {'lava': [13, 7, 22, 9], 'on': False}, {'lava': [15, 21, 20, 26], 'on': False},
         {'open': ['17,11', '18,11']},
-        {'say': "YOU DID IT! THE ENGINE'S DEAD AND THE CITY'S LIGHTS ARE COMING BACK. THE WAYSTONE'S BEHIND IT. COME FIND ME AFTER."},
+        {'say': "YOU DID IT! THE ENGINE'S SILENT AND THE CITY'S LIGHTS ARE COMING BACK. THE WAYSTONE'S BEHIND IT. COME FIND ME AFTER."},
         {'lower': [17, 1, 18, 1], 'to': 0.5, 'speed': 1.0}]},
 ]
 
