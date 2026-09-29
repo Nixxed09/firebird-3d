@@ -82,13 +82,14 @@ for x, z in [(12, 23), (23, 23)]: put(x, z, 't')                   # torches at 
 for x, z in [(16, 12), (18, 12), (8, 12), (8, 22), (27, 12), (27, 22)]: put(x, z, 't')  # torch pairs: red door, wing doors
 for x, z in [(13, 3), (22, 3)]: put(x, z, 't')
 # demons: seen from a distance first (P6); each wing teaches one thing
-put(10, 17, 'i'); put(25, 17, 'i')                 # two imps in the hub, one per side, seen from the gantry
+put(10, 17, 'i')                                    # one Hollow in the hub, seen from the gantry: a calm opening (U12: the forge is the peak)
 put(3, 12, 'i'); put(5, 21, 'i'); put(2, 9, 'i')   # west wing: imps in the dark, one guarding the switch
 put(32, 18, 'g'); put(30, 23, 'g'); put(32, 9, 'i')  # east wing: gnashers on the floor, an imp on the tanks
 # pickups: push forward (C2), health after hard bits (E1)
 put(19, 25, 'b'); put(9, 13, 'a'); put(26, 22, 'b'); put(4, 23, 'h'); put(33, 23, '+')
 put(31, 10, 'r'); put(33, 9, 'A'); put(10, 21, 'h')
 put(16, 9, 'a'); put(19, 9, 'a'); put(10, 3, 'h'); put(25, 3, '+'); put(17, 6, 'b')
+put(10, 8, 'a'); put(25, 8, 'b')                   # more in the forge for the third wave (E2)
 put(26, 13, 'o'); put(9, 23, 'o')                  # barrels by the hub corners
 
 # ---- events: the level's moments ------------------------------------------------
@@ -111,6 +112,11 @@ events = [
             {'kind': 'gnasher', 'x': 10, 'z': 9}, {'kind': 'gnasher', 'x': 25, 'z': 9}, {'kind': 'imp', 'x': 10, 'z': 5},
             {'kind': 'imp', 'x': 25, 'z': 5}]}]}]},
     {'when': {'cleared': 'forge2'}, 'do': [
+        {'say': "THAT'S NOT ALL OF THEM. HOLD THE HIGH GROUND!"}, {'shake': 3},
+        {'after': 1.2, 'do': [{'wave': 'forge3', 'spawn': [
+            {'kind': 'gnasher', 'x': 13, 'z': 6}, {'kind': 'gnasher', 'x': 22, 'z': 6}, {'kind': 'imp', 'x': 10, 'z': 9},
+            {'kind': 'imp', 'x': 25, 'z': 9}, {'kind': 'imp', 'x': 17, 'z': 8}]}]}]},
+    {'when': {'cleared': 'forge3'}, 'do': [
         {'notice': 'FORGE CLEARED!'}, {'open': ['17,11']},
         {'say': "THAT WAS AWESOME. THE WAYSTONE IS BEHIND THE PLINTH. IT'S SINKING NOW."},
         {'lower': [17, 2, 17, 2], 'to': 0.5, 'speed': 0.6}]},

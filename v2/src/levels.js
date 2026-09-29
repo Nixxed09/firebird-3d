@@ -1,9 +1,9 @@
 // FIREBIRD 3D v2 levels: the classic ASCII maps (js/levels.js) plus height.
 // heights: one digit per cell, floor at digit x 0.25 cells (0.5 m); 0-9 then a-z.
 // 'L' in a map is a lift: it rests at its lowest neighbour and rises to its own height.
-import CLASSIC from '../../js/levels.js';
 import { E1M2 } from './levels/e1m2.js';
 import { E1M3 } from './levels/e1m3.js';
+import { E1M4 } from './levels/e1m4.js';
 
 var E1M1 = {
   name: 'E1M1: ASH GATES', floor: 'slab', ceil: 'ceilDark', par: 240, playerAngle: 0, ceilHeight: 2.5,
@@ -15,7 +15,7 @@ var E1M1 = {
   },
   // Riley on the radio: each line plays once, when you walk into its box [x0, z0, x1, z1]
   triggers: [
-    { box: [2, 25, 8, 30], say: "HI! I'M RILEY. I'M WAITING FOR YOU AT THE TOP. LOOK AROUND WITH THE MOUSE, MOVE WITH WASD." },
+    { box: [2, 25, 8, 30], say: "HI! I'M RILEY. I'M WAITING FOR YOU AT THE TOP. LOOK AROUND WITH THE MOUSE, MOVE WITH WASD, THEN HEAD FOR THAT DOOR AHEAD." },
     { box: [7, 26, 9, 28], say: "DOORS OPEN WITH E. GO ON, TRY IT." },
     { box: [15, 23, 28, 29], say: "SEE THE BELL BLASTER UP THERE? JUMP WITH SPACE." },
     { box: [14, 20, 28, 22], say: "NICE VIEW. THE BLUE KEYSTONE IS DOWN IN THE HALL. THE BLUE DOOR IS ACROSS FROM YOU." },
@@ -127,10 +127,5 @@ var E1M1 = {
   ]
 };
 
-// E1M2 and E1M3 are built to the full contract (sections 3 and 3b) by tools/build_e1m*.py;
-// E1M4 keeps its classic flat layout until it gets the same treatment
-// v2 is set in Ashgate, the buried star-city of the Old Earth canon (STYLE_GUIDE.md)
-var OLD_EARTH_NAMES = { "E1M4: RILEY'S ARENA": "E1M4: RILEY'S TRIAL" };
-export var LEVELS = [E1M1, E1M2, E1M3].concat(CLASSIC.slice(3).map(function (L) {
-  return Object.assign({ ceilHeight: 2 }, L, { name: OLD_EARTH_NAMES[L.name] || L.name });
-}));
+// every level is built to the Level Design Codex by tools/build_e1m*.py (E1M1 is authored above)
+export var LEVELS = [E1M1, E1M2, E1M3, E1M4];

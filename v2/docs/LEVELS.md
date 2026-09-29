@@ -151,6 +151,36 @@ circle. It has two soft misses:
 HUD objective counts them, and `goalTarget()` points at the nearest lever you've
 seen (with `use: {x, z}` for bots).
 
+## E1M4: Riley's Trial (v2, rebuilt to the Level Design Codex)
+
+```
+LEVEL:          E1M4 RILEY'S TRIAL, FIREBIRD v2, genre module 3.1 (the contract)
+MOMENT:         M4 climax and M5 ending: the episode's final exam (A2: nothing new)
+THE IDEA:       show Riley what you learned
+FANTASY:        reaching the top of the world and proving yourself to your coach
+BEATS:          introduce: the peak ledge, the courtyard below, Riley's arena glowing past the gate
+                develop:   two trials in either order: Ash (jump-stair or lift, E1M1's lessons)
+                           and Mercury (find the switch, drain the pool, E1M2's lesson)
+                twist:     44 s into the fight, the floor moves: four stones rise and change the cover
+                conclude:  Riley taps out; the episode ends on her line and the ending text
+FIRST SAFE CASE: the first Hollow stands alone far below the ledge; the first hound stands alone
+                across the mercury wing (lab U3: 2/2)
+WEENIE:         the aqua arena and its beam past the torch-paired gate, seen from the ledge (S2: 19/34)
+LOOPS:          each trial wing has two doors into the courtyard; the Ash trial's lift is the way down
+DENSITY:        lab U10: the longest quiet stretch is 6 cells
+VARIETY:        courtyard (open, a lone Hollow), Ash (vertical, climbing), Mercury (a switch, then a wave
+                off the island), the arena (a boss with high ground and pillars)
+PEAK:           Riley's fight, last; nothing after it but her line and the ending (U12)
+FAILURE:        Riley's rules (RILEY_BOSS_SPEC): a rest every 12 s or less, telegraphs, mercy after 3 losses
+THREE MOMENTS:  the reveal (the courtyard and the arena from the ledge), the set piece (the drain),
+                the smile (Riley tapping out)
+BUILT BY:       tools/build_e1m4.py; check with node tools/lab.mjs 3; sim test "E1M4 plays out"
+```
+
+**Lab (node tools/lab.mjs 3):** passes every hard rule and every soft rule except M2
+(range mix 0.33; the arena is open on purpose, and the rising stones add close cover
+mid-fight).
+
 ## Status
 
 | Level | Built with height | Bot-played | Human-played |
@@ -158,4 +188,4 @@ seen (with `use: {x, z}` for bots).
 | E1M1 Ash Gates (with Riley's sparring arena) | yes | needs a rerun after this change | the user played the earlier v2 E1M1 ("much better") |
 | E1M2 The Furnace | yes, rebuilt to the full contract | yes (first-timer bot clears it; intensity peaks at the forge) | no |
 | E1M3 The Reset Engine | yes, built to the full contract (Old Earth) | needs the bots' lever plan | no |
-| E1M4 Riley's Trial | not yet (classic flat layout) | yes | no |
+| E1M4 Riley's Trial | yes, rebuilt to the Level Design Codex | needs a rerun | no |

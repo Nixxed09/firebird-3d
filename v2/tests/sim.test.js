@@ -223,6 +223,11 @@ test('E1M2 plays out: drain the pit, take the key, survive the forge waves, exit
   var wave2 = G.ents.filter(function (e) { return e.wave === 'forge2'; });
   assert.strictEqual(wave2.length, 4, 'then wave two');
   wave2.forEach(function (e) { e.state = 'die'; e.st = -1; });
+  run(g, 2, function () { p.hp = 9999; });
+  var wave3 = G.ents.filter(function (e) { return e.wave === 'forge3'; });
+  assert.strictEqual(wave3.length, 5, "then the forge's last and biggest wave (U12: end on the peak)");
+  assert.ok(d.sealed, 'still sealed until it is over');
+  wave3.forEach(function (e) { e.state = 'die'; e.st = -1; });
   run(g, 3, function () { p.hp = 9999; });
   assert.ok(!d.sealed, 'the door reopens when the forge is cleared');
   var plinth = 2 * W.mw + 17;
@@ -276,6 +281,33 @@ test('E1M3 plays out: pull three seals, beat the Warden, the city relights, exit
   assert.strictEqual(g.usePrompt().verb, 'RELIGHT THE WAYSTONE');
   g.useAction(); run(g, 1.2);
   assert.strictEqual(g.mode(), 'inter');
+});
+
+// ---- E1M4: Riley's Trial, the final exam ------------------------------------------------
+
+test('E1M4 plays out: two trials, two keystones, the gate seals, the stones rise', function () {
+  var g = game(6); g.startLevel(3, false); var G = clear(g), p = G.p, W = G.W;
+  assert.strictEqual(g.objective(), 'FIND THE BLUE KEYSTONE');
+  // the Trial of Mercury: the switch drains the pool into floor
+  var pool = 21 * W.mw + 31;
+  assert.ok(W.lava[pool] === 1, 'the pool starts as mercury');
+  p.x = 34.5; p.z = 27.5; p.y = floorAt0(W, 34, 27); p.ang = 0; p.hp = 9999;
+  assert.strictEqual(g.usePrompt().verb, 'PULL THE SWITCH');
+  g.useAction(); run(g, 4, function () { p.hp = 9999; });
+  assert.ok(W.lava[pool] === 0 && Math.abs(W.floor[pool] - 1) < 1e-6, 'drained and risen to the wing floor');
+  // the Trial of Ash: the lift carries you to the blue keystone's platform
+  var lift = W.lifts.find(function (l) { return l.x === 5 && l.z === 20; });
+  assert.ok(lift && Math.abs(lift.top - 3) < 1e-6 && Math.abs(lift.bottom - 1) < 1e-6, 'the lift rides from the wing floor to the platform');
+  p.keys.blue = true; p.keys.red = true;
+  // through both gates and into the arena: the gate seals, and 44 s later the stones rise
+  ['17,21', '18,21', '17,17', '18,17'].forEach(function (k) { var d = G.doors[k]; d.open = 1; d.state = 'open'; d.timer = 99; });
+  p.x = 17.5; p.z = 11.2; p.y = floorAt0(W, 17, 11);
+  run(g, 0.3, function () { p.hp = 9999; });
+  assert.ok(G.doors['17,17'].sealed, 'the Trial gate seals behind you');
+  var stone = 4 * W.mw + 14;
+  assert.ok(Math.abs(W.floor[stone] - 1) < 1e-6, 'the floor is flat when the Trial begins');
+  run(g, 46, function () { p.hp = 9999; if (G.boss) G.boss.hp = G.boss.maxHp; });
+  assert.ok(Math.abs(W.floor[stone] - 2) < 1e-6, 'the stones rose (' + W.floor[stone] + ')');
 });
 
 test('lava burns the player, and demons path around it', function () {

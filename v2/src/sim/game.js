@@ -25,7 +25,7 @@ var WEAPON_NAMES = { fist: 'EMBER FIST', pistol: 'SPARK CASTER', shotgun: 'BELL 
 export var MOBS = {
   imp: { hp: 40, speed: 1.7, radius: 0.35, painChance: 0.75, ranged: true, melee: false, h: 0.85, attackDmg: [8, 20] },
   gnasher: { hp: 110, speed: 2.9, radius: 0.42, painChance: 0.5, ranged: false, melee: true, h: 0.7, attackDmg: [4, 16], fleeBelow: 0.4 },
-  knight: { hp: 400, speed: 1.9, radius: 0.48, painChance: 0.2, ranged: true, melee: true, h: 1.3, attackDmg: [10, 26] },
+  knight: { hp: 700, speed: 1.9, radius: 0.48, painChance: 0.2, ranged: true, melee: true, h: 1.3, attackDmg: [10, 26] },
   riley: { hp: 900, speed: 2.4, radius: 0.4, painChance: 0.12, ranged: true, melee: true, h: 0.95, attackDmg: [10, 20], boss: true }
 };
 var MOB_CHARS = { i: 'imp', g: 'gnasher', K: 'knight', Y: 'riley' };
@@ -466,6 +466,9 @@ export function createGame(opts) {
       var nx = cx + (k === 0 ? 1 : k === 1 ? -1 : 0), nz = cz + (k === 2 ? 1 : k === 3 ? -1 : 0);
       if (nx < 0 || nz < 0 || nx >= mw || nz >= G.mh) continue;
       var f = G.flow[nz * mw + nx];
+      // only a step it can actually make: a neighbour can have a lower number because it's
+      // reachable some other way, but not up this ledge (the E1M1 stair-side wedge)
+      if (G.W.floor[nz * mw + nx] - G.W.floor[cz * mw + cx] > STEP_UP + 1e-4) continue;
       if (f >= 0 && f < best) { best = f; bx = nx; bz = nz; }
     }
     if (bx < 0) return null;
@@ -622,7 +625,15 @@ export function createGame(opts) {
             if (tgt) damageMob(tgt, dmg, e); else hurtPlayer(dmg, e);
             sound('punch', e);
           }
-        } else if (def.ranged && e.los) throwProjectile(e, e.kind === 'knight', tx, ty, tz);
+        } else if (def.ranged && e.los) {
+          throwProjectile(e, e.kind === 'knight', tx, ty, tz);
+          // the Reset Warden fires a second shot where you're going (codex M4: standing still,
+          // or running in a straight line, loses; changing direction beats both)
+          if (e.kind === 'knight' && !tgt) {
+            var flight = Math.hypot(tx - e.x, tz - e.z) / 5.5;
+            G.timers.push({ t: 0.25, fn: function (w, lx, lz) { return function () { if (alive(w) && w.los) throwProjectile(w, true, lx, ty, lz); }; }(e, tx + p.vx * flight, tz + p.vz * flight) });
+          }
+        }
         e.cool = rndIn(0.9, 1.9);
       }
       return;
@@ -881,7 +892,7 @@ export function createGame(opts) {
   function updateEvents(dt) {
     var p = G.p, evs = G.L.events || [];
     for (var ti = G.timers.length - 1; ti >= 0; ti--) {
-      if ((G.timers[ti].t -= dt) <= 0) { var due = G.timers.splice(ti, 1)[0]; runActions(due.acts); }
+      if ((G.timers[ti].t -= dt) <= 0) { var due = G.timers.splice(ti, 1)[0]; if (due.fn) due.fn(); else runActions(due.acts); }
     }
     for (var i = 0; i < evs.length; i++) {
       var w = evs[i].when || {};
