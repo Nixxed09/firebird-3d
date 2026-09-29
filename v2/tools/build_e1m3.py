@@ -72,7 +72,8 @@ put(9, 15, '=')                                                     # lever 3 (t
 # 8. the engine room (finale): the reset engine itself, side platforms, pillars, mercury channels
 room(6, 1, 29, 10, floor='2', ceil='q', wall='H')
 room(6, 1, 8, 10, floor='6', ceil='q'); room(27, 1, 29, 10, floor='6', ceil='q')   # high ground, 1 m up
-put(9, 5, '.', '4'); put(26, 5, '.', '4')                          # a step up to each platform
+for x, d in [(12, '3'), (11, '4'), (10, '5'), (9, '5')]: put(x, 5, '.', d)   # real stairs up to each platform
+for x, d in [(23, '3'), (24, '4'), (25, '5'), (26, '5')]: put(x, 5, '.', d)   # (bots and players got stuck needing a jump)
 for z in range(3, 6):
     for x in range(15, 21): put(x, z, 'H')                         # the engine block
 for z in range(7, 10): put(13, z, '~', '0'); put(22, z, '~', '0')    # mercury channels: jump them or go round
@@ -100,6 +101,9 @@ put(7, 19, 'h'); put(21, 27, 'b')
 put(4, 27, '+'); put(1, 25, 'a'); put(34, 17, 'A'); put(34, 28, 'h')
 put(11, 16, 'a')
 put(7, 2, '+'); put(28, 9, 'a'); put(12, 5, 'b')                    # the engine room: enough to win, not to relax
+put(10, 1, '+'); put(24, 1, 'h'); put(7, 9, 'a')                     # the north strip behind the engine, where fights end up
+# each lever's answer wave leaves supplies behind it: a reward for every seal (flow: 1.3x ammo, not 0.97x)
+put(3, 27, 'a'); put(1, 27, 'b'); put(32, 28, 'a'); put(34, 26, 'b'); put(21, 23, 'a'); put(14, 27, 'b'); put(28, 19, 'h')
 
 # ---- events: the level's moments -------------------------------------------------------
 SEAL = {1: [17, 13, 18, 13], 2: [17, 15, 18, 15], 3: [17, 17, 18, 17]}
