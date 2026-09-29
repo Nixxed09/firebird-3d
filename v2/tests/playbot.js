@@ -503,12 +503,27 @@ PlayBot.prototype.step = function (dt) {
       self.setMove(a, false);
       self.turnToward(a, dt);
     });
-    case 'exit': return this.goTo(function (x, z) { return self.adjacentTo(x, z, EXIT_SWITCH); }, dt, function () {
+    case 'exit': {
+      // the exit can be out of reach for now (E1M3's waystone dais only lowers once
+      // the Warden falls, and he only wakes when you walk into his arena): a player
+      // heads toward the goal anyway, so walk to the nearest reachable cell
+      var exitGoal = function (x, z) { return self.adjacentTo(x, z, EXIT_SWITCH); };
+      if (!this.pathTo(exitGoal) && G.exitCell) {
+        var near = this.nearestReachable(G.exitCell.x, G.exitCell.z);
+        if (near) { this.plan = { kind: 'approach', key: 'approach:' + near.x + ',' + near.z, gx: near.x, gz: near.z, score: plan.score }; return; }
+      }
+    }
+    return this.goTo(function (x, z) { return self.adjacentTo(x, z, EXIT_SWITCH); }, dt, function () {
       var sw = self.adjacentTo(Math.floor(p.x), Math.floor(p.z), EXIT_SWITCH);
       var a = Math.atan2(sw.z + 0.5 - p.z, sw.x + 0.5 - p.x);
       var err = self.turnToward(a, dt);
       self.setMove(err < 0.3 ? a : null, false);
       if (err < 0.2) self.use();
+    });
+    case 'approach': return this.goTo(function (x, z) { return x === plan.gx && z === plan.gz; }, dt, function () {
+      // as close as it gets: let the next decision look again
+      self.banned[plan.key] = self.now + 20;
+      self.plan = null;
     });
     case 'lever': return this.goTo(function (x, z) { return self.passable(x, z) && Math.abs(x - plan.lx) + Math.abs(z - plan.lz) === 1; }, dt, function () {
       var a = Math.atan2(plan.lz + 0.5 - p.z, plan.lx + 0.5 - p.x);
@@ -602,6 +617,19 @@ PlayBot.prototype.noteChoice = function (cands, best) {
     torchOptions: near.filter(function (c) { return c.torchDoor; }).length, options: near.length,
     door: best.door
   });
+};
+
+// the reachable cell (by the bot's own moves) closest in a straight line to (tx, tz)
+PlayBot.prototype.nearestReachable = function (tx, tz) {
+  var G = this.G(), mw = G.mw, self = this;
+  this.graph = this.game.walkGraph();
+  var sx = Math.floor(G.p.x), sz = Math.floor(G.p.z), seen = new Set([sz * mw + sx]), q = [sz * mw + sx], best = null, bd = Infinity;
+  for (var h = 0; h < q.length; h++) {
+    var c = q[h], cx = c % mw, cz = (c / mw) | 0, d = Math.hypot(cx - tx, cz - tz);
+    if (d < bd && !(self.banned['approach:' + cx + ',' + cz] > self.now)) { bd = d; best = { x: cx, z: cz }; }
+    this.edges(cx, cz).forEach(function (e) { var k = e.cz * mw + e.cx; if (!seen.has(k)) { seen.add(k); q.push(k); } });
+  }
+  return best && (best.x !== sx || best.z !== sz) ? best : null;
 };
 
 PlayBot.prototype.adjacentTo = function (x, z, id) {

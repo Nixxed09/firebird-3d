@@ -457,7 +457,9 @@ function aggregate(all) {
 // M4: "a boss beaten by standing still" is a failure (Doom: holding still
 // should lose). The same bot plays each boss level once per difficulty and
 // seed, one life, twice: normally, and holding still whenever it fights the
-// boss (it still aims and fires). Standing still should win clearly less.
+// boss (it still aims and fires). Standing still should lose: win clearly
+// less, or (when both nearly always win, as on ROOKIE) take clearly more
+// damage per second of boss fight (at least 1.3x).
 function bossStillness() {
   var bossLevels = [];
   // Riley ('Y'), or the Reset Warden on the map ('K') or arriving in a scripted wave
@@ -465,7 +467,7 @@ function bossStillness() {
   var persona = personas.all.power_user || personas.all[keys[0]], rows = [];
   bossLevels.forEach(function (li) {
     DIFFS.forEach(function (d) {
-      var res = { moving: { won: 0, n: 0, secs: 0 }, still: { won: 0, n: 0, secs: 0 } };
+      var res = { moving: { won: 0, n: 0, secs: 0, fightT: 0, dmg: 0 }, still: { won: 0, n: 0, secs: 0, fightT: 0, dmg: 0 } };
       for (var sd = SEED; sd < SEED + SEEDS; sd++) {
         ['moving', 'still'].forEach(function (mode) {
           var store = {}, rng = makeRng(episodeSeed(sd, 'm4-' + li));
@@ -474,17 +476,24 @@ function bossStillness() {
           FB.startLevel(li, false);
           var bot = new PlayBot(FB, persona, rng, {}), fight = bot.fight;
           if (mode === 'still') bot.fight = function (e, dt) { fight.call(this, e, dt); if (e.kind === 'riley' || e.kind === 'knight') this.setMove(null); };
-          var t = 0, won = false;
+          var t = 0, won = false, r = res[mode];
           while (t < LEVEL_LIMIT) {
+            var P = FB.state().p, before = P.hp + P.armor;
             bot.step(DT); FB.update(DT); t += DT;
-            if (FB.state().p.dead) break;
+            // damage taken while a boss (Riley or the Warden) is up and within 12 cells
+            var G2 = FB.state(), P2 = G2.p, inFight = G2.ents.some(function (e) {
+              return (e.kind === 'riley' || e.kind === 'knight') && e.state !== 'idle' && e.state !== 'die' && e.state !== 'dead' && Math.hypot(e.x - P2.x, e.z - P2.z) <= 12; });
+            if (inFight) { r.fightT += DT; r.dmg += Math.max(0, before - (P2.hp + P2.armor)); }
+            if (P2.dead) break;
             if (FB.mode() !== 'game') { won = true; break; }
           }
-          var r = res[mode]; r.n++; if (won) { r.won++; r.secs += t; }
+          r.n++; if (won) { r.won++; r.secs += t; }
         });
       }
-      rows.push({ level: LEVELS[li].name, difficulty: DIFF_NAMES[d], moving: res.moving, still: res.still,
-        ok: res.still.won < res.moving.won || res.moving.won === 0 });
+      ['moving', 'still'].forEach(function (m) { var x = res[m]; x.dps = x.fightT ? +(x.dmg / x.fightT).toFixed(1) : null; });
+      var ratio = res.moving.dps && res.still.dps != null ? +(res.still.dps / res.moving.dps).toFixed(2) : null;
+      rows.push({ level: LEVELS[li].name, difficulty: DIFF_NAMES[d], moving: res.moving, still: res.still, dpsRatio: ratio,
+        ok: res.still.won < res.moving.won || res.moving.won === 0 || (ratio != null && ratio >= 1.3) });
     });
   });
   return rows;
@@ -515,9 +524,9 @@ function codexReport(flow, m4) {
   });
   L.push('', '### M4: standing still against the boss', '',
     'The same bot, one life, once moving and once holding still whenever it fights the boss (it still aims and fires). Standing still should win clearly less (Doom: holding still should lose).', '',
-    '| Level | Difficulty | Moving: won | Still: won | Standing still loses? |', '|---|---|---|---|---|');
+    '| Level | Difficulty | Moving: won, damage/s | Still: won, damage/s | Still takes x | Standing still loses? |', '|---|---|---|---|---|---|');
   m4.forEach(function (r) {
-    L.push('| ' + r.level + ' | ' + r.difficulty + ' | ' + r.moving.won + '/' + r.moving.n + ' | ' + r.still.won + '/' + r.still.n + ' | ' + (r.ok ? 'yes' : '**no**') + ' |');
+    L.push('| ' + r.level + ' | ' + r.difficulty + ' | ' + r.moving.won + '/' + r.moving.n + ', ' + r.moving.dps + ' | ' + r.still.won + '/' + r.still.n + ', ' + r.still.dps + ' | ' + (r.dpsRatio == null ? '-' : r.dpsRatio + 'x') + ' | ' + (r.ok ? 'yes' : '**no**') + ' |');
   });
   return L.join('\n') + '\n';
 }
