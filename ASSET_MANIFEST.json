@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "game_id": "firebird-3d",
+  "style_guide": "STYLE_GUIDE.md",
+  "lila_alignment": "LILA_ALIGNMENT.md",
+  "note": "Every asset below follows STYLE_GUIDE.md (Old Earth: Ashgate, the Overseers' red mercury, Tartarian brass and bells). 'sim_id' is the internal id the code uses; players only ever see 'name'. The v2 model contract is v2/docs/ASSETS.md; CC0 sources and licences are in v2/assets/cc0/CREDITS.md.",
+  "assets": [
+    { "id": "enemy.hollow", "name": "Hollow", "sim_id": "imp", "kind": "cc0_model_recoloured", "status": "approved", "source": "v2/assets/cc0/imp.glb (Quaternius Zombie, CC0)", "style": "ash shell, red-mercury seams; the ash-shell pass greys it in game; windup tell before every throw" },
+    { "id": "enemy.hollow_hound", "name": "Hollow Hound", "sim_id": "gnasher", "kind": "cc0_model_recoloured", "status": "approved", "source": "v2/assets/cc0/gnasher.glb (Quaternius Wolf, CC0)", "style": "low fast charger in ash with glowing seams" },
+    { "id": "enemy.reset_warden", "name": "Reset Warden", "sim_id": "knight", "kind": "procedural_three_js", "status": "approved", "source": "v2/src/render/models.js", "style": "basalt plates, brass trim and spire, red-mercury core and visor; no horns" },
+    { "id": "boss.riley", "name": "Riley", "sim_id": "riley", "kind": "cc0_model_recoloured", "status": "approved", "source": "v2/assets/cc0/riley.glb (Quaternius Adventurer, CC0)", "style": "aqua and white, crystal shield that shatters into light; friendly and human" },
+    { "id": "prop.mercury_cask", "name": "mercury cask", "sim_id": "barrel", "kind": "procedural_three_js", "status": "approved", "source": "v2/src/render/models.js", "style": "dark vessel, brass bands, crimson top; no hazard stripes" },
+    { "id": "weapon.ember_fist", "name": "Ember Fist", "sim_id": "fist", "kind": "procedural_three_js", "status": "approved", "source": "v2/src/render/models.js (addHand)" },
+    { "id": "weapon.spark_caster", "name": "Spark Caster", "sim_id": "pistol", "kind": "procedural_three_js", "status": "approved", "source": "v2/src/render/models.js", "style": "brass body, copper coils, crystal core; no real-gun silhouette" },
+    { "id": "weapon.bell_blaster", "name": "Bell Blaster", "sim_id": "shotgun", "kind": "procedural_three_js", "status": "approved", "source": "v2/src/render/models.js (shotgunModel)", "style": "a Tartarian bell rung once; gold star flash" },
+    { "id": "textures.ashgate", "name": "Ashgate materials", "kind": "procedural_canvas", "status": "approved", "source": "v2/src/render/textures.js", "style": "limestone with bronze seams, mudflood brick, aged brass, aether panels, basalt with ruby seams" },
+    { "id": "hud.firebird_face", "name": "the Firebird (HUD face)", "kind": "pixel_sprite", "status": "approved", "source": "js/art.js buildFace", "style": "soot when hurt, never blood; knocked out, not dead-looking" },
+    { "id": "classic.sprites", "name": "classic build sprites and textures", "kind": "pixel_sprite", "status": "approved", "source": "js/art.js", "style": "the same palette as v2; judged with tests/classic-look.js" },
+    { "id": "audio.sfx_and_music", "name": "sound effects and music", "kind": "synthesized_webaudio", "status": "prototype", "source": "js/sound.js", "style": "Hollows knock and rasp and break like glass; bell and choir colour over a driving gallop; UI chimes" }
+  ],
+  "external_assets": ["v2/assets/cc0/CREDITS.md"],
+  "evidence": ["v2/tests/browser.mjs (screenshots)", "v2/tests/asset-render.mjs", "tests/classic-look.js", "v2/tests/oldearth-lint.test.js"],
+  "final_art_approved": false
+}
