@@ -606,12 +606,12 @@ export function createGame(opts) {
     if (e.kind === 'knight' && !tgt && e.los && e.state === 'chase' && !p.dead) {
       e.eruptT = (e.eruptT === undefined ? 3 : e.eruptT) - dt;
       if (e.eruptT <= 0) {
-        e.eruptT = rndIn(3.5, 5);
+        e.eruptT = rndIn(2.8, 4);
         var mx = p.x, mz = p.z, my = floorAt(G.W, Math.floor(mx), Math.floor(mz));
         ev('fx', 'summon', mx, my + 0.1, mz); sound('impShoot', { x: mx, y: my, z: mz });
         G.timers.push({ t: 1.0, fn: function () {
           ev('fx', 'fireBurst', mx, my + 0.3, mz);
-          if (!p.dead && Math.hypot(p.x - mx, p.z - mz) < 1.1 && p.y < my + 0.6) hurtPlayer(rndIn(14, 22) | 0, e);
+          if (!p.dead && Math.hypot(p.x - mx, p.z - mz) < 1.1 && p.y < my + 0.6) hurtPlayer(rndIn(18, 26) | 0, e);
         } });
       }
     }
@@ -1303,6 +1303,7 @@ export function createGame(opts) {
           var dn = doorAt(G.W, n.x, n.z);
           if (dn && dn.sealed) return; // an arena lock: shut until the fight is won
           var dh = floorAt(G.W, n.x, n.z) - from;
+          if (dn && dh < -STEP_UP) return; // no dropping into a doorway from above: the lintel is in the way
           var kind = dh <= 0.02 && dh >= -0.02 ? 'walk' : dh < 0 ? 'drop' : dh <= STEP_UP ? 'step' : dh <= JUMP_UP ? 'jump' : null;
           if (kind) out.push({ cx: n.x, cz: n.z, cost: kind === 'jump' ? 2 : 1, kind: kind });
         });

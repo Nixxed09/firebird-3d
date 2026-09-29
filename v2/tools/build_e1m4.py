@@ -48,7 +48,7 @@ put(2, 34, '*'); put(3, 34, 'P'); put(4, 34, 'A')
 # 4. the east wing: the Trial of Mercury (E1M2's lesson: find the switch, drain it)
 room(29, 16, 34, 31, floor='4', ceil='q', wall='H')
 for z in range(19, 24):
-    for x in range(29, 35): put(x, z, '~', '0')                    # a mercury pool across the wing
+    for x in range(29, 35): put(x, z, '~', '3')                    # a mercury pool across the wing, one step down: fall in and you can climb out
 room(30, 16, 33, 18, floor='4', ceil='q')                          # the keystone island beyond it
 put(35, 27, '=')                                                   # the drain switch on the east wall
 put(28, 24, 'D'); put(28, 29, 'D')

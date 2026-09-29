@@ -92,7 +92,7 @@ export function buildLevel(G, assets) {
       var b = a.raise || a.lower;
       if (!b) return;
       var lo = Math.min(W.floor[b[1] * W.mw + b[0]], a.to);
-      moverBoxes.push({ box: b, lo: lo });
+      moverBoxes.push({ box: b, lo: lo, look: a.look });   // look: a wall id, so a hidden gate matches its wall
       for (var z = b[1]; z <= b[3]; z++) for (var x = b[0]; x <= b[2]; x++) moverCell[x + ',' + z] = lo;
     });
   });
@@ -168,7 +168,8 @@ export function buildLevel(G, assets) {
     var b = mb.box, w = b[2] - b[0] + 1, d = b[3] - b[1] + 1, depth = 3;
     var geo = new THREE.BoxGeometry(w, depth, d);
     setBoxUV(geo, w, depth);
-    var mesh = new THREE.Mesh(geo, [trimMat, trimMat, floorMat, trimMat, trimMat, trimMat]);
+    var side = mb.look ? mat('wall' + mb.look) : trimMat;
+    var mesh = new THREE.Mesh(geo, [side, side, floorMat, side, side, side]);
     mesh.userData = { i: b[1] * W.mw + b[0], depth: depth, cx: b[0] + w / 2, cz: b[1] + d / 2 };
     group.add(mesh);
     return mesh;

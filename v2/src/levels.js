@@ -17,7 +17,7 @@ var E1M1 = {
   // the shortcut home (codex U8, contract S5): a stone gate between the hall and the start room sinks
   // once you reach the hall, so it opens from the far side
   events: [
-    { when: { enter: [2, 17, 19, 21] }, do: [{ lower: [7, 22, 7, 24], to: 0, speed: 1.2 }, { say: "HEAR THAT? A SHORTCUT BACK TO WHERE YOU STARTED JUST OPENED." }] }
+    { when: { enter: [2, 17, 19, 21] }, do: [{ lower: [7, 22, 7, 24], to: 0, speed: 1.2, look: 1 }, { say: "HEAR THAT? A SHORTCUT BACK TO WHERE YOU STARTED JUST OPENED." }] }
   ],
   triggers: [
     { box: [2, 25, 8, 30], say: "HI! I'M RILEY. I'M WAITING FOR YOU AT THE TOP. LOOK AROUND WITH THE MOUSE, MOVE WITH WASD, THEN HEAD FOR THAT DOOR AHEAD." },

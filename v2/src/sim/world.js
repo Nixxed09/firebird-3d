@@ -231,14 +231,22 @@ export function updateMovers(W, dt) {
 // Lifts: rest at the bottom, rise when stood on (or used), come back down when left alone.
 export function updateLifts(W, dt, occupied, onMove) {
   for (var i = 0; i < W.lifts.length; i++) {
-    var lf = W.lifts[i], busy = occupied(lf.x, lf.z), prev = lf.pos;
-    if (lf.state === 'down' && busy) { lf.state = 'wait'; lf.wait = 0.5; }
+    var lf = W.lifts[i], busy = occupied(lf.x, lf.z), prev = lf.pos, boarded = busy && !lf.wasBusy;
+    lf.wasBusy = busy;
+    // Doom-style: step on at the bottom and it rises; step on at the top and it takes you down.
+    // Someone who just rode down has to step off before it will rise again.
+    if (!busy) lf.stayDown = false;
+    if (lf.state === 'down' && busy && !lf.stayDown) { lf.state = 'wait'; lf.wait = 0.5; }
     else if (lf.state === 'wait') { lf.wait -= dt; if (lf.wait <= 0) { lf.state = 'up'; if (onMove) onMove(lf, 'start'); } }
-    else if (lf.state === 'up') { lf.pos = Math.min(lf.top, lf.pos + dt * 0.9); if (lf.pos >= lf.top) { lf.state = 'top'; lf.wait = 2.5; if (onMove) onMove(lf, 'stop'); } }
-    else if (lf.state === 'top') { if (busy) lf.wait = 2.5; else if ((lf.wait -= dt) <= 0) { lf.state = 'lower'; if (onMove) onMove(lf, 'start'); } }
+    else if (lf.state === 'up') { lf.pos = Math.min(lf.top, lf.pos + dt * 0.9); if (lf.pos >= lf.top) { lf.state = 'top'; lf.wait = 2.5; lf.ridden = false; if (onMove) onMove(lf, 'stop'); } }
+    else if (lf.state === 'top') {
+      if (boarded && lf.ridden) { lf.state = 'lower'; lf.ridingDown = true; if (onMove) onMove(lf, 'start'); }
+      else if (busy) lf.wait = 2.5;
+      else { lf.ridden = true; if ((lf.wait -= dt) <= 0) { lf.state = 'lower'; lf.ridingDown = false; if (onMove) onMove(lf, 'start'); } }
+    }
     else if (lf.state === 'lower') {
-      if (busy && lf.pos > lf.bottom + 0.05) { lf.state = 'up'; }
-      else { lf.pos = Math.max(lf.bottom, lf.pos - dt * 0.9); if (lf.pos <= lf.bottom) { lf.state = 'down'; if (onMove) onMove(lf, 'stop'); } }
+      if (busy && !lf.ridingDown && lf.pos > lf.bottom + 0.05) { lf.state = 'up'; }
+      else { lf.pos = Math.max(lf.bottom, lf.pos - dt * 0.9); if (lf.pos <= lf.bottom) { lf.state = 'down'; lf.stayDown = lf.ridingDown && busy; lf.ridingDown = false; if (onMove) onMove(lf, 'stop'); } }
     }
     W.floor[lf.z * W.mw + lf.x] = lf.pos;
     lf.moved = lf.pos - prev;
