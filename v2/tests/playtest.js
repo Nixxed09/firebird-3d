@@ -19,7 +19,7 @@ import { createGame, DIFFS as GAME_DIFFS } from '../src/sim/game.js';
 import { LEVELS } from '../src/levels.js';
 import { makeRng } from '../src/sim/rng.js';
 import { PlayBot } from './playbot.js';
-import { Recorder, writeFlow } from './flow.js';
+import { Recorder, writeFlow, CODEX_TARGETS } from './flow.js';
 import RILEY from '../../js/riley.js';
 
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -144,8 +144,9 @@ function playEpisode(key, persona, sd, difficulty) {
   for (var li = 0; li < LEVELS.length; li++) {
     var lv = { name: LEVELS[li].name, attempts: 1, time: 0, result: 'timeout', damage: 0, gear: [gearOf(FB.state().p)] };
     var rec = new Recorder(LEVELS[li]); // flow of play across every attempt (tests/flow.js)
-    FLOW[li].push({ persona: key, difficulty: difficulty, seed: sd, samples: rec.samples, deaths: rec.deaths, choices: rec.choices });
-    bot.onChoice = function (ev) { rec.choices.push(ev); };
+    var flowEntry = { persona: key, difficulty: difficulty, seed: sd, samples: rec.samples, deaths: rec.deaths, choices: rec.choices, events: rec.events, firstTimer: FIRST_TIMER };
+    FLOW[li].push(flowEntry);
+    bot.onChoice = function (ev) { rec.choices.push(ev); rec.event('choice'); };
     run.levels.push(lv);
     var t = 0, done = false, fight = null, seenMsgs = new Set(), lastHp = FB.state().p.hp;
     bot.reset();
@@ -234,6 +235,8 @@ function playEpisode(key, persona, sd, difficulty) {
         break;
       }
     }
+    // Level Design Codex evidence (tests/flow.js): how the level ended, M0's first act and win
+    flowEntry.result = lv.result; flowEntry.firstAct = rec.firstAct; flowEntry.firstWin = rec.firstWin;
     if (!done) return run;
     // skip the tally and move on, like pressing Enter
     for (var n = 0; n < 5 && FB.mode() === 'inter'; n++) { for (var w = 0; w < 30; w++) FB.update(DT); FB.onEnter(); }
@@ -449,6 +452,76 @@ function aggregate(all) {
   return L;
 }
 
+// ---- Level Design Codex (GamesOS docs/LEVEL_DESIGN_CODEX.md) ----------------
+
+// M4: "a boss beaten by standing still" is a failure (Doom: holding still
+// should lose). The same bot plays each boss level once per difficulty and
+// seed, one life, twice: normally, and holding still whenever it fights the
+// boss (it still aims and fires). Standing still should win clearly less.
+function bossStillness() {
+  var bossLevels = [];
+  // Riley ('Y'), or the Reset Warden on the map ('K') or arriving in a scripted wave
+  LEVELS.forEach(function (L, li) { var s = L.map.join(''); if (s.indexOf('Y') >= 0 || s.indexOf('K') >= 0 || JSON.stringify(L.events || []).indexOf('"knight"') >= 0) bossLevels.push(li); });
+  var persona = personas.all.power_user || personas.all[keys[0]], rows = [];
+  bossLevels.forEach(function (li) {
+    DIFFS.forEach(function (d) {
+      var res = { moving: { won: 0, n: 0, secs: 0 }, still: { won: 0, n: 0, secs: 0 } };
+      for (var sd = SEED; sd < SEED + SEEDS; sd++) {
+        ['moving', 'still'].forEach(function (mode) {
+          var store = {}, rng = makeRng(episodeSeed(sd, 'm4-' + li));
+          var FB = createGame({ levels: LEVELS, rng: rng, settings: { difficulty: d, tips: false, seenTips: {} },
+            storage: { getItem: function (k) { return k in store ? store[k] : null; }, setItem: function (k, v) { store[k] = String(v); } } });
+          FB.startLevel(li, false);
+          var bot = new PlayBot(FB, persona, rng, {}), fight = bot.fight;
+          if (mode === 'still') bot.fight = function (e, dt) { fight.call(this, e, dt); if (e.kind === 'riley' || e.kind === 'knight') this.setMove(null); };
+          var t = 0, won = false;
+          while (t < LEVEL_LIMIT) {
+            bot.step(DT); FB.update(DT); t += DT;
+            if (FB.state().p.dead) break;
+            if (FB.mode() !== 'game') { won = true; break; }
+          }
+          var r = res[mode]; r.n++; if (won) { r.won++; r.secs += t; }
+        });
+      }
+      rows.push({ level: LEVELS[li].name, difficulty: DIFF_NAMES[d], moving: res.moving, still: res.still,
+        ok: res.still.won < res.moving.won || res.moving.won === 0 });
+    });
+  });
+  return rows;
+}
+
+function codexReport(flow, m4) {
+  var L = ['', '## Level Design Codex', '',
+    'Evidence named by the ids in GamesOS docs/LEVEL_DESIGN_CODEX.md. ' + (FIRST_TIMER ? 'First-timer bots (they know only what they have seen).' : 'Bots that know the map; run with --first-timer for U7 and M0, whose targets are about first-timers.') +
+    ' Targets are the codex starting numbers: U7 lost <= 5%, U10 longest quiet < 30 s, U12 ends high in >= 50% of runs, M0 first act <= 10 s and first win <= 30 s.', '',
+    '| Level | U7 lost | U9 path overlap / spread | U10 longest quiet (median, p90) | U12 ends high | M0 first act / win | M4 still in boss fights | M8 retries (mean, max) |',
+    '|---|---|---|---|---|---|---|---|'];
+  function mark(ok) { return ok === true ? ' ✓' : ok === false ? ' ✗' : ''; }
+  flow.levels.forEach(function (f) {
+    var c = f.codex;
+    L.push('| ' + f.level + ' | ' + Math.round(c.U7.lostShare * 100) + '%' + mark(c.U7.ok) +
+      ' | ' + c.U9.pathOverlap + ' / ' + c.U9.coverageEntropy +
+      ' | ' + c.U10.longestQuietMedian + ' s, ' + c.U10.longestQuietP90 + ' s' + mark(c.U10.ok) +
+      ' | ' + Math.round((c.U12.endsHighShare || 0) * 100) + '%' + mark(c.U12.ok) +
+      ' | ' + c.M0.firstActMedian + ' s / ' + (c.M0.firstWinMedian == null ? '-' : c.M0.firstWinMedian + ' s') + (FIRST_TIMER ? mark(c.M0.ok) : '') +
+      ' | ' + (c.M4.stillShare == null ? '-' : Math.round(c.M4.stillShare * 100) + '% of ' + Math.round(c.M4.bossFightSeconds) + ' s') +
+      ' | ' + c.M8.retriesBeforeSuccessMean + ', ' + c.M8.retriesBeforeSuccessMax + ' |');
+  });
+  L.push('');
+  flow.levels.forEach(function (f) {
+    var c = f.codex, w = c.U10.worst.map(function (g) { return g.seconds + ' s from (' + g.fromX + ',' + g.fromZ + ')'; }).join('; ');
+    var causes = Object.keys(c.M8.byCause).map(function (k) { var x = c.M8.byCause[k]; return k + ' ' + x.deaths + (x.thenNeverCleared ? ' (then never cleared ' + x.thenNeverCleared + ')' : ''); }).join(', ');
+    L.push('- ' + f.level + ': U10 quietest stretches ' + (w || '-') + '. M8 deaths by cause: ' + (causes || 'none') + '.');
+  });
+  L.push('', '### M4: standing still against the boss', '',
+    'The same bot, one life, once moving and once holding still whenever it fights the boss (it still aims and fires). Standing still should win clearly less (Doom: holding still should lose).', '',
+    '| Level | Difficulty | Moving: won | Still: won | Standing still loses? |', '|---|---|---|---|---|');
+  m4.forEach(function (r) {
+    L.push('| ' + r.level + ' | ' + r.difficulty + ' | ' + r.moving.won + '/' + r.moving.n + ' | ' + r.still.won + '/' + r.still.n + ' | ' + (r.ok ? 'yes' : '**no**') + ' |');
+  });
+  return L.join('\n') + '\n';
+}
+
 // ---- main ------------------------------------------------------------------
 
 var detailDiff = DIFFS.indexOf(1) >= 0 ? 1 : DIFFS[0];
@@ -480,5 +553,7 @@ var flow = writeFlow(OUT, LEVELS, worlds, FLOW);
 flow.levels.forEach(function (f) {
   console.log('  flow ' + f.level + ': intensity ' + f.intensity.map(function (v) { return v == null ? '-' : Math.round(v); }).join('') + ', lost ' + Math.round(f.lostShare * 100) + '% of the time');
 });
+var m4 = bossStillness();
+fs.appendFileSync(path.join(OUT, 'playtest-report.md'), codexReport(flow, m4));
 fs.writeFileSync(path.join(OUT, 'playtest-report.json'), JSON.stringify({ seed: SEED, seeds: SEEDS, difficulties: DIFFS, personaSource: personas.source, episodes: all }, null, 1));
 console.log('Report: ' + path.join(OUT, 'playtest-report.md'));

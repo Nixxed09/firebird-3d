@@ -33,6 +33,22 @@
 //              With bots, torchChosenRate reflects the bot's own torch bonus, so only
 //              onCriticalRate (does a torch door ever lead off the route?) is evidence;
 //              whether PEOPLE follow torches needs a human playtest.
+//
+// Level Design Codex ids (GamesOS docs/LEVEL_DESIGN_CODEX.md), in flow.json
+// under each level's `codex` and in the playtest report's codex table:
+//   U7   lost share (target <= 5% for first-timers: run with --first-timer)
+//   U9   path overlap (mean Jaccard of the cells two runs visited) and the
+//        spread of visits (normalised entropy)
+//   U10  the longest stretch of a run with no event. Events: a fight in range
+//        or an enemy freed, a pickup, a new area in view (25+ new cells in
+//        0.5 s), a message or script line, a door or lever, a choice, a death
+//   U12  endsHighShare (P5 per episode; target >= 50%)
+//   M0   time to the first input that matters (fire, pickup, door, lever)
+//        and to the first win (enemy freed, key, lever, secret), first attempt
+//   M4   share of boss-fight time spent holding still; the still-versus-moving
+//        survival test runs in tests/playtest.js
+//   M8   retries before success; deaths by cause, and how many runs never
+//        cleared after them (bots never quit, so this stands in for quitting)
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
@@ -67,7 +83,43 @@ export function Recorder(L) {
   this.fieldKey = null; this.field = null; this.best = Infinity; this.bestT = 0;
   this.choices = [];   // N2: { x, z, torchChosen, torchOptions, options, door }
   this.weenie = null;  // S2: { firstT, firstRoute, after, inView }
+  // Level Design Codex (GamesOS docs/LEVEL_DESIGN_CODEX.md) evidence:
+  this.events = [];    // U10: [t, kind] for fight, pickup, view, script, use, choice, death
+  this.firstAct = null; this.firstWin = null; // M0: seconds into the first attempt
+  this.attempt = 1;
+  this.prev = null;    // counters from the last tick, to see what changed
 }
+
+// U10 / M0: note that something happened (once per kind per sample is plenty)
+Recorder.prototype.event = function (kind) {
+  var last = this.events[this.events.length - 1];
+  if (last && last[1] === kind && this.t - last[0] < STEP) return;
+  this.events.push([+this.t.toFixed(1), kind]);
+};
+
+// what changed since the last tick: the player acting on the world (M0's
+// "first input that matters"), winning something (M0's "first win"), and the
+// events whose absence makes a quiet stretch (U10)
+Recorder.prototype.watch = function (G) {
+  var p = G.p, open = 0, levers = 0;
+  for (var k in G.doors) if (G.doors[k].open > 0.5) open++;
+  if (G.info && G.info.levers) G.info.levers.forEach(function (l) { if (G.W.cells[l[1] * G.W.mw + l[0]] !== 12) levers++; });
+  var now = { items: G.stats.items, kills: G.stats.kills, secrets: G.stats.secrets, keys: (p.keys.red ? 1 : 0) + (p.keys.blue ? 1 : 0),
+    open: open, levers: levers, fireT: p.fireT, msg: G.msgs[G.msgs.length - 1] || null };
+  var was = this.prev; this.prev = now;
+  if (!was) return;
+  var acted = false, won = false;
+  if (now.fireT < was.fireT) acted = true;                                      // pulled the trigger
+  if (now.items > was.items || now.keys > was.keys) { acted = true; this.event('pickup'); }
+  if (now.open > was.open || now.levers > was.levers) { acted = true; this.event('use'); }
+  if (now.keys > was.keys || now.levers > was.levers || now.secrets > was.secrets) won = true;
+  if (now.kills > was.kills) { won = true; this.event('fight'); }
+  if (now.msg && now.msg !== was.msg) this.event('script');
+  if (this.attempt === 1) {
+    if (acted && this.firstAct === null) this.firstAct = +this.t.toFixed(1);
+    if (won && this.firstWin === null) this.firstWin = +this.t.toFixed(1);
+  }
+};
 
 Recorder.prototype.objective = function (G) {
   var W = G.W, p = G.p, m = this.L.map, targets = [], key = '';
@@ -97,6 +149,7 @@ Recorder.prototype.tick = function (G, dt) {
   if (this.lastHp !== null && hp < this.lastHp) this.recent.push([this.t, this.lastHp - hp]);
   this.lastHp = hp;
   this.t += dt;
+  this.watch(G);
   if (this.t < this.next) return;
   this.next = this.t + STEP;
   var self = this, W = G.W, cx = Math.floor(p.x), cz = Math.floor(p.z);
@@ -124,7 +177,20 @@ Recorder.prototype.tick = function (G, dt) {
   this.recent = this.recent.filter(function (r) { return r[0] > self.t - 2; });
   var dmg = this.recent.reduce(function (a, r) { return a + r[1]; }, 0);
   var seesGoal = this.seesDestination(G);
-  this.samples.push([+this.t.toFixed(1), cx, cz, p.hp, p.armor, p.ammo.bullets, p.ammo.shells, awake, near, Math.round(dmg), dist, lost, seesGoal ? 1 : 0]);
+  // U10: a fight in range, or a new view: a new area opening up (a door onto a
+  // room, a corner turned), 25+ cells seen for the first time in half a second.
+  // Walking down a corridor reveals a few cells at a time; that isn't an event.
+  var seen = 0;
+  for (var si = 0; si < G.seen.length; si++) seen += G.seen[si];
+  if (fighting) this.event('fight');
+  if (this.seenCount !== undefined && seen - this.seenCount >= 25) this.event('view');
+  this.seenCount = seen;
+  // M4: in a boss fight (within 12 cells of a living boss), and holding still?
+  var moved = this.lastPos ? Math.hypot(p.x - this.lastPos[0], p.z - this.lastPos[1]) : 1;
+  this.lastPos = [p.x, p.z];
+  var bossFight = atBoss || G.ents.some(function (e) { return e.kind === 'knight' && e.state !== 'idle' && e.state !== 'die' && e.state !== 'dead' && Math.hypot(e.x - p.x, e.z - p.z) <= 12; });
+  this.samples.push([+this.t.toFixed(1), cx, cz, p.hp, p.armor, p.ammo.bullets, p.ammo.shells, awake, near, Math.round(dmg), dist, lost, seesGoal ? 1 : 0,
+    bossFight ? 1 : 0, moved < 0.1 ? 1 : 0]);
 };
 
 // S2: can the player see the level's final destination right now?
@@ -152,9 +218,9 @@ Recorder.prototype.seesDestination = function (G) {
 };
 
 // a retry restarts the level: progress toward the objective starts over
-Recorder.prototype.retry = function () { this.fieldKey = null; this.best = Infinity; this.bestT = this.t; this.lastHp = null; this.recent = []; };
+Recorder.prototype.retry = function () { this.fieldKey = null; this.best = Infinity; this.bestT = this.t; this.lastHp = null; this.recent = []; this.prev = null; this.seenCount = undefined; this.attempt++; };
 
-Recorder.prototype.death = function (G) { this.deaths.push([+this.t.toFixed(1), Math.floor(G.p.x), Math.floor(G.p.z)]); };
+Recorder.prototype.death = function (G) { this.deaths.push([+this.t.toFixed(1), Math.floor(G.p.x), Math.floor(G.p.z), G.killer || '?']); this.event('death'); };
 
 export function intensity(s) {
   return 1 + 9 * (0.6 * Math.min(1, s[9] / 30) + 0.4 * Math.min(1, s[8] / 4));
@@ -293,18 +359,104 @@ export function summarise(levelTraces, W, L) {
   var hot = [];
   for (var i = 0; i < n; i++) if (lost[i] > 0) hot.push({ x: i % W.mw, z: (i / W.mw) | 0, lostSeconds: lost[i] });
   hot.sort(function (a, b) { return b.lostSeconds - a.lostSeconds; });
+  var lostShare = total ? +(lostSamples / total).toFixed(3) : 0;
+  var endsHighShare = epN ? +(epEndHigh / epN).toFixed(2) : null;
   return {
     episodes: levelTraces.length,
     intensity: ints,
     peakBucket: peak, peakValue: ints[peak], endsHigh: peak >= BUCKETS * 0.75,
-    perEpisode: { peakAtMedian: median(epPeakAt), peakValueMedian: median(epPeakVal), endsHighShare: epN ? +(epEndHigh / epN).toFixed(2) : null },
+    perEpisode: { peakAtMedian: median(epPeakAt), peakValueMedian: median(epPeakVal), endsHighShare: endsHighShare },
     weenie: weenie,
     choices: choices,
-    lostShare: total ? +(lostSamples / total).toFixed(3) : 0,
+    lostShare: lostShare,
+    codex: codexMeasures(levelTraces, W, { lostShare: lostShare, endsHighShare: endsHighShare }),
     lostHotspots: hot.slice(0, 8),
     deathCells: Array.from(deaths).map(function (v, i) { return v ? { x: i % W.mw, z: (i / W.mw) | 0, deaths: v } : null; }).filter(Boolean),
     grids: { time: time, deaths: deaths, lost: lost }
   };
+}
+
+// ---- Level Design Codex measures (GamesOS docs/LEVEL_DESIGN_CODEX.md) ---------------------
+// Named by codex id so the codex and the evidence use the same words. Targets
+// are the codex's starting numbers (§4), not law.
+export var CODEX_TARGETS = { U7: 0.05, U10: 30, U12: 0.5, M0act: 10, M0win: 30 };
+
+function med(a) { if (!a.length) return null; a = a.slice().sort(function (x, y) { return x - y; }); return +a[a.length >> 1].toFixed(2); }
+function pctl(a, q) { if (!a.length) return null; a = a.slice().sort(function (x, y) { return x - y; }); return +a[Math.min(a.length - 1, Math.floor(a.length * q))].toFixed(2); }
+
+export function codexMeasures(levelTraces, W, known) {
+  var out = {};
+  var firstTimer = levelTraces.length > 0 && levelTraces.every(function (tr) { return tr.firstTimer; });
+
+  // U7: lost share (the codex target is for first-timers)
+  out.U7 = { lostShare: known.lostShare, firstTimerRun: firstTimer, target: '<= 0.05 for first-timers', ok: firstTimer ? known.lostShare <= CODEX_TARGETS.U7 : null };
+
+  // U9: are players' paths spread out or all on one line? Mean overlap
+  // (Jaccard) of the cells two runs visited, and the normalised entropy of how
+  // many runs visited each cell (1 = evenly spread, 0 = one line)
+  var sets = levelTraces.map(function (tr) { var s = new Set(); tr.samples.forEach(function (r) { s.add(r[2] * W.mw + r[1]); }); return s; }).filter(function (s) { return s.size; });
+  var jac = [], cap = Math.min(sets.length, 40);
+  for (var a = 0; a < cap; a++) for (var b = a + 1; b < cap; b++) {
+    var inter = 0; sets[a].forEach(function (c) { if (sets[b].has(c)) inter++; });
+    jac.push(inter / (sets[a].size + sets[b].size - inter));
+  }
+  var visits = new Map(); sets.forEach(function (s) { s.forEach(function (c) { visits.set(c, (visits.get(c) || 0) + 1); }); });
+  var tot = 0, H = 0; visits.forEach(function (v) { tot += v; });
+  visits.forEach(function (v) { var q = v / tot; H -= q * Math.log(q); });
+  out.U9 = { pathOverlap: jac.length ? +(jac.reduce(function (x, y) { return x + y; }, 0) / jac.length).toFixed(2) : null,
+    coverageEntropy: visits.size > 1 ? +(H / Math.log(visits.size)).toFixed(2) : null, cellsVisited: visits.size,
+    note: 'overlap near 1 = everyone walks one line; the codex asks for spread-out paths (no number yet)' };
+
+  // U10: the longest stretch with no event (fight, pickup, new view, script, door or lever, choice, death)
+  var longest = [], worst = [];
+  levelTraces.forEach(function (tr) {
+    var s = tr.samples; if (!s.length) return;
+    var end = s[s.length - 1][0], ts = [0].concat((tr.events || []).map(function (e) { return e[0]; })).concat([end]).sort(function (x, y) { return x - y; });
+    var best = 0, at = 0;
+    for (var i = 1; i < ts.length; i++) if (ts[i] - ts[i - 1] > best) { best = ts[i] - ts[i - 1]; at = ts[i - 1]; }
+    longest.push(best);
+    var row = s.find(function (r) { return r[0] >= at; }) || s[0];
+    worst.push({ seconds: +best.toFixed(1), fromX: row[1], fromZ: row[2] });
+  });
+  worst.sort(function (x, y) { return y.seconds - x.seconds; });
+  out.U10 = { longestQuietMedian: med(longest), longestQuietP90: pctl(longest, 0.9),
+    shareUnderTarget: longest.length ? +(longest.filter(function (v) { return v < CODEX_TARGETS.U10; }).length / longest.length).toFixed(2) : null,
+    target: '< ~30 s', ok: med(longest) != null ? med(longest) < CODEX_TARGETS.U10 : null, worst: worst.slice(0, 3) };
+
+  // U12: ends on the peak
+  out.U12 = { endsHighShare: known.endsHighShare, target: '>= 0.5', ok: known.endsHighShare != null ? known.endsHighShare >= CODEX_TARGETS.U12 : null };
+
+  // M0: time to the first input that matters (fire, pickup, door or lever)
+  // and to the first win (an enemy freed, a key, a lever, a secret), first attempt only
+  var acts = levelTraces.map(function (tr) { return tr.firstAct; }).filter(function (v) { return v != null; });
+  var wins = levelTraces.map(function (tr) { return tr.firstWin; }).filter(function (v) { return v != null; });
+  out.M0 = { firstActMedian: med(acts), firstWinMedian: med(wins), noWinInFirstTry: levelTraces.length - wins.length,
+    firstTimerRun: firstTimer, target: 'act <= 10 s, win <= 30 s',
+    ok: med(acts) != null && med(wins) != null ? med(acts) <= CODEX_TARGETS.M0act && med(wins) <= CODEX_TARGETS.M0win : null };
+
+  // M4 (in-run part): share of boss-fight time spent holding still
+  var bossS = 0, stillS = 0;
+  levelTraces.forEach(function (tr) { tr.samples.forEach(function (r) { if (r[13]) { bossS++; if (r[14]) stillS++; } }); });
+  out.M4 = { bossFightSeconds: bossS * STEP, stillShare: bossS ? +(stillS / bossS).toFixed(2) : null,
+    note: 'the still-versus-moving survival test is in the playtest report (M4 experiment)' };
+
+  // M8: retries before success, and what happened after each kind of death.
+  // Bots never quit, so "quit after a death" is stood in for by runs that
+  // died to that cause and then never cleared the level (gave up or got stuck).
+  var cleared = levelTraces.filter(function (tr) { return tr.result === 'cleared'; });
+  var retries = cleared.map(function (tr) { return tr.deaths.length; });
+  var causes = {};
+  levelTraces.forEach(function (tr) {
+    tr.deaths.forEach(function (d, i) {
+      var k = d[3] || '?', c = causes[k] = causes[k] || { deaths: 0, thenNeverCleared: 0 };
+      c.deaths++;
+      if (i === tr.deaths.length - 1 && tr.result && tr.result !== 'cleared') c.thenNeverCleared++;
+    });
+  });
+  out.M8 = { retriesBeforeSuccessMean: retries.length ? +(retries.reduce(function (x, y) { return x + y; }, 0) / retries.length).toFixed(2) : null,
+    retriesBeforeSuccessMax: retries.length ? Math.max.apply(null, retries) : null, byCause: causes,
+    note: 'thenNeverCleared stands in for the quit rate: bots never quit' };
+  return out;
 }
 
 function crc32(buf) {
@@ -373,7 +525,7 @@ export function drawLevel(sum, W, S) {
 // Write flow.json (summaries), flow-traces.json (every sample, compact) and one PNG per level.
 export function writeFlow(outDir, levels, worlds, byLevel) {
   var summary = {
-    about: 'Flow of play from the persona bots. Sample every ' + STEP + ' s: [t, x, z, hp, armor, bullets, shells, awake, awakeNear, damage2s, distToObjective, lost]. Intensity = 1 + 9 x (0.6 x min(1, damage2s/30) + 0.4 x min(1, awakeNear/4)). Lost = ' + LOST_AFTER + ' s without getting closer to the objective (needed keycard, else boss, else exit) while not fighting (no awake demon within ' + NEAR + ' cells, not within 12 of the boss).',
+    about: 'Flow of play from the persona bots. Sample every ' + STEP + ' s: [t, x, z, hp, armor, bullets, shells, awake, awakeNear, damage2s, distToObjective, lost, seesDestination, bossFight, still]. Intensity = 1 + 9 x (0.6 x min(1, damage2s/30) + 0.4 x min(1, awakeNear/4)). Lost = ' + LOST_AFTER + ' s without getting closer to the objective (needed keycard, else boss, else exit) while not fighting (no awake demon within ' + NEAR + ' cells, not within 12 of the boss).',
     levels: []
   };
   levels.forEach(function (L, li) {
@@ -384,7 +536,7 @@ export function writeFlow(outDir, levels, worlds, byLevel) {
   });
   fs.writeFileSync(path.join(outDir, 'flow.json'), JSON.stringify(summary, null, 1));
   fs.writeFileSync(path.join(outDir, 'flow-traces.json'), JSON.stringify(levels.map(function (L, li) {
-    return { level: L.name, episodes: byLevel[li].map(function (tr) { return { persona: tr.persona, difficulty: tr.difficulty, seed: tr.seed, samples: tr.samples, deaths: tr.deaths, choices: tr.choices }; }) };
+    return { level: L.name, episodes: byLevel[li].map(function (tr) { return { persona: tr.persona, difficulty: tr.difficulty, seed: tr.seed, samples: tr.samples, deaths: tr.deaths, choices: tr.choices, events: tr.events, result: tr.result, firstAct: tr.firstAct, firstWin: tr.firstWin }; }) };
   })));
   return summary;
 }
