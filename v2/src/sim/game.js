@@ -597,6 +597,20 @@ export function createGame(opts) {
     if (e.losT <= 0) { e.losT = 0.2 + rnd() * 0.1; e.los = hasLOS(G.W, e.x, e.y + e.h * 0.8, e.z, tx, ty, tz); }
     var dx = tx - e.x, dz = tz - e.z, d = Math.sqrt(dx * dx + dz * dz);
     if (tgt) { e.lostT = e.los ? 0 : e.lostT + dt; if (e.lostT > 4) { e.target = null; e.lostT = 0; return; } }
+    // the Reset Warden marks the ground under you, and a second later red mercury erupts there
+    // (codex M4: standing still must lose; moving never does). The plume is the 1 s warning (U5)
+    if (e.kind === 'knight' && !tgt && e.los && e.state === 'chase' && !p.dead) {
+      e.eruptT = (e.eruptT === undefined ? 3 : e.eruptT) - dt;
+      if (e.eruptT <= 0) {
+        e.eruptT = rndIn(3.5, 5);
+        var mx = p.x, mz = p.z, my = floorAt(G.W, Math.floor(mx), Math.floor(mz));
+        ev('fx', 'summon', mx, my + 0.1, mz); sound('impShoot', { x: mx, y: my, z: mz });
+        G.timers.push({ t: 1.0, fn: function () {
+          ev('fx', 'fireBurst', mx, my + 0.3, mz);
+          if (!p.dead && Math.hypot(p.x - mx, p.z - mz) < 1.1 && p.y < my + 0.6) hurtPlayer(rndIn(18, 28) | 0, e);
+        } });
+      }
+    }
 
     if (e.state === 'idle') { if (e.los && d < 9 && !p.dead) wakeMob(e); return; }
     if (e.state === 'pain') {

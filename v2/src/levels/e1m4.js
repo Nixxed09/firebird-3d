@@ -165,7 +165,7 @@ export var E1M4 = {
       23
      ],
      "to": 1.0,
-     "speed": 0.35
+     "speed": 0.8
     },
     {
      "say": "THERE IT GOES. THE KEYSTONE'S ON THE ISLAND. WATCH OUT, THE HOLLOWS HEARD THAT."

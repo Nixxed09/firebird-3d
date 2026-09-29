@@ -98,7 +98,7 @@ events = [
     {'when': {'use': [35, 27]}, 'do': [
         {'notice': 'THE MERCURY IS DRAINING!'}, {'shake': 2},
         {'lava': [29, 19, 34, 23], 'on': False},
-        {'raise': [29, 19, 34, 23], 'to': 1.0, 'speed': 0.35},
+        {'raise': [29, 19, 34, 23], 'to': 1.0, 'speed': 0.8},   # quick, so nobody waits in the pool as it rises
         {'say': "THERE IT GOES. THE KEYSTONE'S ON THE ISLAND. WATCH OUT, THE HOLLOWS HEARD THAT."},
         {'after': 3, 'do': [{'wave': 'island', 'spawn': [{'kind': 'imp', 'x': 32, 'z': 16}, {'kind': 'imp', 'x': 30, 'z': 16}]}]}]},
     # into the arena: the gate seals behind you; the Trial begins
