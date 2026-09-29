@@ -259,8 +259,11 @@ test('E1M3 plays out: pull three seals, beat the Warden, the city relights, exit
   p.x = 12.5; p.z = 6.5; p.y = 0.5;
   run(g, 0.2, function () { p.hp = 9999; });
   assert.ok(d.sealed && G.doors['18,11'].sealed, 'both doors seal behind you');
-  assert.strictEqual(G.ents.filter(function (e) { return e.wave; }).length, 0, 'a warning beat first (P6)');
+  var finale = function () { return G.ents.filter(function (e) { return e.wave === 'warden' || e.wave === 'escort'; }); };
+  assert.ok(G.ents.some(function (e) { return e.wave === 'answer1'; }), 'each seal lever called a wave of its own');
+  assert.strictEqual(finale().length, 0, 'a warning beat first (P6)');
   run(g, 2, function () { p.hp = 9999; });
+  assert.strictEqual(finale().length, 3, 'the Warden comes with an escort');
   var warden = G.ents.filter(function (e) { return e.wave === 'warden'; });
   assert.ok(warden.length === 1 && warden[0].kind === 'knight', 'the Warden arrives');
   warden[0].state = 'die'; warden[0].st = -1;

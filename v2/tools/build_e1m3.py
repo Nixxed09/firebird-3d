@@ -96,33 +96,40 @@ put(10, 16, 'i')                                                    # a Hollow o
 put(26, 20, 'o'); put(8, 27, 'o')                                   # mercury casks near Hollows
 # pickups: push forward (C2), health after hard bits (E1)
 put(18, 36, '2'); put(16, 36, 'a'); put(19, 33, 'b')               # the Bell Blaster is in the street: every run has it
-put(7, 19, 'h'); put(28, 19, 'h'); put(14, 27, 'a'); put(21, 27, 'b')
-put(4, 27, '+'); put(1, 25, 'a'); put(34, 17, 'A'); put(31, 27, 'b'); put(34, 28, 'h')
-put(11, 16, 'a'); put(8, 16, 'h')
-put(7, 2, '+'); put(28, 2, '+'); put(7, 9, 'a'); put(28, 9, 'a'); put(12, 5, 'b'); put(23, 5, 'b')
+put(7, 19, 'h'); put(21, 27, 'b')
+put(4, 27, '+'); put(1, 25, 'a'); put(34, 17, 'A'); put(34, 28, 'h')
+put(11, 16, 'a')
+put(7, 2, '+'); put(28, 9, 'a'); put(12, 5, 'b')                    # the engine room: enough to win, not to relax
 
 # ---- events: the level's moments -------------------------------------------------------
 SEAL = {1: [17, 13, 18, 13], 2: [17, 15, 18, 15], 3: [17, 17, 18, 17]}
-def seal_lever(x, z, n, name, line):
+# each seal the engine loses, it answers: a small wave you see coming (P6), smaller than the finale
+def seal_lever(x, z, n, name, line, answer):
     return {'when': {'use': [x, z]}, 'do': [
         {'notice': 'THE ' + name + ' SEAL IS DOWN'}, {'shake': 2},
-        {'lower': SEAL[n], 'to': 0.5, 'speed': 0.5}, {'say': line}]}
+        {'lower': SEAL[n], 'to': 0.5, 'speed': 0.5}, {'say': line},
+        {'after': 2.5, 'do': [{'wave': 'answer' + str(n), 'spawn': answer}]}]}
 
 events = [
     # the engine room's cyan lights wait for the engine to die
     {'when': {'start': True}, 'do': [{'light': 'relit', 'on': False}, {'light': 'relitW', 'on': False}, {'light': 'relitE', 'on': False}, {'light': 'relitHall', 'on': False}]},
-    seal_lever(2, 15, 1, 'WEST', "THE WEST SEAL IS DOWN. HEAR THAT BELL? THE CITY REMEMBERS."),
-    seal_lever(33, 15, 2, 'EAST', "THE EAST SEAL IS DOWN. THE MERCURY'S RUNNING COLD OVER THERE."),
-    seal_lever(9, 15, 3, 'GALLERY', "THE GALLERY SEAL IS DOWN. YOU CAN SEE THE WHOLE ENGINE FROM UP THERE, HUH?"),
+    seal_lever(2, 15, 1, 'WEST', "THE WEST SEAL IS DOWN. HEAR THAT BELL? THE ENGINE HEARD IT TOO. HOLLOWS, DOWN BELOW!",
+               [{'kind': 'imp', 'x': 2, 'z': 27}, {'kind': 'imp', 'x': 1, 'z': 28}]),
+    seal_lever(33, 15, 2, 'EAST', "THE EAST SEAL IS DOWN. SOMETHING'S COMING OVER THE BRIDGE!",
+               [{'kind': 'gnasher', 'x': 33, 'z': 27}, {'kind': 'imp', 'x': 31, 'z': 28}]),
+    seal_lever(9, 15, 3, 'GALLERY', "THE GALLERY SEAL IS DOWN. HOLLOWS IN THE HALL! YOU'VE GOT THE HIGH GROUND, USE IT.",
+               [{'kind': 'imp', 'x': 11, 'z': 25}, {'kind': 'imp', 'x': 24, 'z': 25}, {'kind': 'gnasher', 'x': 17, 'z': 28}]),
     # the finale: step into the engine room -> doors seal, the Warden climbs out of the engine
     {'when': {'enter': [9, 2, 26, 9]}, 'do': [
         {'seal': ['17,11', '18,11']}, {'notice': 'THE RESET WARDEN!'}, {'shake': 3},
-        {'say': "THAT'S THE WARDEN. IT RUNS THE ENGINE. STAY MOVING, USE THE PILLARS, AND RING IT WITH THE BELL BLASTER."},
-        {'after': 1.5, 'do': [{'wave': 'warden', 'spawn': [{'kind': 'knight', 'x': 17, 'z': 6}]}]},
-        {'after': 14, 'do': [{'say': "IT'S CALLING HOLLOWS OUT OF THE WALLS!"}, {'wave': 'adds1', 'spawn': [
-            {'kind': 'imp', 'x': 7, 'z': 3}, {'kind': 'imp', 'x': 28, 'z': 3}]}]},
-        {'after': 30, 'do': [{'wave': 'adds2', 'spawn': [
-            {'kind': 'gnasher', 'x': 7, 'z': 8}, {'kind': 'gnasher', 'x': 28, 'z': 8}, {'kind': 'imp', 'x': 17, 'z': 9}]}]}]},
+        {'say': "THAT'S THE WARDEN. IT WAS A KNIGHT ONCE, SWORN TO A FIRE DRAKE, UNTIL THE OVERSEERS HOLLOWED IT OUT. STAY MOVING, USE THE PILLARS, RING IT WITH THE BELL BLASTER."},
+        {'after': 1.5, 'do': [{'wave': 'warden', 'spawn': [{'kind': 'knight', 'x': 17, 'z': 6}]},
+                              {'wave': 'escort', 'spawn': [{'kind': 'imp', 'x': 7, 'z': 3}, {'kind': 'imp', 'x': 28, 'z': 3}]}]},
+        {'after': 10, 'do': [{'say': "IT'S CALLING HOLLOWS OUT OF THE WALLS!"}, {'shake': 2}, {'wave': 'adds1', 'spawn': [
+            {'kind': 'gnasher', 'x': 9, 'z': 9}, {'kind': 'gnasher', 'x': 26, 'z': 9}, {'kind': 'imp', 'x': 12, 'z': 2}]}]},
+        {'after': 22, 'do': [{'say': "HERE COMES EVERYTHING IT'S GOT. DON'T STOP MOVING!"}, {'shake': 3}, {'wave': 'adds2', 'spawn': [
+            {'kind': 'imp', 'x': 7, 'z': 9}, {'kind': 'imp', 'x': 28, 'z': 9}, {'kind': 'imp', 'x': 23, 'z': 2},
+            {'kind': 'gnasher', 'x': 12, 'z': 9}, {'kind': 'gnasher', 'x': 23, 'z': 9}]}]}]},
     # the engine dies: the mercury drains, the crimson goes out, Ashgate's cyan comes back on
     {'when': {'cleared': 'warden'}, 'do': [
         {'notice': 'THE ENGINE IS SILENT'}, {'shake': 4},

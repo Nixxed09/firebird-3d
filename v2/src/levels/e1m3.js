@@ -9,24 +9,24 @@ export var E1M3 = {
  "map": [
   "#####HHHHHHHHHHHHXHHHHHHHHHHHHH#####",
   "#####H........................H#####",
-  "#####H.+..t..............t..+.H#####",
+  "#####H.+..t..............t....H#####",
   "#####H.....H...HHHHHH...H.....H#####",
   "#####H.........HHHHHH.........H#####",
-  "#####H......b..HHHHHH..b......H#####",
+  "#####H......b..HHHHHH.........H#####",
   "#####H........................H#####",
   "#####H.......~........~.......H#####",
   "#####H.....H.~...HH...~.H.....H#####",
-  "#####H.a.....~........~.....a.H#####",
+  "#####H.......~........~.....a.H#####",
   "#####H........................H#####",
   "#####HHHHHHHHHHHHDDHHHHHHHHHHHH#####",
   "################H..H################",
   "################H..H################",
   "################H..H################",
   "%%=%%%###=######H..H##########HHH=HH",
-  "%....%#.h.ia.###H..H##########H....H",
+  "%....%#...ia.###H..H##########H....H",
   "%i...%H......LHHH..HHHHHHHHHHHHi..AH",
   "%....%..........t..t..........H..g.H",
-  "%.i%.%.h....................h.H....H",
+  "%.i%.%.h......................H....H",
   "%..%.%......Mi.........M..o...H~..~H",
   "%M.%.%...M.....~~~~~~.....M...H~..~H",
   "%..%.%.........~HHHH~.........H~..~H",
@@ -34,7 +34,7 @@ export var E1M3 = {
   "%.i..D....i.M..~HHHH~..M.i....D....H",
   "%a...%.........~HHHH~.........H....H",
   "%.M..%...M.....~~~~~~.....M...H.g..H",
-  "%...+%..o.....a......b.......tHb...H",
+  "%...+%..o............b.......tH....H",
   "%....Dt........T....T.........D...hH",
   "%....%HHHHHH............HHHHHHH....H",
   "%%S%%%######............######HHHHHH",
@@ -199,7 +199,27 @@ export var E1M3 = {
      "speed": 0.5
     },
     {
-     "say": "THE WEST SEAL IS DOWN. HEAR THAT BELL? THE CITY REMEMBERS."
+     "say": "THE WEST SEAL IS DOWN. HEAR THAT BELL? THE ENGINE HEARD IT TOO. HOLLOWS, DOWN BELOW!"
+    },
+    {
+     "after": 2.5,
+     "do": [
+      {
+       "wave": "answer1",
+       "spawn": [
+        {
+         "kind": "imp",
+         "x": 2,
+         "z": 27
+        },
+        {
+         "kind": "imp",
+         "x": 1,
+         "z": 28
+        }
+       ]
+      }
+     ]
     }
    ]
   },
@@ -228,7 +248,27 @@ export var E1M3 = {
      "speed": 0.5
     },
     {
-     "say": "THE EAST SEAL IS DOWN. THE MERCURY'S RUNNING COLD OVER THERE."
+     "say": "THE EAST SEAL IS DOWN. SOMETHING'S COMING OVER THE BRIDGE!"
+    },
+    {
+     "after": 2.5,
+     "do": [
+      {
+       "wave": "answer2",
+       "spawn": [
+        {
+         "kind": "gnasher",
+         "x": 33,
+         "z": 27
+        },
+        {
+         "kind": "imp",
+         "x": 31,
+         "z": 28
+        }
+       ]
+      }
+     ]
     }
    ]
   },
@@ -257,7 +297,32 @@ export var E1M3 = {
      "speed": 0.5
     },
     {
-     "say": "THE GALLERY SEAL IS DOWN. YOU CAN SEE THE WHOLE ENGINE FROM UP THERE, HUH?"
+     "say": "THE GALLERY SEAL IS DOWN. HOLLOWS IN THE HALL! YOU'VE GOT THE HIGH GROUND, USE IT."
+    },
+    {
+     "after": 2.5,
+     "do": [
+      {
+       "wave": "answer3",
+       "spawn": [
+        {
+         "kind": "imp",
+         "x": 11,
+         "z": 25
+        },
+        {
+         "kind": "imp",
+         "x": 24,
+         "z": 25
+        },
+        {
+         "kind": "gnasher",
+         "x": 17,
+         "z": 28
+        }
+       ]
+      }
+     ]
     }
    ]
   },
@@ -284,7 +349,7 @@ export var E1M3 = {
      "shake": 3
     },
     {
-     "say": "THAT'S THE WARDEN. IT RUNS THE ENGINE. STAY MOVING, USE THE PILLARS, AND RING IT WITH THE BELL BLASTER."
+     "say": "THAT'S THE WARDEN. IT WAS A KNIGHT ONCE, SWORN TO A FIRE DRAKE, UNTIL THE OVERSEERS HOLLOWED IT OUT. STAY MOVING, USE THE PILLARS, RING IT WITH THE BELL BLASTER."
     },
     {
      "after": 1.5,
@@ -298,17 +363,9 @@ export var E1M3 = {
          "z": 6
         }
        ]
-      }
-     ]
-    },
-    {
-     "after": 14,
-     "do": [
-      {
-       "say": "IT'S CALLING HOLLOWS OUT OF THE WALLS!"
       },
       {
-       "wave": "adds1",
+       "wave": "escort",
        "spawn": [
         {
          "kind": "imp",
@@ -325,24 +382,71 @@ export var E1M3 = {
      ]
     },
     {
-     "after": 30,
+     "after": 10,
      "do": [
+      {
+       "say": "IT'S CALLING HOLLOWS OUT OF THE WALLS!"
+      },
+      {
+       "shake": 2
+      },
+      {
+       "wave": "adds1",
+       "spawn": [
+        {
+         "kind": "gnasher",
+         "x": 9,
+         "z": 9
+        },
+        {
+         "kind": "gnasher",
+         "x": 26,
+         "z": 9
+        },
+        {
+         "kind": "imp",
+         "x": 12,
+         "z": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "after": 22,
+     "do": [
+      {
+       "say": "HERE COMES EVERYTHING IT'S GOT. DON'T STOP MOVING!"
+      },
+      {
+       "shake": 3
+      },
       {
        "wave": "adds2",
        "spawn": [
         {
-         "kind": "gnasher",
+         "kind": "imp",
          "x": 7,
-         "z": 8
-        },
-        {
-         "kind": "gnasher",
-         "x": 28,
-         "z": 8
+         "z": 9
         },
         {
          "kind": "imp",
-         "x": 17,
+         "x": 28,
+         "z": 9
+        },
+        {
+         "kind": "imp",
+         "x": 23,
+         "z": 2
+        },
+        {
+         "kind": "gnasher",
+         "x": 12,
+         "z": 9
+        },
+        {
+         "kind": "gnasher",
+         "x": 23,
          "z": 9
         }
        ]
