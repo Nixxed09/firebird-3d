@@ -116,6 +116,10 @@ PlayBot.prototype.knows = function (x, z) {
 PlayBot.prototype.passable = function (x, z) {
   if (this.firstTimer && !this.knows(x, z)) return false;
   var G = this.G(), c = this.cell(x, z);
+  // a player doesn't wade into molten mercury on purpose; only walk through it
+  // to get out when already standing in it (drained pools are fine: lava off)
+  var W = G.W, lava = W.lava;
+  if (lava && lava[z * W.mw + x] && !lava[Math.floor(G.p.z) * W.mw + Math.floor(G.p.x)]) return false;
   if (c === 0) return true;
   if (!DOOR[c]) return false;
   var d = G.doors[x + ',' + z];
@@ -261,12 +265,18 @@ PlayBot.prototype.options = function (threats) {
   // seal levers the level needs pulled (levelInfo().levers): a first-timer only
   // goes for the ones it has seen, and explores until it has seen them all
   var info = G.info; // levelInfo(L), kept on the state
-  ((info && info.levers) || []).forEach(function (lv) {
-    var lx = lv[0], lz = lv[1];
-    if (self.cell(lx, lz) !== LEVER_OFF || (self.firstTimer && !self.knows(lx, lz))) return;
+  var required = {};
+  ((info && info.levers) || []).forEach(function (lv) { required[lv[0] + ',' + lv[1]] = true; });
+  // Any other switch still unpulled is worth a try too, a bit below the
+  // required ones: a player who sees a switch pulls it (E1M4's drain switch
+  // empties the mercury pool around the red keystone)
+  for (var ci = 0; ci < G.W.cells.length; ci++) {
+    if (G.W.cells[ci] !== LEVER_OFF) continue;
+    var lx = ci % G.W.mw, lz = (ci / G.W.mw) | 0;
+    if (self.firstTimer && !self.knows(lx, lz)) continue;
     var d = Math.hypot(lx + 0.5 - p.x, lz + 0.5 - p.z);
-    opts.push({ kind: 'lever', score: 1.4 - d * 0.03, key: 'lever:' + lx + ',' + lz, lx: lx, lz: lz });
-  });
+    opts.push({ kind: 'lever', score: (required[lx + ',' + lz] ? 1.4 : 1.1) - d * 0.03, key: 'lever:' + lx + ',' + lz, lx: lx, lz: lz });
+  }
   if (this.firstTimer) {
     var fr = this.frontier();
     if (fr) opts.push({ kind: 'explore', score: fr.score, key: 'explore:' + fr.x + ',' + fr.z, gx: fr.x, gz: fr.z, cue: fr.cue });
