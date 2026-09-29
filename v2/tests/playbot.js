@@ -24,6 +24,8 @@ import { hasLOS, cellAt, floorAt } from '../src/sim/world.js';
 
 var DOOR = { 6: true, 7: true, 8: true, 11: true };
 var EXIT_SWITCH = 9;
+// a seal lever ('=' switch the level needs pulled): wall id 12 until pulled, then 13
+var LEVER_OFF = 12;
 var HEALS = { h: 10, '+': 25, P: 100 };
 var NB = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
@@ -256,6 +258,15 @@ PlayBot.prototype.options = function (threats) {
   } else if (G.exitCell && (!this.firstTimer || this.knows(G.exitCell.x, G.exitCell.z))) {
     opts.push({ kind: 'exit', score: 0.7 + (1 - st.completionism) * 0.5, key: 'exit' });
   }
+  // seal levers the level needs pulled (levelInfo().levers): a first-timer only
+  // goes for the ones it has seen, and explores until it has seen them all
+  var info = G.info; // levelInfo(L), kept on the state
+  ((info && info.levers) || []).forEach(function (lv) {
+    var lx = lv[0], lz = lv[1];
+    if (self.cell(lx, lz) !== LEVER_OFF || (self.firstTimer && !self.knows(lx, lz))) return;
+    var d = Math.hypot(lx + 0.5 - p.x, lz + 0.5 - p.z);
+    opts.push({ kind: 'lever', score: 1.4 - d * 0.03, key: 'lever:' + lx + ',' + lz, lx: lx, lz: lz });
+  });
   if (this.firstTimer) {
     var fr = this.frontier();
     if (fr) opts.push({ kind: 'explore', score: fr.score, key: 'explore:' + fr.x + ',' + fr.z, gx: fr.x, gz: fr.z, cue: fr.cue });
@@ -488,6 +499,13 @@ PlayBot.prototype.step = function (dt) {
       var err = self.turnToward(a, dt);
       self.setMove(err < 0.3 ? a : null, false);
       if (err < 0.2) self.use();
+    });
+    case 'lever': return this.goTo(function (x, z) { return self.passable(x, z) && Math.abs(x - plan.lx) + Math.abs(z - plan.lz) === 1; }, dt, function () {
+      var a = Math.atan2(plan.lz + 0.5 - p.z, plan.lx + 0.5 - p.x);
+      var err = self.turnToward(a, dt);
+      self.setMove(err < 0.3 ? a : null, false);
+      if (err < 0.2) self.use();
+      if (self.cell(plan.lx, plan.lz) !== LEVER_OFF) { self.log.levers = (self.log.levers || 0) + 1; self.plan = null; }
     });
     case 'explore': return this.goTo(function (x, z) { return x === plan.gx && z === plan.gz; }, dt, function () {
       // reached the edge: whatever is visible from here is now seen; move on

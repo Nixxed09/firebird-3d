@@ -63,6 +63,7 @@ test('her lines are built from real counts', function () {
   for (var i = 0; i < 9; i++) R.noteShot(pr, 'shotgun', 3);
   pr.hits = 6;
   assert.strictEqual(R.line('playerDied', pr), 'GOOD FIGHT! YOU HIT ME 6 TIMES, 67% ACCURACY. AGAIN?');
+  assert.strictEqual(R.line('noticed', pr), 'YOU RUSHED ME WITH THE SHOTGUN. I NOTICED.');
   assert.strictEqual(R.line('defeated', pr), 'OKAY, YOU WIN! 6 HITS WITH MOSTLY THE SHOTGUN. NICE.');
   assert.strictEqual(R.insight(pr, 'shotgun'), '9 SHOTGUN BLASTS SO FAR. SHIELD UP!');
 });
@@ -78,8 +79,8 @@ test('every line fits on the 320px screen', function () {
   for (var i = 0; i < 99; i++) R.noteShot(pr, 'shotgun', 2);
   pr.hits = 99; pr.longestHide = 99;
   var mem = { lastStyle: R.describeStyle(pr), fights: 1, wins: 99 };
-  var lines = ['intro', 'ease', 'studied', 'phase2', 'phase3', 'summon', 'friendlyFire', 'impsTurned', 'playerDied', 'defeated']
-    .map(function (ev) { return R.line(ev, pr, { memory: mem, wins: 99 }); });
+  var lines = ['intro', 'ease', 'studied', 'phase2', 'phase3', 'summon', 'friendlyFire', 'impsTurned', 'playerDied', 'noticed', 'defeated', 'rest', 'mercy']
+    .map(function (ev) { return R.line(ev, pr, { memory: mem, wins: 99, lower: 'WARRIOR' }); });
   ['strafe', 'rusher', 'sniper', 'camper', 'hider', 'shotgun'].forEach(function (w) { pr.said = {}; lines.push(R.insight(pr, w)); });
   lines.forEach(function (l) {
     assert.ok(l, 'missing line');
@@ -149,6 +150,44 @@ test('each game can give her its own words, and the lines stay true and fit', fu
     R.setWords(saved);
   }
   assert.strictEqual(R.line('impsTurned', R.newProfile()), 'YOU GOT MY IMPS FIGHTING ME? SMART.', 'classic words restored');
+});
+
+// ---- Riley's Trial rules (GamesOS ai-infusion/RILEY_BOSS_SPEC.md) ----------
+
+test('she rests: an option after a while, her only move once it is due', function () {
+  var pr = R.newProfile();
+  assert.ok(R.legalMoves(state({ sinceRest: 0 })).indexOf('rest') < 0, 'no rest right after one');
+  assert.ok(R.legalMoves(state({ sinceRest: R.REST_OPEN })).indexOf('rest') >= 0, 'rest is an option');
+  assert.deepStrictEqual(R.legalMoves(state({ sinceRest: R.REST_DUE, phase: 3 })), ['rest'], 'due: nothing else, even in phase 3');
+  assert.deepStrictEqual(R.legalMoves(state({ sinceRest: R.REST_DUE, los: false })), ['rest'], 'due: even out of sight');
+  assert.ok(R.scoreMove('rest', pr, state({ sinceRest: R.REST_OPEN + 2 })).score > R.scoreMove('rest', pr, state({ sinceRest: R.REST_OPEN })).score, 'the longer since, the likelier');
+});
+
+test('a rest comes at least every 12 s, and every tell is at least 0.45 s', function () {
+  // her longest move is 1.3 s, so once a rest is due she starts it before 12 s
+  assert.ok(R.REST_DUE + 1.3 <= 12, 'rest gap bound');
+  assert.ok(R.TELL_MIN >= 0.45, 'tell floor');
+  assert.ok(R.REST_HURT > 1 && R.REST_TIME >= 1.5, 'the rest is a real damage window');
+});
+
+test('three losses in a row: she offers another way in, honestly', function () {
+  var pr = R.newProfile();
+  assert.strictEqual(R.line('mercy', pr, { lower: 'ROOKIE' }), 'WANT ANOTHER WAY IN? I\'M GOING EASIER. OR TRY ROOKIE IN THE MENU.');
+  assert.strictEqual(R.line('mercy', pr, { lower: null }), 'WANT ANOTHER WAY IN? I\'M GOING EASIER.', 'no easier setting to offer on the easiest one');
+  var mem = { fights: 0, wins: 0, lossStreak: 0, ease: 0, lastStyle: null };
+  for (var i = 0; i < 3; i++) R.settle(mem, pr, false);
+  assert.strictEqual(mem.lossStreak, 3);
+  assert.strictEqual(R.tuning(mem).hpScale < 1, true, 'and she really is easier');
+});
+
+test('she says she is an AI, and never mocks you', function () {
+  assert.ok(/I'M AN AI/.test(R.line('intro', R.newProfile(), {})));
+  var pr = R.newProfile();
+  for (var i = 0; i < 20; i++) R.noteShot(pr, 'pistol', 5);
+  pr.strafeL = 10; pr.longestHide = 20;
+  var all = ['intro', 'ease', 'mercy', 'rest', 'studied', 'phase2', 'phase3', 'summon', 'friendlyFire', 'impsTurned', 'playerDied', 'noticed', 'defeated']
+    .map(function (ev) { return R.line(ev, pr, { wins: 1, lower: 'ROOKIE' }); });
+  all.forEach(function (l) { assert.ok(!/LOSER|PATHETIC|BAD AT|TERRIBLE|NOOB|EASY KILL|WEAK|STUPID|DUMB/.test(l || ''), 'mocking: ' + l); });
 });
 
 console.log(passed + ' Riley brain tests passed');

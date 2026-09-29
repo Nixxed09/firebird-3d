@@ -596,15 +596,16 @@ var ART = (function () {
 
   // ---- HUD face ------------------------------------------------------------
 
-  // Built from a template: eyes and mouth get swapped per state, blood added by tier.
+  // Built from a template: eyes and mouth get swapped per state, soot added by tier
+  // (ash smudges, never blood: STYLE_GUIDE.md kid-safety rules).
   function buildFace(state) {
     var L = {
       'o': '#1a1008', 'f': '#e85818', 'F': '#ffa018', 's': '#d8a06a',
       'S': '#a8744a', 'w': '#f0ead8', 'k': '#28221a', 'm': '#5a1408',
-      't': '#e8e0c8', 'r': '#c01818', 'c': '#b84a10', 'C': '#7e2e08',
+      't': '#e8e0c8', 'r': '#4a4038', 'c': '#b84a10', 'C': '#7e2e08',
       'g': '#888078', 'x': '#301010'
     };
-    var skin = state.gray ? { 's': '#9a9488', 'S': '#6e6a60' } : {};
+    var skin = state.dim ? { 's': '#c08c5c', 'S': '#946440' } : {};
     for (var kk in skin) L[kk] = skin[kk];
 
     // rows are half-width 12, mirrored to 24 wide, 28 tall
@@ -693,10 +694,10 @@ var ART = (function () {
       while (r.length < 12) r += '.';
       return r;
     });
-    // blood by damage tier: splats on forehead / cheek
-    if (state.blood >= 1) { rows[8] = '..osrrsssSSS'.slice(0, 12); rows[9] = '..ossrssssss'; }
-    if (state.blood >= 2) { rows[14] = '..osrssssrss'; rows[15] = '..orrssSSrss'; rows[21] = '..osrsssssrs'; }
-    if (state.blood >= 3) { rows[6] = '.offosrrssss'; rows[13] = '..orrsssrrss'; rows[22] = '...orrsssrSS'.slice(0, 12); }
+    // soot by damage tier: smudges on forehead / cheek
+    if (state.soot >= 1) { rows[8] = '..osrrsssSSS'.slice(0, 12); rows[9] = '..ossrssssss'; }
+    if (state.soot >= 2) { rows[14] = '..osrssssrss'; rows[15] = '..orrssSSrss'; rows[21] = '..osrsssssrs'; }
+    if (state.soot >= 3) { rows[6] = '.offosrrssss'; rows[13] = '..orrsssrrss'; rows[22] = '...orrsssrSS'.slice(0, 12); }
     return sprite(rows, L, { mirror: true });
   }
 
@@ -1145,13 +1146,14 @@ var ART = (function () {
   };
 
   A.faces = {
-    ok: buildFace({ eyes: 'open', mouth: 'calm', blood: 0 }),
-    hurt1: buildFace({ eyes: 'open', mouth: 'grim', blood: 1 }),
-    hurt2: buildFace({ eyes: 'squint', mouth: 'grim', blood: 2 }),
-    hurt3: buildFace({ eyes: 'squint', mouth: 'ouch', blood: 3 }),
-    pain: buildFace({ eyes: 'shut', mouth: 'ouch', blood: 1 }),
-    grin: buildFace({ eyes: 'open', mouth: 'grin', blood: 0 }),
-    dead: buildFace({ eyes: 'x', mouth: 'ouch', blood: 3, gray: true })
+    ok: buildFace({ eyes: 'open', mouth: 'calm', soot: 0 }),
+    hurt1: buildFace({ eyes: 'open', mouth: 'grim', soot: 1 }),
+    hurt2: buildFace({ eyes: 'squint', mouth: 'grim', soot: 2 }),
+    hurt3: buildFace({ eyes: 'squint', mouth: 'ouch', soot: 3 }),
+    pain: buildFace({ eyes: 'shut', mouth: 'ouch', soot: 1 }),
+    grin: buildFace({ eyes: 'open', mouth: 'grin', soot: 0 }),
+    // knocked out, not dead: eyes shut, sooty, a little dimmer. He always bounces back.
+    dead: buildFace({ eyes: 'shut', mouth: 'ouch', soot: 3, dim: true })
   };
 
   A.guns = {

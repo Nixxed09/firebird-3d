@@ -149,8 +149,19 @@ var SND = (function () {
         tone({ f0: f, dur: 0.2, type: 'triangle', gain: 0.2, delay: i * 0.08, pan: pan });
       });
     },
-    impSight: function (v, pan) { tone({ f0: 110, f1: 55, dur: 0.5, type: 'sawtooth', gain: 0.3 * v, wobble: 9, pan: pan }); },
-    knightSight: function (v, pan) { tone({ f0: 75, f1: 35, dur: 0.9, type: 'sawtooth', gain: 0.4 * v, wobble: 6, pan: pan }); },
+    // Hollows (STYLE_GUIDE.md audio): hollow knocks, dry rasps, a glassy crack
+    // when they break. No growls, no screams.
+    impSight: function (v, pan) {
+      noise({ dur: 0.35, gain: 0.22 * v, f0: 900, f1: 2400, type: 'bandpass', q: 4, pan: pan });                 // a dry rasp, like ash breathing
+      tone({ f0: 180, f1: 150, dur: 0.08, type: 'triangle', gain: 0.25 * v, pan: pan, delay: 0.3 });               // knock
+      tone({ f0: 180, f1: 150, dur: 0.08, type: 'triangle', gain: 0.2 * v, pan: pan, delay: 0.42 });               // knock
+    },
+    // the Reset Warden wakes: a basalt engine turning over and a cracked bronze bell
+    knightSight: function (v, pan) {
+      tone({ f0: 55, f1: 62, dur: 0.9, type: 'sine', gain: 0.45 * v, pan: pan });
+      noise({ dur: 0.5, gain: 0.2 * v, f0: 300, f1: 120, type: 'lowpass', pan: pan });
+      [[196, 0.1], [196 * 2.63, 0.05], [196 * 4.9, 0.025]].forEach(function (b) { tone({ f0: b[0], f1: b[0] * 0.98, dur: 1.1, type: 'sine', gain: b[1] * v, pan: pan, delay: 0.15 }); });
+    },
     rileySight: function (v, pan) {
       [523, 659, 784, 1047].forEach(function (f, i) {
         tone({ f0: f, dur: 0.12, type: 'triangle', gain: 0.22 * v, delay: i * 0.07, pan: pan });
@@ -175,17 +186,26 @@ var SND = (function () {
       noise({ dur: 0.7, gain: 0.9 * v, f0: 1400, f1: 60, pan: pan });
       tone({ f0: 65, f1: 28, dur: 0.6, type: 'sine', gain: 0.6 * v, pan: pan });
     },
-    enemyPain: function (v, pan) { tone({ f0: 200, f1: 120, dur: 0.13, type: 'square', gain: 0.22 * v, pan: pan }); },
+    // the shell knocks when hit, and breaks like glass with the light going up
+    enemyPain: function (v, pan) {
+      tone({ f0: 240, f1: 170, dur: 0.07, type: 'triangle', gain: 0.24 * v, pan: pan });
+      noise({ dur: 0.06, gain: 0.12 * v, f0: 1600, type: 'bandpass', q: 2, pan: pan });
+    },
     enemyDie: function (v, pan) {
-      tone({ f0: 170, f1: 40, dur: 0.5, type: 'sawtooth', gain: 0.3 * v, wobble: 12, pan: pan });
-      noise({ dur: 0.25, gain: 0.2 * v, f0: 700, f1: 150, delay: 0.05, pan: pan });
+      noise({ dur: 0.12, gain: 0.3 * v, f0: 6000, f1: 2500, type: 'highpass', q: 0.8, pan: pan });                 // the crack
+      noise({ dur: 0.4, gain: 0.12 * v, f0: 900, f1: 250, pan: pan, delay: 0.04 });                               // ash falls
+      tone({ f0: 523, f1: 1046, dur: 0.45, type: 'sine', gain: 0.1 * v, pan: pan, delay: 0.08 });                  // the light rises
+      tone({ f0: 784, f1: 1568, dur: 0.45, type: 'sine', gain: 0.06 * v, pan: pan, delay: 0.14 });
     },
     playerPain: function (v, pan) {
       tone({ f0: 170, f1: 90, dur: 0.16, type: 'square', gain: 0.3, pan: pan });
       noise({ dur: 0.1, gain: 0.15, f0: 500, f1: 200, pan: pan });
     },
+    // the flame gutters, then a single ember glows: the Firebird always comes back
     playerDie: function (v, pan) {
-      tone({ f0: 220, f1: 28, dur: 1.3, type: 'sawtooth', gain: 0.4, wobble: 5, pan: pan });
+      noise({ dur: 0.9, gain: 0.3, f0: 1800, f1: 120, pan: pan });
+      tone({ f0: 330, f1: 110, dur: 0.9, type: 'triangle', gain: 0.25, pan: pan });
+      tone({ f0: 440, f1: 660, dur: 0.6, type: 'sine', gain: 0.1, pan: pan, delay: 1.0 });
     },
     noAmmo: function (v, pan) { noise({ dur: 0.03, gain: 0.2, f0: 1800, type: 'bandpass', q: 3, pan: pan }); },
     // ---- v2 (WebGL) weapon sounds: layered thump + crack + tail. The classic
@@ -223,11 +243,16 @@ var SND = (function () {
       var f = 3200 + Math.random() * 1600;
       tone({ f0: f, f1: f * 0.9, dur: 0.05, type: 'triangle', gain: 0.05 * v, pan: pan });
     },
-    tally: function (v, pan) { tone({ f0: 990, dur: 0.03, type: 'square', gain: 0.12, pan: pan }); },
-    menu: function (v, pan) { tone({ f0: 520, dur: 0.05, type: 'square', gain: 0.15, pan: pan }); },
+    // UI: soft bell ticks and chimes
+    tally: function (v, pan) { tone({ f0: 1320, f1: 1310, dur: 0.06, type: 'sine', gain: 0.12, pan: pan }); },
+    menu: function (v, pan) {
+      tone({ f0: 880, f1: 875, dur: 0.12, type: 'sine', gain: 0.14, pan: pan });
+      tone({ f0: 880 * 2.76, dur: 0.05, type: 'sine', gain: 0.03, pan: pan });
+    },
     menuPick: function (v, pan) {
-      tone({ f0: 520, dur: 0.06, type: 'square', gain: 0.18 });
-      tone({ f0: 780, dur: 0.09, type: 'square', gain: 0.18, delay: 0.06 });
+      tone({ f0: 660, f1: 655, dur: 0.3, type: 'sine', gain: 0.16 });
+      tone({ f0: 990, f1: 985, dur: 0.4, type: 'sine', gain: 0.14, delay: 0.07 });
+      tone({ f0: 990 * 2.76, dur: 0.12, type: 'sine', gain: 0.03, delay: 0.07 });
     }
   };
 
@@ -284,6 +309,35 @@ var SND = (function () {
     }
   }
 
+  // Tartarian bell: inharmonic partials, long ring (STYLE_GUIDE.md: bell and choir colour)
+  function bell(t, f, gain) {
+    [[1, 1], [2.76, 0.4], [5.4, 0.18], [0.5, 0.35]].forEach(function (pp) {
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine'; o.frequency.value = f * pp[0];
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(gain * pp[1], t + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.6 / Math.sqrt(pp[0]));
+      o.connect(g); g.connect(musG); o.start(t); o.stop(t + 1.7);
+    });
+  }
+
+  // a soft choir "aah": detuned sines swelling over two bars
+  function choir(t, freqs) {
+    var len = STEP * 32;
+    freqs.forEach(function (f) {
+      [-4, 4].forEach(function (cents) {
+        var o = ac.createOscillator(), g = ac.createGain(), flt = ac.createBiquadFilter();
+        o.type = 'triangle'; o.frequency.value = f * Math.pow(2, cents / 1200);
+        flt.type = 'lowpass'; flt.frequency.value = 1200;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.035, t + len * 0.4);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+        o.connect(flt); flt.connect(g); g.connect(musG); o.start(t); o.stop(t + len + 0.05);
+      });
+    });
+  }
+  var CHORDS = [[329.63, 392, 493.88], [293.66, 369.99, 440], [261.63, 329.63, 392], [246.94, 311.13, 369.99]];
+
   function scheduler() {
     if (!musicRunning || !ac) return;
     while (nextStepTime < ac.currentTime + 0.15) {
@@ -297,6 +351,9 @@ var SND = (function () {
       if (s === 0 || s === 8) drum(nextStepTime, 'kick');
       if (s === 4 || s === 12) drum(nextStepTime, 'snare');
       if ((s & 1) === 0) drum(nextStepTime, 'hat');
+      // a bell on every other downbeat, and a choir swell every two bars
+      if (s === 0 && bar % 2 === 0) bell(nextStepTime, [659.25, 587.33, 523.25, 493.88][(bar >> 1) % 4], 0.07);
+      if (s === 0 && bar % 2 === 0) choir(nextStepTime, CHORDS[(bar >> 1) % 4]);
       nextStepTime += STEP;
       stepIdx++;
     }

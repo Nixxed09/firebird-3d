@@ -91,9 +91,17 @@ var RILEY = (function () {
 
   // ---- 2 + 3. list legal moves, then choose ----------------------------------
 
+  // Riley's Trial rules (GamesOS ai-infusion/RILEY_BOSS_SPEC.md): every attack
+  // has a tell of at least TELL_MIN seconds, and she rests (stands still, no
+  // shield, easier to hurt) at least every 12 s: from REST_OPEN s since her
+  // last rest it's an option, and at REST_DUE s it's her only move. With her
+  // longest move at 1.3 s the gap never passes 12 s.
+  var TELL_MIN = 0.45, REST_OPEN = 7, REST_DUE = 10, REST_TIME = 1.8, REST_HURT = 1.5;
+
   // s: { los, dist, phase, cool: {volley, lead, summon, shield}, impsAlive,
-  //      playerWeapon }  — the engine builds this from the real game state.
+  //      playerWeapon, sinceRest }  — the engine builds this from the real game state.
   function legalMoves(s) {
+    if ((s.sinceRest || 0) >= REST_DUE) return ['rest'];
     var m = [];
     if (s.los) {
       if (s.cool.volley <= 0) m.push('volley');
@@ -109,6 +117,7 @@ var RILEY = (function () {
     var summonReady = s.cool.summon <= (s.phase >= 3 ? 9 : 0);
     if (s.phase >= 2 && s.impsAlive < 2 && summonReady) m.push('summon');
     if (s.phase >= 2 && s.los && s.dist < 7 && s.cool.shield <= 0) m.push('shield');
+    if ((s.sinceRest || 0) >= REST_OPEN) m.push('rest');
     return m;
   }
 
@@ -138,6 +147,9 @@ var RILEY = (function () {
         break;
       case 'summon':
         sc = 0.9;
+        break;
+      case 'rest':
+        sc = 0.3 + ((s.sinceRest || 0) - REST_OPEN) * 0.25;
         break;
       case 'shield':
         sc = s.playerWeapon === 'shotgun' ? 1.4 : 0.25;
@@ -223,9 +235,16 @@ var RILEY = (function () {
       case 'intro':
         if (f.memory && f.memory.lastStyle) return 'BACK AGAIN! LAST TIME ' + f.memory.lastStyle + '.';
         if (f.memory) return 'BACK AGAIN! ROUND ' + (f.memory.fights + 1) + '. LET\'S GO!';
-        return 'HI! I\'M RILEY. I LEARN HOW YOU PLAY. READY?';
+        return 'HI! I\'M RILEY. I\'M AN AI, AND I LEARN HOW YOU PLAY. READY?';
       case 'ease':
         return 'I\'M GOING A LITTLE EASIER THIS TIME. JUST A LITTLE.';
+      // three losses in a row: she offers another way in (the spec's mercy
+      // rule). f.lower names the easier setting, if there is one.
+      case 'mercy':
+        return 'WANT ANOTHER WAY IN? I\'M GOING EASIER' +
+          (f.lower ? '. OR TRY ' + f.lower + ' IN THE MENU.' : '.');
+      case 'rest':
+        return 'PHEW. GIVE ME A SECOND.';
       case 'studied':
         return 'YOU BEAT ME ' + f.wins + (f.wins === 1 ? ' TIME' : ' TIMES') + '. I\'VE BEEN PRACTISING.';
       case 'phase2':
@@ -233,11 +252,17 @@ var RILEY = (function () {
       case 'phase3':
         return 'ALRIGHT, NO MORE HOLDING BACK!';
       case 'summon':
-        return 'LITTLE HELP, FRIENDS?';
+        return 'LET\'S SEE HOW YOU HANDLE THESE!';
       case 'friendlyFire':
         return 'HEY! WATCH WHERE YOU THROW THOSE.';
       case 'impsTurned':
         return 'YOU GOT MY ' + WORDS.minions + ' FIGHTING ME? SMART.';
+      // she never mocks you: how it went ('playerDied'), then one true thing
+      // she noticed about how you fought ('noticed', null if nothing stood out)
+      case 'noticed': {
+        var style = describeStyle(pr);
+        return style ? style + '. I NOTICED.' : null;
+      }
       case 'playerDied': {
         var acc = accuracy(pr);
         return 'GOOD FIGHT! YOU HIT ME ' + pr.hits + (pr.hits === 1 ? ' TIME' : ' TIMES') +
@@ -312,7 +337,8 @@ var RILEY = (function () {
   }
 
   return {
-    MAX_EASE: MAX_EASE,
+    MAX_EASE: MAX_EASE, TELL_MIN: TELL_MIN, REST_OPEN: REST_OPEN, REST_DUE: REST_DUE,
+    REST_TIME: REST_TIME, REST_HURT: REST_HURT,
     newProfile: newProfile, observe: observe, noteShot: noteShot,
     favWeapon: favWeapon, rusher: rusher, sniper: sniper, camper: camper,
     strafeSide: strafeSide, strafeHabit: strafeHabit, accuracy: accuracy,

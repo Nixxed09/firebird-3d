@@ -96,7 +96,15 @@ function checkLine(text, fight, history) {
   var W = RILEY.words();
   var blasts = text.indexOf(' ' + W.shotgunShots + ' SO FAR') >= 0 && /^RILEY: (\d+) /.exec(text);
   if (blasts) claim('shotgun blasts', +blasts[1], fight.shots.shotgun);
-  if ((m = /DODGE (LEFT|RIGHT)/.exec(text))) claim('dodge side', m[1], fight.strafeL > fight.strafeR ? 'LEFT' : 'RIGHT');
+  // "LAST TIME YOU KEPT DODGING LEFT" is about the previous fight; any other dodge line is about this one
+  if ((m = /(LAST TIME YOU KEPT )?DODG(?:E|ING) (LEFT|RIGHT)/.exec(text))) {
+    var df = m[1] ? history[history.length - 1] : fight;
+    if (df) claim(m[1] ? 'last fight dodge side' : 'dodge side', m[2], df.strafeL > df.strafeR ? 'LEFT' : 'RIGHT');
+  }
+  // "... I NOTICED." after you lose: about the fight that just ended
+  if ((m = /YOU (?:USED THE (.+?) THE MOST|RUSHED ME WITH THE (.+?))\. I NOTICED/.exec(text))) claim('noticed weapon', m[1] || m[2], W.weapon[mostUsed(fight.shots)]);
+  // the mercy offer: only after three losses in a row
+  if (/ANOTHER WAY IN\?/.test(text)) claim('lost the last 3', true, history.length >= 3 && history.slice(-3).every(function (f) { return !f.won; }));
   if ((m = /MOSTLY THE (.+?)\. NICE/.exec(text))) claim('main weapon', m[1], W.weapon[mostUsed(fight.shots)]);
   if ((m = /YOU BEAT ME (\d+) TIME/.exec(text))) claim('times beaten', +m[1], history.filter(function (f) { return f.won; }).length);
   if (/GOING A LITTLE EASIER/.test(text)) claim('lost last time', true, history.length > 0 && !history[history.length - 1].won);

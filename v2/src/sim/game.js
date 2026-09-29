@@ -322,6 +322,7 @@ export function createGame(opts) {
   function damageMob(e, dmg, src) {
     if (e.state === 'die' || e.state === 'dead') return;
     if (e.kind === 'riley' && rileyTakeHit(e, src)) return;
+    if (e.resting) dmg *= RILEY.REST_HURT;
     e.hp -= dmg;
     e.flashT = 0.07;
     if (e.barrel) {
@@ -389,7 +390,7 @@ export function createGame(opts) {
     if (p.hp <= 0) {
       p.hp = 0; p.dead = true; p.deadT = 0;
       sound('playerDie');
-      if (rileyActive(G.boss)) { rileySay(G.boss, RILEY.line('playerDied', G.boss.profile)); rileySettle(G.boss, false); }
+      if (rileyActive(G.boss)) { rileySay(G.boss, RILEY.line('playerDied', G.boss.profile)); rileySay(G.boss, RILEY.line('noticed', G.boss.profile)); rileySettle(G.boss, false); }
     } else {
       sound('playerPain');
       if (p.hp < 30) tip('lowHealth');
@@ -690,6 +691,7 @@ export function createGame(opts) {
     e.phase = 1;
     e.cools = { volley: 1, lead: 3, summon: 8, shield: 5, melee: 0 };
     e.move = null; e.moveT = 0; e.shieldT = 0; e.talkT = 0; e.flankSide = 1; e.attack = null; e.settled = false;
+    e.sinceRest = 0; e.resting = false; e.restT = 0;
   }
   // the level's boss settings (setupRiley runs while the level is being built)
   var buildingLevel = null;
@@ -698,7 +700,7 @@ export function createGame(opts) {
   function rileyActive(e) { return !!e && e.state !== 'idle' && alive(e); }
   function rileySay(e, text, isInsight) {
     if (!text || (isInsight && e.talkT > 0)) return false;
-    message('RILEY: ' + text, '#6fe0ec', 4.5);
+    message('RILEY: ' + text, '#6fe0ec', Math.max(4.5, text.length / 14));
     sound('rileyTalk');
     e.talkT = 3.5;
     return true;
@@ -708,7 +710,9 @@ export function createGame(opts) {
     // a first sparring match picks up from the radio; a rematch uses what she remembers
     if (e.sparring && spar && spar.intro && !(mem.fights > 0)) { rileySay(e, spar.intro); return; }
     rileySay(e, RILEY.line('intro', e.profile, { memory: mem.fights > 0 ? mem : null }));
-    if (mem.ease > 0) rileySay(e, RILEY.line('ease', e.profile));
+    // three losses in a row: she offers another way in, naming the easier setting if there is one
+    if (mem.lossStreak >= 3) rileySay(e, RILEY.line('mercy', e.profile, { lower: settings.difficulty > 0 && DIFFS[settings.difficulty - 1] ? DIFFS[settings.difficulty - 1].name : null }));
+    else if (mem.ease > 0) rileySay(e, RILEY.line('ease', e.profile));
     else if (e.tune.practised) rileySay(e, RILEY.line('studied', e.profile, { wins: mem.wins }));
   }
   function rileySettle(e, won) {
@@ -734,7 +738,7 @@ export function createGame(opts) {
     e.cools.summon = 18 * e.tune.coolScale;
   }
   function rileyChoose(e, d, dx, dz) {
-    var s = { los: e.los, dist: d, phase: e.phase, cool: e.cools, impsAlive: countSummoned(), playerWeapon: G.p.weapon };
+    var s = { los: e.los, dist: d, phase: e.phase, cool: e.cools, impsAlive: countSummoned(), playerWeapon: G.p.weapon, sinceRest: e.sinceRest };
     var legal = RILEY.legalMoves(s);
     if (e.allowed) { var only = legal.filter(function (mv) { return e.allowed.indexOf(mv) >= 0; }); if (only.length) legal = only; }
     var pick = RILEY.choose(legal, e.profile, s, rng);
@@ -743,12 +747,17 @@ export function createGame(opts) {
     var pr = e.profile;
     switch (pick.move) {
       case 'volley': case 'lead':
-        e.state = 'windup'; e.attack = pick.move; e.st = pick.move === 'volley' ? 0.55 : 0.4; e.moveT = e.st + 0.2; break;
+        e.state = 'windup'; e.attack = pick.move; e.st = pick.move === 'volley' ? 0.55 : RILEY.TELL_MIN; e.moveT = e.st + 0.2; break;
       case 'backoff': e.moveT = 1.0; e.moveAng = Math.atan2(-dz, -dx) + rndIn(-0.5, 0.5); break;
       case 'flank': e.flankSide = RILEY.strafeHabit(pr) > 0.3 ? RILEY.strafeSide(pr) : (rnd() < 0.5 ? 1 : -1); e.moveT = 1.3; break;
       case 'close': e.moveT = 1.2; break;
       case 'seek': e.moveT = 0.8; break;
       case 'summon': rileySummon(e); e.moveT = 0.8; break;
+      // her rest: she stands still with no shield and takes extra damage (the spec's damage window)
+      case 'rest':
+        e.resting = true; e.restT = e.moveT = RILEY.REST_TIME; e.sinceRest = 0; e.shieldT = 0;
+        if (!pr.said.rest) { pr.said.rest = true; rileySay(e, RILEY.line('rest', pr)); }
+        break;
       case 'shield': e.shieldT = 1.6; e.moveT = 1.2; e.cools.shield = 8 * e.tune.coolScale; sound('rileyShield', e); break;
     }
   }
@@ -775,7 +784,7 @@ export function createGame(opts) {
   }
   function updateRiley(e, dt) {
     var p = G.p, pr = e.profile;
-    e.animT += dt; e.st -= dt; e.talkT -= dt; e.shieldT -= dt; e.moveT -= dt; e.flashT -= dt;
+    e.animT += dt; e.st -= dt; e.talkT -= dt; e.shieldT -= dt; e.moveT -= dt; e.flashT -= dt; e.restT -= dt;
     for (var ck in e.cools) e.cools[ck] -= dt;
     e.losT -= dt;
     if (e.losT <= 0) { e.losT = 0.15; e.los = hasLOS(G.W, e.x, e.y + e.h * 0.85, e.z, p.x, eyeY(), p.z); }
@@ -784,9 +793,11 @@ export function createGame(opts) {
     if (e.state === 'die') { if (e.st <= -1.2) e.state = 'dead'; return; }
     if (e.state === 'dead' || p.dead) return;
     RILEY.observe(pr, { dt: dt, los: e.los, dist: d, strafe: G.input.strafe, moving: G.input.moving });
+    if (!e.resting) e.sinceRest += dt;
     if (e.state === 'pain') { if (e.st <= 0) e.state = 'chase'; return; }
     if (e.state === 'windup') { if (e.st <= 0) { e.state = 'chase'; rileyAttack(e, d); } return; }
-    if (d < 1.3 && e.los && e.cools.melee <= 0) { e.state = 'windup'; e.attack = 'melee'; e.st = 0.3; return; }
+    if (e.resting) { if (e.restT > 0) return; e.resting = false; }
+    if (d < 1.3 && e.los && e.cools.melee <= 0) { e.state = 'windup'; e.attack = 'melee'; e.st = RILEY.TELL_MIN; return; }
     if (e.moveT <= 0) { rileyChoose(e, d, dx, dz); if (e.state === 'windup') return; }
     var toP = Math.atan2(dz, dx), ang = null;
     switch (e.move) {

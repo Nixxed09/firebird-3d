@@ -848,6 +848,7 @@
   function damageMob(e, dmg, src) {
     if (e.state === 'die' || e.state === 'dead') return;
     if (e.kind === 'riley' && rileyTakeHit(e, src)) return;
+    if (e.resting) dmg *= RILEY.REST_HURT;
     e.hp -= dmg;
     e.flashT = 0.07; // the white hit flash
     if (e.barrel) {
@@ -930,6 +931,7 @@
       SND.play('playerDie');
       if (rileyActive(G.boss)) {
         rileySay(G.boss, RILEY.line('playerDied', G.boss.profile));
+        rileySay(G.boss, RILEY.line('noticed', G.boss.profile));
         rileySettle(G.boss, false);
       }
     } else {
@@ -1115,6 +1117,7 @@
     e.cools = { volley: 1, lead: 3, summon: 8, shield: 5, melee: 0 };
     e.move = null; e.moveT = 0; e.shieldT = 0; e.talkT = 0;
     e.flankSide = 1; e.attack = null; e.settled = false;
+    e.sinceRest = 0; e.resting = false; e.restT = 0;
   }
 
   function rileyActive(e) {
@@ -1124,7 +1127,7 @@
   // insights wait their turn; event lines always get said
   function rileySay(e, text, isInsight) {
     if (!text || (isInsight && e.talkT > 0)) return false;
-    message('RILEY: ' + text, '#6fe0ec', 4.5);
+    message('RILEY: ' + text, '#6fe0ec', Math.max(4.5, text.length / 14));
     SND.play('rileyTalk');
     e.talkT = 3.5;
     return true;
@@ -1133,7 +1136,10 @@
   function rileyIntro(e) {
     var mem = e.mem;
     rileySay(e, RILEY.line('intro', e.profile, { memory: mem.fights > 0 ? mem : null }));
-    if (mem.ease > 0) rileySay(e, RILEY.line('ease', e.profile));
+    // three losses in a row: she offers another way in, naming the easier setting if there is one
+    var lower = DIFFS[SETTINGS.v.difficulty - 1];
+    if (mem.lossStreak >= 3) rileySay(e, RILEY.line('mercy', e.profile, { lower: lower ? lower.name : null }));
+    else if (mem.ease > 0) rileySay(e, RILEY.line('ease', e.profile));
     else if (e.tune.practised) rileySay(e, RILEY.line('studied', e.profile, { wins: mem.wins }));
   }
 
@@ -1174,7 +1180,7 @@
   function rileyChoose(e, d, dx, dy) {
     var s = {
       los: e.los, dist: d, phase: e.phase, cool: e.cools,
-      impsAlive: countSummoned(), playerWeapon: G.p.weapon
+      impsAlive: countSummoned(), playerWeapon: G.p.weapon, sinceRest: e.sinceRest
     };
     var pick = RILEY.choose(RILEY.legalMoves(s), e.profile, s);
     e.move = pick.move;
@@ -1183,7 +1189,7 @@
     switch (pick.move) {
       case 'volley': case 'lead':
         e.state = 'windup'; e.attack = pick.move;
-        e.st = pick.move === 'volley' ? 0.55 : 0.4; // the white flash is the tell
+        e.st = pick.move === 'volley' ? 0.55 : RILEY.TELL_MIN; // the white flash is the tell
         e.moveT = e.st + 0.2;
         break;
       case 'backoff':
@@ -1198,6 +1204,11 @@
       case 'close': e.moveT = 1.2; break;
       case 'seek': e.moveT = 0.8; break;
       case 'summon': rileySummon(e); e.moveT = 0.8; break;
+      // her rest: she stands still with no shield and takes extra damage (the spec's damage window)
+      case 'rest':
+        e.resting = true; e.restT = e.moveT = RILEY.REST_TIME; e.sinceRest = 0; e.shieldT = 0;
+        if (!pr.said.rest) { pr.said.rest = true; rileySay(e, RILEY.line('rest', pr)); }
+        break;
       case 'shield':
         e.shieldT = 1.6; e.moveT = 1.2;
         e.cools.shield = 8 * e.tune.coolScale;
@@ -1234,7 +1245,7 @@
 
   function updateRiley(e, dt) {
     var p = G.p, pr = e.profile;
-    e.animT += dt; e.st -= dt; e.talkT -= dt; e.shieldT -= dt; e.moveT -= dt;
+    e.animT += dt; e.st -= dt; e.talkT -= dt; e.shieldT -= dt; e.moveT -= dt; e.restT -= dt;
     e.flashT = (e.flashT || 0) - dt;
     for (var ck in e.cools) e.cools[ck] -= dt;
     e.losT -= dt;
@@ -1252,14 +1263,16 @@
 
     RILEY.observe(pr, { dt: dt, los: e.los, dist: d, strafe: G.input.strafe, moving: G.input.moving });
 
+    if (!e.resting) e.sinceRest += dt;
     if (e.state === 'pain') { if (e.st <= 0) e.state = 'chase'; return; }
     if (e.state === 'windup') {
       if (e.st <= 0) { e.state = 'chase'; rileyAttack(e, d); }
       return;
     }
+    if (e.resting) { if (e.restT > 0) return; e.resting = false; }
 
     if (d < 1.3 && e.los && e.cools.melee <= 0) {
-      e.state = 'windup'; e.attack = 'melee'; e.st = 0.3;
+      e.state = 'windup'; e.attack = 'melee'; e.st = RILEY.TELL_MIN;
       return;
     }
     if (e.moveT <= 0) { rileyChoose(e, d, dx, dy); if (e.state === 'windup') return; }

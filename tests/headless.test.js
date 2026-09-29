@@ -190,7 +190,7 @@ test('Riley waits in her arena, introduces herself, and fights with several move
     if (r.move) moves[r.move] = true;
   });
   FB.keys.KeyA = false;
-  assert.ok(said[0] === 'RILEY: HI! I\'M RILEY. I LEARN HOW YOU PLAY. READY?', 'intro: ' + said[0]);
+  assert.ok(said[0] === 'RILEY: HI! I\'M RILEY. I\'M AN AI, AND I LEARN HOW YOU PLAY. READY?', 'intro: ' + said[0]);
   assert.ok(Object.keys(moves).length >= 3, 'moves used: ' + Object.keys(moves));
   assert.ok(RILEY.strafeSide(r.profile) === -1 && RILEY.strafeHabit(r.profile) > 0.8, 'she should notice the left dodge');
   console.log('        moves: ' + Object.keys(moves).join(', '));
