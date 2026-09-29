@@ -1545,8 +1545,8 @@
       case 'h': if (p.hp >= 100) full = 'HEALTH'; else p.hp = Math.min(100, p.hp + 10); break;
       case '+': if (p.hp >= 100) full = 'HEALTH'; else p.hp = Math.min(100, p.hp + 25); break;
       case 'A': if (p.armor >= 100) full = 'ARMOR'; else { p.armor = 100; p.grinT = 1; } break;
-      case 'b': if (p.ammo.bullets >= 200) full = 'BULLETS'; else p.ammo.bullets = Math.min(200, p.ammo.bullets + 10 * am); break;
-      case 'a': if (p.ammo.shells >= 50) full = 'SHELLS'; else p.ammo.shells = Math.min(50, p.ammo.shells + 4 * am); break;
+      case 'b': if (p.ammo.bullets >= 200) full = 'SPARKS'; else p.ammo.bullets = Math.min(200, p.ammo.bullets + 10 * am); break;
+      case 'a': if (p.ammo.shells >= 50) full = 'BELL CHARGES'; else p.ammo.shells = Math.min(50, p.ammo.shells + 4 * am); break;
       case '2':
         p.weapons.shotgun = true;
         p.ammo.shells = Math.min(50, p.ammo.shells + 8 * am);

@@ -114,17 +114,18 @@ var ART = (function () {
 
   function techTex(seed) {
     return makeTex(function (x, y) {
-      var base = '#4a5a52', dark = '#232c28';
-      if (y < 6 || y > 57) return mix('#2a3430', '#000000', 0.3 + n2(x, y, seed) * 0.2);
-      // glowing light strip
+      // an aether-lit resonance panel in aged brass (STYLE_GUIDE.md materials)
+      var base = '#5a4e3a', dark = '#2a2418';
+      if (y < 6 || y > 57) return mix('#3a3022', '#000000', 0.3 + n2(x, y, seed) * 0.2);
+      // glowing aether strip
       if (y >= 28 && y <= 33 && (x & 31) > 3 && (x & 31) < 28) {
-        var g = (y === 30 || y === 31) ? '#7dff9a' : '#2f8a4a';
+        var g = (y === 30 || y === 31) ? '#bff8ff' : '#1a8a98';
         return mix(g, '#000000', n2(x, y, seed) * 0.2);
       }
       var seam = (x & 31) < 2;
       var vent = y > 40 && y < 54 && ((y & 3) < 2) && (x & 31) > 6 && (x & 31) < 26;
       if (seam) return mix(dark, '#000000', 0.5);
-      if (vent) return mix('#1a211e', '#000000', 0.3);
+      if (vent) return mix('#1e1a12', '#000000', 0.3);
       return mix(base, dark, n2(x, y, seed) * 0.5);
     });
   }
@@ -134,15 +135,16 @@ var ART = (function () {
       var v = n2(x, y, seed) * 0.4 + n2(x >> 2, y >> 2, seed + 5) * 0.6;
       // glowing lava veins
       var s = Math.sin(x * 0.22 + Math.sin(y * 0.13 + seed) * 2.1) + Math.sin(y * 0.18 + x * 0.05);
-      if (s > 1.45) return mix('#ff7a18', '#ffd23e', n2(x, y, seed + 2));
-      if (s > 1.2) return mix('#8a1e08', '#ff5a10', 0.5);
-      return mix('#4a1410', '#1c0605', v);
+      // red mercury seams in Overseer basalt (STYLE_GUIDE.md: crimson = danger)
+      if (s > 1.45) return mix('#c0141e', '#ff3a2a', n2(x, y, seed + 2));
+      if (s > 1.2) return mix('#4a060c', '#9a1018', 0.5);
+      return mix('#2a2224', '#100c0e', v);
     });
   }
 
   function doorTex(stripe) {
     return makeTex(function (x, y) {
-      var base = '#5a5f68', dark = '#2a2d33';
+      var base = '#6a5a3a', dark = '#2e2618'; // bronze doors
       var seam = Math.abs(x - 32) < 1;                        // central split
       var slat = (y & 15) < 2;
       var edge = x < 3 || x > 60 || y < 3 || y > 60;
@@ -163,7 +165,7 @@ var ART = (function () {
       var inPanelX = x > 16 && x < 48, inPanelY = y > 14 && y < 50;
       if (inPanelX && inPanelY) {
         var bx = x > 24 && x < 40, by = on ? (y > 32 && y < 46) : (y > 18 && y < 32);
-        if (bx && by) return mix(on ? '#30d040' : '#d03030', '#000000', n2(x, y, 3) * 0.25);
+        if (bx && by) return mix(on ? '#6fe0ec' : '#d03030', '#000000', n2(x, y, 3) * 0.25); // cyan = restored
         return mix('#1c1a16', '#000000', 0.3);
       }
       var edge = x < 2 || x > 61 || y < 2 || y > 61;
@@ -182,13 +184,16 @@ var ART = (function () {
     });
   }
 
-  // ---- the imp (fire imp) --------------------------------------------------
+  // ---- the Hollow (sim kind 'imp') -----------------------------------------
+  // An ash shell with red mercury leaking from the seams (STYLE_GUIDE.md).
 
   var IMP_L = {
-    'o': '#1c0e06', 'b': '#9a5226', 'd': '#6b3413', 'c': '#e08a28',
-    'h': '#f7b24a', 'e': '#ffe14a', 'm': '#3a1006', 't': '#f0e6c8',
-    'x': '#f0e6c8', 'r': '#c03018', 'f': '#ff8a18', 'g': '#ffd23e'
+    'o': '#141210', 'b': '#5e5750', 'd': '#3a3532', 'c': '#8a1c18',
+    'h': '#e0403a', 'e': '#ff7a6a', 'm': '#1a0806', 't': '#c8c0b0',
+    'x': '#c8c0b0', 'r': '#c0302a', 'f': '#ff4a3a', 'g': '#ffb0a0'
   };
+  // the old fire imp had horns in its top rows; a Hollow has none
+  function noHorns(rows) { return rows.map(function (r, i) { return i < 3 ? r.replace(/t/g, '.') : r; }); }
 
   var IMP_A = [
     '......tt........',
@@ -353,13 +358,13 @@ var ART = (function () {
     '................'
   ];
 
-  // ---- the gnasher (pink demon) -------------------------------------------
+  // ---- the Hollow Hound (sim kind 'gnasher') -------------------------------
 
   function gnasherLegend(recolor) {
     var L = {
-      'o': '#200a10', 'p': '#d06a8a', 'q': '#9a3d5e', 'k': '#e898a8',
-      't': '#f2ead0', 'm': '#41101c', 'e': '#ffd23e', 'x': '#f2ead0',
-      'r': '#b02030'
+      'o': '#141210', 'p': '#5e5750', 'q': '#3a3532', 'k': '#7a726a',
+      't': '#c8c0b0', 'm': '#1a0806', 'e': '#ff5a4a', 'x': '#c8c0b0',
+      'r': '#c0302a'
     };
     if (recolor) for (var key in recolor) L[key] = recolor[key];
     return L;
@@ -704,9 +709,10 @@ var ART = (function () {
   // ---- weapons (viewmodel, drawn front-on) --------------------------------
 
   var GUN_L = {
-    'o': '#0e0c0a', 'g': '#4a4e56', 'G': '#6a707c', 'd': '#26282e',
+    // brass and bronze with an aether crystal ('y'): no gunmetal (STYLE_GUIDE.md)
+    'o': '#0e0c0a', 'g': '#8a6a2a', 'G': '#c8a048', 'd': '#4a3818',
     's': '#d8a06a', 'S': '#a8744a', 'w': '#7a4a28', 'W': '#5a3418',
-    'y': '#c8b040', 'k': '#16181c'
+    'y': '#6fe0ec', 'k': '#2a2010'
   };
 
   // fist (half 12 wide -> 24, 18 tall)
@@ -818,9 +824,9 @@ var ART = (function () {
   function fireballFrame(seed) {
     return radial(12, 12, function (d, x, y) {
       var j = n2(x, y, seed) * 0.3;
-      if (d + j < 0.38) return hex('#fff8d0');
-      if (d + j < 0.68) return hex('#ffd23e');
-      if (d + j < 0.95) return hex('#ff7a18');
+      if (d + j < 0.38) return hex('#ffe0d8');
+      if (d + j < 0.68) return hex('#ff6a5a');
+      if (d + j < 0.95) return hex('#c0202a');
       return 0;
     });
   }
@@ -828,9 +834,9 @@ var ART = (function () {
   function greenballFrame(seed) {
     return radial(14, 14, function (d, x, y) {
       var j = n2(x, y, seed) * 0.3;
-      if (d + j < 0.38) return hex('#eaffd0');
-      if (d + j < 0.68) return hex('#8aff3e');
-      if (d + j < 0.95) return hex('#2fa818');
+      if (d + j < 0.38) return hex('#eafffc');
+      if (d + j < 0.68) return hex('#6fe0ec');
+      if (d + j < 0.95) return hex('#1a8a98');
       return 0;
     });
   }
@@ -858,13 +864,14 @@ var ART = (function () {
   function bloodFrame(seed, big) {
     return radial(big ? 8 : 6, big ? 8 : 6, function (d, x, y) {
       var j = n2(x, y, seed) * 0.45;
-      if (d + j < 0.45) return hex('#e04020');
-      if (d + j < 0.9) return hex('#901810');
+      // ash chips off a Hollow's shell (never blood)
+      if (d + j < 0.45) return hex('#8a8278');
+      if (d + j < 0.9) return hex('#4a4440');
       return 0;
     });
   }
 
-  // barrel: shaded cylinder with fire stripe
+  // mercury cask (sim: barrel): a dark vessel in brass bands, red mercury on top
   function barrelSprite() {
     var w = 16, h = 22, data = new Uint32Array(w * h);
     for (var y = 0; y < h; y++) {
@@ -875,12 +882,12 @@ var ART = (function () {
         var shade = 1 - u * u * 0.75;
         var band = (y === 4 || y === 16);
         var stripe = (y >= 8 && y <= 12);
-        var base = stripe ? '#c05010' : '#5c554c';
-        if (y >= 1 && y <= 2) base = '#3a352e';
-        var c = mix(base, '#000000', 1 - shade + (band ? 0.35 : 0) + n2(x, y, 77) * 0.2);
+        var base = band ? '#c8a048' : stripe ? '#6a1018' : '#2a2226';
+        if (y >= 1 && y <= 2) base = '#3a1418';
+        var c = mix(base, '#000000', 1 - shade + n2(x, y, 77) * 0.2);
         if (edge) c = hex('#16130f');
-        // glowing coals on top
-        if (y === 1 && u < 0.6 && n2(x, y, 8) > 0.4) c = hex('#ff9a28');
+        // red mercury glowing on top
+        if (y === 1 && u < 0.6 && n2(x, y, 8) > 0.4) c = hex('#ff3a3a');
         data[y * w + x] = c;
       }
     }
@@ -920,6 +927,18 @@ var ART = (function () {
     return finish(w, h, data);
   }
 
+  // a standing crystal: a tall diamond, light on one face and dark on the other
+  function crystalSprite(w, h, light, dark) {
+    var data = new Uint32Array(w * h), cx = (w - 1) / 2;
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var half = (y < h * 0.35 ? y / (h * 0.35) : (h - 1 - y) / (h * 0.65)) * (w / 2);
+      var dx = x - cx;
+      if (Math.abs(dx) > half) continue;
+      data[y * w + x] = Math.abs(dx) > half - 1 ? hex('#14120e') : dx < 0 ? mix(light, '#ffffff', 0.2) : mix(dark, '#000000', 0.25);
+    }
+    return finish(w, h, data);
+  }
+
   function crossDeco(color) {
     return function (data, w, h) {
       var cx = w >> 1, cy = h >> 1, c = hex(color);
@@ -928,26 +947,27 @@ var ART = (function () {
     };
   }
 
+  // a keystone: a carved stone wedge with a glowing ring in its key colour
   function keycardSprite(color) {
     var rows = [
-      'oooooooo',
-      'occccccb'.replace('b', 'o'),
-      'occwwcco',
-      'occwwcco',
-      'occcccco',
-      'occcccco',
-      'ocwwwwco',
-      'occcccco',
-      'occcccco',
-      'oooooooo'
+      '.oooooo.',
+      'osssssso',
+      'osscccso',
+      'oscsscso',
+      'oscsscso',
+      'osscccso',
+      '.osssso.',
+      '.osssso.',
+      '..osso..',
+      '...oo...'
     ];
-    return sprite(rows, { 'o': '#14120e', 'c': color, 'w': '#f0ead8' });
+    return sprite(rows, { 'o': '#14120e', 's': '#b8b0a0', 'c': color });
   }
 
   function shotgunPickup() {
     var w = 30, h = 10, data = new Uint32Array(w * h);
     function px(x, y, c) { if (x >= 0 && x < w && y >= 0 && y < h) data[y * w + x] = hex(c); }
-    for (var x = 2; x < 22; x++) { px(x, 3, '#3a3e46'); px(x, 4, '#5a5f68'); px(x, 5, '#26282e'); }
+    for (var x = 2; x < 22; x++) { px(x, 3, '#6a5020'); px(x, 4, '#c8a048'); px(x, 5, '#4a3818'); }
     for (var x2 = 8; x2 < 15; x2++) px(x2, 6, '#5a3418'); // pump
     for (var x3 = 21; x3 < 29; x3++) { px(x3, 4 + ((x3 - 21) >> 1), '#5a3418'); px(x3, 5 + ((x3 - 21) >> 1), '#7a4a28'); }
     px(1, 3, '#16130f'); px(1, 4, '#16130f');
@@ -1030,7 +1050,7 @@ var ART = (function () {
   A.tex = {
     1: brickTex(1, '#8a4232', '#4a1e14', '#2a1812'),
     2: stoneTex(2, '#8a8578', '#4a463c'),
-    3: metalTex(3, '#5a5f68', '#26282e'),
+    3: metalTex(3, '#6a5e4a', '#2e281e'),
     4: techTex(4),
     5: hellTex(5),
     6: doorTex(null),
@@ -1047,8 +1067,8 @@ var ART = (function () {
     hell: makeTex(function (x, y) {
       var v = n2(x, y, 13) * 0.5 + n2(x >> 2, y >> 2, 14) * 0.5;
       var s = Math.sin(x * 0.19 + Math.sin(y * 0.11) * 2.0) + Math.sin(y * 0.15);
-      if (s > 1.5) return mix('#ff7a18', '#ffd23e', v);
-      return mix('#3a100c', '#180404', v);
+      if (s > 1.5) return mix('#c0141e', '#ff3a2a', v);
+      return mix('#221c1e', '#0e0a0c', v);
     }),
     ceilDark: floorTexGen(15, '#2e2b26', '#201d18'),
     ceilTech: makeTex(function (x, y) {
@@ -1057,22 +1077,36 @@ var ART = (function () {
       return mix('#2a2e2c', '#1a1d1b', n2(x, y, 16) * 0.5);
     }),
     ceilHell: makeTex(function (x, y) {
-      return mix('#241010', '#100404', n2(x, y, 17) * 0.6);
+      return mix('#1e1a1c', '#0c0a0b', n2(x, y, 17) * 0.6);
     })
   };
 
   var impL = IMP_L, gnaL = gnasherLegend(null);
-  var kniL = gnasherLegend({ 'p': '#c8502a', 'q': '#7e2412', 'k': '#e8804a', 'e': '#a0fFff'.toLowerCase() });
+  var kniL = gnasherLegend({ 'p': '#2e2a28', 'q': '#161312', 'k': '#b08a3a', 'e': '#ff3a2a', 't': '#d8b060', 'r': '#ff3a2a' });
+
+  // a released Hollow leaves a low pile of ash, not a body (Law of Poles)
+  function ashPile(seed, w) {
+    var h = 5, data = new Uint32Array(w * h);
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var u = (x - (w - 1) / 2) / (w / 2), top = h * (1 - u * u) - n2(x, 0, seed) * 1.2;
+      if (h - 1 - y >= top) continue;
+      var c = mix('#6a625a', '#2e2a28', (y / h) * 0.5 + n2(x, y, seed) * 0.5);
+      if (n2(x, y, seed + 3) > 0.94) c = hex('#c0302a'); // a last ember of mercury
+      data[y * w + x] = c;
+    }
+    return finish(w, h, data);
+  }
 
   A.mobs = {
     imp: {
-      walkA: sprite(IMP_A, impL, { mirror: true }),
-      walkB: sprite(IMP_B, impL, { mirror: true }),
-      attack: sprite(IMP_ATK, impL, { mirror: true }),
-      pain: sprite(IMP_PAIN, impL, { mirror: true }),
-      die1: sprite(IMP_DIE1, impL, { mirror: true }),
-      die2: sprite(IMP_DIE2, impL, { mirror: true }),
-      corpse: sprite(IMP_CORPSE, impL, { mirror: true })
+      walkA: sprite(noHorns(IMP_A), impL, { mirror: true }),
+      walkB: sprite(noHorns(IMP_B), impL, { mirror: true }),
+      attack: sprite(noHorns(IMP_ATK), impL, { mirror: true }),
+      pain: sprite(noHorns(IMP_PAIN), impL, { mirror: true }),
+      // falling, the old horns sit lower in the frame: take every 't' out
+      die1: sprite(IMP_DIE1.map(function (r) { return r.replace(/t/g, '.'); }), impL, { mirror: true }),
+      die2: sprite(IMP_DIE2.map(function (r) { return r.replace(/t/g, '.'); }), impL, { mirror: true }),
+      corpse: ashPile(91, 16)
     },
     gnasher: {
       walkA: sprite(GNA_A, gnaL, { mirror: true }),
@@ -1081,7 +1115,7 @@ var ART = (function () {
       pain: sprite(GNA_PAIN, gnaL, { mirror: true }),
       die1: sprite(GNA_DIE1, gnaL, { mirror: true }),
       die2: sprite(GNA_DIE2, gnaL, { mirror: true }),
-      corpse: sprite(GNA_CORPSE, gnaL, { mirror: true })
+      corpse: ashPile(92, 18)
     },
     knight: {
       walkA: sprite(GNA_A, kniL, { mirror: true }),
@@ -1090,7 +1124,7 @@ var ART = (function () {
       pain: sprite(GNA_PAIN, kniL, { mirror: true }),
       die1: sprite(GNA_DIE1, kniL, { mirror: true }),
       die2: sprite(GNA_DIE2, kniL, { mirror: true }),
-      corpse: sprite(GNA_CORPSE, kniL, { mirror: true })
+      corpse: ashPile(93, 22)
     },
     riley: {
       walkA: sprite(RIL_A, RIL_L, { mirror: true }),
@@ -1108,12 +1142,12 @@ var ART = (function () {
     barrel: barrelSprite(),
     torchA: torchSprite(31),
     torchB: torchSprite(87),
-    stim: boxSprite(10, 8, '#e8e4dc', '#a8a49c', crossDeco('#d02020')),
-    medkit: boxSprite(16, 12, '#e8e4dc', '#a8a49c', crossDeco('#d02020')),
-    clip: boxSprite(10, 8, '#7a7468', '#4a463c', function (d, w, h) {
-      for (var x = 2; x < w - 2; x += 2) d[2 * w + x] = hex('#c8a030');
+    stim: crystalSprite(8, 10, '#ffe8a0', '#e0a020'),     // life shard
+    medkit: crystalSprite(12, 16, '#f0fff8', '#6fe0ec'),  // healing crystal
+    clip: boxSprite(10, 8, '#8a6a2a', '#4a3818', function (d, w, h) { // spark cell
+      for (var x = 2; x < w - 2; x += 2) d[2 * w + x] = hex('#6fe0ec');
     }),
-    shells: boxSprite(14, 9, '#b03020', '#5e1810', function (d, w, h) {
+    shells: boxSprite(14, 9, '#b08a3a', '#5e4418', function (d, w, h) { // bell charges
       for (var x = 2; x < w - 2; x += 2) { d[3 * w + x] = hex('#c8a030'); d[4 * w + x] = hex('#c8a030'); }
     }),
     armor: sprite([
@@ -1127,7 +1161,7 @@ var ART = (function () {
       '..oggggg',
       '...ooooo'
     ].map(function (r) { while (r.length < 8) r += '.'; return r.slice(0, 8); }),
-      { 'o': '#14120e', 'g': '#3a7a30', 'G': '#6ab858' }, { mirror: true }),
+      { 'o': '#14120e', 'g': '#8a6a2a', 'G': '#e0b050' }, { mirror: true }), // brass ward
     keyRed: keycardSprite('#d02020'),
     keyBlue: keycardSprite('#2050e0'),
     shotgunPickup: shotgunPickup(),
