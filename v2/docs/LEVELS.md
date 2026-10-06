@@ -188,7 +188,7 @@ Bot evidence: `node tests/playtest.js` (bots that know the map) and `--first-tim
 
 | Level | Built | Lab (hard rules) | First-timer bots: ends on its peak (U12) / lost (U7) / clears W, B | Human-played |
 |---|---|---|---|---|
-| E1M1 Ash Gates | yes, with a shortcut gate and the spar as the climax | all pass | 63% / 3% / 35/35, 35/35 | the user played an early v2 ("much better") |
+| E1M1 Ash Gates | yes, with a shortcut gate and the spar as the climax (Riley alone for 16 s, then 4 Hollows) | all pass | 51% / 2% / 35/35, 35/35 (ff37895) | the user played an early v2 ("much better") |
 | E1M2 The Furnace | yes, forge reworked (overlapping waves; the last wave takes the high ground) | all pass | 57% / 1% / 35/35, 32/35 | no |
 | E1M3 The Reset Engine | yes, Old Earth, three seals, the Warden opens as a duel | all pass | 54% / 0% / 34/35, 26/32 | no |
 | E1M4 Riley's Trial | yes, rebuilt to the codex | all pass | 59% / 0% / 33/34, 21/26 | no |
