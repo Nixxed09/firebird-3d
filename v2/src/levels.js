@@ -18,10 +18,10 @@ var E1M1 = {
   // once you reach the hall, so it opens from the far side
   events: [
     { when: { enter: [2, 17, 19, 21] }, do: [{ lower: [7, 22, 7, 24], to: 0, speed: 1.2, look: 1 }, { say: "HEAR THAT? A SHORTCUT BACK TO WHERE YOU STARTED JUST OPENED." }] },
-    // the sparring match is the level's climax (codex U12). The first 20 s are Riley alone, which teaches
-    // "keep moving" for her Trial (M4); then Hollows join and the fight peaks
-    { when: { enter: [15, 1, 28, 8] }, do: [{ after: 20, do: [{ say: "HOLLOWS! THEY HEARD US. KEEP GOING, WE CAN TAKE THEM TOO." }, { shake: 2 },
-      { wave: 'sparAdds', spawn: [{ kind: 'imp', x: 15, z: 2 }, { kind: 'imp', x: 28, z: 2 }, { kind: 'gnasher', x: 21, z: 8 }] }] }] }
+    // the sparring match is the level's climax (codex U12). The first 16 s are Riley alone, which teaches
+    // "keep moving" for her Trial (M4); then a bigger wave of Hollows joins and the fight peaks
+    { when: { enter: [15, 1, 28, 8] }, do: [{ after: 16, do: [{ say: "HOLLOWS! THEY HEARD US. KEEP GOING, WE CAN TAKE THEM TOO." }, { shake: 2 },
+      { wave: 'sparAdds', spawn: [{ kind: 'imp', x: 15, z: 2 }, { kind: 'imp', x: 28, z: 2 }, { kind: 'imp', x: 21, z: 1 }, { kind: 'gnasher', x: 21, z: 8 }] }] }] }
   ],
   triggers: [
     { box: [2, 25, 8, 30], say: "HI! I'M RILEY. I'M WAITING FOR YOU AT THE TOP. LOOK AROUND WITH THE MOUSE, MOVE WITH WASD, THEN HEAD FOR THAT DOOR AHEAD." },
