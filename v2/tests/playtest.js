@@ -173,7 +173,9 @@ function playEpisode(key, persona, sd, difficulty) {
       }
       if (fight && bossActive) {
         var fired = p.fireT === 0 && fireTBefore > 0; // a real trigger pull, not a frozen timer while dead
-        var otherHit = near.some(function (e) { return G.ents.indexOf(e) < 0 || e.dead; });
+        var otherHit = near.some(function (e) { return G.ents.indexOf(e) < 0 || e.dead; }) ||
+          // a Hollow that turned on her and is biting or punching her this frame (infighting)
+          G.ents.some(function (e) { return e.mob && !e.barrel && e !== boss && e.target === boss && e.state !== 'die' && e.state !== 'dead' && Math.hypot(e.x - boss.x, e.z - boss.z) < 2.5; });
         if (fired) {
           fight.shots[p.weapon]++; fight.shotsTotal++;
           if (boss.hp < bossHpBefore) { if (otherHit) fight.ambiguous++; else fight.hits++; }
