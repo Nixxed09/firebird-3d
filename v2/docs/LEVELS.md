@@ -183,9 +183,18 @@ mid-fight).
 
 ## Status
 
-| Level | Built with height | Bot-played | Human-played |
-|---|---|---|---|
-| E1M1 Ash Gates (with Riley's sparring arena) | yes | needs a rerun after this change | the user played the earlier v2 E1M1 ("much better") |
-| E1M2 The Furnace | yes, rebuilt to the full contract | yes (first-timer bot clears it; intensity peaks at the forge) | no |
-| E1M3 The Reset Engine | yes, built to the full contract (Old Earth) | needs the bots' lever plan | no |
-| E1M4 Riley's Trial | yes, rebuilt to the Level Design Codex | needs a rerun | no |
+Bot evidence: `node tests/playtest.js` (bots that know the map) and `--first-timer`,
+105 episodes each, on f9197f6 (2026-10-06). The targets are the Level Design Codex's.
+
+| Level | Built | Lab (hard rules) | First-timer bots: ends on its peak (U12) / lost (U7) / clears W, B | Human-played |
+|---|---|---|---|---|
+| E1M1 Ash Gates | yes, with a shortcut gate and the spar as the climax | all pass | 63% / 3% / 35/35, 35/35 | the user played an early v2 ("much better") |
+| E1M2 The Furnace | yes, forge reworked (overlapping waves; the last wave takes the high ground) | all pass | 57% / 1% / 35/35, 32/35 | no |
+| E1M3 The Reset Engine | yes, Old Earth, three seals, the Warden opens as a duel | all pass | 54% / 0% / 34/35, 26/32 | no |
+| E1M4 Riley's Trial | yes, rebuilt to the codex | all pass | 59% / 0% / 33/34, 21/26 | no |
+
+Open:
+- Bots that know the map end high less often on E1M2 (48%) and E1M3 (40%).
+- On ROOKIE, standing still against the Warden isn't punished. That's acceptable on the easiest setting.
+- The E1M1 first-timer quiet stretch at the stone gate (31 s) is a bot frontier artifact: the gate cells are raised floor.
+- **The real test left is human: the Nix test (Q3).**
