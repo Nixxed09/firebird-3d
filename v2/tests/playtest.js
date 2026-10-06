@@ -467,7 +467,7 @@ function bossStillness() {
   var persona = personas.all.power_user || personas.all[keys[0]], rows = [];
   bossLevels.forEach(function (li) {
     DIFFS.forEach(function (d) {
-      var res = { moving: { won: 0, n: 0, secs: 0, fightT: 0, dmg: 0 }, still: { won: 0, n: 0, secs: 0, fightT: 0, dmg: 0 } };
+      var res = { moving: { won: 0, n: 0, secs: 0, fightT: 0, dmg: 0, duelT: 0, duelDmg: 0 }, still: { won: 0, n: 0, secs: 0, fightT: 0, dmg: 0, duelT: 0, duelDmg: 0 } };
       for (var sd = SEED; sd < SEED + SEEDS; sd++) {
         ['moving', 'still'].forEach(function (mode) {
           var store = {}, rng = makeRng(episodeSeed(sd, 'm4-' + li));
@@ -476,23 +476,30 @@ function bossStillness() {
           FB.startLevel(li, false);
           var bot = new PlayBot(FB, persona, rng, {}), fight = bot.fight;
           if (mode === 'still') bot.fight = function (e, dt) { fight.call(this, e, dt); if (e.kind === 'riley' || e.kind === 'knight') this.setMove(null); };
-          var t = 0, won = false, r = res[mode];
+          var t = 0, won = false, r = res[mode], clock = 0;
           while (t < LEVEL_LIMIT) {
             var P = FB.state().p, before = P.hp + P.armor;
             bot.step(DT); FB.update(DT); t += DT;
             // damage taken while a boss (Riley or the Warden) is up and within 12 cells
             var G2 = FB.state(), P2 = G2.p, inFight = G2.ents.some(function (e) {
               return (e.kind === 'riley' || e.kind === 'knight') && e.state !== 'idle' && e.state !== 'die' && e.state !== 'dead' && Math.hypot(e.x - P2.x, e.z - P2.z) <= 12; });
-            if (inFight) { r.fightT += DT; r.dmg += Math.max(0, before - (P2.hp + P2.armor)); }
+            if (inFight) {
+              var lost = Math.max(0, before - (P2.hp + P2.armor));
+              r.fightT += DT; r.dmg += lost;
+              // the opening duel: the first 7 s of the boss fight (E1M3's escort arrives at 9 s)
+              if (clock < 7) { r.duelT += DT; r.duelDmg += lost; }
+              clock += DT;
+            }
             if (P2.dead) break;
             if (FB.mode() !== 'game') { won = true; break; }
           }
           r.n++; if (won) { r.won++; r.secs += t; }
         });
       }
-      ['moving', 'still'].forEach(function (m) { var x = res[m]; x.dps = x.fightT ? +(x.dmg / x.fightT).toFixed(1) : null; });
+      ['moving', 'still'].forEach(function (m) { var x = res[m]; x.dps = x.fightT ? +(x.dmg / x.fightT).toFixed(1) : null; x.duelDps = x.duelT ? +(x.duelDmg / x.duelT).toFixed(1) : null; });
+      var duelRatio = res.moving.duelDps && res.still.duelDps != null ? +(res.still.duelDps / res.moving.duelDps).toFixed(2) : null;
       var ratio = res.moving.dps && res.still.dps != null ? +(res.still.dps / res.moving.dps).toFixed(2) : null;
-      rows.push({ level: LEVELS[li].name, difficulty: DIFF_NAMES[d], moving: res.moving, still: res.still, dpsRatio: ratio,
+      rows.push({ level: LEVELS[li].name, difficulty: DIFF_NAMES[d], moving: res.moving, still: res.still, dpsRatio: ratio, duelRatio: duelRatio,
         ok: res.still.won < res.moving.won || res.moving.won === 0 || (ratio != null && ratio >= 1.3) });
     });
   });
@@ -524,9 +531,9 @@ function codexReport(flow, m4) {
   });
   L.push('', '### M4: standing still against the boss', '',
     'The same bot, one life, once moving and once holding still whenever it fights the boss (it still aims and fires). Standing still should win clearly less (Doom: holding still should lose).', '',
-    '| Level | Difficulty | Moving: won, damage/s | Still: won, damage/s | Still takes x | Standing still loses? |', '|---|---|---|---|---|---|');
+    '| Level | Difficulty | Moving: won, damage/s | Still: won, damage/s | Still takes x | First 7 s: still takes x | Standing still loses? |', '|---|---|---|---|---|---|---|');
   m4.forEach(function (r) {
-    L.push('| ' + r.level + ' | ' + r.difficulty + ' | ' + r.moving.won + '/' + r.moving.n + ', ' + r.moving.dps + ' | ' + r.still.won + '/' + r.still.n + ', ' + r.still.dps + ' | ' + (r.dpsRatio == null ? '-' : r.dpsRatio + 'x') + ' | ' + (r.ok ? 'yes' : '**no**') + ' |');
+    L.push('| ' + r.level + ' | ' + r.difficulty + ' | ' + r.moving.won + '/' + r.moving.n + ', ' + r.moving.dps + ' | ' + r.still.won + '/' + r.still.n + ', ' + r.still.dps + ' | ' + (r.dpsRatio == null ? '-' : r.dpsRatio + 'x') + ' | ' + (r.duelRatio == null ? '-' : r.duelRatio + 'x (' + r.moving.duelDps + ' vs ' + r.still.duelDps + ')') + ' | ' + (r.ok ? 'yes' : '**no**') + ' |');
   });
   return L.join('\n') + '\n';
 }

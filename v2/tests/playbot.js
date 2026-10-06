@@ -20,7 +20,7 @@
 // marker (game.goalTarget(), which itself only points at things seen). The cue
 // behind each exploration step is logged, so the playtest shows which cues
 // actually lead players.
-import { hasLOS, cellAt, floorAt } from '../src/sim/world.js';
+import { hasLOS, cellAt, floorAt, JUMP_UP } from '../src/sim/world.js';
 
 var DOOR = { 6: true, 7: true, 8: true, 11: true };
 var EXIT_SWITCH = 9;
@@ -610,14 +610,21 @@ PlayBot.prototype.frontier = function () {
   }
   var goal = this.game.goalTarget ? this.game.goalTarget() : null;
   var torches = G.ents.filter(function (e) { return e.kind === 'torch' && self.knows(Math.floor(e.x), Math.floor(e.z)); });
-  function unseen(x, z) { return x >= 0 && z >= 0 && x < mw && z < mh && !G.seen[z * mw + x]; }
+  // an unseen cell counts as somewhere to explore only if a player could get
+  // onto it from the candidate's floor: a block raised more than a jump above
+  // you (E1M1's stone gate at 7,22-24) is wall to a player, not an opening
+  function unseen(x, z, from) {
+    return x >= 0 && z >= 0 && x < mw && z < mh && !G.seen[z * mw + x] && floorAt(G.W, x, z) - from <= JUMP_UP + 1e-4;
+  }
   var best = null, cands = [];
   dist.forEach(function (d, c) {
-    var x = c % mw, z = (c / mw) | 0;
-    if (!NB.some(function (o) { return unseen(x + o[0], z + o[1]); })) return;
+    var x = c % mw, z = (c / mw) | 0, lift = self.liftAt(x, z);
+    // from a lift, you reach what its top reaches
+    var here = lift ? Math.max(lift.top, floorAt(G.W, x, z)) : floorAt(G.W, x, z);
+    if (!NB.some(function (o) { return unseen(x + o[0], z + o[1], here); })) return;
     if (self.banned['explore:' + x + ',' + z] > self.now) return;
     var open = 0;
-    for (var dz = -2; dz <= 2; dz++) for (var dx = -2; dx <= 2; dx++) if (unseen(x + dx, z + dz)) open++;
+    for (var dz = -2; dz <= 2; dz++) for (var dx = -2; dx <= 2; dx++) if (unseen(x + dx, z + dz, here)) open++;
     var sc = 0.55 - d * 0.03 + open * 0.02, cue = 'open', torchTerm = 0, door = null;
     if (DOOR[self.cell(x, z)]) door = { x: x, z: z };
     else NB.forEach(function (o) { if (!door && DOOR[self.cell(x + o[0], z + o[1])]) door = { x: x + o[0], z: z + o[1] }; });
