@@ -1,0 +1,5 @@
+PROBE_START {"role":"join","beacon_port":33450,"game":"firebird-coop","build":"build-100","order":20261013120000,"relay":""}
+JOIN_LIST {"rooms":[{"room":"b49b28ffe81a9b69","game":"firebird-coop","host":"Nix","players":1,"max_players":4,"level":"host-join","address":"192.168.1.13","port":27700,"ctl":33451,"build":"build-200","same_build":false,"build_message":"The other computer has a newer copy: open the Family Arcade to update."}],"listening":true,"error":""}
+REFUSED {"room":"b49b28ffe81a9b69","message":"The other computer has a newer copy: open the Family Arcade to update."}
+ROOM_CLOSED {"room":"b49b28ffe81a9b69","message":"That game is not there any more.","at":1791923944663}
+PROBE_END {"force":false}

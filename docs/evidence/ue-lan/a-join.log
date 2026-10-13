@@ -1,0 +1,5 @@
+PROBE_START {"beacon_port":"38867","role":"joiner"}
+JOIN_LIST {"found":true,"rooms":[{"address":"192.168.1.13","build":"build-100","build_message":"","by":"high","ctl":38868,"game":"firebird-coop","heard":1744,"host":"Nix","level":"host-join","local":true,"max":4,"max_players":4,"mine":false,"order":20261013120000,"players":1,"port":27700,"room":"5171d058b82ce174","same_build":true}]}
+JOINED {"address":"192.168.1.13","ctl":38868,"game":"firebird-coop","host":"Nix","level":"host-join","max_players":4,"players":1,"port":27700,"room":"5171d058b82ce174","score_order":"high"}
+GUEST_CLOSED {"at":1791923884941,"message":"The other computer stopped the game.","room":"5171d058b82ce174"}
+PROBE_END {}

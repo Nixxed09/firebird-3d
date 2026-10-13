@@ -12,3 +12,6 @@ engine/Saved/
 engine/*.sln
 engine/.vsconfig
 captures/ue/
+
+# packaged game (built by tools/ue-package.ps1)
+builds/

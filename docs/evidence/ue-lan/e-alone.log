@@ -1,0 +1,2 @@
+PROBE_START {"role":"join","beacon_port":38574,"game":"firebird-coop","build":"build-100","order":20261013120000,"relay":""}
+LISTEN_ERROR {"error":"Another program on this computer is already listening for rooms (UDP 38574). Open the Family Arcade and start this game from it."}

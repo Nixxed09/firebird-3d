@@ -77,3 +77,40 @@ with no audio device. Check every asset loads: run the game with
 | `riley_radio` | before each Riley radio line | 2D |
 | `ui_tick` | menu moves, HUD prompts | 2D |
 | `ambience_loop`, `music_loop` | at level start (`FB::StartAmbience`) | 2D loops |
+
+## Family Arcade rooms (arcade-lan/v1)
+
+`UFirebirdArcadeLan` (a game-instance subsystem) is a C++ port of the Family
+Arcade's `GamesOS/shared/arcade-lan/arcade_lan.gd`, for the `host-join` level:
+the host's room shows up in the arcade's "Playing now" strip, a joiner gets the
+contract's build check and its plain-words refusals, then connects to the
+address and port it is handed with the game's own netcode.
+
+```cpp
+UFirebirdArcadeLan* Lan = GetGameInstance()->GetSubsystem<UFirebirdArcadeLan>();
+int64 Order = 0;
+Lan->Configure(TEXT("firebird-coop"), UFirebirdArcadeLan::ComputeBuildId(&Order), Order);
+FString Room = Lan->AnnounceRoom(GamePort, /*Players*/ 1, /*Max*/ 4);   // host
+Lan->UpdatePlayers(Room, 2);  Lan->CloseRoom(Room);
+Lan->ListRooms(Lan->GameId());   // joiner: call while the list is on screen
+Lan->JoinRoom(RoomId);           // -> OnJoined(Room, Address, Port) / OnJoinRefused(Room, Message)
+Lan->PendingJoin();              // the room the arcade's strip asked for (ARCADE_JOIN)
+```
+
+- Same wire format, ports (27620 beacon, 27621-27639 rooms), timings and home-address
+  filter as `arcade_lan.gd`. Sockets are dual-stack (`[::]`), like Godot's: on
+  Windows an IPv4 socket could share a port with a Godot one and steal its packets.
+- Started by the arcade (`ARCADE_RELAY_URL` set), rooms are read from the arcade
+  over loopback; started alone, the game listens on 27620 itself, and if the arcade
+  already holds it, `LastError` says so.
+- Build id: `ComputeBuildId()` hashes a `BUILD-INFO.txt` beside the game if there is
+  one (line endings ignored), else the packaged IoStore tables of contents plus every
+  container's name and size, else (run from source) the compiled game module. The
+  order is the newest of those files' times, `YYYYMMDDhhmmss`.
+- Not ported: the scoreboard (`submit_score`/`board`), leases.
+
+Proof, with real processes (Godot 4.7 and the GamesOS checkout needed):
+`.\tools\ue-test-arcade-lan.ps1 [-KeepEvidence]`. It runs a UE host with the arcade's
+own `arcade_lan.gd` joining, the GamesOS `lan_probe.gd` host with a UE joiner, UE to UE
+with the host killed, an older copy refused, and the real launcher scene holding the
+beacon port (its feed lists the UE room; a UE game reads and joins through the relay).

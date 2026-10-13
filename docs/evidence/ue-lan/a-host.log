@@ -1,0 +1,4 @@
+PROBE_START {"role":"host","beacon_port":38867,"game":"firebird-coop","build":"build-100","order":20261013120000,"relay":""}
+HOST_READY {"room":"5171d058b82ce174","error":"","port":27700}
+HOST_GUEST_JOINED {"room":"5171d058b82ce174","who":"GodotKid","players":2}
+HOST_CLOSED {"room":"5171d058b82ce174"}

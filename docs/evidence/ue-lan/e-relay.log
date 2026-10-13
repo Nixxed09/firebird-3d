@@ -1,0 +1,7 @@
+PROBE_START {"beacon_port":"38574","role":"relay"}
+RELAY_READY {"ok":true,"relay_wired":true,"status":"pending","url":"http://127.0.0.1:65198/arcade-lan/v1/"}
+RELAY_STRIP {"chips":[],"mode":"empty","rooms":[],"status":"live"}
+RELAY_STRIP {"chips":["firebird-coop  -  Nix  -  1 of 4"],"mode":"rooms","rooms":[{"game_id":"firebird-coop","host":"Nix","max_players":4,"players":1,"room":"dbd2476743aeca22"}],"status":"live"}
+RELAY_STRIP {"chips":["firebird-coop  -  Nix  -  2 of 4"],"mode":"rooms","rooms":[{"game_id":"firebird-coop","host":"Nix","max_players":4,"players":2,"room":"dbd2476743aeca22"}],"status":"live"}
+RELAY_STRIP {"chips":[],"mode":"empty","rooms":[],"status":"live"}
+PROBE_END {}

@@ -1,0 +1,4 @@
+PROBE_START {"beacon_port":"38023","role":"host"}
+HOST_READY {"ctl":38024,"error":"","hostjoin":"51198255a751a6a4","other":"ed5d4008cc83a59d","scoreboard":"45217d04af320dcc"}
+HOST_GUEST_JOINED {"room":"51198255a751a6a4","who":"Sky"}
+HOST_CLOSED {"at":1791923897956,"room":"51198255a751a6a4"}
