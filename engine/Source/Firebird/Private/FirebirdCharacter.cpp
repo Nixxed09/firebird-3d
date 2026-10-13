@@ -129,7 +129,7 @@ void AFirebirdCharacter::BuildViewModel()
 void AFirebirdCharacter::BuildBody()
 {
     const FLinearColor C = PlayerColor(PlayerIndex);
-    UMaterialInterface* Suit = FB::MakeSurface(this, C * 0.55f, 0.6f, 0.6f);
+    UMaterialInterface* Suit = FB::MakeSurface(this, C * 0.7f, 0.08f, 0.6f);   // the colour must read, not glow white
     UMaterialInterface* Dark = FB::MakeSurface(this, FB::Basalt * 2.f, 0.f, 0.7f);
     UMaterialInterface* Glow = FB::MakeGlow(this, C, 2.f);
     TArray<UStaticMeshComponent*> Parts;
@@ -152,7 +152,7 @@ void AFirebirdCharacter::BuildBody()
     BodyGlow->SetupAttachment(Body);
     BodyGlow->SetRelativeLocation(FVector(-30.f, 0.f, 50.f));
     BodyGlow->SetIntensityUnits(ELightUnits::Candelas);
-    BodyGlow->SetIntensity(25.f);
+    BodyGlow->SetIntensity(10.f);
     BodyGlow->SetAttenuationRadius(300.f);
     BodyGlow->SetLightColor(C);
     BodyGlow->SetCastShadows(false);

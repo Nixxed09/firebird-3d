@@ -5,7 +5,7 @@
 # -BENCHMARK: an unthrottled host would live through its wait before the
 # others arrive), capped at 30 fps so recorded frames line up with the video.
 #   .\tools\ue-coop-test.ps1 [-Players 2] [-Video]
-param([ValidateRange(2, 4)][int]$Players = 2, [switch]$Video, [int]$Port = 27705, [int]$ResX = 1280, [int]$ResY = 720)
+param([ValidateRange(2, 4)][int]$Players = 2, [switch]$Video, [switch]$CleanHostView, [int]$Port = 27705, [int]$ResX = 1280, [int]$ResY = 720)
 . "$PSScriptRoot\ue-common.ps1"
 
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -17,7 +17,8 @@ function Start-FB([string]$name, [string]$url, [bool]$record = $false) {
   $a = @("`"$FBProject`"", $url, "-game", "-windowed", "-ResX=$ResX", "-ResY=$ResY", "-NoSplash", "-nosound",
          "-abslog=`"$(Join-Path $out 'game.log')`"", "-ExecCmds=`"DisableAllScreenMessages, t.MaxFPS 30`"",
          "-FBAuto", "-FBScenario=coop", "-FBPlayers=$Players", "-FBOut=`"$out`"")
-  if ($record) { $a += "-FBFrames" }   # only one recorder: saving every frame slows a game down
+  if ($record) { $a += "-FBFrames" }
+  if ($name -eq "host" -and $CleanHostView) { $a = $a -replace 'DisableAllScreenMessages, t.MaxFPS 30', 'DisableAllScreenMessages, t.MaxFPS 30, showhud' }   # pictures without the HUD (covers)   # only one recorder: saving every frame slows a game down
   Start-Process -FilePath $FBEditor -ArgumentList $a -PassThru -WindowStyle Hidden
 }
 
