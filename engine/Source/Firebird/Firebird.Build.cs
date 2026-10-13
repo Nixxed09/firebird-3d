@@ -7,7 +7,8 @@ public class Firebird : ModuleRules
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicDependencyModuleNames.AddRange(new[]
         {
-            "Core", "CoreUObject", "Engine", "InputCore", "AIModule", "Slate", "SlateCore"
+            "Core", "CoreUObject", "Engine", "InputCore", "AIModule", "Slate", "SlateCore",
+            "Sockets", "Networking", "HTTP", "Json"
         });
     }
 }
