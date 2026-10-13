@@ -3,6 +3,8 @@
 #include "FBRange.h"
 #include "FirebirdCharacter.h"
 #include "Hollow.h"
+#include "FirebirdHUD.h"
+#include "FirebirdSession.h"
 #include "Camera/CameraComponent.h"
 #include "EngineUtils.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -111,6 +113,40 @@ void UFirebirdAutomation::Tick(float DeltaSeconds)
         return;
     }
     P->bAutoDriven = true;
+    // the start menu, as a kid sees it: a friend's room is listed, picking it joins
+    if (Scenario == TEXT("menu"))
+    {
+        UFirebirdSession* S = UFirebirdSession::Get(P);
+        APlayerController* PC = Cast<APlayerController>(P->GetController());
+        AFirebirdHUD* Hud = PC ? Cast<AFirebirdHUD>(PC->GetHUD()) : nullptr;
+        if (!S || !Hud) return;
+        if (S->Mode == EFirebirdSessionMode::Menu && Stage == 0)
+        {
+            if (Hud->MenuItems.Num() >= 3 && TotalT > 2.f)
+            {
+                Shot(TEXT("01-menu"));
+                Proof(TEXT("menu_lists_friends_game"), true, Hud->MenuItems[2].Label);
+                S->SelectedItem = 2;
+                S->Join(Hud->MenuItems[2].Room);   // what clicking it does
+                Stage = 1;
+            }
+            else if (TotalT > 30.f) { Shot(TEXT("99-no-room")); Proof(TEXT("menu_lists_friends_game"), false, TEXT("no room listed after 30 s")); Finish(); Stage = 200; }
+        }
+        else if (S->Mode == EFirebirdSessionMode::Joined && Stage < 200)
+        {
+            int32 N = 0;
+            for (TActorIterator<AFirebirdCharacter> It(GetWorld()); It; ++It) N++;
+            if (N >= 2 && TotalT > 1.5f)
+            {
+                Shot(TEXT("02-joined"));
+                Proof(TEXT("joined_from_menu"), true, FString::Printf(TEXT("%d players, playing as P%d"), N, P->PlayerIndex + 1));
+                Finish();
+                Stage = 200;
+            }
+        }
+        return;
+    }
+
     // the arcade's boot check: the game starts, the course builds, the Firebird stands on it
     if (Scenario == TEXT("boot"))
     {

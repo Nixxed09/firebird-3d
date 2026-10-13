@@ -39,7 +39,7 @@ void UFirebirdSession::Initialize(FSubsystemCollectionBase& Collection)
     const FString Cmd = FCommandLine::Get();
     if (Cmd.Contains(TEXT("?listen"))) Mode = EFirebirdSessionMode::Hosting;
     else if (!FPlatformMisc::GetEnvironmentVariable(TEXT("ARCADE_JOIN")).IsEmpty()) Mode = EFirebirdSessionMode::Menu;   // joins at once (Tick)
-    else if (FParse::Param(*Cmd, TEXT("FBAuto"))) Mode = EFirebirdSessionMode::Solo;
+    else if (FParse::Param(*Cmd, TEXT("FBAuto")) && !Cmd.Contains(TEXT("FBScenario=menu"))) Mode = EFirebirdSessionMode::Solo;
     else
     {
         // a bare address to join (e.g. 192.168.1.20:27705) as the first word

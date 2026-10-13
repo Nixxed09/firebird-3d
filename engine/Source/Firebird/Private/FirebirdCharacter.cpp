@@ -53,7 +53,7 @@ AFirebirdCharacter::AFirebirdCharacter()
 
     MuzzleLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("MuzzleLight"));
     MuzzleLight->SetupAttachment(ViewRig);
-    MuzzleLight->SetRelativeLocation(FVector(70.f, 16.f, -12.f));
+    MuzzleLight->SetRelativeLocation(FVector(60.f, 13.f, -12.f));
     MuzzleLight->SetIntensityUnits(ELightUnits::Candelas);
     MuzzleLight->SetIntensity(0.f);
     MuzzleLight->SetAttenuationRadius(900.f);
@@ -99,17 +99,17 @@ void AFirebirdCharacter::BeginPlay()
 // the Spark Caster and Ember Fist: only the player holding them sees them
 void AFirebirdCharacter::BuildViewModel()
 {
-    UMaterialInterface* BrassM = FB::MakeSurface(this, FB::Brass, 0.f, 0.35f, 0.9f);
+    UMaterialInterface* BrassM = FB::MakeSurface(this, FB::Brass * 0.55f, 0.f, 0.3f, 1.f);
     UMaterialInterface* CopperM = FB::MakeSurface(this, FLinearColor(0.75f, 0.32f, 0.16f), 0.f, 0.3f, 0.9f);
     UMaterialInterface* DarkM = FB::MakeSurface(this, FB::Basalt * 2.f, 0.f, 0.8f);
     TArray<UStaticMeshComponent*> Parts;
-    GunBody = FB::AddPart(this, ViewRig, TEXT("GunBody"), FVector(30, 4.5f, 6), FVector(44, 15, -15), BrassM); Parts.Add(GunBody);
-    UStaticMeshComponent* Grip = FB::AddPart(this, ViewRig, TEXT("GunGrip"), FVector(6, 4, 10), FVector(34, 15, -21), DarkM);
+    GunBody = FB::AddPart(this, ViewRig, TEXT("GunBody"), FVector(22, 3.2f, 4.2f), FVector(42, 13, -14), BrassM); Parts.Add(GunBody);
+    UStaticMeshComponent* Grip = FB::AddPart(this, ViewRig, TEXT("GunGrip"), FVector(5, 3, 8), FVector(34, 13, -19), DarkM);
     Grip->SetRelativeRotation(FRotator(-15, 0, 0)); Parts.Add(Grip);
-    GunCoil = FB::AddPart(this, ViewRig, TEXT("Coil1"), FVector(2, 7, 8), FVector(50, 15, -15), CopperM); Parts.Add(GunCoil);
-    Parts.Add(FB::AddPart(this, ViewRig, TEXT("Coil2"), FVector(2, 7, 8), FVector(54, 15, -15), CopperM));
-    Parts.Add(FB::AddPart(this, ViewRig, TEXT("Coil3"), FVector(2, 7, 8), FVector(58, 15, -15), CopperM));
-    GunCrystal = FB::AddPart(this, ViewRig, TEXT("Crystal"), FVector(8, 2.5f, 2.5f), FVector(62, 15, -12.5f), FB::MakeGlow(this, FB::Aether, 6.f)); Parts.Add(GunCrystal);
+    GunCoil = FB::AddPart(this, ViewRig, TEXT("Coil1"), FVector(1.5f, 5, 6), FVector(46, 13, -14), CopperM); Parts.Add(GunCoil);
+    Parts.Add(FB::AddPart(this, ViewRig, TEXT("Coil2"), FVector(1.5f, 5, 6), FVector(49, 13, -14), CopperM));
+    Parts.Add(FB::AddPart(this, ViewRig, TEXT("Coil3"), FVector(1.5f, 5, 6), FVector(52, 13, -14), CopperM));
+    GunCrystal = FB::AddPart(this, ViewRig, TEXT("Crystal"), FVector(6, 2, 2), FVector(55, 13, -12.5f), FB::MakeGlow(this, FB::Aether, 6.f)); Parts.Add(GunCrystal);
     Fist = FB::AddPart(this, ViewRig, TEXT("Fist"), FVector(14, 11, 11), FVector(22, -18, -22), FB::MakeGlow(this, FB::Orange, 3.f)); Parts.Add(Fist);
     Fist->SetVisibility(false);
     for (UStaticMeshComponent* C : Parts) { C->SetCastShadow(false); C->SetOnlyOwnerSee(true); }
@@ -118,7 +118,7 @@ void AFirebirdCharacter::BuildViewModel()
     Fill->SetupAttachment(ViewRig);
     Fill->SetRelativeLocation(FVector(25.f, 0.f, 5.f));
     Fill->SetIntensityUnits(ELightUnits::Candelas);
-    Fill->SetIntensity(2.f);
+    Fill->SetIntensity(0.6f);
     Fill->SetAttenuationRadius(90.f);
     Fill->SetLightColor(FLinearColor(1.f, 0.75f, 0.5f));
     Fill->SetCastShadows(false);
@@ -521,7 +521,7 @@ void AFirebirdCharacter::FireSpark()
     FHitResult Hit;
     const bool bHit = SparkTrace(GetWorld(), this, Eye, Aim, Hit);
     // the tracer starts at the crystal, not the eye, and shows here at once
-    const FVector Muzzle = Camera->GetComponentTransform().TransformPosition(FVector(66.f, 16.f, -12.f));
+    const FVector Muzzle = Camera->GetComponentTransform().TransformPosition(FVector(58.f, 13.f, -12.f));
     ShotFx(Muzzle, bHit ? FVector(Hit.ImpactPoint) : Eye + Aim.Vector() * 8000.f, bHit ? FVector(Hit.ImpactNormal) : FVector::ZeroVector, bHit && Cast<AHollow>(Hit.GetActor()));
     Server_Fire(Eye, Aim, GetActorLocation() + GetActorRotation().RotateVector(FVector(55.f, 22.f, 20.f)));
 }
@@ -752,5 +752,5 @@ void AFirebirdCharacter::UpdateView(float DeltaSeconds)
     ViewRig->SetRelativeLocation(FVector(-Recoil * 5.f, FMath::Sin(BobPhase) * 1.4f * BobAmt, -FMath::Abs(FMath::Cos(BobPhase)) * 1.2f * BobAmt - (bSliding ? 3.f : 0.f) - Dip));
     ViewRig->SetRelativeRotation(FRotator(Recoil * 5.f, 0.f, bSliding ? -8.f : 0.f));
     MuzzleLight->SetIntensity(MuzzleLight->Intensity * FMath::Exp(-DeltaSeconds * 40.f));
-    if (GunCrystal) GunCrystal->SetRelativeScale3D(FVector(0.08f, 0.025f, 0.025f) * (1.f + Recoil * 0.6f));
+    if (GunCrystal) GunCrystal->SetRelativeScale3D(FVector(0.06f, 0.02f, 0.02f) * (1.f + Recoil * 0.6f));
 }
