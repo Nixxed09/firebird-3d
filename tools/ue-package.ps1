@@ -14,11 +14,14 @@ $log = Join-Path $FBRoot "captures\ue\package.log"
 New-Item -ItemType Directory -Force -Path (Split-Path $log) | Out-Null
 & $uat BuildCookRun "-project=$FBProject" -platform=Win64 "-clientconfig=$Configuration" -build -cook -stage -pak -iostore -archive "-archivedirectory=$stage" -nop4 -utf8output -unattended -NoP4 *>&1 | Tee-Object -FilePath $log | Select-String -Pattern "BUILD SUCCESSFUL|BUILD FAILED|Error:" | Select-Object -Last 10
 if ($LASTEXITCODE -ne 0) { throw "Packaging failed (exit $LASTEXITCODE); see $log" }
-$built = Join-Path $stage "Windows"
-if (!(Test-Path (Join-Path $built "Firebird.exe"))) { throw "No Firebird.exe in $built" }
+# UAT archives into <stage>\Windows or straight into <stage> depending on what's already there
+$exeFound = Get-ChildItem $stage -Filter Firebird.exe -Recurse -Depth 1 | Select-Object -First 1
+if (!$exeFound) { throw "No Firebird.exe under $stage" }
+$built = $exeFound.DirectoryName
 if (Test-Path $out) { Remove-Item -Recurse -Force $out }
 New-Item -ItemType Directory -Force -Path (Split-Path $out) | Out-Null
 Move-Item $built $out
+if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }   # the next archive starts clean
 # the build's fingerprint: the hash of the cooked content (same files -> same id on any computer)
 # the cooked content and the game program itself (a code change must change the id too)
 $paks = Get-ChildItem $out -Recurse -Include *.pak, *.utoc, *.ucas, Firebird*.exe | Sort-Object Name
