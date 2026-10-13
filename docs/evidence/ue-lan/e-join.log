@@ -1,0 +1,5 @@
+PROBE_START {"role":"join","beacon_port":38574,"game":"firebird-coop","build":"build-100","order":20261013120000,"relay":"http://127.0.0.1:65198/arcade-lan/v1/"}
+JOIN_LIST {"rooms":[{"room":"dbd2476743aeca22","game":"firebird-coop","host":"Nix","players":1,"max_players":4,"level":"host-join","address":"192.168.1.13","port":27700,"ctl":38575,"build":"build-100","same_build":true,"build_message":""}],"listening":true,"error":""}
+JOINED {"room":"dbd2476743aeca22","address":"192.168.1.13","port":27700}
+ROOM_CLOSED {"room":"dbd2476743aeca22","message":"The other computer stopped the game.","at":1791923975435}
+PROBE_END {"force":false}

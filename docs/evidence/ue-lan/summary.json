@@ -1,0 +1,108 @@
+{
+  "contract": "arcade-lan/v1",
+  "at": "2026-10-13T14:39:37",
+  "godot": "C:\\Users\\pberg\\AppData\\Local\\Microsoft\\WinGet\\Packages\\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\\Godot_v4.7.1-stable_win64_console.exe",
+  "failed": 0,
+  "checks": [
+    {
+      "ok": true,
+      "check": "A: the UE host announced a room (16 hex id, no error)"
+    },
+    {
+      "ok": true,
+      "check": "A: arcade_lan.gd lists the UE room with the beacon payload (host Nix, 1/4, host-join, port 27700, same build)"
+    },
+    {
+      "ok": true,
+      "check": "A: arcade_lan.gd joined the UE room and was handed the game port 27700"
+    },
+    {
+      "ok": true,
+      "check": "A: the UE host was told GodotKid joined (2 players)"
+    },
+    {
+      "ok": true,
+      "check": "A: the UE host's own check refuses an older copy: 'The other computer has a newer copy: open the Family Arcade to update.'"
+    },
+    {
+      "ok": true,
+      "check": "A: the UE host refuses another game: 'That room is for a different game.'"
+    },
+    {
+      "ok": true,
+      "check": "A: a hello claiming pid 'host' gets no answer"
+    },
+    {
+      "ok": true,
+      "check": "A: the UE host closed politely and arcade_lan.gd said 'The other computer stopped the game.'"
+    },
+    {
+      "ok": true,
+      "check": "B: the Godot host announced its rooms"
+    },
+    {
+      "ok": true,
+      "check": "B: the UE game lists the Godot host-join room (host Nix, port, 4 seats, same build)"
+    },
+    {
+      "ok": true,
+      "check": "B: the UE list filtered to its own game (saw: demo)"
+    },
+    {
+      "ok": true,
+      "check": "B: the UE game joined the Godot room and was handed its game port"
+    },
+    {
+      "ok": true,
+      "check": "B: arcade_lan.gd (host) was told Sky joined"
+    },
+    {
+      "ok": true,
+      "check": "B: the Godot host closed the room and the UE game said 'The other computer stopped the game.'"
+    },
+    {
+      "ok": true,
+      "check": "C: a UE joiner joined a UE host and was handed port 27700"
+    },
+    {
+      "ok": true,
+      "check": "C: the UE host was told Sky joined"
+    },
+    {
+      "ok": true,
+      "check": "C: after the host was killed the joiner said 'The other computer stopped the game.' (noticed within ~3.9 s of the kill)"
+    },
+    {
+      "ok": true,
+      "check": "D: the list already says the other copy is newer"
+    },
+    {
+      "ok": true,
+      "check": "D: the join is refused with 'The other computer has a newer copy: open the Family Arcade to update.'"
+    },
+    {
+      "ok": true,
+      "check": "D: the refused copy never reached the host as a guest"
+    },
+    {
+      "ok": true,
+      "check": "E: the real launcher scene is up with its relay"
+    },
+    {
+      "ok": true,
+      "check": "E: the launcher's Playing-now strip shows the UE room (chip: firebird-coop  -  Nix  -  1 of 4)"
+    },
+    {
+      "ok": true,
+      "check": "E: a UE game started alone does not take the arcade's beacon port, and says why"
+    },
+    {
+      "ok": true,
+      "check": "E: started with ARCADE_RELAY_URL, the UE game lists the room through the arcade"
+    },
+    {
+      "ok": true,
+      "check": "E: and joins it (handed port 27700)"
+    }
+  ]
+}

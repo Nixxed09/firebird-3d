@@ -1,0 +1,5 @@
+PROBE_START {"role":"join","beacon_port":38023,"game":"demo","build":"build-100","order":20261013120000,"relay":""}
+JOIN_LIST {"rooms":[{"room":"45217d04af320dcc","game":"demo","host":"Nix","players":1,"max_players":2,"level":"scoreboard","address":"192.168.1.13","port":38024,"ctl":38024,"build":"build-100","same_build":true,"build_message":""},{"room":"51198255a751a6a4","game":"demo","host":"Nix","players":1,"max_players":4,"level":"host-join","address":"192.168.1.13","port":27711,"ctl":38025,"build":"build-100","same_build":true,"build_message":""}],"listening":true,"error":""}
+JOINED {"room":"51198255a751a6a4","address":"192.168.1.13","port":27711}
+ROOM_CLOSED {"room":"51198255a751a6a4","message":"The other computer stopped the game.","at":1791923897968}
+PROBE_END {"force":false}

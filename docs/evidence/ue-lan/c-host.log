@@ -1,0 +1,5 @@
+PROBE_START {"role":"host","beacon_port":33774,"game":"firebird-coop","build":"build-100","order":20261013120000,"relay":""}
+HOST_READY {"room":"81b772f3f7957066","error":"","port":27700}
+HOST_GUEST_JOINED {"room":"81b772f3f7957066","who":"Sky","players":2}
+HOST_KILLED {"room":"81b772f3f7957066"}
+PROBE_END {"force":true}
