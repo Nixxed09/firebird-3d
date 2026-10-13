@@ -20,7 +20,8 @@ if (Test-Path $out) { Remove-Item -Recurse -Force $out }
 New-Item -ItemType Directory -Force -Path (Split-Path $out) | Out-Null
 Move-Item $built $out
 # the build's fingerprint: the hash of the cooked content (same files -> same id on any computer)
-$paks = Get-ChildItem $out -Recurse -Include *.pak, *.utoc, *.ucas | Sort-Object Name
+# the cooked content and the game program itself (a code change must change the id too)
+$paks = Get-ChildItem $out -Recurse -Include *.pak, *.utoc, *.ucas, Firebird*.exe | Sort-Object Name
 $sha = [System.Security.Cryptography.SHA256]::Create()
 $all = New-Object System.IO.MemoryStream
 foreach ($f in $paks) {
