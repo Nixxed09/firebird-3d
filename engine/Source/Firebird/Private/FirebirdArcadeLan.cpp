@@ -290,12 +290,15 @@ FString UFirebirdArcadeLan::ComputeBuildId(int64* OutOrder)
             bAny = true;
         }
     }
-    // 3. run from source: the compiled game module
+    // 3. run from source: the compiled game module (a packaged, monolithic game has no module file;
+    //    it always has BUILD-INFO.txt or its IoStore files above)
+#if !IS_MONOLITHIC
     if (!bAny)
     {
         const FString Module = FModuleManager::Get().GetModuleFilename(TEXT("Firebird"));
         if (!Module.IsEmpty() && HashFile(Module, false)) { Stamp(Module); bAny = true; }
     }
+#endif
     Sha.Final();
     uint8 Digest[20];
     Sha.GetHash(Digest);
