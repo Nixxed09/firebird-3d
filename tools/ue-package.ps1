@@ -31,10 +31,10 @@ foreach ($f in $paks) {
 $fingerprint = ([BitConverter]::ToString($sha.ComputeHash($all.ToArray())) -replace '-', '').Substring(0, 16).ToLower()
 if (-not $Commit) { $Commit = (& git -C $FBRoot rev-parse HEAD 2>$null) }
 if (-not $Commit) { $Commit = 'unknown' }
-$commit = $Commit.Trim().Substring(0, [Math]::Min(7, $Commit.Trim().Length))
+$shortCommit = $Commit.Trim().Substring(0, [Math]::Min(7, $Commit.Trim().Length))   # (PowerShell names ignore case: not $commit)
 $order = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
-@("Game: firebird-coop", "Built from: $($Commit.Trim())", "Commit: $commit", "Build id: $fingerprint", "Build order: $order",
+@("Game: firebird-coop", "Built from: $($Commit.Trim())", "Commit: $shortCommit", "Build id: $fingerprint", "Build order: $order",
   "Configuration: $Configuration", "Built at: $(Get-Date -Format o)") | Set-Content (Join-Path $out "BUILD-INFO.txt")
 # a double-click launcher, and the boot check the arcade updater runs after installing
 "@echo off`r`nstart `"`" `"%~dp0Firebird.exe`" -windowed -ResX=1600 -ResY=900 %*`r`n" | Set-Content -NoNewline (Join-Path $out "Start-Firebird.bat")
-Write-Output "FB_PACKAGE ok $out build=$fingerprint commit=$commit"
+Write-Output "FB_PACKAGE ok $out build=$fingerprint commit=$shortCommit"
