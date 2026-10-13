@@ -158,7 +158,7 @@ DUSK or Prodeus, and on one unaided Nix playtest. Scripts passing does not count
 |---|---|
 | Feel in the hands (Gate 4) | Dash, slide, jump (coyote + buffer), run speed ≈ v2's 5 cells/s (10 m/s); weapon switch < 0.25 s; hitstop and knockback ported from v2 numbers |
 | The fantasy as a mechanic (Gates 0, 3) | Ember Fist release: stagger, then punch, then light bursts up and you heal. A bot that holds still survives worse than one that pushes |
-| Combat chess (C3) | Hollow, Hound, Warden, plus 1 new role, each with a ≥ 0.5 s telegraph; one 3-role arena |
+| Combat roster (C3, A1) | Hollow and Hound only, as STORY_BIBLE places them in E1M2: the level's one new thing is the Ember Dash (L2). Each attack has a ≥ 0.5 s telegraph. The Warden (the E1M5 boss) and the first new role (the Cinderhulk, E1M3) wait for slice 2, the Bell Works, which owns the first 3-role arena |
 | Level craft (contract) | Rebuild **E1M2 The Furnace** as the slice: arrival overlook (S3), hub around the lava pit (C1 loop), two wings with 2 doors each (S5), the drain set piece (T3), the sealed forge finale (C5), 1 key, 3 secrets |
 | Story beat | A 30 s intro in-engine (Ashgate under ash, the Firebird ignites), Riley on the radio, environmental storytelling in the forge (T4) |
 | Look (Gate 8) | Lumen lighting; the cover's ember palette (STYLE_GUIDE "The Look In 3D"); authored Hollow, Hound and first-person arms; no CC0 humanoids |
