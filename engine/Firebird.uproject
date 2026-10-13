@@ -1,0 +1,13 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.8",
+  "Category": "Games",
+  "Description": "FIREBIRD: the UE5 production rebuild. The WebGL v2 in ../v2 is the design reference.",
+  "Modules": [
+    { "Name": "Firebird", "Type": "Runtime", "LoadingPhase": "Default" }
+  ],
+  "Plugins": [
+    { "Name": "PythonScriptPlugin", "Enabled": true, "TargetAllowList": [ "Editor" ] },
+    { "Name": "EditorScriptingUtilities", "Enabled": true, "TargetAllowList": [ "Editor" ] }
+  ]
+}

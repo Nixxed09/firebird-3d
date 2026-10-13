@@ -1,3 +1,14 @@
 captures/
 node_modules/
 .env
+
+# Unreal generated output (engine/ is the UE5 rebuild)
+engine/.vs/
+engine/Binaries/
+engine/Build/
+engine/DerivedDataCache/
+engine/Intermediate/
+engine/Saved/
+engine/*.sln
+engine/.vsconfig
+captures/ue/

@@ -1,0 +1,11 @@
+{
+  "scenario": "nodash",
+  "all_ok": true,
+  "seconds": 5.67,
+  "frames": 0,
+  "proofs": {
+    "coyote_jump": { "ok": true, "detail": "jumped ~100 ms after leaving the edge, landed at x=2944 z=94" },
+    "gap_needs_dash": { "ok": true, "detail": "jump alone reached x=4066 (gap ends at 4100)" }
+  },
+  "shots": ["01-arrival", "02-coyote-jump", "03-no-dash"]
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "feel",
+  "all_ok": true,
+  "seconds": 12.84,
+  "frames": 380,
+  "proofs": {
+    "coyote_jump": { "ok": true, "detail": "jumped ~100 ms after leaving the edge, landed at x=2944 z=94" },
+    "dash_gap": { "ok": true, "detail": "jump + air dash landed at x=4313 z=94" },
+    "slide_gate": { "ok": true, "detail": "passed under the 110 cm gate in 0.93 s (crouch-walking would take 2.72 s)" },
+    "crack_then_release": { "ok": true, "detail": "released: +20 health (now 75)" },
+    "read_and_dodge": { "ok": true, "detail": "saw the windup, side-dashed; hits taken in the next 1.4 s: 0" },
+    "arena_clear": { "ok": true, "detail": "releases 2, dashes 3, slides 1, hits taken 1" }
+  },
+  "shots": ["01-arrival", "02-coyote-jump", "03-dash", "04-slide", "05-cracked", "06-release", "07-windup-tell", "08-clear"]
+}
