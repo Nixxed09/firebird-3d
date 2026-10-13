@@ -40,3 +40,40 @@ use, with colours from the STYLE_GUIDE palette in `Firebird.h`.
 Automation never changes gameplay code paths: it fills the same input
 struct the keyboard fills. Runs use `-BENCHMARK -FPS=30`, so every frame is
 1/30 s and the video is true to time.
+
+## Sound
+
+Every sound is synthesized (`tools/ue-make-sounds.py`, no samples) and imported
+as `/Game/Firebird/Sounds/<name>` by `.\tools\ue-import-sounds.ps1`. Play them by
+name through `FBAudio.h`:
+
+```cpp
+FB::Sound(this, TEXT("spark_fire"), Location);   // 3D one-shot, ~40 m falloff, +/-5% pitch
+FB::Sound2D(this, TEXT("riley_radio"));          // no position: UI, radio, your own body
+FB::StartAmbience(this);                         // ambience_loop + music_loop under the action
+```
+
+All calls are no-ops on a dedicated server, under `-nullrhi` or `-nosound`, or
+with no audio device. Check every asset loads: run the game with
+`-FBSoundCheck` (logs `FB_SOUND_OK 25 (loops 2)` and quits). Listen to them all:
+`docs/evidence/ue-sound/all-sounds.wav` (`all-sounds.txt` gives the times).
+
+| Name | Play it when | 2D/3D |
+|---|---|---|
+| `footstep_1..3` | every ~0.35 s of running on the ground (rotate the three) | 3D, quiet (0.5) |
+| `jump` / `land` | jump starts / touchdown after a fall (scale volume by fall speed) | 3D |
+| `dash` | Ember Dash starts | 3D |
+| `slide` | a slide starts | 3D |
+| `spark_fire` | Spark Caster fires | 3D at the muzzle |
+| `spark_hit_wall` / `spark_hit_hollow` | the spark hits stone / a Hollow | 3D at the impact |
+| `fist_swing` / `fist_hit` | every punch / a punch that connects (not a release) | 3D |
+| `crack` | a Hollow's shell cracks (the release window opens) | 3D |
+| `release` | a cracked Hollow is released: the reward, play it full | 3D at the Hollow, and quietly 2D for the puncher |
+| `hollow_break` | a Hollow breaks to shots (no release) | 3D |
+| `hollow_windup` | a Hollow's 0.65 s throw tell starts (it is cut to that length) | 3D at the Hollow |
+| `ember_throw` | the ember leaves its hand | 3D |
+| `ember_hit_player` / `player_hurt` | an ember hits you / any damage to you | 2D |
+| `player_death` / `respawn` | knocked down / rising at the checkpoint | 2D |
+| `riley_radio` | before each Riley radio line | 2D |
+| `ui_tick` | menu moves, HUD prompts | 2D |
+| `ambience_loop`, `music_loop` | at level start (`FB::StartAmbience`) | 2D loops |
