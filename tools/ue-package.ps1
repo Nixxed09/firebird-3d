@@ -41,4 +41,5 @@ $order = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
   "Configuration: $Configuration", "Built at: $(Get-Date -Format o)") | Set-Content (Join-Path $out "BUILD-INFO.txt")
 # a double-click launcher, and the boot check the arcade updater runs after installing
 "@echo off`r`nstart `"`" `"%~dp0Firebird.exe`" -windowed -ResX=1600 -ResY=900 %*`r`n" | Set-Content -NoNewline (Join-Path $out "Start-Firebird.bat")
+Copy-Item (Join-Path $PSScriptRoot "arcade-boot-check.ps1") $out
 Write-Output "FB_PACKAGE ok $out build=$fingerprint commit=$shortCommit"
