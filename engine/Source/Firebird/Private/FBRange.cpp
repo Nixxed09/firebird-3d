@@ -3,6 +3,7 @@
 #include "FirebirdCharacter.h"
 #include "FirebirdHUD.h"
 #include "Hollow.h"
+#include "FBFx.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/PointLightComponent.h"
@@ -13,12 +14,17 @@
 #include "Engine/CollisionProfile.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "EngineUtils.h"
+#include "GameFramework/GameStateBase.h"
+#include "Net/UnrealNetwork.h"
 
 using namespace FBCourse;
 
 AFBRange::AFBRange()
 {
     PrimaryActorTick.bCanEverTick = true;
+    bReplicates = true;
+    bAlwaysRelevant = true;   // every player needs the course and the arena state
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
     RootComponent->SetMobility(EComponentMobility::Static);
 }
@@ -166,7 +172,8 @@ void AFBRange::BeginPlay()
     Torch(FVector(GateStart - 200, -420, 0)); Torch(FVector(GateStart - 200, 420, 0));
     Torch(FVector(ArenaStart - 150, -420, 0)); Torch(FVector(ArenaStart - 150, 420, 0));
 
-    // the Hollows: the first one alone, in view from the arena door (L3, P6)
+    // the Hollows (the host owns them): the first one alone, in view from the arena door (L3, P6)
+    if (!HasAuthority()) return;
     FActorSpawnParameters P;
     P.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
     if (AHollow* H1 = GetWorld()->SpawnActor<AHollow>(AHollow::StaticClass(), FVector(7050, 0, 100), FRotator(0, 180, 0), P)) Hollows.Add(H1);
@@ -179,6 +186,20 @@ void AFBRange::BeginPlay()
     UE_LOG(LogFirebird, Display, TEXT("FB_EVENT range_built hollows=%d"), Hollows.Num());
 }
 
+AFBRange* AFBRange::Get(UWorld* World)
+{
+    for (TActorIterator<AFBRange> It(World); It; ++It) return *It;
+    return nullptr;
+}
+
+void AFBRange::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(AFBRange, Wave);
+    DOREPLIFETIME(AFBRange, WaveCount);
+    DOREPLIFETIME(AFBRange, HollowsLeft);
+}
+
 void AFBRange::Say(const FString& Line)
 {
     if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
@@ -186,29 +207,124 @@ void AFBRange::Say(const FString& Line)
     UE_LOG(LogFirebird, Display, TEXT("FB_RADIO %s"), *Line);
 }
 
+void AFBRange::Multi_Say_Implementation(const FString& Line) { Say(Line); }
+
+void AFBRange::Multi_ArenaClear_Implementation(float Seconds)
+{
+    bArenaClear = true;
+    ClearTime = Seconds;
+    if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
+        if (AFirebirdHUD* H = Cast<AFirebirdHUD>(PC->GetHUD())) H->Celebrate(FString::Printf(TEXT("ARENA CLEAR  %d:%02d"), (int32)Seconds / 60, (int32)Seconds % 60));
+    UE_LOG(LogFirebird, Display, TEXT("FB_EVENT arena_clear seconds=%.1f"), Seconds);
+}
+
 void AFBRange::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    TickLocalRadio();
+    if (HasAuthority()) TickArena(DeltaSeconds);
+}
+
+// Riley on the radio for this computer's own player: one short, true line per
+// new thing, before it's needed (L5). Each player hears their own as they go.
+void AFBRange::TickLocalRadio()
+{
     AFirebirdCharacter* P = Cast<AFirebirdCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (!P) return;
-    const float X = P->GetActorLocation().X;
-    // Riley on the radio: one short, true line per new thing, before you need it (L5)
+    const float X = P->GetActorLocation().X, Y = P->GetActorLocation().Y;
     if (RadioStage == 0 && GetWorld()->GetTimeSeconds() > 0.8f) { Say(TEXT("RILEY: WARM-UP RUN. JUMP THE FIRST GAP. YOU CAN JUMP A MOMENT AFTER THE EDGE.")); RadioStage = 1; }
-    else if (RadioStage == 1 && X > GapAEnd + 100.f) { Say(TEXT("RILEY: THAT ONE'S TOO FAR TO JUMP. JUMP, THEN DASH WITH SHIFT AT THE TOP.")); RadioStage = 2; P->Checkpoint = FVector(GapAEnd + 150.f, 0, 110); }
-    else if (RadioStage == 2 && X > GapBEnd + 100.f) { Say(TEXT("RILEY: LOW GATE. RUN AT IT AND HOLD CTRL TO SLIDE.")); RadioStage = 3; P->Checkpoint = FVector(GapBEnd + 150.f, 0, 110); }
-    else if (RadioStage == 3 && X > ArenaStart + 100.f) { Say(TEXT("RILEY: A HOLLOW. CRACK ITS SHELL, THEN PUNCH IT WITH F TO SET THE LIGHT FREE.")); RadioStage = 4; P->Checkpoint = FVector(ArenaStart + 200.f, 0, 110); }
-    // the second Hollow wakes once the first is gone
-    if (RadioStage == 4 && Hollows.Num() > 1 && (!IsValid(Hollows[0]) || !Hollows[0]->IsAlive()) && IsValid(Hollows[1]))
+    else if (RadioStage == 1 && X > GapAEnd + 100.f) { Say(TEXT("RILEY: THAT ONE'S TOO FAR TO JUMP. JUMP, THEN DASH WITH SHIFT AT THE TOP.")); RadioStage = 2; P->Checkpoint = FVector(GapAEnd + 150.f, Y, 110); }
+    else if (RadioStage == 2 && X > GapBEnd + 100.f) { Say(TEXT("RILEY: LOW GATE. RUN AT IT AND HOLD CTRL TO SLIDE.")); RadioStage = 3; P->Checkpoint = FVector(GapBEnd + 150.f, Y, 110); }
+    else if (RadioStage == 3 && X > ArenaStart + 100.f) { Say(TEXT("RILEY: A HOLLOW. CRACK ITS SHELL, THEN PUNCH IT WITH F TO SET THE LIGHT FREE.")); RadioStage = 4; P->Checkpoint = FVector(ArenaStart + 200.f, Y, 110); }
+}
+
+// The host runs the arena: the two teaching Hollows, then the forge wakes.
+void AFBRange::TickArena(float DeltaSeconds)
+{
+    int32 Players = 0;
+    for (TActorIterator<AFirebirdCharacter> It(GetWorld()); It; ++It) Players++;
+    Players = FMath::Max(1, Players);
+    int32 Alive = 0;
+    for (AHollow* H : Hollows) if (IsValid(H) && H->IsAlive()) Alive++;
+    HollowsLeft = Alive + ToSpawn;
+    ArenaT += DeltaSeconds;
+
+    switch (ArenaStage)
     {
-        Hollows[1]->WakeRange = 3000.f;
-        Hollows[1]->bHoldFire = false;
-        Hollows[1]->Alert();
-        Say(TEXT("RILEY: ANOTHER ONE. WATCH ITS ARMS GO UP, THEN SIDESTEP."));
-        RadioStage = 5;
+    case 0:   // the first Hollow, alone
+        if (Hollows.Num() > 0 && (!IsValid(Hollows[0]) || !Hollows[0]->IsAlive()))
+        {
+            if (ArenaStartTime < 0.f) ArenaStartTime = GetWorld()->GetTimeSeconds();
+            if (Hollows.Num() > 1 && IsValid(Hollows[1]))
+            {
+                Hollows[1]->WakeRange = 3000.f;
+                Hollows[1]->bHoldFire = false;
+                Hollows[1]->Alert();
+            }
+            Multi_Say(TEXT("RILEY: ANOTHER ONE. WATCH ITS ARMS GO UP, THEN SIDESTEP."));
+            ArenaStage = 1;
+        }
+        else if (ArenaStartTime < 0.f && Hollows.Num() > 0 && IsValid(Hollows[0]) && Hollows[0]->bAwake) ArenaStartTime = GetWorld()->GetTimeSeconds();
+        break;
+    case 1:   // the second
+        if (Alive == 0)
+        {
+            Multi_Say(Players > 1 ? TEXT("RILEY: THE FORGE IS WAKING. STICK TOGETHER AND HOLD THE ARENA!") : TEXT("RILEY: THE FORGE IS WAKING. HOLD THE ARENA!"));
+            ArenaStage = 2; ArenaT = 0.f;
+        }
+        break;
+    case 2:   // a breather before each wave (E1): sparks and health topped up
+        if (ArenaT > 4.f)
+        {
+            Wave++;
+            // three waves, each a little bigger, and two more Hollows per extra player (co-op)
+            static const int32 Base[3] = { 3, 4, 6 };
+            ToSpawn = Base[FMath::Clamp(Wave - 1, 0, 2)] + 2 * (Players - 1);
+            SpawnT = 0.f;
+            Multi_Say(FString::Printf(TEXT("RILEY: WAVE %d OF %d. %d HOLLOWS."), Wave, WaveCount, ToSpawn));
+            ArenaStage = 3;
+        }
+        break;
+    case 3:   // a wave: they arrive a moment apart, from the far side
+        SpawnT -= DeltaSeconds;
+        if (ToSpawn > 0 && SpawnT <= 0.f) { SpawnWaveHollow(); ToSpawn--; SpawnT = 0.6f; }
+        if (ToSpawn == 0 && Alive == 0)
+        {
+            if (Wave >= WaveCount)
+            {
+                const float Seconds = GetWorld()->GetTimeSeconds() - FMath::Max(0.f, ArenaStartTime);
+                Multi_Say(TEXT("RILEY: ARENA CLEAR! EVERY LIGHT IN THE FORGE IS FREE."));
+                Multi_ArenaClear(Seconds);
+                ArenaStage = 4;
+            }
+            else
+            {
+                Multi_Say(FString::Printf(TEXT("RILEY: WAVE %d CLEAR. CATCH YOUR BREATH: SPARKS AND HEALTH TOPPED UP."), Wave));
+                for (TActorIterator<AFirebirdCharacter> It(GetWorld()); It; ++It)
+                {
+                    It->Sparks = FMath::Max(It->Sparks, 60);
+                    if (!It->bDead) It->Health = FMath::Max(It->Health, 70.f);
+                }
+                ArenaStage = 2; ArenaT = 0.f;
+            }
+        }
+        break;
+    default: break;
     }
-    if (RadioStage == 5 && Hollows.Num() > 1 && (!IsValid(Hollows[1]) || !Hollows[1]->IsAlive()))
+}
+
+void AFBRange::SpawnWaveHollow()
+{
+    static const FVector Points[7] = { FVector(7900, -1100, 100), FVector(7900, 1100, 100), FVector(8200, 0, 100), FVector(7300, -1200, 100),
+                                       FVector(7300, 1200, 100), FVector(8200, -700, 100), FVector(8200, 700, 100) };
+    FActorSpawnParameters P;
+    P.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+    const FVector At = Points[SpawnIndex++ % 7];
+    if (AHollow* H = GetWorld()->SpawnActor<AHollow>(AHollow::StaticClass(), At, FRotator(0, 180, 0), P))
     {
-        Say(TEXT("RILEY: TWO RELEASED. THAT'S THE WHOLE KIT. PRESS R TO RUN IT AGAIN, FASTER."));
-        RadioStage = 6;
+        H->Alert();   // the forge sent it: it comes for you
+        Hollows.Add(H);
+        // it climbs out of the forge floor in a burst of crimson (a warning before it throws, C5)
+        AFBFx::Burst(GetWorld(), At - FVector(0, 0, 60), 10, FB::Crimson, 300.f, 0.6f, 8.f, -300.f, 6.f);
     }
 }

@@ -11,12 +11,14 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/App.h"
+#include "Net/UnrealNetwork.h"
 
 AFirebirdCharacter::AFirebirdCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
     GetCapsuleComponent()->InitCapsuleSize(34.f, 92.f);
     bUseControllerRotationYaw = true;
+    SetNetUpdateFrequency(60.f);
 
     UCharacterMovementComponent* M = GetCharacterMovement();
     M->GetNavAgentPropertiesRef().bCanCrouch = true;
@@ -32,6 +34,10 @@ AFirebirdCharacter::AFirebirdCharacter()
     M->JumpZVelocity = JumpSpeed;
     M->MaxStepHeight = 45.f;
     M->SetWalkableFloorAngle(50.f);
+    // home LAN co-op: the owning computer's movement is the truth (dash, slide and
+    // coyote stay instant), and the host takes its word for the position
+    M->bIgnoreClientMovementErrorChecksAndCorrection = true;
+    M->bServerAcceptClientAuthoritativePosition = true;
 
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     Camera->SetupAttachment(GetCapsuleComponent());
@@ -59,21 +65,51 @@ AFirebirdCharacter::AFirebirdCharacter()
     FistLight->SetAttenuationRadius(600.f);
     FistLight->SetLightColor(FB::Orange);
     FistLight->SetCastShadows(false);
+
+    Body = CreateDefaultSubobject<USceneComponent>(TEXT("Body"));
+    Body->SetupAttachment(GetCapsuleComponent());
+}
+
+void AFirebirdCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(AFirebirdCharacter, Health);
+    DOREPLIFETIME(AFirebirdCharacter, bDead);
+    DOREPLIFETIME(AFirebirdCharacter, PlayerIndex);
+    DOREPLIFETIME_CONDITION(AFirebirdCharacter, Sparks, COND_OwnerOnly);
+}
+
+FLinearColor AFirebirdCharacter::PlayerColor(int32 Index)
+{
+    // P1 the cover's amber, then aether blue, ember green and violet: easy to tell apart
+    static const FLinearColor C[4] = { FLinearColor(1.f, 0.55f, 0.1f), FLinearColor(0.2f, 0.65f, 1.f), FLinearColor(0.35f, 0.9f, 0.3f), FLinearColor(0.75f, 0.4f, 1.f) };
+    return C[FMath::Abs(Index) % 4];
 }
 
 void AFirebirdCharacter::BeginPlay()
 {
     Super::BeginPlay();
-    // the Spark Caster, built from brass, copper coils and an aether crystal (STYLE_GUIDE: no real-gun shapes)
+    Checkpoint = GetActorLocation();
+    CheckpointYaw = GetActorRotation().Yaw;
+}
+
+// the Spark Caster and Ember Fist: only the player holding them sees them
+void AFirebirdCharacter::BuildViewModel()
+{
     UMaterialInterface* BrassM = FB::MakeSurface(this, FB::Brass, 0.f, 0.35f, 0.9f);
     UMaterialInterface* CopperM = FB::MakeSurface(this, FLinearColor(0.75f, 0.32f, 0.16f), 0.f, 0.3f, 0.9f);
     UMaterialInterface* DarkM = FB::MakeSurface(this, FB::Basalt * 2.f, 0.f, 0.8f);
-    GunBody = FB::AddPart(this, ViewRig, TEXT("GunBody"), FVector(30, 4.5f, 6), FVector(44, 15, -15), BrassM);
-    FB::AddPart(this, ViewRig, TEXT("GunGrip"), FVector(6, 4, 10), FVector(34, 15, -21), DarkM)->SetRelativeRotation(FRotator(-15, 0, 0));
-    GunCoil = FB::AddPart(this, ViewRig, TEXT("Coil1"), FVector(2, 7, 8), FVector(50, 15, -15), CopperM);
-    FB::AddPart(this, ViewRig, TEXT("Coil2"), FVector(2, 7, 8), FVector(54, 15, -15), CopperM);
-    FB::AddPart(this, ViewRig, TEXT("Coil3"), FVector(2, 7, 8), FVector(58, 15, -15), CopperM);
-    GunCrystal = FB::AddPart(this, ViewRig, TEXT("Crystal"), FVector(8, 2.5f, 2.5f), FVector(62, 15, -12.5f), FB::MakeGlow(this, FB::Aether, 6.f));
+    TArray<UStaticMeshComponent*> Parts;
+    GunBody = FB::AddPart(this, ViewRig, TEXT("GunBody"), FVector(30, 4.5f, 6), FVector(44, 15, -15), BrassM); Parts.Add(GunBody);
+    UStaticMeshComponent* Grip = FB::AddPart(this, ViewRig, TEXT("GunGrip"), FVector(6, 4, 10), FVector(34, 15, -21), DarkM);
+    Grip->SetRelativeRotation(FRotator(-15, 0, 0)); Parts.Add(Grip);
+    GunCoil = FB::AddPart(this, ViewRig, TEXT("Coil1"), FVector(2, 7, 8), FVector(50, 15, -15), CopperM); Parts.Add(GunCoil);
+    Parts.Add(FB::AddPart(this, ViewRig, TEXT("Coil2"), FVector(2, 7, 8), FVector(54, 15, -15), CopperM));
+    Parts.Add(FB::AddPart(this, ViewRig, TEXT("Coil3"), FVector(2, 7, 8), FVector(58, 15, -15), CopperM));
+    GunCrystal = FB::AddPart(this, ViewRig, TEXT("Crystal"), FVector(8, 2.5f, 2.5f), FVector(62, 15, -12.5f), FB::MakeGlow(this, FB::Aether, 6.f)); Parts.Add(GunCrystal);
+    Fist = FB::AddPart(this, ViewRig, TEXT("Fist"), FVector(14, 11, 11), FVector(22, -18, -22), FB::MakeGlow(this, FB::Orange, 3.f)); Parts.Add(Fist);
+    Fist->SetVisibility(false);
+    for (UStaticMeshComponent* C : Parts) { C->SetCastShadow(false); C->SetOnlyOwnerSee(true); }
     // a soft warm fill on the weapon, so it never reads as a black block in shadow
     UPointLightComponent* Fill = NewObject<UPointLightComponent>(this, TEXT("ViewFill"));
     Fill->SetupAttachment(ViewRig);
@@ -84,12 +120,41 @@ void AFirebirdCharacter::BeginPlay()
     Fill->SetLightColor(FLinearColor(1.f, 0.75f, 0.5f));
     Fill->SetCastShadows(false);
     Fill->RegisterComponent();
-    // the Ember Fist: a flame-wrapped glove that punches in from the left
-    Fist = FB::AddPart(this, ViewRig, TEXT("Fist"), FVector(14, 11, 11), FVector(22, -18, -22), FB::MakeGlow(this, FB::Orange, 3.f));
-    Fist->SetVisibility(false);
-    for (UStaticMeshComponent* C : { GunBody, GunCoil, GunCrystal, Fist }) C->SetCastShadow(false);
-    Checkpoint = GetActorLocation();
-    CheckpointYaw = GetActorRotation().Yaw;
+}
+
+// the Firebird as teammates see it: a figure in the player's colour, with ember wings
+void AFirebirdCharacter::BuildBody()
+{
+    const FLinearColor C = PlayerColor(PlayerIndex);
+    UMaterialInterface* Suit = FB::MakeSurface(this, C * 0.55f, 0.6f, 0.6f);
+    UMaterialInterface* Dark = FB::MakeSurface(this, FB::Basalt * 2.f, 0.f, 0.7f);
+    UMaterialInterface* Glow = FB::MakeGlow(this, C, 5.f);
+    TArray<UStaticMeshComponent*> Parts;
+    Parts.Add(FB::AddPart(this, Body, TEXT("BTorso"), FVector(30, 44, 70), FVector(0, 0, 10), Suit));
+    Parts.Add(FB::AddPart(this, Body, TEXT("BHead"), FVector(28, 28, 28), FVector(2, 0, 64), Dark));
+    Parts.Add(FB::AddPart(this, Body, TEXT("BVisor"), FVector(4, 22, 7), FVector(16, 0, 66), Glow));
+    Parts.Add(FB::AddPart(this, Body, TEXT("BCrest"), FVector(22, 5, 18), FVector(-4, 0, 82), Glow));
+    Parts.Add(FB::AddPart(this, Body, TEXT("BLegL"), FVector(16, 16, 60), FVector(0, -12, -58), Dark));
+    Parts.Add(FB::AddPart(this, Body, TEXT("BLegR"), FVector(16, 16, 60), FVector(0, 12, -58), Dark));
+    Parts.Add(FB::AddPart(this, Body, TEXT("BGun"), FVector(40, 8, 10), FVector(30, 22, 20), FB::MakeSurface(this, FB::Brass, 0.f, 0.35f, 0.9f)));
+    BodyFist = FB::AddPart(this, Body, TEXT("BFist"), FVector(14, 12, 12), FVector(18, -24, 20), FB::MakeGlow(this, FB::Orange, 3.f)); Parts.Add(BodyFist);
+    // the wings: two flat ember blades swept up and back, like the emblem
+    WingL = FB::AddPart(this, Body, TEXT("BWingL"), FVector(6, 70, 34), FVector(-22, -48, 40), Glow);
+    WingR = FB::AddPart(this, Body, TEXT("BWingR"), FVector(6, 70, 34), FVector(-22, 48, 40), Glow);
+    WingL->SetRelativeRotation(FRotator(0.f, 20.f, -30.f));
+    WingR->SetRelativeRotation(FRotator(0.f, -20.f, 30.f));
+    Parts.Add(WingL); Parts.Add(WingR);
+    for (UStaticMeshComponent* P : Parts) P->SetOwnerNoSee(true);
+    BodyGlow = NewObject<UPointLightComponent>(this, TEXT("BodyGlow"));
+    BodyGlow->SetupAttachment(Body);
+    BodyGlow->SetRelativeLocation(FVector(-30.f, 0.f, 50.f));
+    BodyGlow->SetIntensityUnits(ELightUnits::Candelas);
+    BodyGlow->SetIntensity(25.f);
+    BodyGlow->SetAttenuationRadius(300.f);
+    BodyGlow->SetLightColor(C);
+    BodyGlow->SetCastShadows(false);
+    BodyGlow->SetVolumetricScatteringIntensity(0.2f);
+    BodyGlow->RegisterComponent();
 }
 
 float AFirebirdCharacter::HorizontalSpeed() const
@@ -117,8 +182,8 @@ void AFirebirdCharacter::ReadInput()
     I.bFireHeld = PC->IsInputKeyDown(EKeys::LeftMouseButton);
     I.bFist = PC->WasInputKeyJustPressed(EKeys::F) || PC->WasInputKeyJustPressed(EKeys::RightMouseButton);
     Input = I;
-    // R: run the course again; Esc: leave (no menus yet in the feel range)
-    if (PC->WasInputKeyJustPressed(EKeys::R)) PC->RestartLevel();
+    // R: run the course again (playing alone); Esc: leave
+    if (PC->WasInputKeyJustPressed(EKeys::R) && GetNetMode() == NM_Standalone) PC->RestartLevel();
     if (PC->WasInputKeyJustPressed(EKeys::Escape)) PC->ConsoleCommand(TEXT("quit"));
 }
 
@@ -127,6 +192,20 @@ void AFirebirdCharacter::ReadInput()
 void AFirebirdCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    // the figure and the weapon are built once we know who we are (PlayerIndex arrives by replication)
+    // (replicated properties arrive before BeginPlay, but whether this one is ours can take a frame)
+    if (!bBuilt) { bBuilt = true; BuildBody(); }
+    if (!GunBody && IsLocallyControlled()) BuildViewModel();
+    UpdateBody(DeltaSeconds);
+
+    HitMarker = FMath::Max(0.f, HitMarker - DeltaSeconds);
+    KillMarker = FMath::Max(0.f, KillMarker - DeltaSeconds);
+    ReleaseFlash = FMath::Max(0.f, ReleaseFlash - DeltaSeconds);
+    DamageFlash = FMath::Max(0.f, DamageFlash - DeltaSeconds);
+    HurtDirT = FMath::Max(0.f, HurtDirT - DeltaSeconds);
+
+    // everything below is the player's own computer: input, movement, weapons, the view
+    if (!IsLocallyControlled()) return;
     UCharacterMovementComponent* M = GetCharacterMovement();
 
     // hitstop runs on real time, since it is what slows the world down
@@ -142,27 +221,30 @@ void AFirebirdCharacter::Tick(float DeltaSeconds)
     Input.bJump = Input.bDash = Input.bFist = Input.bCrouchPressed = false;
     Input.Look = FVector2D::ZeroVector;
 
-    DamageFlash = FMath::Max(0.f, DamageFlash - DeltaSeconds);
-    HitMarker = FMath::Max(0.f, HitMarker - DeltaSeconds);
-    KillMarker = FMath::Max(0.f, KillMarker - DeltaSeconds);
-    ReleaseFlash = FMath::Max(0.f, ReleaseFlash - DeltaSeconds);
-    HurtDirT = FMath::Max(0.f, HurtDirT - DeltaSeconds);
-
     if (bDead)
     {
         DeadT += DeltaSeconds;
         CamZ = FMath::FInterpTo(CamZ, -60.f, DeltaSeconds, 3.f);
         Camera->SetRelativeLocation(FVector(0, 0, CamZ));
-        if (DeadT > 1.6f) Respawn();   // retry close and fast (contract F1)
+        if (DeadT > 1.6f && !bRespawnSent)
+        {
+            // retry close and fast (contract F1): this computer moves us, the host restores us
+            bRespawnSent = true;
+            TeleportOwned(Checkpoint, CheckpointYaw);
+            CamZ = 68.f;
+            Server_Respawned();
+        }
         return;
     }
+    DeadT = 0.f;
+    bRespawnSent = false;
 
     // fell into the pit: back to the checkpoint
     if (GetActorLocation().Z < -700.f)
     {
         UE_LOG(LogFirebird, Display, TEXT("FB_EVENT fell"));
-        Hurt(15.f, GetActorLocation() + FVector(0, 0, 100));
-        if (!bDead) { SetActorLocation(Checkpoint); M->Velocity = FVector::ZeroVector; }
+        TeleportOwned(Checkpoint, GetControlRotation().Yaw);
+        Server_Fell();
         return;
     }
 
@@ -189,7 +271,6 @@ void AFirebirdCharacter::Tick(float DeltaSeconds)
 
     if (I.bJump)
     {
-        UE_LOG(LogFirebird, Display, TEXT("FB_EVENT jump_pressed ground=%d sliding=%d consumed=%d since_ground=%.3f x=%.0f z=%.0f"), bGround ? 1 : 0, bSliding ? 1 : 0, bJumpConsumed ? 1 : 0, TimeSinceGrounded, GetActorLocation().X, GetActorLocation().Z);
         if (bGround || bSliding || (!bJumpConsumed && TimeSinceGrounded <= CoyoteTime))
         {
             if (!bGround && !bSliding) { CoyoteJumps++; UE_LOG(LogFirebird, Display, TEXT("FB_EVENT coyote_jump late=%.3f"), TimeSinceGrounded); }
@@ -239,6 +320,13 @@ void AFirebirdCharacter::Tick(float DeltaSeconds)
     UpdateView(DeltaSeconds);
 }
 
+void AFirebirdCharacter::TeleportOwned(const FVector& To, float InYaw)
+{
+    SetActorLocation(To, false, nullptr, ETeleportType::TeleportPhysics);
+    GetCharacterMovement()->Velocity = FVector::ZeroVector;
+    if (AController* C = GetController()) C->SetControlRotation(FRotator(0.f, InYaw, 0.f));
+}
+
 // ---- movement -------------------------------------------------------------------------------
 
 void AFirebirdCharacter::DoJump()
@@ -254,6 +342,7 @@ void AFirebirdCharacter::Landed(const FHitResult& Hit)
 {
     Super::Landed(Hit);
     bJumpConsumed = false;
+    if (!IsLocallyControlled()) return;
     Shake += FMath::Clamp(-GetVelocity().Z / 2500.f, 0.f, 0.5f);
     if (JumpBuffer > 0.f)
     {
@@ -324,73 +413,114 @@ void AFirebirdCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfH
 {
     Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
     CamZ += ScaledHalfHeightAdjust;   // the capsule dropped; keep the eye where it was, then ease down
+    if (Body) Body->SetRelativeLocation(FVector(0, 0, ScaledHalfHeightAdjust * 0.5f));
 }
 
 void AFirebirdCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
 {
     Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
     CamZ -= ScaledHalfHeightAdjust;
+    if (Body) Body->SetRelativeLocation(FVector::ZeroVector);
 }
 
 // ---- combat ---------------------------------------------------------------------------------
 
 void AFirebirdCharacter::Hitstop(float RealSeconds)
 {
+    // a hitstop slows the whole world, so it is a solo-only effect: in co-op it would freeze the others
+    if (GetNetMode() != NM_Standalone) return;
     HitstopReal = FMath::Max(HitstopReal, RealSeconds);
     UGameplayStatics::SetGlobalTimeDilation(this, 0.05f);
+}
+
+void AFirebirdCharacter::ShotFx(const FVector& Muzzle, const FVector& Impact, const FVector& Normal, bool bHitHollow)
+{
+    const FVector Span = Impact - Muzzle;
+    AFBFx::Spawn(GetWorld(), Muzzle + Span * 0.5f, Span.Rotation(), FVector(Span.Size(), 2.5f, 2.5f), FB::Aether, 30.f, 0.06f);
+    if (Normal.IsNearlyZero()) return;
+    if (bHitHollow) AFBFx::Burst(GetWorld(), Impact, 6, FLinearColor(1.f, 0.9f, 0.7f), 300.f, 0.25f, 4.f, 600.f, 12.f);
+    else
+    {
+        AFBFx::Burst(GetWorld(), Impact + Normal * 5.f, 5, FB::Aether, 260.f, 0.25f, 3.f, 700.f, 10.f);
+        AFBFx::Spawn(GetWorld(), Impact + Normal * 2.f, Normal.Rotation(), FVector(1.f, 9.f, 9.f), FB::Orange, 4.f, 2.5f);   // a scorch that cools
+    }
+}
+
+static bool SparkTrace(UWorld* W, const AActor* Self, const FVector& Eye, const FRotator& Aim, FHitResult& Hit)
+{
+    FCollisionQueryParams Q(SCENE_QUERY_STAT(Spark), false, Self);
+    FCollisionObjectQueryParams Objects;
+    Objects.AddObjectTypesToQuery(ECC_WorldStatic);
+    Objects.AddObjectTypesToQuery(ECC_WorldDynamic);
+    Objects.AddObjectTypesToQuery(ECC_Pawn);
+    // teammates don't block your sparks (there is no friendly fire)
+    for (TActorIterator<AFirebirdCharacter> It(W); It; ++It) Q.AddIgnoredActor(*It);
+    return W->LineTraceSingleByObjectType(Hit, Eye, Eye + Aim.Vector() * 8000.f, Objects, Q);
 }
 
 void AFirebirdCharacter::FireSpark()
 {
     if (Sparks <= 0) { SparkCooldown = 0.3f; return; }
-    Sparks--;
+    if (!HasAuthority()) Sparks--;   // shown at once here; the host keeps the real count
     SparkCooldown = SparkInterval;
     Recoil = 1.f;
     Shake += 0.25f;
     MuzzleLight->SetIntensity(900.f);
     const FVector Eye = Camera->GetComponentLocation();
     const FRotator Aim = GetControlRotation() + FRotator(FMath::FRandRange(-0.5f, 0.5f), FMath::FRandRange(-0.5f, 0.5f), 0.f);
-    const FVector End = Eye + Aim.Vector() * 8000.f;
     FHitResult Hit;
-    FCollisionQueryParams Q(SCENE_QUERY_STAT(Spark), false, this);
-    FCollisionObjectQueryParams Objects;
-    Objects.AddObjectTypesToQuery(ECC_WorldStatic);
-    Objects.AddObjectTypesToQuery(ECC_WorldDynamic);
-    Objects.AddObjectTypesToQuery(ECC_Pawn);
-    const bool bHit = GetWorld()->LineTraceSingleByObjectType(Hit, Eye, End, Objects, Q);
-    const FVector Impact = bHit ? Hit.ImpactPoint : End;
-    // the tracer starts at the crystal, not the eye
+    const bool bHit = SparkTrace(GetWorld(), this, Eye, Aim, Hit);
+    // the tracer starts at the crystal, not the eye, and shows here at once
     const FVector Muzzle = Camera->GetComponentTransform().TransformPosition(FVector(66.f, 16.f, -12.f));
-    const FVector Span = Impact - Muzzle;
-    AFBFx::Spawn(GetWorld(), Muzzle + Span * 0.5f, Span.Rotation(), FVector(Span.Size(), 2.5f, 2.5f), FB::Aether, 30.f, 0.06f);
-    if (!bHit) return;
-    if (AHollow* H = Cast<AHollow>(Hit.GetActor()))
-    {
-        HitMarker = 0.12f;
-        AFBFx::Burst(GetWorld(), Impact, 6, FLinearColor(1.f, 0.9f, 0.7f), 300.f, 0.25f, 4.f, 600.f, 12.f);
-        H->TakeHit(FMath::FRandRange(8.f, 14.f), Aim.Vector(), false, this);
-    }
-    else
-    {
-        AFBFx::Burst(GetWorld(), Impact + Hit.ImpactNormal * 5.f, 5, FB::Aether, 260.f, 0.25f, 3.f, 700.f, 10.f);
-        AFBFx::Spawn(GetWorld(), Impact + Hit.ImpactNormal * 2.f, Hit.ImpactNormal.Rotation(), FVector(1.f, 9.f, 9.f), FB::Orange, 4.f, 2.5f);   // a scorch that cools
-    }
+    ShotFx(Muzzle, bHit ? FVector(Hit.ImpactPoint) : Eye + Aim.Vector() * 8000.f, bHit ? FVector(Hit.ImpactNormal) : FVector::ZeroVector, bHit && Cast<AHollow>(Hit.GetActor()));
+    Server_Fire(Eye, Aim, GetActorLocation() + GetActorRotation().RotateVector(FVector(55.f, 22.f, 20.f)));
+}
+
+void AFirebirdCharacter::Server_Fire_Implementation(FVector_NetQuantize Eye, FRotator Aim, FVector_NetQuantize Muzzle)
+{
+    if (bDead || Sparks <= 0) return;
+    Sparks--;
+    FHitResult Hit;
+    const bool bHit = SparkTrace(GetWorld(), this, Eye, Aim, Hit);
+    AHollow* H = bHit ? Cast<AHollow>(Hit.GetActor()) : nullptr;
+    Multi_ShotFx(Muzzle, bHit ? FVector(Hit.ImpactPoint) : FVector(Eye) + Aim.Vector() * 8000.f, bHit ? FVector(Hit.ImpactNormal) : FVector::ZeroVector, H != nullptr);
+    if (!H) return;
+    const bool bBroke = H->TakeHit(FMath::FRandRange(8.f, 14.f), Aim.Vector(), false, this);
+    if (bBroke) Sparks = FMath::Min(MaxSparks, Sparks + 2);
+    Client_HitConfirm(bBroke);
+}
+
+void AFirebirdCharacter::Multi_ShotFx_Implementation(FVector_NetQuantize Muzzle, FVector_NetQuantize Impact, FVector_NetQuantizeNormal Normal, bool bHitHollow)
+{
+    if (IsLocallyControlled()) return;   // the shooter already drew it
+    ShotFx(Muzzle, Impact, Normal, bHitHollow);
+}
+
+void AFirebirdCharacter::Client_HitConfirm_Implementation(bool bBroke)
+{
+    ConfirmedHits++;
+    HitMarker = 0.12f;
+    if (bBroke) { KillMarker = 0.35f; Breaks++; }
 }
 
 AHollow* AFirebirdCharacter::ReleaseTarget() const
 {
+    return ReleaseTargetFrom(GetActorLocation(), GetControlRotation().Vector());
+}
+
+AHollow* AFirebirdCharacter::ReleaseTargetFrom(const FVector& From, const FVector& Look) const
+{
     // generous on purpose (kids play this): a cracked Hollow close by and roughly in front
     AHollow* Best = nullptr;
     float BestD = 300.f;
-    const FVector Eye = GetActorLocation();
-    const FVector Look = GetControlRotation().Vector().GetSafeNormal2D();
+    const FVector Look2D = Look.GetSafeNormal2D();
     for (TActorIterator<AHollow> It(GetWorld()); It; ++It)
     {
         AHollow* H = *It;
         if (!H->IsCracked()) continue;
-        const FVector To = H->GetActorLocation() - Eye;
+        const FVector To = H->GetActorLocation() - From;
         const float D = To.Size2D();
-        if (D < BestD && FVector::DotProduct(To.GetSafeNormal2D(), Look) > 0.8f) { Best = H; BestD = D; }
+        if (D < BestD && FVector::DotProduct(To.GetSafeNormal2D(), Look2D) > 0.8f) { Best = H; BestD = D; }
     }
     return Best;
 }
@@ -401,79 +531,121 @@ void AFirebirdCharacter::Punch()
     FistAnim = 1.f;
     FistLight->SetIntensity(300.f);
     const FVector Fwd = GetControlRotation().Vector();
-    AHollow* Target = ReleaseTarget();
-    if (Target)
+    if (AHollow* Target = ReleaseTarget())
     {
         // snap in: the release always connects once you've earned it
         const FVector To = Target->GetActorLocation() - GetActorLocation();
         GetCharacterMovement()->Velocity = To.GetSafeNormal2D() * FMath::Min(1400.f, To.Size2D() * 6.f);
+        Shake += 1.0f;
     }
-    else
+    Server_Punch(Camera->GetComponentLocation(), Fwd);
+}
+
+void AFirebirdCharacter::Server_Punch_Implementation(FVector_NetQuantize Eye, FVector_NetQuantizeNormal Look)
+{
+    if (bDead) return;
+    Multi_Punch();
+    AHollow* Target = ReleaseTargetFrom(GetActorLocation(), Look);
+    if (!Target)
     {
         FHitResult Hit;
         FCollisionQueryParams Q(SCENE_QUERY_STAT(Fist), false, this);
-        const FVector Eye = Camera->GetComponentLocation();
-        if (GetWorld()->SweepSingleByObjectType(Hit, Eye, Eye + Fwd * FistRange, FQuat::Identity, FCollisionObjectQueryParams(ECC_Pawn), FCollisionShape::MakeSphere(45.f), Q))
+        if (GetWorld()->SweepSingleByObjectType(Hit, Eye, FVector(Eye) + FVector(Look) * FistRange, FQuat::Identity, FCollisionObjectQueryParams(ECC_Pawn), FCollisionShape::MakeSphere(45.f), Q))
             Target = Cast<AHollow>(Hit.GetActor());
     }
     if (!Target) return;
     const bool bRelease = Target->IsCracked();
-    Target->TakeHit(FMath::FRandRange(8.f, 24.f), Fwd, true, this);
-    Shake += bRelease ? 1.6f : 0.7f;
+    const bool bBroke = Target->TakeHit(FMath::FRandRange(8.f, 24.f), Look, true, this);
     if (bRelease)
     {
         const float Before = Health;
         Health = FMath::Min(MaxHealth, Health + ReleaseHeal);
-        LastReleaseHeal = Health - Before;
-        ReleaseFlash = 0.8f;
-        Releases++;
-        FovKick += 8.f;
-        Hitstop(0.09f);
-        UE_LOG(LogFirebird, Display, TEXT("FB_EVENT release heal=%.0f health=%.0f"), LastReleaseHeal, Health);
+        Sparks = FMath::Min(MaxSparks, Sparks + ReleaseSparks);
+        Client_Released(Health - Before);
+        UE_LOG(LogFirebird, Display, TEXT("FB_EVENT release by=P%d heal=%.0f health=%.0f"), PlayerIndex + 1, Health - Before, Health);
     }
-    else
-    {
-        HitMarker = 0.12f;
-        Hitstop(0.035f);
-    }
+    else Client_HitConfirm(bBroke);
+}
+
+void AFirebirdCharacter::Multi_Punch_Implementation()
+{
+    BodyPunch = 1.f;   // teammates see the fist go out
+}
+
+void AFirebirdCharacter::Client_Released_Implementation(float Heal)
+{
+    LastReleaseHeal = Heal;
+    ReleaseFlash = 0.8f;
+    KillMarker = 0.35f;
+    Releases++;
+    FovKick += 8.f;
+    Shake += 0.6f;
+    Hitstop(0.09f);
+    UE_LOG(LogFirebird, Display, TEXT("FB_EVENT release_here heal=%.0f"), Heal);
 }
 
 void AFirebirdCharacter::Hurt(float Amount, const FVector& From)
 {
-    if (bDead) return;
+    if (!HasAuthority() || bDead) return;
     Health -= Amount;
-    DamageFlash = 0.45f;
-    LastHurtFrom = From;
-    HurtDirT = 1.f;
-    Shake += 0.9f;
-    UE_LOG(LogFirebird, Display, TEXT("FB_EVENT hurt amount=%.0f health=%.0f"), Amount, Health);
+    UE_LOG(LogFirebird, Display, TEXT("FB_EVENT hurt P%d amount=%.0f health=%.0f"), PlayerIndex + 1, Amount, Health);
     if (Health <= 0.f)
     {
         Health = 0.f;
         bDead = true;
-        DeadT = 0.f;
+        UE_LOG(LogFirebird, Display, TEXT("FB_EVENT death P%d"), PlayerIndex + 1);
+    }
+    Client_Hurt(Amount, From);
+}
+
+void AFirebirdCharacter::Client_Hurt_Implementation(float Amount, FVector_NetQuantize From)
+{
+    DamageFlash = 0.45f;
+    LastHurtFrom = From;
+    HurtDirT = 1.f;
+    Shake += 0.9f;
+    if (bDead || Health <= 0.f)
+    {
         if (bSliding) EndSlide();
         if (DashT > 0.f) EndDash();
-        UE_LOG(LogFirebird, Display, TEXT("FB_EVENT death"));
     }
 }
 
-void AFirebirdCharacter::Respawn()
+void AFirebirdCharacter::Server_Fell_Implementation()
+{
+    Hurt(15.f, GetActorLocation() + FVector(0, 0, 100));
+}
+
+void AFirebirdCharacter::Server_Respawned_Implementation()
 {
     bDead = false;
     Health = MaxHealth;
     Sparks = FMath::Max(Sparks, 50);   // never retry below a fresh start (lesson 2026-09-24f)
-    SetActorLocation(Checkpoint);
-    GetCharacterMovement()->Velocity = FVector::ZeroVector;
-    if (AController* C = GetController()) C->SetControlRotation(FRotator(0.f, CheckpointYaw, 0.f));
-    CamZ = 68.f;
-    UE_LOG(LogFirebird, Display, TEXT("FB_EVENT respawn"));
+    UE_LOG(LogFirebird, Display, TEXT("FB_EVENT respawn P%d"), PlayerIndex + 1);
+}
+
+// ---- the figure teammates see ------------------------------------------------------------------
+
+void AFirebirdCharacter::UpdateBody(float DeltaSeconds)
+{
+    if (!WingL) return;
+    // wings beat slowly, flare in a dash, fold when knocked down
+    const float T = GetWorld()->GetTimeSeconds() + PlayerIndex;
+    const float Speed = HorizontalSpeed() / RunSpeed;
+    const float Flap = bDead ? -60.f : 30.f + 10.f * FMath::Sin(T * 3.f) + 25.f * FMath::Clamp(Speed - 1.f, 0.f, 1.f);
+    WingL->SetRelativeRotation(FRotator(0.f, 20.f, -Flap));
+    WingR->SetRelativeRotation(FRotator(0.f, -20.f, Flap));
+    // the body leans with the aim; the fist punches out
+    Body->SetRelativeRotation(FRotator(bDead ? -70.f : 0.f, 0.f, 0.f));
+    BodyPunch = FMath::Max(0.f, BodyPunch - DeltaSeconds / 0.25f);
+    if (BodyFist) BodyFist->SetRelativeLocation(FVector(18.f + 50.f * FMath::Sin((1.f - BodyPunch) * PI) * (BodyPunch > 0.f ? 1.f : 0.f), -24.f, 20.f));
 }
 
 // ---- the view -------------------------------------------------------------------------------
 
 void AFirebirdCharacter::UpdateView(float DeltaSeconds)
 {
+    if (!GunBody) return;
     const UCharacterMovementComponent* M = GetCharacterMovement();
     // eye height eases toward standing (160 cm) or crouched (70 cm) over the floor
     CamZ = FMath::FInterpTo(CamZ, bIsCrouched ? 24.f : 68.f, DeltaSeconds, 14.f);
@@ -498,21 +670,21 @@ void AFirebirdCharacter::UpdateView(float DeltaSeconds)
         C->SetControlRotation(R);
     }
 
-    // the weapon: walk bob, recoil kick, dip on landing; the fist punches in
+    // the weapon: walk bob, recoil kick; the fist punches in and the gun dips out of its way
     Recoil *= FMath::Exp(-DeltaSeconds * 16.f);
-    ViewRig->SetRelativeLocation(FVector(-Recoil * 5.f, FMath::Sin(BobPhase) * 1.4f * BobAmt, -FMath::Abs(FMath::Cos(BobPhase)) * 1.2f * BobAmt - (bSliding ? 3.f : 0.f)));
-    ViewRig->SetRelativeRotation(FRotator(Recoil * 5.f, 0.f, bSliding ? -8.f : 0.f));
-    MuzzleLight->SetIntensity(MuzzleLight->Intensity * FMath::Exp(-DeltaSeconds * 40.f));
-    if (GunCrystal) GunCrystal->SetRelativeScale3D(FVector(0.08f, 0.025f, 0.025f) * (1.f + Recoil * 0.6f));
+    float Dip = 0.f;
     if (FistAnim > 0.f)
     {
         FistAnim = FMath::Max(0.f, FistAnim - DeltaSeconds / 0.22f);
         const float K = FMath::Sin((1.f - FistAnim) * PI);
         Fist->SetVisibility(FistAnim > 0.f);
         Fist->SetRelativeLocation(FVector(22.f + 48.f * K, -18.f + 10.f * K, -22.f + 8.f * K));
-        // the gun dips out of the way while the fist is out
-        GunBody->GetAttachParent()->SetRelativeLocation(ViewRig->GetRelativeLocation() + FVector(0, 0, -10.f * K));
         FistLight->SetIntensity(300.f * K);
+        Dip = 10.f * K;
     }
     else if (Fist->IsVisible()) Fist->SetVisibility(false);
+    ViewRig->SetRelativeLocation(FVector(-Recoil * 5.f, FMath::Sin(BobPhase) * 1.4f * BobAmt, -FMath::Abs(FMath::Cos(BobPhase)) * 1.2f * BobAmt - (bSliding ? 3.f : 0.f) - Dip));
+    ViewRig->SetRelativeRotation(FRotator(Recoil * 5.f, 0.f, bSliding ? -8.f : 0.f));
+    MuzzleLight->SetIntensity(MuzzleLight->Intensity * FMath::Exp(-DeltaSeconds * 40.f));
+    if (GunCrystal) GunCrystal->SetRelativeScale3D(FVector(0.08f, 0.025f, 0.025f) * (1.f + Recoil * 0.6f));
 }

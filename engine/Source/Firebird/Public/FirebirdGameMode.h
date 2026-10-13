@@ -13,4 +13,9 @@ public:
     AFirebirdGameMode();
     virtual void StartPlay() override;
     virtual void RestartPlayer(AController* NewPlayer) override;
+    virtual void PostLogin(APlayerController* NewPlayer) override;
+
+private:
+    TMap<TWeakObjectPtr<AController>, int32> Seats;   // P1..P4, kept across respawns
+    int32 SeatFor(AController* C);
 };

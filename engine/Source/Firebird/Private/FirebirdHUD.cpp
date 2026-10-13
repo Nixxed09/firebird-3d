@@ -2,6 +2,9 @@
 #include "Firebird.h"
 #include "FirebirdCharacter.h"
 #include "Hollow.h"
+#include "FBRange.h"
+#include "EngineUtils.h"
+#include "GameFramework/PlayerState.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
@@ -99,6 +102,37 @@ void AFirebirdHUD::DrawHUD()
         DrawRect(Fill >= 1.f ? FLinearColor(1.f, 0.48f, 0.09f) : FLinearColor(0.55f, 0.25f, 0.06f), X, Y, 38 * S * Fill, 16 * S);
     }
     if (P->bSliding) DrawText(TEXT("SLIDE"), FLinearColor(1.f, 0.75f, 0.3f), 440 * S, Y0 + 26 * S, Small, S * 1.2f);
+
+    // teammates: a name and a health bar over each other Firebird, in their colour
+    for (TActorIterator<AFirebirdCharacter> It(GetWorld()); It; ++It)
+    {
+        AFirebirdCharacter* T = *It;
+        if (T == P) continue;
+        const FVector Sp = Project(T->GetActorLocation() + FVector(0, 0, 130));
+        if (Sp.Z <= 0.f) continue;   // behind the camera
+        const FLinearColor C = AFirebirdCharacter::PlayerColor(T->PlayerIndex);
+        const FString Name = T->bDead ? FString::Printf(TEXT("P%d  DOWN"), T->PlayerIndex + 1) : FString::Printf(TEXT("P%d"), T->PlayerIndex + 1);
+        DrawText(Name, C, Sp.X - 14 * S, Sp.Y - 22 * S, Small, S);
+        DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.5f), Sp.X - 25 * S, Sp.Y, 50 * S, 5 * S);
+        DrawRect(C, Sp.X - 25 * S, Sp.Y, 50 * S * FMath::Clamp(T->Health / T->MaxHealth, 0.f, 1.f), 5 * S);
+    }
+
+    // the arena: which wave, how many Hollows left
+    if (AFBRange* R = AFBRange::Get(GetWorld()))
+    {
+        if (R->Wave > 0 && !R->bArenaClear)
+            DrawText(FString::Printf(TEXT("WAVE %d / %d     HOLLOWS LEFT %d"), R->Wave, R->WaveCount, R->HollowsLeft), FLinearColor(1.f, 0.6f, 0.25f), W - 330 * S, Y0 + 26 * S, Small, S * 1.1f);
+        int32 Players = 0;
+        for (TActorIterator<AFirebirdCharacter> It(GetWorld()); It; ++It) Players++;
+        if (Players > 1) DrawText(FString::Printf(TEXT("P%d  ·  %d PLAYERS"), P->PlayerIndex + 1, Players), AFirebirdCharacter::PlayerColor(P->PlayerIndex), W - 330 * S, Y0 + 8 * S, Small, S);
+    }
+    BigT = FMath::Max(0.f, BigT - GetWorld()->GetDeltaSeconds());
+    if (BigT > 0.f)
+    {
+        const float A = FMath::Min(1.f, BigT);
+        DrawRect(FLinearColor(0.1f, 0.04f, 0.01f, 0.55f * A), 0, Cy - 70 * S, W, 110 * S);
+        DrawText(BigText, FLinearColor(1.f, 0.78f, 0.25f, A), Cx - 190 * S, Cy - 55 * S, Big, S * 2.4f);
+    }
 
     // the banner: Riley's radio and goals
     if (BannerT > 0.f && !Banner.IsEmpty())

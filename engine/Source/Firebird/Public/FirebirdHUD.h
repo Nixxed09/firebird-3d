@@ -20,4 +20,8 @@ public:
     FLinearColor BannerColor = FLinearColor(0.44f, 0.88f, 0.93f);
     float BannerT = 0.f;
     void Say(const FString& Text, float Seconds = 4.f, FLinearColor Color = FLinearColor(0.44f, 0.88f, 0.93f));
+    // a big centred moment (ARENA CLEAR): pride gets a proper moment (contract K4)
+    void Celebrate(const FString& Text, float Seconds = 8.f) { BigText = Text; BigT = Seconds; }
+    FString BigText;
+    float BigT = 0.f;
 };
