@@ -23,7 +23,11 @@ Move-Item $built $out
 $paks = Get-ChildItem $out -Recurse -Include *.pak, *.utoc, *.ucas | Sort-Object Name
 $sha = [System.Security.Cryptography.SHA256]::Create()
 $all = New-Object System.IO.MemoryStream
-foreach ($f in $paks) { $h = (Get-FileHash $f.FullName -Algorithm SHA256).Hash; $b = [Text.Encoding]::UTF8.GetBytes("$($f.Name):$h`n"); $all.Write($b, 0, $b.Length) }
+foreach ($f in $paks) {
+  $stream = [IO.File]::OpenRead($f.FullName)
+  try { $h = [BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash($stream)) -replace '-', '' } finally { $stream.Dispose() }
+  $b = [Text.Encoding]::UTF8.GetBytes("$($f.Name):$h`n"); $all.Write($b, 0, $b.Length)
+}
 $fingerprint = ([BitConverter]::ToString($sha.ComputeHash($all.ToArray())) -replace '-', '').Substring(0, 16).ToLower()
 if (-not $Commit) { $Commit = (& git -C $FBRoot rev-parse HEAD 2>$null) }
 if (-not $Commit) { $Commit = 'unknown' }
