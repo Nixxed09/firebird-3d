@@ -9,8 +9,8 @@ import { buildLevel } from './level.js';
 import { makeMob, makePickup, makeTorch, shotgunModel, pistolModel, fistModel, addHand } from './models.js';
 import { makeFx, flashTex } from './fx.js';
 import { emptyAssets, instance } from './assets.js';
+import { makeAir, gradePass, moodFor } from './atmosphere.js';
 
-var FOG = { slab: 0x0c0907, tech: 0x06090c, hell: 0x160604 };
 
 export function createRenderer(canvas, opts) {
   opts = opts || {};
@@ -29,7 +29,7 @@ export function createRenderer(canvas, opts) {
 
   var camera = new THREE.PerspectiveCamera(78, 16 / 9, 0.03, 60);
   camera.rotation.order = 'YXZ';
-  var scene = null, composer = null, bloom = null, level = null, fx = null;
+  var scene = null, composer = null, bloom = null, grade = null, air = null, level = null, fx = null;
   var models = new Map(), torchLights = [], projs = new Map(), levelLights = [];
   var viewScene = new THREE.Scene(), viewCam = new THREE.PerspectiveCamera(60, 16 / 9, 0.01, 5);
   var viewLight = new THREE.PointLight(0xffb070, 0, 3, 1.5);
@@ -107,16 +107,19 @@ export function createRenderer(canvas, opts) {
   function buildScene(G) {
     G0 = G;
     scene = new THREE.Scene();
-    var fogCol = FOG[G.L.floor] || FOG.slab;
-    scene.background = new THREE.Color(fogCol);
-    scene.fog = new THREE.FogExp2(fogCol, 0.032);
+    // the level's mood (atmosphere.js): fog fades into ember brown, never flat black
+    var mood = moodFor(G.L);
+    scene.background = new THREE.Color(mood.fog);
+    scene.fog = new THREE.FogExp2(mood.fog, mood.fogDensity);
     scene.environment = envMap;
     scene.environmentIntensity = 0.25;
-    scene.add(new THREE.HemisphereLight(0xa08878, 0x201a20, 0.9));
-    scene.add(new THREE.AmbientLight(0x504848, 0.5));
-    level = buildLevel(G, assets);
+    // firelight from above, soot below: the whole city is lit by its own burning
+    scene.add(new THREE.HemisphereLight(mood.sky, mood.ground, mood.hemi));
+    scene.add(new THREE.AmbientLight(0x5a3c2c, 0.5));
+    level = buildLevel(G, assets, mood);
     scene.add(level.group);
     fx = makeFx(scene);
+    air = makeAir(scene, mood);
     fx.onTink = function (pos) { if (opts.onSound) opts.onSound('casingTink', pos); };
     models.clear(); projs.clear(); torchLights = [];
     // a warm light at every torch (a fixed number, so shaders never recompile mid-fight)
@@ -141,7 +144,7 @@ export function createRenderer(canvas, opts) {
     function inDark(r) { return dark.some(function (b) { return r.x >= b[0] && r.x <= b[2] + 1 && r.z >= b[1] && r.z <= b[3] + 1; }); }
     rooms(G).forEach(function (r) {
       if (inDark(r)) return; // dark rooms get no fill light: only their placed lamps
-      var fill = new THREE.PointLight(0xc8b8a8, 1.6 + r.size * 0.02, 4 + Math.sqrt(r.size) * 1.6, 1.1);
+      var fill = new THREE.PointLight(0xffcfa0, 1.8 + r.size * 0.025, 5 + Math.sqrt(r.size) * 1.8, 1.0);
       fill.position.set(r.x, r.y, r.z);
       scene.add(fill);
       // and the fixture it comes from: a caged lamp on the ceiling
@@ -159,9 +162,11 @@ export function createRenderer(canvas, opts) {
     });
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.75, 0.55, 0.82);
+    bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.95, 0.6, 0.78);
     bloom.enabled = quality.bloom;
     composer.addPass(bloom);
+    grade = gradePass(mood);
+    composer.addPass(grade);
     composer.addPass(new OutputPass());
     resize(canvas.clientWidth, canvas.clientHeight);
   }
@@ -198,7 +203,7 @@ export function createRenderer(canvas, opts) {
     viewport = { w: w, h: h };
     camera.aspect = w / h; camera.updateProjectionMatrix();
     viewCam.aspect = w / h; viewCam.updateProjectionMatrix();
-    if (composer) { composer.setSize(w, h); bloom.resolution.set(w / 2, h / 2); }
+    if (composer) { composer.setSize(w, h); bloom.resolution.set(w / 2, h / 2); grade.uniforms.uAspect.value = w / h; }
   }
 
   function syncEntities(G, t, dt) {
@@ -321,6 +326,10 @@ export function createRenderer(canvas, opts) {
     camera.rotation.y = -Math.PI / 2 - p.ang;
     camera.rotation.x = p.pitch + punch.pitch;
     camera.rotation.z = p.dead ? Math.min(0.5, p.deadT * 0.6) : punch.roll * 0.35;
+    air.setScale(viewport.h * 0.9);
+    air.update(camera.position, t);
+    grade.uniforms.uTime.value = t;
+    grade.uniforms.uHurt.value = Math.min(1, (p.dmgFlash || 0) * 1.5);
     var wantFov = baseFov + punch.fov;
     if (Math.abs(camera.fov - wantFov) > 0.01) { camera.fov = wantFov; camera.updateProjectionMatrix(); }
     composer.render(dt);
@@ -347,7 +356,7 @@ export function createRenderer(canvas, opts) {
     assets: function () { return assets; },
     fxStats: function () { return fx ? fx.stats() : null; },
     debugModels: function () { var out = []; models.forEach(function (m) { if (m.debug) out.push(m.debug()); }); return out; },
-    render: render, resize: resize, renderer: renderer, camera: camera,
+    render: render, resize: resize, renderer: renderer, camera: camera, scene: function () { return scene; },
     info: function () { return renderer.info; }
   };
 }

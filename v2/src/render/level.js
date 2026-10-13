@@ -9,8 +9,15 @@ import { wallSet, floorSet, makeMaterial, crackOverlay } from './textures.js';
 function Batch() { this.groups = {}; }
 Batch.prototype.quad = function (key, a, b, c, d, n, uvs) {
   var g = this.groups[key] || (this.groups[key] = { pos: [], nor: [], uv: [] });
-  [a, b, c, a, c, d].forEach(function (p) { g.pos.push(p[0], p[1], p[2]); g.nor.push(n[0], n[1], n[2]); });
-  [uvs[0], uvs[1], uvs[2], uvs[0], uvs[2], uvs[3]].forEach(function (t) { g.uv.push(t[0], t[1]); });
+  // wind the triangles so their front faces the way n says: a quad wound the
+  // other way is culled from inside the room and the wall vanishes into the fog
+  var ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+  var flip = (uy * vz - uz * vy) * n[0] + (uz * vx - ux * vz) * n[1] + (ux * vy - uy * vx) * n[2] < 0;
+  var order = flip ? [0, 3, 2, 0, 2, 1] : [0, 1, 2, 0, 2, 3], pts = [a, b, c, d];
+  order.forEach(function (k) {
+    var p = pts[k], t = uvs[k];
+    g.pos.push(p[0], p[1], p[2]); g.nor.push(n[0], n[1], n[2]); g.uv.push(t[0], t[1]);
+  });
 };
 Batch.prototype.meshes = function (materialFor) {
   var out = [];
@@ -77,7 +84,9 @@ function hostWall(W, x, z) {
   return host;
 }
 
-export function buildLevel(G, assets) {
+// look: the renderer's per-level mood can swap the floor and ceiling surfaces
+export function buildLevel(G, assets, look) {
+  look = look || {};
   // an authored surface set when there is one, else the built-in painted one
   function wallTex(id) { return (assets && assets.texture('tex:' + id)) || wallSet(id); }
   function floorTex(name) { return (assets && assets.texture('tex:' + name)) || floorSet(name); }
@@ -148,8 +157,8 @@ export function buildLevel(G, assets) {
   var mats = {};
   function mat(key) {
     if (mats[key]) return mats[key];
-    if (key === 'floor') return (mats[key] = makeMaterial(floorTex(L.floor)));
-    if (key === 'ceil') return (mats[key] = makeMaterial(floorTex(L.ceil)));
+    if (key === 'floor') return (mats[key] = makeMaterial(floorTex(look.floor || L.floor)));
+    if (key === 'ceil') return (mats[key] = makeMaterial(floorTex(look.ceil || L.ceil)));
     if (key === 'trim') return (mats[key] = makeMaterial(wallTex(3), { color: 0x9a8a78, metalness: 0.6, roughness: 0.5 }));
     if (key === 'beam') return (mats[key] = makeMaterial(wallTex(3), { color: 0x6a5a4a, metalness: 0.4 }));
     return (mats[key] = makeMaterial(wallTex(+key.slice(4))));

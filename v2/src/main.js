@@ -7,6 +7,7 @@ import { makeRng } from './sim/rng.js';
 import { createRenderer } from './render/renderer.js';
 import { createHud, fmtTime } from './ui/hud.js';
 import { loadAssets } from './render/assets.js';
+import { drawEmblem, drawRim, drawEmbers, fireText } from './ui/emblem.js';
 import RILEY from '../../js/riley.js';
 
 var SETTINGS = MENUS.SETTINGS, MENU = MENUS.MENU;
@@ -191,7 +192,7 @@ function driveShowcase(t) {
 }
 
 // ---- menu look: a dark panel on the left, the scene on the right ---------------------------------
-var PANEL = 150;
+var PANEL = 158;
 function panelBg(c, t) {
   ctx.fillStyle = 'rgba(6,4,3,0.84)'; ctx.fillRect(0, 0, PANEL, H);
   for (var i = 0; i < 40; i++) { ctx.fillStyle = 'rgba(6,4,3,' + (0.84 * (1 - i / 40)).toFixed(3) + ')'; ctx.fillRect(PANEL + i, 0, 1, H); }
@@ -199,10 +200,9 @@ function panelBg(c, t) {
   ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(0, H - 14, W, 14);
 }
 function logo(x, y) {
-  ART.drawText(ctx, 'FIREBIRD', x + 1, y + 1, { scale: 3, color: '#401008' });
-  ART.drawText(ctx, 'FIREBIRD', x, y, { scale: 3, color: '#ff9a28' });
+  fireText(ART, ctx, 'FIREBIRD', x, y, { scale: 3 });
   ART.drawText(ctx, '3D', x + 98, y - 2, { scale: 4, color: '#ffd23e', shadow: '#803008' });
-  ART.drawText(ctx, 'EPISODE ONE: KNEE-DEEP IN THE ASHES', x, y + 21, { color: '#a8a090' });
+  ART.drawText(ctx, 'EPISODE ONE: KNEE-DEEP IN THE ASHES', x, y + 21, { color: '#c8a070' });
 }
 function heading(text, y) {
   ART.drawText(ctx, text, 14, y || 14, { scale: 2, color: '#ff9a28', shadow: '#401008' });
@@ -241,13 +241,18 @@ function rileyGreeting() {
 }
 
 function titleBg(c, t) {
+  // the cover: the Firebird burning over the scene, in its orange frame
+  var heat = Math.min(1, t / 1.2);
+  drawEmblem(ctx, 236, 76, 112, t, { glow: 0.4 + 0.8 * heat, backdrop: 1 });
+  drawEmbers(ctx, W, H, t, 46, 0.9);
   panelBg(c, t);
   logo(14, 16);
-  ART.drawText(ctx, 'A NIX GAMES PRODUCTION BY PHOENIX', 14, H - 24, { color: '#6a655c' });
+  ART.drawText(ctx, 'A NIX GAMES PRODUCTION BY PHOENIX', 14, H - 24, { color: '#7a6450' });
   // Riley's line, in the scene
   var lines = wrapText('RILEY: ' + rileyGreeting(), 34);
-  ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(170, 150 - 4, 144, lines.length * 8 + 6);
+  ctx.fillStyle = 'rgba(6,3,2,0.6)'; ctx.fillRect(170, 150 - 4, 144, lines.length * 8 + 6);
   lines.forEach(function (l, i) { ART.drawText(ctx, l, 174, 150 + i * 8, { color: '#6fe0ec', shadow: true }); });
+  drawRim(ctx, W, H, 1, 0.9);
 }
 
 var BLURBS = {
@@ -428,22 +433,27 @@ function pauseScreen() {
 
 function levelCard(t) {
   var G = game.state(), parts = G.L.name.split(': ');
-  ctx.fillStyle = 'rgba(4,3,2,0.6)'; ctx.fillRect(0, 0, W, H);
-  ART.drawText(ctx, parts[0], W / 2, 22, { color: '#8a8478', center: true });
-  ART.drawText(ctx, parts[1] || G.L.name, W / 2, 32, { scale: 3, color: '#ff9a28', shadow: '#401008', center: true });
+  ctx.fillStyle = 'rgba(10,4,2,0.66)'; ctx.fillRect(0, 0, W, H);
+  drawEmbers(ctx, W, H, t, 30, 0.7);
+  drawEmblem(ctx, W / 2, 166, 44, t, { glow: 0.9, alpha: Math.min(1, t * 2) });
+  ART.drawText(ctx, parts[0], W / 2, 22, { color: '#c8a070', center: true });
+  fireText(ART, ctx, parts[1] || G.L.name, W / 2, 32, { scale: 3, center: true });
   ART.drawText(ctx, 'GOAL', W / 2, 60, { color: '#8a8478', center: true });
   ART.drawText(ctx, game.objective(), W / 2, 69, { scale: 2, color: '#f0d848', shadow: true, center: true });
   ART.drawText(ctx, 'DIFFICULTY: ' + diff().name + '     PAR ' + fmtTime(G.L.par), W / 2, 88, { color: '#a8a090', center: true });
   if ((t % 1) < 0.7) ART.drawText(ctx, 'CLICK TO BEGIN', W / 2, 106, { scale: 2, color: '#ffffff', shadow: true, center: true });
-  if (lockFailed) ART.drawText(ctx, 'THE GAME NEEDS THE MOUSE. CLICK THE SCREEN AGAIN.', W / 2, 124, { color: '#ff9a28', center: true });
-  ART.drawText(ctx, 'WASD MOVE  MOUSE LOOK  CLICK FIRE  SPACE JUMP  E USE  TAB MAP  ESC PAUSE', W / 2, 140, { color: '#8a8478', center: true });
+  if (lockFailed) ART.drawText(ctx, 'THE GAME NEEDS THE MOUSE. CLICK THE SCREEN AGAIN.', W / 2, 118, { color: '#ff9a28', center: true });
+  ART.drawText(ctx, 'WASD MOVE  MOUSE LOOK  CLICK FIRE  SPACE JUMP  E USE  TAB MAP  ESC PAUSE', W / 2, 128, { color: '#8a8478', center: true });
+  drawRim(ctx, W, H, 1, 0.8);
 }
 
 function interScreen(t) {
   var st = game.interStats();
-  ctx.fillStyle = 'rgba(10,8,6,0.88)'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(12,5,3,0.9)'; ctx.fillRect(0, 0, W, H);
+  drawEmbers(ctx, W, H, t, 36, 0.8);
+  drawEmblem(ctx, 40, 100, 50, t, { glow: 0.8, alpha: 0.85 }); drawEmblem(ctx, W - 40, 100, 50, t + 1, { glow: 0.8, alpha: 0.85 });
   fireLine(H - 6, t, 1);
-  ART.drawText(ctx, st.name, W / 2, 22, { scale: 2, color: '#ff9a28', shadow: true, center: true });
+  fireText(ART, ctx, st.name, W / 2, 22, { scale: 2, center: true });
   ART.drawText(ctx, 'FINISHED!', W / 2, 42, { scale: 2, color: '#e8e0c8', shadow: true, center: true });
   var roll = interSkip ? 1 : Math.min(1, t / 1.2);
   function pct(a, b) { return b ? Math.round(a / b * 100 * roll) : 100; }
@@ -460,11 +470,15 @@ function interScreen(t) {
   }
 }
 function victoryScreen(t) {
-  ctx.fillStyle = 'rgba(8,6,4,0.9)'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(12,5,3,0.92)'; ctx.fillRect(0, 0, W, H);
+  drawEmbers(ctx, W, H, t, 70, 1);
+  // the Firebird rises out of the ash and spreads its wings
+  var rise = Math.min(1, t / 2.5), e = 1 - Math.pow(1 - rise, 3);
+  drawEmblem(ctx, W / 2, 150 - e * 50, 60 + e * 70, t, { glow: 0.6 + e * 0.9, alpha: 0.35 + e * 0.35 });
   fireLine(H - 8, t, 0); fireLine(H - 4, t * 1.3, 2);
-  ART.drawText(ctx, 'YOU WIN!', W / 2, 30, { scale: 4, color: '#ffd23e', shadow: '#803008', center: true });
+  fireText(ART, ctx, 'YOU WIN!', W / 2, 30, { scale: 4, center: true });
   ['THE RESET ENGINE IS SILENT.', 'ASHGATE\'S BELLS RING AGAIN,', 'AND RILEY TAPS OUT WITH A GRIN:', '"SAME TIME TOMORROW? I\'LL BE READY."', '', 'EVERY AGE ENDS IN ASH.', 'THE FIREBIRD IS WHAT RISES FROM IT.', '', 'THANKS FOR PLAYING, WARRIOR.']
-    .forEach(function (l, i) { ART.drawText(ctx, l, W / 2, 74 + i * 10, { color: '#e8e0c8', center: true }); });
+    .forEach(function (l, i) { ART.drawText(ctx, l, W / 2, 74 + i * 10, { color: '#f4ead2', shadow: '#2a0c04', center: true }); });
   if (t > 1 && (t % 1) < 0.7) ART.drawText(ctx, 'CLICK OR PRESS ENTER FOR THE TITLE SCREEN', W / 2, 170, { color: '#f0d848', shadow: true, center: true });
 }
 
@@ -579,6 +593,7 @@ if (DEBUG) {
       function q(f) { return s.length ? s[Math.min(s.length - 1, Math.floor(s.length * f))] * 1000 : 0; }
       return { frames: s.length, p50: q(0.5), p95: q(0.95), p99: q(0.99), info: gfx.info().render };
     },
-    renderInfo: function () { return gfx.info(); }
+    renderInfo: function () { return gfx.info(); },
+    scene: function () { return gfx.scene(); }
   });
 }

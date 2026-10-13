@@ -3,9 +3,10 @@
 // messages, boss bar, death screen and automap. Ported from the classic game.
 import { ART } from './globals.js';
 import { WEAPONS, WEAPON_ORDER } from '../sim/game.js';
+import { drawEmblem } from './emblem.js';
 
 var W = 320, H = 200, VH = 168, HUD_H = 32, HORIZON = VH / 2;
-var HUD_RED = '#e03828', HUD_LABEL = '#8a8478', HUD_SHADOW = '#401008';
+var HUD_RED = '#e03828', HUD_LABEL = '#c8a070', HUD_SHADOW = '#401008';
 
 function wrap(text, n) {
   var words = String(text).split(' '), lines = [], cur = '';
@@ -31,11 +32,17 @@ export function createHud(ctx, game, settings) {
 
   function statusBar(G) {
     var p = G.p;
-    ctx.fillStyle = '#3a352e'; ctx.fillRect(0, VH, W, HUD_H);
-    ctx.fillStyle = '#14110d'; ctx.fillRect(0, VH, W, 2);
-    ctx.fillStyle = '#57514a'; ctx.fillRect(0, VH + 2, W, 1);
-    ctx.fillStyle = '#24211c';
-    [46, 116, 142, 178, 230, 250].forEach(function (dx) { ctx.fillRect(dx, VH + 4, 1, HUD_H - 8); });
+    // soot and brass, with the cover's orange rim along the top
+    var bar = ctx.createLinearGradient(0, VH, 0, H);
+    bar.addColorStop(0, '#3a2416'); bar.addColorStop(1, '#1e120c');
+    ctx.fillStyle = bar; ctx.fillRect(0, VH, W, HUD_H);
+    ctx.fillStyle = '#ff7a18'; ctx.fillRect(0, VH, W, 1);
+    ctx.fillStyle = '#7a3e14'; ctx.fillRect(0, VH + 1, W, 1);
+    ctx.fillStyle = '#120a06'; ctx.fillRect(0, VH + 2, W, 1);
+    [46, 116, 142, 178, 230, 250].forEach(function (dx) {
+      ctx.fillStyle = '#120a06'; ctx.fillRect(dx, VH + 5, 1, HUD_H - 9);
+      ctx.fillStyle = '#6a4220'; ctx.fillRect(dx + 1, VH + 5, 1, HUD_H - 9);
+    });
     var wep = WEAPONS[p.weapon], n = wep.ammo ? p.ammo[wep.ammo] : -1;
     var lowAmmo = wep.ammo && n <= (wep.ammo === 'shells' ? 4 : 10);
     ART.drawText(ctx, 'AMMO', 8, VH + 5, { color: n === 0 ? HUD_RED : HUD_LABEL });
@@ -46,7 +53,7 @@ export function createHud(ctx, game, settings) {
     ART.drawText(ctx, 'ARMS', 129, VH + 5, { color: HUD_LABEL, center: true });
     WEAPON_ORDER.forEach(function (name, wi) {
       var x = 119 + wi * 8, owned = p.weapons[name], inHand = (p.nextWeapon || p.weapon) === name;
-      var col = inHand ? '#ffd23e' : !owned ? '#2a2620' : game.hasAmmo(p, name) ? '#c8c0b0' : '#6a5a4a';
+      var col = inHand ? '#ffd23e' : !owned ? '#3a2618' : game.hasAmmo(p, name) ? '#d8c8a8' : '#6a5a4a';
       ART.drawText(ctx, String(wi + 1), x, VH + 13, { scale: 2, color: col });
       if (inHand) { ctx.fillStyle = '#ffd23e'; ctx.fillRect(x, VH + 25, 6, 1); }
     });
@@ -59,8 +66,8 @@ export function createHud(ctx, game, settings) {
       ctx.drawImage(ART.things[k[1]].canvas, 236, VH + k[2]);
       ctx.globalAlpha = 1;
     });
-    ART.drawText(ctx, 'SPRK ' + p.ammo.bullets + '/200', 254, VH + 8, { color: wep.ammo === 'bullets' ? '#ffd23e' : '#c8c0b0' });
-    ART.drawText(ctx, 'BELL ' + p.ammo.shells + '/50', 254, VH + 19, { color: !p.weapons.shotgun ? '#6a655c' : wep.ammo === 'shells' ? '#ffd23e' : '#c8c0b0' });
+    ART.drawText(ctx, 'SPRK ' + p.ammo.bullets + '/200', 254, VH + 8, { color: wep.ammo === 'bullets' ? '#ffd23e' : '#d8c8a8' });
+    ART.drawText(ctx, 'BELL ' + p.ammo.shells + '/50', 254, VH + 19, { color: !p.weapons.shotgun ? '#6a5040' : wep.ammo === 'shells' ? '#ffd23e' : '#d8c8a8' });
   }
 
   function crosshair(G) {
@@ -150,11 +157,13 @@ export function createHud(ctx, game, settings) {
     var p = G.p;
     if (!p.dead || p.deadT < 1) return;
     var ob = OBITS[G.killer] || ['YOU WERE OVERWHELMED.', 'TIP: FIGHT FROM HIGH GROUND SO HOLLOWS COME TO YOU ONE AT A TIME.'];
-    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0, 44, W, 72);
+    ctx.fillStyle = 'rgba(12,4,2,0.6)'; ctx.fillRect(0, 44, W, 72);
+    // the Firebird's ember waits to rise again
+    drawEmblem(ctx, W / 2, 132, 26, G.time, { glow: 0.5 + 0.3 * Math.sin(G.time * 3), alpha: Math.min(0.9, (p.deadT - 1) * 2) });
     ART.drawText(ctx, 'KNOCKED DOWN', W / 2, 50, { scale: 3, color: HUD_RED, shadow: true, center: true });
     ART.drawText(ctx, ob[0], W / 2, 72, { color: '#e8e0c8', shadow: true, center: true });
     ART.drawText(ctx, ob[1], W / 2, 84, { color: '#8fe0a0', shadow: true, center: true });
-    if (p.deadT > 1.2 && (G.time % 1) < 0.7) ART.drawText(ctx, 'CLICK OR PRESS ENTER TO TRY AGAIN', W / 2, 100, { color: '#f0d848', shadow: true, center: true });
+    if (p.deadT > 1.2 && (G.time % 1) < 0.7) ART.drawText(ctx, 'IT ONLY BURNS BRIGHTER. CLICK OR PRESS ENTER TO RISE', W / 2, 100, { color: '#f0d848', shadow: true, center: true });
   }
 
   function messages(G) {

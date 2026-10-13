@@ -109,6 +109,23 @@ The weapons feel exactly like the Doom classics; only their fiction changes.
 - HUD tone: the classic Doom bar (face, health, armor, arms, ammo) in soot and brass, with chunky pixel type.
 - Feedback states: crimson for hurt, amber for pickup, cyan for restored or opened.
 - Menus: dark panels, the Firebird logo, Riley's radio in aqua.
+- **Match the cover** (`assets/firebird-icon.png`): a glowing amber-to-orange
+  Firebird on dark ember brown, in a thin orange rim. The emblem is drawn in code
+  (`v2/src/ui/emblem.js`) on the title, level cards, the score screen, the
+  victory screen (it rises out of the ash) and the death screen. The status bar
+  carries the same orange rim along its top.
+
+## The Look In 3D (v2)
+
+- **Ember air, never a black void:** fog fades into ember brown, embers drift
+  up and ash drifts down around you (`v2/src/render/atmosphere.js`).
+- **The grade:** shadows sink to ember brown, highlights lean amber, the edges
+  fall into a dark ember vignette. Saturated cyan and crimson keep their colour,
+  so the colour language above still reads.
+- **Each level its own mood, hotter the deeper you go:** E1M1 dusk and
+  ashfall under vaulted ceilings; E1M2 red-hot with bronze grating; E1M3 crimson
+  basalt; E1M4 gold dawn on Tartarian star paving. Moods live in `MOODS` in
+  `atmosphere.js`, not in level data.
 
 ## Audio Identity
 

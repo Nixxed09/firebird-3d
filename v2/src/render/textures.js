@@ -141,8 +141,9 @@ function tech(seed) {
     var o = m(u, v, x, y);
     var strip = Math.abs(v - 0.5) < 0.025 && (u * 4) % 1 > 0.15 && (u * 4) % 1 < 0.85;
     var lamp = Math.abs(v - 0.15) < 0.04 && Math.abs(((u * 2) % 1) - 0.5) < 0.12;
-    if (strip) return { c: [0.2, 0.7, 0.8], h: 0.3, r: 0.3, e: [0.15, 0.85, 1.0] };
-    if (lamp) return { c: [0.9, 0.7, 0.3], h: 0.8, r: 0.3, e: [1.0, 0.6, 0.15] };
+    // aether strips and amber lamps, kept soft: a whole tall wall of them must not glare
+    if (strip) return { c: [0.2, 0.6, 0.7], h: 0.3, r: 0.3, e: [0.05, 0.42, 0.52] };
+    if (lamp) return { c: [0.8, 0.6, 0.3], h: 0.8, r: 0.3, e: [0.55, 0.3, 0.07] };
     o.e = [0, 0, 0];
     return o;
   };
@@ -232,6 +233,34 @@ function ceilingPanels(seed) {
   return floorTiles(0x2a2622, 0x121010, seed, false);
 }
 
+// Tartarian star paving: limestone flags with a brass eight-point star inlaid
+// in each one, and bronze lines between the flags (the style guide's star)
+function starPaving(seed) {
+  var base = floorTiles(0xb0a286, 0x4a4234, seed, false);
+  return function (u, v, x, y) {
+    var tu = (u * 2) % 1, tv = (v * 2) % 1, du = tu - 0.5, dv = tv - 0.5;
+    if (Math.min(tu, 1 - tu, tv, 1 - tv) < 0.018) return { c: [0.55, 0.36, 0.16], h: 0.4, r: 0.35 };   // bronze joint
+    // an 8-point star: the union of a square and the same square turned 45 degrees
+    var sq = Math.max(Math.abs(du), Math.abs(dv)), dia = (Math.abs(du) + Math.abs(dv)) / 1.4142;
+    var star = Math.min(sq, dia), n = fbm(u * 10, v * 10, 3, seed + 4);
+    if (star < 0.15 && star > 0.125) return { c: [0.86 * (0.85 + n * 0.3), 0.64 * (0.85 + n * 0.3), 0.26], h: 0.8, r: 0.25 }; // brass outline
+    if (star < 0.125) return { c: [0.32 + n * 0.1, 0.24 + n * 0.08, 0.14], h: 0.45, r: 0.6 };                                  // darker inlay
+    return base(u, v, x, y);
+  };
+}
+
+// a vaulted ceiling: deep coffers between bronze ribs, soot-stained
+function ceilVault(seed) {
+  return function (u, v) {
+    var tu = (u * 2) % 1, tv = (v * 2) % 1, e = Math.min(tu, 1 - tu, tv, 1 - tv);
+    var n = fbm(u * 6, v * 6, 4, seed), soot = fbm(u * 2, v * 2, 3, seed + 9);
+    if (e < 0.06) { var s = 0.8 + n * 0.4; return { c: [0.42 * s, 0.28 * s, 0.14 * s], h: 1, r: 0.4 }; }            // the rib
+    if (e < 0.11) return { c: [0.16, 0.12, 0.09], h: 0.75 - (e - 0.06) * 6, r: 0.9 };                              // the coffer's stepped edge
+    var k = (0.75 + n * 0.35) * (0.55 + soot * 0.6);
+    return { c: [0.26 * k, 0.2 * k, 0.15 * k], h: 0.3 + n * 0.1, r: 0.95 };
+  };
+}
+
 // cache: textures are built once per page
 var cache = {};
 function once(key, fn, opts) { return cache[key] || (cache[key] = bake(fn, opts)); }
@@ -285,6 +314,9 @@ export function floorSet(name) {
     case 'ceilTech': return once('cTech', floorTiles(0x4a3e2c, 0x18140e, 13, true), { bump: 2 });
     case 'ceilHell': return once('cHell', hellrock(14, true), { emissive: true, bump: 4 });
     case 'ceilDark': return once('cDark', ceilingPanels(15), { bump: 2 });
+    case 'ceilVault': return once('cVault', ceilVault(17), { bump: 5 });
+    case 'basalt': return once('fBasalt', hellrock(18, true), { emissive: true, bump: 4 });
+    case 'star': return once('fStar', starPaving(19), { bump: 3 });
     default: return once('fSlab', floorTiles(0x8e846e, 0x3c362a, 10, false), { bump: 3 });   // limestone paving
   }
 }
