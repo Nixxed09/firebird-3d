@@ -72,3 +72,60 @@ Video: `evidence/ue-session-01/feel.mp4` (13 s). Stills: `key-moments.png`.
    overlook, the lava-pit hub, two looping wings, the drain set piece, the
    sealed forge. Run the level contract checks (port the lab's rules) and a
    bot route on it.
+
+## Session 2 (2026-10-13): co-op, sound, the Family Arcade
+
+**Asked:** playtest it, make it good, and set it up in the Family Arcade so the kids
+can play it together on the home network.
+
+**Built:**
+- **Home-LAN co-op for 1-4 players.** Each computer moves its own Firebird (the
+  dash, slide and coyote jump stay instant). The host owns the Hollows, damage,
+  health, sparks and heals. Teammates see each other as winged Firebirds in their
+  own colour (P1 amber, P2 blue, P3 green, P4 violet) with a name and health bar.
+  There's no friendly fire.
+- **The arena became a co-op fight.** After the two teaching Hollows, the forge
+  wakes: three waves of 4/6/8 Hollows, plus 3 for each extra player, with later
+  waves throwing more often. The 0.65 s tell never shortens. Between waves
+  there's a breather with sparks and health topped up, then ARENA CLEAR with the
+  time. A release also gives sparks (push forward).
+- **Sound:** 25 synthesized sounds, ambience and a music bed, wired to every
+  action for local and remote players (`tools/ue-make-sounds.py`).
+- **A start menu:** PLAY ALONE / HOST A GAME FOR FRIENDS / JOIN <NAME>'S GAME.
+  The join list comes from the Family Arcade's rooms. Esc goes back to the menu.
+- **The Family Arcade contract `arcade-lan/v1` in C++** (`UFirebirdArcadeLan`).
+  A host announces a room, and a game started from "Playing now" (`ARCADE_JOIN`)
+  joins it at once, after the contract's build check and with its exact refusal
+  words.
+- **Packaging** (`tools/ue-package.ps1`, about 915 MB) with a build fingerprint,
+  and the arcade's boot check (`tools/arcade-boot-check.ps1`).
+
+**Bot-played evidence (one computer, real processes, real UDP):**
+
+| Test | Result |
+|---|---|
+| Solo feel proofs (`ue-capture.ps1 -Scenario feel`) | all pass after every change |
+| 2-player and 3-player co-op (`ue-coop-test.ps1`) | ARENA CLEAR together; each sees the others; Hollows replicate; the host confirms everyone's hits and heals |
+| Arcade contract interop with the arcade's own Godot code and the real launcher (`ue-test-arcade-lan.ps1`) | 25/25 |
+| The whole arcade path, packaged: host announces a room, `ARCADE_JOIN` joins it, ARENA CLEAR (`ue-arcade-coop-test.ps1 -Packaged`) | pass |
+| The menu lists a friend's game and joins it (over the home address 192.168.1.13) | pass |
+| GamesOS `test-external-games.ps1 -Only firebird-coop` (built from the pinned source by the arcade's own import) | UNREAL BOOT PASS, UNREAL LAN HOST-JOIN PASS |
+
+**Found and fixed by testing:**
+- `-BENCHMARK` makes a host live through a 60 s wait in 7 real seconds, so co-op
+  tests run in real time.
+- Saving every frame slowed a recording client to 1 fps, so only one joiner
+  records now.
+- A client that lost its host restarted its automation in an empty world and
+  overwrote its own result. Runs now finish once per process.
+- A hitstop slows the whole world, so it's solo-only.
+- The bots cleared 3/4/6 waves untouched, so the waves were made bigger.
+
+**Not proven (needs people):**
+- **Human-played: still no.** The bots aim perfectly and always dodge. Whether
+  the arena is fun and fair for the kids, and whether they find Host and Join
+  unaided, is the Nix test (Q3).
+- **Two physical computers.** Everything ran on WhiteNova. Skybox has no Unreal,
+  so it needs the packaged build through the arcade channel (pack, release,
+  candidate, two-PC run, promote: GamesOS `docs/arcade/UPDATES.md`).
+- The hosting computer's firewall must allow UDP 27705 (Windows asks once).
