@@ -3,6 +3,8 @@
 #include "FirebirdCharacter.h"
 #include "Hollow.h"
 #include "FBRange.h"
+#include "FirebirdSession.h"
+#include "FirebirdArcadeLan.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerState.h"
 #include "Engine/Canvas.h"
@@ -20,8 +22,11 @@ void AFirebirdHUD::Say(const FString& Text, float Seconds, FLinearColor Color)
 void AFirebirdHUD::DrawHUD()
 {
     Super::DrawHUD();
+    if (!Canvas) return;
+    if (UFirebirdSession* Session = UFirebirdSession::Get(this); Session && Session->InMenu()) { DrawMenu(Session); return; }
+    MenuItems.Reset();
     AFirebirdCharacter* P = Cast<AFirebirdCharacter>(GetOwningPawn());
-    if (!P || !Canvas) return;
+    if (!P) return;
     const float W = Canvas->ClipX, H = Canvas->ClipY, S = H / 720.f;
     UFont* Big = GEngine->GetLargeFont();
     UFont* Small = GEngine->GetMediumFont();
@@ -124,7 +129,7 @@ void AFirebirdHUD::DrawHUD()
             DrawText(FString::Printf(TEXT("WAVE %d / %d     HOLLOWS LEFT %d"), R->Wave, R->WaveCount, R->HollowsLeft), FLinearColor(1.f, 0.6f, 0.25f), W - 330 * S, Y0 + 26 * S, Small, S * 1.1f);
         int32 Players = 0;
         for (TActorIterator<AFirebirdCharacter> It(GetWorld()); It; ++It) Players++;
-        if (Players > 1) DrawText(FString::Printf(TEXT("P%d  ·  %d PLAYERS"), P->PlayerIndex + 1, Players), AFirebirdCharacter::PlayerColor(P->PlayerIndex), W - 330 * S, Y0 + 8 * S, Small, S);
+        if (Players > 1) DrawText(FString::Printf(TEXT("P%d  -  %d PLAYERS"), P->PlayerIndex + 1, Players), AFirebirdCharacter::PlayerColor(P->PlayerIndex), W - 330 * S, Y0 + 8 * S, Small, S);
     }
     BigT = FMath::Max(0.f, BigT - GetWorld()->GetDeltaSeconds());
     if (BigT > 0.f)
@@ -140,4 +145,54 @@ void AFirebirdHUD::DrawHUD()
         DrawRect(FLinearColor(0.02f, 0.02f, 0.02f, 0.55f), 16 * S, 16 * S, W - 32 * S, 34 * S);
         DrawText(Banner, BannerColor, 26 * S, 22 * S, Small, S * 1.15f);
     }
+}
+
+// ---- the start menu -----------------------------------------------------------------------------
+
+void AFirebirdHUD::DrawMenu(UFirebirdSession* S)
+{
+    const float W = Canvas->ClipX, H = Canvas->ClipY, Sc = H / 720.f;
+    UFont* Big = GEngine->GetLargeFont();
+    UFont* Small = GEngine->GetMediumFont();
+    // the cover's look: dark ember panel, amber title, an orange rim
+    DrawRect(FLinearColor(0.05f, 0.02f, 0.01f, 0.78f), 0, 0, W * 0.48f, H);
+    DrawRect(FLinearColor(1.f, 0.48f, 0.09f), W * 0.48f - 2 * Sc, 0, 2 * Sc, H);
+    DrawText(TEXT("FIREBIRD"), FLinearColor(1.f, 0.72f, 0.2f), 60 * Sc, 60 * Sc, Big, Sc * 3.2f);
+    DrawText(TEXT("CO-OP RANGE  -  UP TO 4 PLAYERS ON YOUR HOME NETWORK"), FLinearColor(0.85f, 0.6f, 0.4f), 64 * Sc, 150 * Sc, Small, Sc * 1.1f);
+
+    // the items: play alone, host, and every friend's room heard on the network
+    MenuItems.Reset();
+    MenuItems.Add({ TEXT("PLAY ALONE"), FString(), true, FString() });
+    MenuItems.Add({ TEXT("HOST A GAME FOR FRIENDS"), FString(), true, FString() });
+    for (const FFirebirdLanRoom& R : S->Rooms())
+    {
+        FMenuItem It;
+        It.Label = FString::Printf(TEXT("JOIN %s'S GAME  (%d/%d)"), *R.Host.ToUpper(), R.Players, R.MaxPlayers);
+        It.Room = R.Room;
+        It.bEnabled = R.bSameBuild && R.Players < R.MaxPlayers;
+        It.Why = !R.bSameBuild ? R.BuildMessage : (R.Players >= R.MaxPlayers ? FString(UFirebirdArcadeLan::MSG_FULL) : FString());
+        MenuItems.Add(It);
+    }
+    S->SelectedItem = FMath::Clamp(S->SelectedItem, 0, MenuItems.Num() - 1);
+    float Y = 230 * Sc;
+    for (int32 i = 0; i < MenuItems.Num(); ++i)
+    {
+        FMenuItem& It = MenuItems[i];
+        const bool bSel = i == S->SelectedItem;
+        It.Min = FVector2D(50 * Sc, Y - 8 * Sc);
+        It.Max = FVector2D(W * 0.46f, Y + 44 * Sc);
+        if (bSel) DrawRect(FLinearColor(1.f, 0.48f, 0.09f, 0.25f), It.Min.X, It.Min.Y, It.Max.X - It.Min.X, It.Max.Y - It.Min.Y);
+        const FLinearColor C = !It.bEnabled ? FLinearColor(0.45f, 0.4f, 0.35f) : bSel ? FLinearColor(1.f, 0.85f, 0.35f) : FLinearColor(0.92f, 0.86f, 0.75f);
+        DrawText(FString::Printf(TEXT("%d   %s"), i + 1, *It.Label), C, 64 * Sc, Y, Big, Sc * 1.25f);
+        if (!It.Why.IsEmpty()) DrawText(It.Why, FLinearColor(0.9f, 0.55f, 0.4f), 96 * Sc, Y + 32 * Sc, Small, Sc * 0.9f);
+        Y += (It.Why.IsEmpty() ? 64.f : 80.f) * Sc;
+        if (i == 1 && MenuItems.Num() == 2)
+        {
+            DrawText(TEXT("NO FRIENDS' GAMES ON THE NETWORK YET. WHEN SOMEONE HOSTS, IT SHOWS UP HERE."), FLinearColor(0.7f, 0.6f, 0.5f), 64 * Sc, Y, Small, Sc * 0.95f);
+            Y += 40 * Sc;
+        }
+    }
+    if (!S->Status.IsEmpty()) DrawText(S->Status, FLinearColor(1.f, 0.6f, 0.35f), 64 * Sc, Y + 20 * Sc, Small, Sc * 1.1f);
+    DrawText(TEXT("NUMBER KEYS, ARROWS + ENTER, OR CLICK.   ESC QUITS."), FLinearColor(0.6f, 0.5f, 0.42f), 64 * Sc, H - 70 * Sc, Small, Sc);
+    DrawText(TEXT("A NIX GAMES PRODUCTION BY PHOENIX"), FLinearColor(0.5f, 0.4f, 0.32f), 64 * Sc, H - 40 * Sc, Small, Sc * 0.9f);
 }

@@ -3,6 +3,7 @@
 #include "FBFx.h"
 #include "FirebirdCharacter.h"
 #include "EmberProjectile.h"
+#include "FBAudio.h"
 #include "AIController.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PointLightComponent.h"
@@ -171,7 +172,7 @@ void AHollow::Think(float DeltaSeconds)
         if (WindupT >= WindupTime)
         {
             Throw(P);
-            AttackCooldown = FMath::FRandRange(1.8f, 2.8f);
+            AttackCooldown = FMath::FRandRange(1.8f, 2.8f) / Aggression;
             State = EHollowState::Chase;
             WindupT = 0.f;
         }
@@ -194,6 +195,9 @@ void AHollow::Think(float DeltaSeconds)
 void AHollow::Draw(float DeltaSeconds)
 {
     if (!ShellMat) return;
+    // the tell has a sound too: a rising rasp you can hear across the arena
+    if (State == EHollowState::Windup && LastDrawnState != EHollowState::Windup) FB::Sound(this, TEXT("hollow_windup"), GetActorLocation());
+    LastDrawnState = State;
     ShellMat->SetVectorParameterValue(TEXT("Color"), FMath::Lerp(FB::Ash * 1.4f, FLinearColor(3.f, 2.6f, 2.2f), FlashT / 0.08f));
     switch (State)
     {
@@ -272,11 +276,13 @@ bool AHollow::TakeHit(float Damage, const FVector& FromDir, bool bMelee, AFirebi
 void AHollow::Multi_Hit_Implementation(bool bMelee)
 {
     FlashT = 0.08f;
+    if (bMelee) FB::Sound(this, TEXT("fist_hit"), GetActorLocation());
     AFBFx::Burst(GetWorld(), GetActorLocation() + FVector(0, 0, 30), 5, FB::Ash * 3.f, 350.f, 0.5f, 8.f, 900.f, 0.2f);   // ash chips
 }
 
 void AHollow::Multi_Cracked_Implementation()
 {
+    FB::Sound(this, TEXT("crack"), GetActorLocation());
     AFBFx::Burst(GetWorld(), GetActorLocation() + FVector(0, 0, 40), 6, FB::Amber, 300.f, 0.4f, 6.f, -200.f, 8.f);
 }
 
@@ -292,6 +298,7 @@ void AHollow::Break(bool bReleased)
 void AHollow::Multi_Break_Implementation(bool bReleased)
 {
     const FVector At = GetActorLocation();
+    FB::Sound(this, bReleased ? TEXT("release") : TEXT("hollow_break"), At);
     if (bReleased)
     {
         // the light inside goes up: a gold column of motes, and a flash that lights the room

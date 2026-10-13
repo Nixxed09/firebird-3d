@@ -15,15 +15,21 @@
 #include "Misc/Paths.h"
 #include "UnrealClient.h"
 
+static bool GRanThisProcess = false;
+
 void UFirebirdAutomation::OnWorldBeginPlay(UWorld& InWorld)
 {
     Super::OnWorldBeginPlay(InWorld);
     const TCHAR* Cmd = FCommandLine::Get();
     bActive = FParse::Param(Cmd, TEXT("FBAuto"));
-    if (!bActive) return;
+    // one finished run per process: a client that loses its host falls back to an empty world,
+    // and a second run there would overwrite the real summary. (A joiner that travels into the
+    // host's world before finishing starts over there, which is what it should do.)
+    if (!bActive || GRanThisProcess) { bActive = false; return; }
     FParse::Value(Cmd, TEXT("FBScenario="), Scenario);
     if (!FParse::Value(Cmd, TEXT("FBOut="), OutDir) || OutDir.IsEmpty()) OutDir = FPaths::ProjectSavedDir() / TEXT("fb-auto");
     bFrames = FParse::Param(Cmd, TEXT("FBFrames"));
+    FParse::Value(Cmd, TEXT("FBPlayers="), WantPlayers);
     IFileManager::Get().MakeDirectory(*(OutDir / TEXT("frames")), true);
     UE_LOG(LogFirebird, Display, TEXT("FB_AUTO start scenario=%s out=%s frames=%d"), *Scenario, *OutDir, bFrames ? 1 : 0);
 }
@@ -79,13 +85,15 @@ void UFirebirdAutomation::AimAt(AFirebirdCharacter* P, const FVector& Target)
 
 void UFirebirdAutomation::Finish()
 {
+    GRanThisProcess = true;
     FString Json = TEXT("{\n");
     Json += FString::Printf(TEXT("  \"scenario\": \"%s\",\n  \"all_ok\": %s,\n  \"seconds\": %.2f,\n  \"frames\": %d,\n"), *Scenario, bAllOk ? TEXT("true") : TEXT("false"), TotalT, Frame);
     Json += TEXT("  \"proofs\": {\n") + FString::Join(Proofs, TEXT(",\n")) + TEXT("\n  },\n");
     Json += TEXT("  \"shots\": [\"") + FString::Join(Shots, TEXT("\", \"")) + TEXT("\"]\n}\n");
     FFileHelper::SaveStringToFile(Json, *(OutDir / TEXT("summary.json")));
     UE_LOG(LogFirebird, Display, TEXT("FB_AUTO done all_ok=%d"), bAllOk ? 1 : 0);
-    FinishT = 1.0f;   // let the last shot write, then quit
+    // let the last shot write, then quit; a co-op host lingers so every player hears ARENA CLEAR first
+    FinishT = (Scenario == TEXT("coop") && GetWorld()->GetNetMode() == NM_ListenServer) ? 8.f : 1.f;
 }
 
 void UFirebirdAutomation::Tick(float DeltaSeconds)
@@ -103,6 +111,27 @@ void UFirebirdAutomation::Tick(float DeltaSeconds)
         return;
     }
     P->bAutoDriven = true;
+    // the arcade's boot check: the game starts, the course builds, the Firebird stands on it
+    if (Scenario == TEXT("boot"))
+    {
+        if (TotalT > 2.f && Stage == 0)
+        {
+            const bool bRange = AFBRange::Get(GetWorld()) != nullptr;
+            Proof(TEXT("boots"), bRange && P->GetActorLocation().Z > 0.f, FString::Printf(TEXT("range %s, Firebird at z=%.0f"), bRange ? TEXT("built") : TEXT("missing"), P->GetActorLocation().Z));
+            UE_LOG(LogFirebird, Display, TEXT("%s"), bAllOk ? TEXT("ARCADE_BOOT_OK") : TEXT("ARCADE_BOOT_FAILED"));
+            Finish();
+            Stage = 200;
+        }
+        return;
+    }
+    if (Scenario == TEXT("coop"))
+    {
+        TickCoop(P, DeltaSeconds);
+        if (bFrames && !bShotTaken)
+            FScreenshotRequest::RequestScreenshot(OutDir / FString::Printf(TEXT("frames/f_%05d.png"), Frame++), true, false);
+        return;
+    }
+
     FFirebirdInput& I = P->Input;
     const FVector L = P->GetActorLocation();
     const bool bGround = P->GetCharacterMovement()->IsMovingOnGround();
@@ -294,4 +323,119 @@ void UFirebirdAutomation::Tick(float DeltaSeconds)
     // the video: every frame, at a fixed 1/30 s step
     if (bFrames && !bShotTaken)
         FScreenshotRequest::RequestScreenshot(OutDir / FString::Printf(TEXT("frames/f_%05d.png"), Frame++), true, false);
+}
+
+// ---- co-op: each process plays its own Firebird through the arena ------------------------------
+
+void UFirebirdAutomation::TickCoop(AFirebirdCharacter* P, float DeltaSeconds)
+{
+    FFirebirdInput& I = P->Input;
+    I = FFirebirdInput();
+    const FVector L = P->GetActorLocation();
+    AFBRange* Range = AFBRange::Get(GetWorld());
+
+    // what this computer sees of the others
+    int32 Mates = 0;
+    for (TActorIterator<AFirebirdCharacter> It(GetWorld()); It; ++It)
+    {
+        if (*It == P) continue;
+        Mates++;
+        const FVector T = It->GetActorLocation();
+        if (bTeammatePosSet) TeammateTravel += FVector::Dist(T, LastTeammatePos);
+        LastTeammatePos = T; bTeammatePosSet = true;
+    }
+    MaxTeammatesSeen = FMath::Max(MaxTeammatesSeen, Mates);
+    int32 HollowsHere = 0;
+    for (TActorIterator<AHollow> It(GetWorld()); It; ++It) if (It->IsAlive()) HollowsHere++;
+    MaxHollowsSeen = FMath::Max(MaxHollowsSeen, HollowsHere);
+    if (P->bDead && !bWasDead) DownsSeen++;
+    bWasDead = P->bDead;
+
+    switch (Stage)
+    {
+    case 0:   // wait for everyone
+        if (Mates + 1 >= WantPlayers && StageT > 1.f)
+        {
+            Proof(TEXT("sees_teammates"), Mates + 1 >= WantPlayers, FString::Printf(TEXT("%d player(s) in this world, playing as P%d"), Mates + 1, P->PlayerIndex + 1));
+            // walk into the arena side by side (this computer owns its own position)
+            P->Checkpoint = FVector(FBCourse::ArenaStart + 250.f, -200.f + P->PlayerIndex * 200.f, 110.f);
+            P->TeleportOwned(P->Checkpoint, 0.f);
+            Next(1);
+        }
+        else if (StageT > 60.f) { Proof(TEXT("sees_teammates"), false, FString::Printf(TEXT("only %d player(s) after 60 s"), Mates + 1)); Next(100); }
+        break;
+
+    case 1:   // look at the team together for the picture
+        for (TActorIterator<AFirebirdCharacter> It(GetWorld()); It; ++It) if (*It != P) AimAt(P, It->GetActorLocation() + FVector(0, 0, 40));
+        if (StageT > 1.2f) { Shot(TEXT("01-together")); Next(2); }
+        break;
+
+    case 2:   // fight until the arena is clear
+    {
+        if (P->bDead) break;
+        AHollow* Target = nullptr;
+        float Best = BIG_NUMBER;
+        for (TActorIterator<AHollow> It(GetWorld()); It; ++It)
+        {
+            if (!It->IsAlive()) continue;
+            const float D = FVector::Dist2D(It->GetActorLocation(), L) - (It->IsCracked() ? 800.f : 0.f);   // go for cracked ones first
+            if (D < Best) { Best = D; Target = *It; }
+        }
+        // stay in the arena
+        if (L.X < FBCourse::ArenaStart + 150.f) I.Move.Y = 1.f;
+        if (Target)
+        {
+            const FVector T = Target->GetActorLocation();
+            const float D = FVector::Dist2D(T, L);
+            AimAt(P, T + FVector(0, 0, 10));
+            if (Target->IsCracked())
+            {
+                // close in and release it
+                I.Move.Y = D > 220.f ? 1.f : 0.f;
+                if (D > 700.f && P->DashCharge >= 1.f) I.bDash = true;
+                if (P->ReleaseTarget() == Target) I.bFist = true;
+            }
+            else
+            {
+                I.bFireHeld = true;
+                if (D > 1500.f) I.Move.Y = 1.f;
+                // keep moving sideways so embers miss; sidestep hard when one winds up
+                StrafeT -= DeltaSeconds;
+                if (StrafeT <= 0.f) { StrafeT = FMath::FRandRange(0.8f, 1.6f); StrafeDirX = -StrafeDirX; }
+                I.Move.X = StrafeDirX;
+                if (Target->State == EHollowState::Windup && Target->WindupT > 0.4f && P->DashCharge >= 1.f) I.bDash = true;
+            }
+            if (!bFightShot && HollowsHere >= 3) { Shot(TEXT("02-fight")); bFightShot = true; }
+        }
+        if (Range && Range->bArenaClear)
+        {
+            Shot(TEXT("03-clear"));
+            Next(3);
+        }
+        else if (StageT > 300.f) { Proof(TEXT("arena_clear"), false, TEXT("not clear after 300 s")); Next(100); }
+        break;
+    }
+
+    case 3:
+        if (StageT > 1.0f)
+        {
+            Proof(TEXT("arena_clear"), Range && Range->bArenaClear, FString::Printf(TEXT("cleared together in %.0f s (host clock)"), Range ? Range->ClearTime : -1.f));
+            Proof(TEXT("hollows_replicated"), MaxHollowsSeen >= 1, FString::Printf(TEXT("up to %d Hollows alive at once on this computer"), MaxHollowsSeen));
+            Proof(TEXT("my_hits_confirmed_by_host"), P->ConfirmedHits > 0, FString::Printf(TEXT("%d hits, %d broken by shots"), P->ConfirmedHits, P->Breaks));
+            Proof(TEXT("my_releases_healed"), P->Releases > 0, FString::Printf(TEXT("%d releases"), P->Releases));
+            Proof(TEXT("teammate_moving_here"), WantPlayers < 2 || TeammateTravel > 500.f, FString::Printf(TEXT("the teammate travelled %.0f m as seen on this computer"), TeammateTravel / 100.f));
+            UE_LOG(LogFirebird, Display, TEXT("FB_AUTO coop P%d downs=%d dashes=%d"), P->PlayerIndex + 1, DownsSeen, P->Dashes);
+            Proofs.Add(FString::Printf(TEXT("    \"info\": { \"ok\": true, \"detail\": \"P%d: knocked down %d times, %d dashes, %d slides\" }"), P->PlayerIndex + 1, DownsSeen, P->Dashes, P->Slides));
+            Finish();
+            Next(200);
+        }
+        break;
+
+    case 100:
+        Shot(TEXT("99-failed"));
+        Finish();
+        Next(200);
+        break;
+    default: break;
+    }
 }

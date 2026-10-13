@@ -39,6 +39,7 @@ public:
     UPROPERTY(EditAnywhere, Category = "Hollow") float Speed = 360.f;       // v2: 1.7 cells/s
     UPROPERTY(EditAnywhere, Category = "Hollow") float WakeRange = 2600.f;
     UPROPERTY(EditAnywhere, Category = "Hollow") float EmberSpeed = 1400.f; // v2: 7 cells/s
+    float Aggression = 1.f;   // >1 throws more often; the 0.65 s tell never shortens (E4)
 
     // host only: a hit from a player; bMelee = the Ember Fist. Returns true if it broke.
     bool TakeHit(float Damage, const FVector& FromDir, bool bMelee, AFirebirdCharacter* By);
@@ -87,4 +88,5 @@ private:
     float GoneT = 0.f;
     float Bob = 0.f;
     bool bBrokenFx = false;
+    EHollowState LastDrawnState = EHollowState::Idle;
 };

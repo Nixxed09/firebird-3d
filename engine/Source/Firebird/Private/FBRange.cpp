@@ -4,6 +4,7 @@
 #include "FirebirdHUD.h"
 #include "Hollow.h"
 #include "FBFx.h"
+#include "FBAudio.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/PointLightComponent.h"
@@ -123,6 +124,7 @@ void AFBRange::BeginPlay()
 {
     Super::BeginPlay();
     Atmosphere();
+    FB::StartAmbience(this);   // distant fire and the music bed, on every computer
     UMaterialInterface* Stone = FB::MakeSurface(this, FB::Limestone, 0.f, 0.85f);
     UMaterialInterface* StoneDark = FB::MakeSurface(this, FB::Limestone * 0.6f, 0.f, 0.9f);
     UMaterialInterface* BasaltM = FB::MakeSurface(this, FB::Basalt * 1.6f, 0.f, 0.7f);
@@ -204,6 +206,7 @@ void AFBRange::Say(const FString& Line)
 {
     if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
         if (AFirebirdHUD* H = Cast<AFirebirdHUD>(PC->GetHUD())) H->Say(Line, 4.5f);
+    FB::Sound2D(this, TEXT("riley_radio"), 0.6f);
     UE_LOG(LogFirebird, Display, TEXT("FB_RADIO %s"), *Line);
 }
 
@@ -278,8 +281,9 @@ void AFBRange::TickArena(float DeltaSeconds)
         {
             Wave++;
             // three waves, each a little bigger, and two more Hollows per extra player (co-op)
-            static const int32 Base[3] = { 3, 4, 6 };
-            ToSpawn = Base[FMath::Clamp(Wave - 1, 0, 2)] + 2 * (Players - 1);
+            // the bot co-op run cleared 3/4/6 (+2 a player) in 38 s with no one knocked down: too easy
+            static const int32 Base[3] = { 4, 6, 8 };
+            ToSpawn = Base[FMath::Clamp(Wave - 1, 0, 2)] + 3 * (Players - 1);
             SpawnT = 0.f;
             Multi_Say(FString::Printf(TEXT("RILEY: WAVE %d OF %d. %d HOLLOWS."), Wave, WaveCount, ToSpawn));
             ArenaStage = 3;
@@ -323,6 +327,7 @@ void AFBRange::SpawnWaveHollow()
     if (AHollow* H = GetWorld()->SpawnActor<AHollow>(AHollow::StaticClass(), At, FRotator(0, 180, 0), P))
     {
         H->Alert();   // the forge sent it: it comes for you
+        H->Aggression = 1.f + 0.25f * (Wave - 1);   // later waves throw more often (same tell)
         Hollows.Add(H);
         // it climbs out of the forge floor in a burst of crimson (a warning before it throws, C5)
         AFBFx::Burst(GetWorld(), At - FVector(0, 0, 60), 10, FB::Crimson, 300.f, 0.6f, 8.f, -300.f, 6.f);

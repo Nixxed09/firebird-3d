@@ -2,6 +2,9 @@
 #include "Firebird.h"
 #include "FBFx.h"
 #include "Hollow.h"
+#include "FBAudio.h"
+#include "FirebirdHUD.h"
+#include "FirebirdSession.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PointLightComponent.h"
@@ -128,7 +131,7 @@ void AFirebirdCharacter::BuildBody()
     const FLinearColor C = PlayerColor(PlayerIndex);
     UMaterialInterface* Suit = FB::MakeSurface(this, C * 0.55f, 0.6f, 0.6f);
     UMaterialInterface* Dark = FB::MakeSurface(this, FB::Basalt * 2.f, 0.f, 0.7f);
-    UMaterialInterface* Glow = FB::MakeGlow(this, C, 5.f);
+    UMaterialInterface* Glow = FB::MakeGlow(this, C, 2.f);
     TArray<UStaticMeshComponent*> Parts;
     Parts.Add(FB::AddPart(this, Body, TEXT("BTorso"), FVector(30, 44, 70), FVector(0, 0, 10), Suit));
     Parts.Add(FB::AddPart(this, Body, TEXT("BHead"), FVector(28, 28, 28), FVector(2, 0, 64), Dark));
@@ -168,6 +171,45 @@ void AFirebirdCharacter::ReadInput()
 {
     APlayerController* PC = Cast<APlayerController>(GetController());
     if (!PC) return;
+    // the start menu has the keyboard and mouse until a choice is made
+    UFirebirdSession* S = UFirebirdSession::Get(this);
+    const bool bMenu = S && S->InMenu();
+    PC->bShowMouseCursor = bMenu;
+    if (bMenu)
+    {
+        Input = FFirebirdInput();
+        AFirebirdHUD* Hud = Cast<AFirebirdHUD>(PC->GetHUD());
+        const int32 N = Hud ? Hud->MenuItems.Num() : 0;
+        if (N == 0 || S->Mode == EFirebirdSessionMode::Joining) return;
+        int32 Pick = -1;
+        static const FKey Numbers[9] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine };
+        for (int32 i = 0; i < FMath::Min(N, 9); ++i) if (PC->WasInputKeyJustPressed(Numbers[i])) Pick = i;
+        if (PC->WasInputKeyJustPressed(EKeys::Down) || PC->WasInputKeyJustPressed(EKeys::S)) { S->SelectedItem = (S->SelectedItem + 1) % N; FB::Sound2D(this, TEXT("ui_tick")); }
+        if (PC->WasInputKeyJustPressed(EKeys::Up) || PC->WasInputKeyJustPressed(EKeys::W)) { S->SelectedItem = (S->SelectedItem + N - 1) % N; FB::Sound2D(this, TEXT("ui_tick")); }
+        float Mx = 0.f, My = 0.f;
+        if (PC->GetMousePosition(Mx, My))
+            for (int32 i = 0; i < N; ++i)
+            {
+                const AFirebirdHUD::FMenuItem& It = Hud->MenuItems[i];
+                if (Mx >= It.Min.X && Mx <= It.Max.X && My >= It.Min.Y && My <= It.Max.Y)
+                {
+                    S->SelectedItem = i;
+                    if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton)) Pick = i;
+                }
+            }
+        if (PC->WasInputKeyJustPressed(EKeys::Enter) || PC->WasInputKeyJustPressed(EKeys::SpaceBar)) Pick = S->SelectedItem;
+        if (PC->WasInputKeyJustPressed(EKeys::Escape)) { PC->ConsoleCommand(TEXT("quit")); return; }
+        if (Pick >= 0 && Pick < N)
+        {
+            const AFirebirdHUD::FMenuItem& It = Hud->MenuItems[Pick];
+            FB::Sound2D(this, TEXT("ui_tick"));
+            if (!It.bEnabled) S->Status = It.Why;
+            else if (Pick == 0) S->PlayAlone();
+            else if (Pick == 1) S->Host();
+            else S->Join(It.Room);
+        }
+        return;
+    }
     FFirebirdInput I;
     I.Move.Y = (PC->IsInputKeyDown(EKeys::W) ? 1.f : 0.f) - (PC->IsInputKeyDown(EKeys::S) ? 1.f : 0.f);
     I.Move.X = (PC->IsInputKeyDown(EKeys::D) ? 1.f : 0.f) - (PC->IsInputKeyDown(EKeys::A) ? 1.f : 0.f);
@@ -184,7 +226,8 @@ void AFirebirdCharacter::ReadInput()
     Input = I;
     // R: run the course again (playing alone); Esc: leave
     if (PC->WasInputKeyJustPressed(EKeys::R) && GetNetMode() == NM_Standalone) PC->RestartLevel();
-    if (PC->WasInputKeyJustPressed(EKeys::Escape)) PC->ConsoleCommand(TEXT("quit"));
+    // Esc: back to the start menu (leaving a hosted or joined game); Esc there quits
+    if (PC->WasInputKeyJustPressed(EKeys::Escape) && S) S->BackToMenu(FString());
 }
 
 // ---- the frame ------------------------------------------------------------------------------
@@ -232,6 +275,7 @@ void AFirebirdCharacter::Tick(float DeltaSeconds)
             bRespawnSent = true;
             TeleportOwned(Checkpoint, CheckpointYaw);
             CamZ = 68.f;
+            FB::Sound2D(this, TEXT("respawn"));
             Server_Respawned();
         }
         return;
@@ -334,6 +378,7 @@ void AFirebirdCharacter::DoJump()
     if (bSliding) EndSlide();
     if (bIsCrouched) UnCrouch();
     LaunchCharacter(FVector(0.f, 0.f, JumpSpeed), false, true);
+    FB::Sound(this, TEXT("jump"), GetActorLocation());
     bJumpConsumed = true;
     JumpBuffer = 0.f;
 }
@@ -344,6 +389,7 @@ void AFirebirdCharacter::Landed(const FHitResult& Hit)
     bJumpConsumed = false;
     if (!IsLocallyControlled()) return;
     Shake += FMath::Clamp(-GetVelocity().Z / 2500.f, 0.f, 0.5f);
+    FB::Sound(this, TEXT("land"), GetActorLocation(), FMath::Clamp(-GetVelocity().Z / 1200.f, 0.25f, 1.f));
     if (JumpBuffer > 0.f)
     {
         BufferedJumps++;
@@ -365,6 +411,7 @@ void AFirebirdCharacter::StartDash()
     M->Velocity = DashDir * DashSpeed;
     if (M->IsMovingOnGround()) M->SetMovementMode(MOVE_Falling);   // lift off the floor so friction can't eat it
     FovKick += 10.f;
+    FB::Sound(this, TEXT("dash"), GetActorLocation());
     UE_LOG(LogFirebird, Display, TEXT("FB_EVENT dash charges_left=%.2f"), DashCharge);
 }
 
@@ -395,6 +442,7 @@ void AFirebirdCharacter::StartSlide()
     const float S = FMath::Max(V.Size2D(), SlideBoost);
     M->Velocity = V.GetSafeNormal2D() * S + FVector(0, 0, V.Z);
     FovKick += 5.f;
+    FB::Sound(this, TEXT("slide"), GetActorLocation());
     UE_LOG(LogFirebird, Display, TEXT("FB_EVENT slide speed=%.0f"), S);
 }
 
@@ -436,6 +484,8 @@ void AFirebirdCharacter::Hitstop(float RealSeconds)
 void AFirebirdCharacter::ShotFx(const FVector& Muzzle, const FVector& Impact, const FVector& Normal, bool bHitHollow)
 {
     const FVector Span = Impact - Muzzle;
+    FB::Sound(this, TEXT("spark_fire"), Muzzle, 0.8f);
+    if (!Normal.IsNearlyZero()) FB::Sound(this, bHitHollow ? TEXT("spark_hit_hollow") : TEXT("spark_hit_wall"), Impact, 0.7f);
     AFBFx::Spawn(GetWorld(), Muzzle + Span * 0.5f, Span.Rotation(), FVector(Span.Size(), 2.5f, 2.5f), FB::Aether, 30.f, 0.06f);
     if (Normal.IsNearlyZero()) return;
     if (bHitHollow) AFBFx::Burst(GetWorld(), Impact, 6, FLinearColor(1.f, 0.9f, 0.7f), 300.f, 0.25f, 4.f, 600.f, 12.f);
@@ -530,6 +580,7 @@ void AFirebirdCharacter::Punch()
     FistCooldown = FistInterval;
     FistAnim = 1.f;
     FistLight->SetIntensity(300.f);
+    FB::Sound(this, TEXT("fist_swing"), GetActorLocation());
     const FVector Fwd = GetControlRotation().Vector();
     if (AHollow* Target = ReleaseTarget())
     {
@@ -570,6 +621,7 @@ void AFirebirdCharacter::Server_Punch_Implementation(FVector_NetQuantize Eye, FV
 void AFirebirdCharacter::Multi_Punch_Implementation()
 {
     BodyPunch = 1.f;   // teammates see the fist go out
+    if (!IsLocallyControlled()) FB::Sound(this, TEXT("fist_swing"), GetActorLocation(), 0.7f);
 }
 
 void AFirebirdCharacter::Client_Released_Implementation(float Heal)
@@ -581,6 +633,7 @@ void AFirebirdCharacter::Client_Released_Implementation(float Heal)
     FovKick += 8.f;
     Shake += 0.6f;
     Hitstop(0.09f);
+    FB::Sound2D(this, TEXT("release"), 0.45f);   // the reward, close in your ears too
     UE_LOG(LogFirebird, Display, TEXT("FB_EVENT release_here heal=%.0f"), Heal);
 }
 
@@ -604,8 +657,11 @@ void AFirebirdCharacter::Client_Hurt_Implementation(float Amount, FVector_NetQua
     LastHurtFrom = From;
     HurtDirT = 1.f;
     Shake += 0.9f;
+    FB::Sound2D(this, TEXT("ember_hit_player"), 0.8f);
+    FB::Sound2D(this, TEXT("player_hurt"), 0.7f);
     if (bDead || Health <= 0.f)
     {
+        FB::Sound2D(this, TEXT("player_death"));
         if (bSliding) EndSlide();
         if (DashT > 0.f) EndDash();
     }
@@ -650,7 +706,17 @@ void AFirebirdCharacter::UpdateView(float DeltaSeconds)
     // eye height eases toward standing (160 cm) or crouched (70 cm) over the floor
     CamZ = FMath::FInterpTo(CamZ, bIsCrouched ? 24.f : 68.f, DeltaSeconds, 14.f);
     const float Speed = HorizontalSpeed();
-    if (M->IsMovingOnGround() && !bSliding && Speed > 100.f) BobPhase += DeltaSeconds * Speed / 95.f;
+    if (M->IsMovingOnGround() && !bSliding && Speed > 100.f)
+    {
+        // a footstep on every stride (each half bob cycle), rotating three
+        const int32 Before = FMath::FloorToInt(BobPhase / PI);
+        BobPhase += DeltaSeconds * Speed / 95.f;
+        if (FMath::FloorToInt(BobPhase / PI) != Before)
+        {
+            static const TCHAR* Steps[3] = { TEXT("footstep_1"), TEXT("footstep_2"), TEXT("footstep_3") };
+            FB::Sound(this, Steps[FMath::Abs(Before) % 3], GetActorLocation() - FVector(0, 0, 80), 0.5f);
+        }
+    }
     const float BobAmt = M->IsMovingOnGround() && !bSliding ? FMath::Clamp(Speed / RunSpeed, 0.f, 1.f) : 0.f;
     Shake *= FMath::Exp(-DeltaSeconds * 9.f);
     const FVector ShakeV = FMath::VRand() * Shake * 2.f;

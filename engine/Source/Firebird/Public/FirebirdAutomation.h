@@ -50,6 +50,19 @@ private:
     float FinishT = -1.f;
     bool bShotTaken = false;
     bool bDashedB = false;
+    // co-op scenario (-FBScenario=coop -FBPlayers=N): each process plays its own Firebird
+    void TickCoop(AFirebirdCharacter* P, float DeltaSeconds);
+    int32 WantPlayers = 1;
+    int32 MaxHollowsSeen = 0;
+    int32 MaxTeammatesSeen = 0;
+    float TeammateTravel = 0.f;
+    FVector LastTeammatePos = FVector::ZeroVector;
+    bool bTeammatePosSet = false;
+    float StrafeT = 0.f;
+    float StrafeDirX = 1.f;
+    int32 DownsSeen = 0;
+    bool bWasDead = false;
+    bool bFightShot = false;
     TArray<FString> Proofs;
     TArray<FString> Shots;
     bool bAllOk = true;

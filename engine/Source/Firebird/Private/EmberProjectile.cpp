@@ -1,6 +1,7 @@
 #include "EmberProjectile.h"
 #include "Firebird.h"
 #include "FBFx.h"
+#include "FBAudio.h"
 #include "FirebirdCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
@@ -54,6 +55,7 @@ void AEmberProjectile::BeginPlay()
     Super::BeginPlay();
     Mesh->SetStaticMesh(FB::Sphere());
     Mesh->SetMaterial(0, FB::MakeGlow(this, FB::Crimson, 14.f));
+    FB::Sound(this, TEXT("ember_throw"), GetActorLocation());
 }
 
 void AEmberProjectile::Multi_Impact_Implementation(FVector_NetQuantize At)

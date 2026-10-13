@@ -24,4 +24,10 @@ public:
     void Celebrate(const FString& Text, float Seconds = 8.f) { BigText = Text; BigT = Seconds; }
     FString BigText;
     float BigT = 0.f;
+
+    // the start menu: PLAY ALONE / HOST FOR FRIENDS / JOIN <room>. Its items and where they
+    // were drawn (for mouse clicks), rebuilt every frame from the rooms heard on the network.
+    struct FMenuItem { FString Label; FString Room; bool bEnabled = true; FString Why; FVector2D Min, Max; };
+    TArray<FMenuItem> MenuItems;
+    void DrawMenu(class UFirebirdSession* S);
 };
