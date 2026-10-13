@@ -129,3 +129,16 @@ can play it together on the home network.
   so it needs the packaged build through the arcade channel (pack, release,
   candidate, two-PC run, promote: GamesOS `docs/arcade/UPDATES.md`).
 - The hosting computer's firewall must allow UDP 27705 (Windows asks once).
+
+### Session 2, later: pushed, packed, handed to SKYBOX
+
+- Pushed: this branch (`claude/firebird-ue`) and ProductOS `master` (the arcade entry `firebird-coop`).
+- Repinned to `01977f0`: packs now carry `tools/arcade-boot-check.ps1`, which takes the updater's
+  `-Folder/-Root` and removes the `Saved` folder its own 640x360 run creates.
+- Candidate pack: draft release `firebird-coop-01977f0` on Traviseric/ProductOS. Unzipped fresh, it passed the boot check
+  and the two-copy arcade co-op test. WHITENOVA runs it through the arcade updater.
+- The arcade installer has a firewall row for UDP 27705.
+- **Firewall lesson:** hidden test runs left Windows **Block** rules for every Firebird.exe they ran, and a block beats
+  the allow. Loopback tests can't see it; only a second computer can. Check `Get-NetFirewallRule -DisplayName firebird.exe`.
+- What each computer still has to do lives in ProductOS `GamesOS/projects/firebird-coop/PIN.md` (Status). SKYBOX's
+  steps are in `GamesOS/projects/old-earth-world/living-quarry/BETWEEN-COMPUTERS.md`.
