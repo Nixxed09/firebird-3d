@@ -75,6 +75,25 @@ void AFirebirdHUD::Key(const FString& Cap, float X, float Y, float Alpha)
 void AFirebirdHUD::DrawControls(float X, float Y, float Alpha, bool bMouseRow)
 {
     struct FRow { const TCHAR* Cap; const TCHAR* What; };
+    const UFirebirdSession* Session = UFirebirdSession::Get(this);
+    if (Session && Session->bUsingPad)
+    {
+        static const FRow Pad[] = {
+            { TEXT("L STICK"), TEXT("Move") },          { TEXT("R STICK"), TEXT("Look and aim") },
+            { TEXT("A"), TEXT("Jump") },                { TEXT("RT"), TEXT("Shoot sparks") },
+            { TEXT("LB / RB"), TEXT("Dash (2 charges)") }, { TEXT("LT  or  X"), TEXT("Fist: free a cracked Hollow") },
+            { TEXT("B"), TEXT("Slide (while running)") },  { TEXT("START"), TEXT("Back to the menu") },
+            { TEXT("D-PAD < >"), TEXT("Look slower / faster") },
+        };
+        const int32 PadCount = UE_ARRAY_COUNT(Pad) - (bMouseRow ? 0 : 1);
+        for (int32 i = 0; i < PadCount; ++i)
+        {
+            const float Cx = X + (i % 2) * 280.f * Sc, Cy = Y + (i / 2) * 32.f * Sc;
+            Key(Pad[i].Cap, Cx, Cy, Alpha);
+            Txt(Pad[i].What, 15.f, FBUI::A(FBUI::Cream, Alpha), Cx + 108.f * Sc, Cy + 2.f * Sc, 0, false);
+        }
+        return;
+    }
     static const FRow Rows[] = {
         { TEXT("W A S D"), TEXT("Move") },          { TEXT("MOUSE"), TEXT("Look and aim") },
         { TEXT("SPACE"), TEXT("Jump") },            { TEXT("LEFT CLICK"), TEXT("Shoot sparks") },
@@ -191,7 +210,8 @@ void AFirebirdHUD::DrawHUD()
     }
     if (Rel)
     {
-        const FString Prompt = TEXT("RIGHT CLICK  -  RELEASE THE LIGHT");
+        const UFirebirdSession* Ses = UFirebirdSession::Get(this);
+        const FString Prompt = (Ses && Ses->bUsingPad) ? TEXT("LT  -  RELEASE THE LIGHT") : TEXT("RIGHT CLICK  -  RELEASE THE LIGHT");
         const float Pw = Measure(Prompt, 20.f).X + 36 * S;
         const float Pulse = 0.75f + 0.25f * FMath::Sin(GetWorld()->GetTimeSeconds() * 8.f);
         DrawRect(FLinearColor(0.06f, 0.03f, 0.01f, 0.8f), Cx - Pw * 0.5f, Cy + 34 * S, Pw, 38 * S);
@@ -220,7 +240,8 @@ void AFirebirdHUD::DrawHUD()
 
     const float X3 = X2 + 162 * S;
     Plate(X3, Y0, 136 * S, PlH);
-    Txt(TEXT("DASH  [SHIFT]"), 13.f, FBUI::Brass, X3 + 16 * S, Y0 + 8 * S);
+    const UFirebirdSession* PadSes = UFirebirdSession::Get(this);
+    Txt((PadSes && PadSes->bUsingPad) ? TEXT("DASH  [LB/RB]") : TEXT("DASH  [SHIFT]"), 13.f, FBUI::Brass, X3 + 16 * S, Y0 + 8 * S);
     for (int32 i = 0; i < P->DashCharges; ++i)
     {
         const float Fill = FMath::Clamp(P->DashCharge - i, 0.f, 1.f);
@@ -366,7 +387,7 @@ void AFirebirdHUD::DrawMenu(UFirebirdSession* S)
         const FLinearColor C = !It.bEnabled ? FLinearColor(0.5f, 0.45f, 0.4f) : bSel ? FLinearColor(1.f, 0.9f, 0.6f) : FBUI::Cream;
         Txt(It.Label, 24.f, C, L + 70 * Sc, Y + 5 * Sc);
         if (!It.Why.IsEmpty()) Txt(It.Why, 15.f, It.bEnabled ? FBUI::Brass : FLinearColor(1.f, 0.55f, 0.4f), L + 70 * Sc, Y + 37 * Sc, 0, false);
-        if (bSel) Txt(TEXT("ENTER"), 13.f, FBUI::Gold, L + Bw - 18 * Sc, Y + 23 * Sc, 2);
+        if (bSel) Txt(S->bUsingPad ? TEXT("PRESS A") : TEXT("ENTER"), 13.f, FBUI::Gold, L + Bw - 18 * Sc, Y + 23 * Sc, 2);
         Y += Bh + 10 * Sc;
         if (i == 1 && MenuItems.Num() == 2)
         {
@@ -380,7 +401,7 @@ void AFirebirdHUD::DrawMenu(UFirebirdSession* S)
     {
         const float Ry = Y + 6 * Sc, Rh = 46 * Sc;
         DrawRect(FBUI::A(FBUI::Plate2, 0.9f), L, Ry, Bw, Rh);
-        Txt(TEXT("MOUSE SENSITIVITY"), 17.f, FBUI::Cream, L + 20 * Sc, Ry + 12 * Sc);
+        Txt(S->bUsingPad ? TEXT("LOOK SENSITIVITY") : TEXT("MOUSE SENSITIVITY"), 17.f, FBUI::Cream, L + 20 * Sc, Ry + 12 * Sc);
         const float Bs = 34 * Sc, Vx = L + 250 * Sc, By = Ry + 6 * Sc;
         auto Btn = [&](const TCHAR* Cap, float X, FVector2D* Out)
         {
@@ -392,7 +413,7 @@ void AFirebirdHUD::DrawMenu(UFirebirdSession* S)
         Btn(TEXT("-"), Vx, SensMinus);
         Txt(S->SensitivityText(), 22.f, FBUI::Gold, Vx + Bs + 34 * Sc, Ry + 9 * Sc, 1);
         Btn(TEXT("+"), Vx + Bs + 68 * Sc, SensPlus);
-        Txt(TEXT("or the arrow keys"), 14.f, FBUI::Brass, Vx + 2 * Bs + 86 * Sc, Ry + 14 * Sc, 0, false);
+        Txt(S->bUsingPad ? TEXT("D-pad left / right") : TEXT("or the arrow keys"), 14.f, FBUI::Brass, Vx + 2 * Bs + 86 * Sc, Ry + 14 * Sc, 0, false);
         Y = Ry + Rh;
     }
 
@@ -400,5 +421,6 @@ void AFirebirdHUD::DrawMenu(UFirebirdSession* S)
     const float Hy = FMath::Max(Y + 44 * Sc, H - 210 * Sc);
     Txt(TEXT("HOW TO PLAY"), 15.f, FBUI::Ember, L, Hy - 30 * Sc);
     DrawControls(L, Hy, 1.f);
-    Txt(TEXT("Number keys, arrows + Enter, or click.   Esc quits.        A Nix Games production by Phoenix"), 13.f, FLinearColor(0.62f, 0.52f, 0.42f), L, H - 26 * Sc, 0, false);
+    Txt(S->bUsingPad ? TEXT("D-pad or left stick to choose, A to start.        A Nix Games production by Phoenix")
+                     : TEXT("Number keys, arrows + Enter, or click. A controller works too.   Esc quits.        A Nix Games production by Phoenix"), 13.f, FLinearColor(0.62f, 0.52f, 0.42f), L, H - 26 * Sc, 0, false);
 }

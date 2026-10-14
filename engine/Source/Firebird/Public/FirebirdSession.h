@@ -51,6 +51,10 @@ public:
     void AdjustSensitivity(int32 Steps);
     FString SensitivityText() const { return FString::Printf(TEXT("%.1f"), MouseSensitivity); }
 
+    // true while the player is using a game controller (the last input came from one): the menu and the
+    // controls card then show the controller's buttons instead of the keyboard's
+    bool bUsingPad = false;
+
     FString Status;         // a line for the menu: joining..., or a refusal exactly as the contract words it
     FString BuildId;
     int32 SelectedItem = 0;

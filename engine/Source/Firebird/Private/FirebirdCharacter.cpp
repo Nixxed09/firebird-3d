@@ -184,8 +184,10 @@ void AFirebirdCharacter::ReadInput()
         int32 Pick = -1;
         static const FKey Numbers[9] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine };
         for (int32 i = 0; i < FMath::Min(N, 9); ++i) if (PC->WasInputKeyJustPressed(Numbers[i])) Pick = i;
-        if (PC->WasInputKeyJustPressed(EKeys::Down) || PC->WasInputKeyJustPressed(EKeys::S)) { S->SelectedItem = (S->SelectedItem + 1) % N; FB::Sound2D(this, TEXT("ui_tick")); }
-        if (PC->WasInputKeyJustPressed(EKeys::Up) || PC->WasInputKeyJustPressed(EKeys::W)) { S->SelectedItem = (S->SelectedItem + N - 1) % N; FB::Sound2D(this, TEXT("ui_tick")); }
+        NotePadUse(PC, S);
+        auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
+        if (Pressed({ EKeys::Down, EKeys::S, EKeys::Gamepad_DPad_Down, EKeys::Gamepad_LeftStick_Down })) { S->SelectedItem = (S->SelectedItem + 1) % N; FB::Sound2D(this, TEXT("ui_tick")); }
+        if (Pressed({ EKeys::Up, EKeys::W, EKeys::Gamepad_DPad_Up, EKeys::Gamepad_LeftStick_Up })) { S->SelectedItem = (S->SelectedItem + N - 1) % N; FB::Sound2D(this, TEXT("ui_tick")); }
         float Mx = 0.f, My = 0.f;
         if (PC->GetMousePosition(Mx, My))
             for (int32 i = 0; i < N; ++i)
@@ -198,7 +200,8 @@ void AFirebirdCharacter::ReadInput()
                 }
             }
         // mouse sensitivity: left/right arrows, or the - and + buttons beside it
-        int32 SensSteps = (PC->WasInputKeyJustPressed(EKeys::Right) ? 1 : 0) - (PC->WasInputKeyJustPressed(EKeys::Left) ? 1 : 0);
+        int32 SensSteps = (Pressed({ EKeys::Right, EKeys::Gamepad_DPad_Right, EKeys::Gamepad_LeftStick_Right }) ? 1 : 0)
+                        - (Pressed({ EKeys::Left, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_LeftStick_Left }) ? 1 : 0);
         if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton) && Hud)
         {
             auto In = [Mx, My](const FVector2D& Min, const FVector2D& Max) { return Mx >= Min.X && Mx <= Max.X && My >= Min.Y && My <= Max.Y; };
@@ -206,7 +209,7 @@ void AFirebirdCharacter::ReadInput()
             if (In(Hud->SensPlus[0], Hud->SensPlus[1])) SensSteps = 1;
         }
         if (SensSteps != 0) { S->AdjustSensitivity(SensSteps); FB::Sound2D(this, TEXT("ui_tick")); }
-        if (PC->WasInputKeyJustPressed(EKeys::Enter) || PC->WasInputKeyJustPressed(EKeys::SpaceBar)) Pick = S->SelectedItem;
+        if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom })) Pick = S->SelectedItem;
         if (PC->WasInputKeyJustPressed(EKeys::Escape)) { PC->ConsoleCommand(TEXT("quit")); return; }
         if (Pick >= 0 && Pick < N)
         {
@@ -220,34 +223,82 @@ void AFirebirdCharacter::ReadInput()
         return;
     }
     FFirebirdInput I;
+    NotePadUse(PC, S);
     I.Move.Y = (PC->IsInputKeyDown(EKeys::W) ? 1.f : 0.f) - (PC->IsInputKeyDown(EKeys::S) ? 1.f : 0.f);
     I.Move.X = (PC->IsInputKeyDown(EKeys::D) ? 1.f : 0.f) - (PC->IsInputKeyDown(EKeys::A) ? 1.f : 0.f);
+    // a controller: left stick moves (with a dead zone), right stick looks (curved for fine aim)
+    const FVector2D LStick = PadStick(PC, EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY);
+    if (!LStick.IsNearlyZero()) { I.Move.X = FMath::Clamp(I.Move.X + LStick.X, -1.f, 1.f); I.Move.Y = FMath::Clamp(I.Move.Y + LStick.Y, -1.f, 1.f); }
     float Mx = 0.f, My = 0.f;
     PC->GetInputMouseDelta(Mx, My);
     // [ and ] change the mouse sensitivity during play (saved; also on the start menu)
     if (S)
     {
-        const int32 Steps = (PC->WasInputKeyJustPressed(EKeys::RightBracket) ? 1 : 0) - (PC->WasInputKeyJustPressed(EKeys::LeftBracket) ? 1 : 0);
+        const int32 Steps = (PC->WasInputKeyJustPressed(EKeys::RightBracket) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right) ? 1 : 0)
+                          - (PC->WasInputKeyJustPressed(EKeys::LeftBracket) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left) ? 1 : 0);
         if (Steps != 0)
         {
             S->AdjustSensitivity(Steps);
             if (AFirebirdHUD* Hud = Cast<AFirebirdHUD>(PC->GetHUD()))
-                Hud->Say(FString::Printf(TEXT("MOUSE: SENSITIVITY %s   ( [ slower   ] faster )"), *S->SensitivityText()), 2.5f, FLinearColor(1.f, 0.78f, 0.35f));
+                Hud->Say(S->bUsingPad
+                    ? FString::Printf(TEXT("LOOK SENSITIVITY %s   ( D-PAD LEFT slower   RIGHT faster )"), *S->SensitivityText())
+                    : FString::Printf(TEXT("MOUSE: SENSITIVITY %s   ( [ slower   ] faster )"), *S->SensitivityText()), 2.5f, FLinearColor(1.f, 0.78f, 0.35f));
         }
     }
     const float Sens = 0.11f * (S ? S->MouseSensitivity : 1.f);
     I.Look = FVector2D(Mx * Sens, My * Sens);
-    I.bJump = PC->WasInputKeyJustPressed(EKeys::SpaceBar);
-    I.bDash = PC->WasInputKeyJustPressed(EKeys::LeftShift);
-    I.bCrouchHeld = PC->IsInputKeyDown(EKeys::LeftControl) || PC->IsInputKeyDown(EKeys::C);
-    I.bCrouchPressed = PC->WasInputKeyJustPressed(EKeys::LeftControl) || PC->WasInputKeyJustPressed(EKeys::C);
-    I.bFireHeld = PC->IsInputKeyDown(EKeys::LeftMouseButton);
-    I.bFist = PC->WasInputKeyJustPressed(EKeys::F) || PC->WasInputKeyJustPressed(EKeys::RightMouseButton);
+    const FVector2D RStick = PadStick(PC, EKeys::Gamepad_RightX, EKeys::Gamepad_RightY);
+    if (!RStick.IsNearlyZero())
+    {
+        // degrees per second at full tilt (x the same sensitivity setting); squared so small tilts aim finely
+        const float Dt = GetWorld()->GetDeltaSeconds(), K = S ? S->MouseSensitivity : 1.f;
+        const FVector2D Curved(RStick.X * FMath::Abs(RStick.X), RStick.Y * FMath::Abs(RStick.Y));
+        I.Look += FVector2D(Curved.X * PadYawSpeed, Curved.Y * PadPitchSpeed) * K * Dt;
+    }
+    auto Down = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->IsInputKeyDown(K)) return true; return false; };
+    auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
+    // the controller: A jump, LB / RB dash, B or L3 slide, RT shoot, LT or X fist, START menu
+    I.bJump = Pressed({ EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom });
+    I.bDash = Pressed({ EKeys::LeftShift, EKeys::Gamepad_LeftShoulder, EKeys::Gamepad_RightShoulder });
+    I.bCrouchHeld = Down({ EKeys::LeftControl, EKeys::C, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_LeftThumbstick });
+    I.bCrouchPressed = Pressed({ EKeys::LeftControl, EKeys::C, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_LeftThumbstick });
+    I.bFireHeld = Down({ EKeys::LeftMouseButton, EKeys::Gamepad_RightTrigger }) || PC->GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.35f;
+    I.bFist = Pressed({ EKeys::F, EKeys::RightMouseButton, EKeys::Gamepad_LeftTrigger, EKeys::Gamepad_FaceButton_Left });
     Input = I;
     // R: run the course again (playing alone); Esc: leave
     if (PC->WasInputKeyJustPressed(EKeys::R) && GetNetMode() == NM_Standalone) PC->RestartLevel();
     // Esc: back to the start menu (leaving a hosted or joined game); Esc there quits
-    if (PC->WasInputKeyJustPressed(EKeys::Escape) && S) S->BackToMenu(FString());
+    if ((PC->WasInputKeyJustPressed(EKeys::Escape) || PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Right)) && S) S->BackToMenu(FString());
+}
+
+// a stick's two axes with a radial dead zone, rescaled so just past the dead zone is a small value
+FVector2D AFirebirdCharacter::PadStick(APlayerController* PC, const FKey& X, const FKey& Y)
+{
+    FVector2D V(PC->GetInputAnalogKeyState(X), PC->GetInputAnalogKeyState(Y));
+    const float Len = V.Size(), Dead = 0.18f;
+    if (Len < Dead) return FVector2D::ZeroVector;
+    return V / Len * FMath::Min(1.f, (Len - Dead) / (1.f - Dead));
+}
+
+// which device the player is using now: a controller once any of its sticks, triggers or buttons is used;
+// back to keyboard and mouse once the mouse moves or a key is pressed. The HUD shows that device's buttons.
+void AFirebirdCharacter::NotePadUse(APlayerController* PC, UFirebirdSession* S)
+{
+    if (!S) return;
+    static const FKey PadButtons[] = { EKeys::Gamepad_FaceButton_Bottom, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_FaceButton_Left,
+        EKeys::Gamepad_FaceButton_Top, EKeys::Gamepad_LeftShoulder, EKeys::Gamepad_RightShoulder, EKeys::Gamepad_LeftTrigger,
+        EKeys::Gamepad_RightTrigger, EKeys::Gamepad_DPad_Up, EKeys::Gamepad_DPad_Down, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_DPad_Right,
+        EKeys::Gamepad_Special_Right, EKeys::Gamepad_Special_Left, EKeys::Gamepad_LeftThumbstick, EKeys::Gamepad_RightThumbstick };
+    bool bPad = !PadStick(PC, EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY).IsNearlyZero() || !PadStick(PC, EKeys::Gamepad_RightX, EKeys::Gamepad_RightY).IsNearlyZero();
+    for (const FKey& K : PadButtons) bPad = bPad || PC->WasInputKeyJustPressed(K);
+    float Mx = 0.f, My = 0.f;
+    PC->GetInputMouseDelta(Mx, My);
+    static const FKey KeyboardMouse[] = { EKeys::W, EKeys::A, EKeys::S, EKeys::D, EKeys::SpaceBar, EKeys::LeftShift, EKeys::LeftMouseButton,
+        EKeys::RightMouseButton, EKeys::Enter, EKeys::Up, EKeys::Down, EKeys::Escape };
+    bool bKeys = FMath::Abs(Mx) + FMath::Abs(My) > 2.f;
+    for (const FKey& K : KeyboardMouse) bKeys = bKeys || PC->WasInputKeyJustPressed(K);
+    if (bPad) S->bUsingPad = true;
+    else if (bKeys) S->bUsingPad = false;
 }
 
 // ---- the frame ------------------------------------------------------------------------------

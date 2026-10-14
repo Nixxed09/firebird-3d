@@ -116,6 +116,11 @@ public:
     // a cracked Hollow the fist can release from here, looking that way
     AHollow* ReleaseTarget() const;
     AHollow* ReleaseTargetFrom(const FVector& From, const FVector& Look) const;
+    // a game controller: stick dead zone, which device is in use, right-stick look speed (degrees/second at full tilt)
+    static FVector2D PadStick(class APlayerController* PC, const FKey& X, const FKey& Y);
+    void NotePadUse(class APlayerController* PC, class UFirebirdSession* S);
+    static constexpr float PadYawSpeed = 220.f;
+    static constexpr float PadPitchSpeed = 150.f;
     float HorizontalSpeed() const;
     // the owning computer puts its Firebird somewhere (movement is owned there)
     void TeleportOwned(const FVector& To, float Yaw);

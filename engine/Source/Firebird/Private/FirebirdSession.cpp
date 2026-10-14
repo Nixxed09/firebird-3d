@@ -52,6 +52,13 @@ static FAutoConsoleCommandWithWorldAndArgs GSensitivityCmd(TEXT("fb.MouseSensiti
         UE_LOG(LogTemp, Display, TEXT("FB_SENSITIVITY %s"), *S->SensitivityText());
     }));
 
+// fb.ControllerHints <0|1>: show the controller's buttons (or the keyboard's) on the menu and controls card
+static FAutoConsoleCommandWithWorldAndArgs GPadHintsCmd(TEXT("fb.ControllerHints"), TEXT("Show controller (1) or keyboard (0) hints."),
+    FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+    {
+        if (UFirebirdSession* S = UFirebirdSession::Get(World)) S->bUsingPad = Args.Num() == 0 || FCString::Atoi(*Args[0]) != 0;
+    }));
+
 void UFirebirdSession::Initialize(FSubsystemCollectionBase& Collection)
 {
     Collection.InitializeDependency(UFirebirdArcadeLan::StaticClass());
