@@ -4,10 +4,11 @@
 #include "GameFramework/HUD.h"
 #include "FirebirdHUD.generated.h"
 
-// The slice HUD (placeholder skin, readable first): crosshair with hit and
-// break markers, health, sparks, dash pips, the RELEASE prompt over a cracked
-// Hollow, a hurt-direction wedge and the death card. Soot and brass with the
-// cover's orange rim, per STYLE_GUIDE; the final skin comes with the art pass.
+// The slice HUD, readable from the couch first: crosshair with hit and break markers,
+// health and sparks plates bottom-left, dash pips, the wave plate bottom-right, the
+// RELEASE prompt over a cracked Hollow, Riley's radio at the top, a controls card for
+// the first seconds, the knocked-down card and ARENA CLEAR. Soot and brass with the
+// cover's orange rim (STYLE_GUIDE). Text is drawn at its real size (no scaled bitmaps).
 UCLASS()
 class FIREBIRD_API AFirebirdHUD : public AHUD
 {
@@ -30,4 +31,17 @@ public:
     struct FMenuItem { FString Label; FString Room; bool bEnabled = true; FString Why; FVector2D Min, Max; };
     TArray<FMenuItem> MenuItems;
     void DrawMenu(class UFirebirdSession* S);
+
+private:
+    // text at a real size (Slate points at 720p, scaled to the screen); Align 0 left, 1 centre, 2 right
+    void Txt(const FString& T, float Size, const FLinearColor& C, float X, float Y, int32 Align = 0, bool bBold = true, bool bShadow = true);
+    FVector2D Measure(const FString& T, float Size, bool bBold = true) const;
+    void Plate(float X, float Y, float W, float H, float Alpha = 0.82f, bool bRim = true);
+    void Key(const FString& Cap, float X, float Y, float Alpha = 1.f);   // a keycap
+    void DrawControls(float X, float Y, float Alpha);
+
+    float Sc = 1.f;              // screen height / 720
+    float PlayT = 0.f;           // seconds since the menu last closed (the controls card fades out)
+    float CtlFade = 0.f;         // the controls card, eased in and out
+    bool bHidPawnForMenu = false;
 };
