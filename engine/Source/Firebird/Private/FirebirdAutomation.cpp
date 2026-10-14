@@ -16,8 +16,63 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "UnrealClient.h"
+#include "Engine/GameViewportClient.h"
+#include "Slate/SceneViewport.h"
+#include "Input/Events.h"
 
 static bool GRanThisProcess = false;
+
+// Inject device-space stick events through the actual viewport (including its
+// right-Y inversion), then let normal ReadInput and character ticks respond.
+void UFirebirdAutomation::TickController(AFirebirdCharacter* P)
+{
+    if (TotalT < 1.f) return;
+    APlayerController* PC = Cast<APlayerController>(P->GetController());
+    UGameViewportClient* Client = GetWorld()->GetGameViewport();
+    FSceneViewport* Viewport = Client ? Client->GetGameViewport() : nullptr;
+    if (!PC || !Viewport)
+    {
+        Proof(TEXT("controller_viewport"), false, TEXT("No local player viewport"));
+        Finish();
+        return;
+    }
+    struct FStickCase { FKey Key; float Value; const TCHAR* Name; bool bMove; };
+    const FStickCase Cases[] = {
+        { EKeys::Gamepad_RightY,  0.8f, TEXT("right_stick_up_looks_up"), false },
+        { EKeys::Gamepad_RightY, -0.8f, TEXT("right_stick_down_looks_down"), false },
+        { EKeys::Gamepad_RightX,  0.8f, TEXT("right_stick_right_looks_right"), false },
+        { EKeys::Gamepad_RightX, -0.8f, TEXT("right_stick_left_looks_left"), false },
+        { EKeys::Gamepad_LeftY,   0.8f, TEXT("left_stick_up_moves_forward"), true },
+        { EKeys::Gamepad_LeftY,  -0.8f, TEXT("left_stick_down_moves_backward"), true }
+    };
+    if (!bControllerCaseStarted)
+    {
+        ControllerStart = P->GetActorLocation();
+        PC->SetControlRotation(FRotator::ZeroRotator);
+        P->GetCharacterMovement()->StopMovementImmediately();
+        StageT = 0.f;
+        bControllerCaseStarted = true;
+    }
+    P->bAutoDriven = false;
+    const FStickCase& Test = Cases[Stage];
+    for (const FKey& Key : { EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY, EKeys::Gamepad_RightX, EKeys::Gamepad_RightY })
+    {
+        const float Value = StageT < 0.4f && Key == Test.Key ? Test.Value : 0.f;
+        Viewport->OnAnalogValueChanged(FGeometry(), FAnalogInputEvent(Key, FModifierKeysState(), 0u, false, 0, 0, Value));
+    }
+    if (StageT < 0.4f) return;
+    const FRotator Rotation = PC->GetControlRotation();
+    const float Actual = Test.bMove ? (P->GetActorLocation() - ControllerStart).X
+        : FRotator::NormalizeAxis(Test.Key == EKeys::Gamepad_RightY ? Rotation.Pitch : Rotation.Yaw);
+    Proof(Test.Name, Actual * FMath::Sign(Test.Value) > (Test.bMove ? 10.f : 1.f), FString::Printf(TEXT("observed %.2f"), Actual));
+    bControllerCaseStarted = false;
+    if (++Stage == UE_ARRAY_COUNT(Cases))
+    {
+        P->bAutoDriven = true;
+        P->Input = FFirebirdInput();
+        Finish();
+    }
+}
 
 void UFirebirdAutomation::OnWorldBeginPlay(UWorld& InWorld)
 {
@@ -113,6 +168,11 @@ void UFirebirdAutomation::Tick(float DeltaSeconds)
         return;
     }
     P->bAutoDriven = true;
+    if (Scenario == TEXT("controller"))
+    {
+        TickController(P);
+        return;
+    }
     // the start menu, as a kid sees it: a friend's room is listed, picking it joins
     if (Scenario == TEXT("menu"))
     {

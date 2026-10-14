@@ -253,7 +253,9 @@ void AFirebirdCharacter::ReadInput()
         // degrees per second at full tilt (x the same sensitivity setting); squared so small tilts aim finely
         const float Dt = GetWorld()->GetDeltaSeconds(), K = S ? S->MouseSensitivity : 1.f;
         const FVector2D Curved(RStick.X * FMath::Abs(RStick.X), RStick.Y * FMath::Abs(RStick.Y));
-        I.Look += FVector2D(Curved.X * PadYawSpeed, Curved.Y * PadPitchSpeed) * K * Dt;
+        // FSceneViewport negates Gamepad_RightY before PlayerInput receives it.
+        // Undo that viewport convention: stick up must increase our direct pitch.
+        I.Look += FVector2D(Curved.X * PadYawSpeed, -Curved.Y * PadPitchSpeed) * K * Dt;
     }
     auto Down = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->IsInputKeyDown(K)) return true; return false; };
     auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };

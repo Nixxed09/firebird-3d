@@ -52,6 +52,9 @@ private:
     bool bDashedB = false;
     // co-op scenario (-FBScenario=coop -FBPlayers=N): each process plays its own Firebird
     void TickCoop(AFirebirdCharacter* P, float DeltaSeconds);
+    void TickController(AFirebirdCharacter* P);
+    bool bControllerCaseStarted = false;
+    FVector ControllerStart = FVector::ZeroVector;
     int32 WantPlayers = 1;
     int32 MaxHollowsSeen = 0;
     int32 MaxTeammatesSeen = 0;
