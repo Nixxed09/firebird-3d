@@ -5,7 +5,8 @@ $exe = Join-Path $GameDir 'Firebird.exe'
 if (-not (Test-Path -LiteralPath $exe)) { throw "No packaged game: $exe" }
 $out = Join-Path $FBRoot ('captures\ue\controller-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 New-Item -ItemType Directory -Force -Path $out | Out-Null
-$process = Start-Process -FilePath $exe -ArgumentList @('-windowed','-ResX=640','-ResY=360','-nosound','-FBAuto','-FBScenario=controller',('-FBOut="' + $out + '"'),('-abslog="' + (Join-Path $out 'game.log') + '"')) -WindowStyle Hidden -PassThru
+# Ignore physical devices while injecting deterministic device-space viewport events.
+$process = Start-Process -FilePath $exe -ArgumentList @('-windowed','-ResX=640','-ResY=360','-nosound','-NoGamepad','-FBAuto','-FBScenario=controller',('-FBOut="' + $out + '"'),('-abslog="' + (Join-Path $out 'game.log') + '"')) -WindowStyle Hidden -PassThru
 try {
   $null = $process.Handle
   if (-not $process.WaitForExit(90000)) { $process.Kill(); throw "Controller check timed out; see $out" }
