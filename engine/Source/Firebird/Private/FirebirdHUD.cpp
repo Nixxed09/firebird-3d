@@ -72,7 +72,7 @@ void AFirebirdHUD::Key(const FString& Cap, float X, float Y, float Alpha)
 }
 
 // the controls, keycap and what it does, in two columns
-void AFirebirdHUD::DrawControls(float X, float Y, float Alpha)
+void AFirebirdHUD::DrawControls(float X, float Y, float Alpha, bool bMouseRow)
 {
     struct FRow { const TCHAR* Cap; const TCHAR* What; };
     static const FRow Rows[] = {
@@ -80,8 +80,10 @@ void AFirebirdHUD::DrawControls(float X, float Y, float Alpha)
         { TEXT("SPACE"), TEXT("Jump") },            { TEXT("LEFT CLICK"), TEXT("Shoot sparks") },
         { TEXT("SHIFT"), TEXT("Dash (2 charges)") },{ TEXT("RIGHT CLICK"), TEXT("Fist: free a cracked Hollow") },
         { TEXT("CTRL"), TEXT("Slide (while running)") }, { TEXT("ESC"), TEXT("Back to the menu") },
+        { TEXT("[   ]"), TEXT("Mouse slower / faster") },
     };
-    for (int32 i = 0; i < UE_ARRAY_COUNT(Rows); ++i)
+    const int32 Count = UE_ARRAY_COUNT(Rows) - (bMouseRow ? 0 : 1);
+    for (int32 i = 0; i < Count; ++i)
     {
         const float Cx = X + (i % 2) * 280.f * Sc, Cy = Y + (i / 2) * 32.f * Sc;
         Key(Rows[i].Cap, Cx, Cy, Alpha);
@@ -305,10 +307,10 @@ void AFirebirdHUD::DrawHUD()
     const float CtlA = CtlFade;
     if (CtlA > 0.02f)
     {
-        const float Cw = 620 * S, Cxl = M, Cyt = H - M - PlH - 162 * S;
-        DrawRect(FBUI::A(FBUI::Soot, 0.72f * CtlA), Cxl, Cyt, Cw, 150 * S);
+        const float Cw = 620 * S, Cxl = M, Cyt = H - M - PlH - 194 * S;
+        DrawRect(FBUI::A(FBUI::Soot, 0.72f * CtlA), Cxl, Cyt, Cw, 182 * S);
         DrawRect(FBUI::A(FBUI::Ember, CtlA), Cxl, Cyt, Cw, 2 * S);
-        DrawControls(Cxl + 20 * S, Cyt + 14 * S, CtlA);
+        DrawControls(Cxl + 20 * S, Cyt + 14 * S, CtlA, true);
     }
 }
 
@@ -348,7 +350,7 @@ void AFirebirdHUD::DrawMenu(UFirebirdSession* S)
     }
     S->SelectedItem = FMath::Clamp(S->SelectedItem, 0, MenuItems.Num() - 1);
     float Y = 214 * Sc;
-    const float Bw = Pw - L - 48 * Sc, Bh = 70 * Sc;
+    const float Bw = Pw - L - 48 * Sc, Bh = 62 * Sc;
     for (int32 i = 0; i < MenuItems.Num(); ++i)
     {
         FMenuItem& It = MenuItems[i];
@@ -359,13 +361,13 @@ void AFirebirdHUD::DrawMenu(UFirebirdSession* S)
         DrawRect(bSel ? FBUI::Ember : FLinearColor(0.35f, 0.2f, 0.1f), L, Y, 5 * Sc, Bh);
         if (bSel) { DrawRect(FBUI::A(FBUI::Ember, 0.7f), L, Y, Bw, 2 * Sc); DrawRect(FBUI::A(FBUI::Ember, 0.7f), L, Y + Bh - 2 * Sc, Bw, 2 * Sc); }
         // the number key, as a cap
-        DrawRect(bSel ? FBUI::Gold : FLinearColor(0.55f, 0.42f, 0.28f), L + 20 * Sc, Y + 19 * Sc, 32 * Sc, 32 * Sc);
-        Txt(FString::FromInt(i + 1), 18.f, FLinearColor(0.1f, 0.04f, 0.01f), L + 36 * Sc, Y + 22 * Sc, 1, true, false);
+        DrawRect(bSel ? FBUI::Gold : FLinearColor(0.55f, 0.42f, 0.28f), L + 20 * Sc, Y + 15 * Sc, 32 * Sc, 32 * Sc);
+        Txt(FString::FromInt(i + 1), 18.f, FLinearColor(0.1f, 0.04f, 0.01f), L + 36 * Sc, Y + 18 * Sc, 1, true, false);
         const FLinearColor C = !It.bEnabled ? FLinearColor(0.5f, 0.45f, 0.4f) : bSel ? FLinearColor(1.f, 0.9f, 0.6f) : FBUI::Cream;
-        Txt(It.Label, 24.f, C, L + 70 * Sc, Y + 8 * Sc);
-        if (!It.Why.IsEmpty()) Txt(It.Why, 15.f, It.bEnabled ? FBUI::Brass : FLinearColor(1.f, 0.55f, 0.4f), L + 70 * Sc, Y + 42 * Sc, 0, false);
-        if (bSel) Txt(TEXT("ENTER"), 13.f, FBUI::Gold, L + Bw - 18 * Sc, Y + 27 * Sc, 2);
-        Y += Bh + 12 * Sc;
+        Txt(It.Label, 24.f, C, L + 70 * Sc, Y + 5 * Sc);
+        if (!It.Why.IsEmpty()) Txt(It.Why, 15.f, It.bEnabled ? FBUI::Brass : FLinearColor(1.f, 0.55f, 0.4f), L + 70 * Sc, Y + 37 * Sc, 0, false);
+        if (bSel) Txt(TEXT("ENTER"), 13.f, FBUI::Gold, L + Bw - 18 * Sc, Y + 23 * Sc, 2);
+        Y += Bh + 10 * Sc;
         if (i == 1 && MenuItems.Num() == 2)
         {
             Txt(TEXT("No friends' games on the network yet. When someone hosts, it shows up here."), 15.f, FLinearColor(0.75f, 0.65f, 0.55f), L + 4 * Sc, Y + 2 * Sc, 0, false);
@@ -374,9 +376,29 @@ void AFirebirdHUD::DrawMenu(UFirebirdSession* S)
     }
     if (!S->Status.IsEmpty()) { Txt(S->Status, 18.f, FLinearColor(1.f, 0.65f, 0.35f), L, Y + 4 * Sc); Y += 34 * Sc; }
 
+    // settings: mouse sensitivity, with - and + buttons (left/right arrows too)
+    {
+        const float Ry = Y + 6 * Sc, Rh = 46 * Sc;
+        DrawRect(FBUI::A(FBUI::Plate2, 0.9f), L, Ry, Bw, Rh);
+        Txt(TEXT("MOUSE SENSITIVITY"), 17.f, FBUI::Cream, L + 20 * Sc, Ry + 12 * Sc);
+        const float Bs = 34 * Sc, Vx = L + 250 * Sc, By = Ry + 6 * Sc;
+        auto Btn = [&](const TCHAR* Cap, float X, FVector2D* Out)
+        {
+            DrawRect(FLinearColor(0.93f, 0.85f, 0.70f, 0.95f), X, By, Bs, Bs);
+            DrawRect(FLinearColor(0.55f, 0.40f, 0.25f, 0.95f), X, By + Bs - 3 * Sc, Bs, 3 * Sc);
+            Txt(Cap, 20.f, FLinearColor(0.12f, 0.06f, 0.03f), X + Bs * 0.5f, By + 3 * Sc, 1, true, false);
+            Out[0] = FVector2D(X, By); Out[1] = FVector2D(X + Bs, By + Bs);
+        };
+        Btn(TEXT("-"), Vx, SensMinus);
+        Txt(S->SensitivityText(), 22.f, FBUI::Gold, Vx + Bs + 34 * Sc, Ry + 9 * Sc, 1);
+        Btn(TEXT("+"), Vx + Bs + 68 * Sc, SensPlus);
+        Txt(TEXT("or the arrow keys"), 14.f, FBUI::Brass, Vx + 2 * Bs + 86 * Sc, Ry + 14 * Sc, 0, false);
+        Y = Ry + Rh;
+    }
+
     // how to play, always there (below the list when friends' games make it long)
     const float Hy = FMath::Max(Y + 44 * Sc, H - 210 * Sc);
     Txt(TEXT("HOW TO PLAY"), 15.f, FBUI::Ember, L, Hy - 30 * Sc);
     DrawControls(L, Hy, 1.f);
-    Txt(TEXT("Number keys, arrows + Enter, or click.   Esc quits.        A Nix Games production by Phoenix"), 13.f, FLinearColor(0.62f, 0.52f, 0.42f), L, H - 40 * Sc, 0, false);
+    Txt(TEXT("Number keys, arrows + Enter, or click.   Esc quits.        A Nix Games production by Phoenix"), 13.f, FLinearColor(0.62f, 0.52f, 0.42f), L, H - 26 * Sc, 0, false);
 }

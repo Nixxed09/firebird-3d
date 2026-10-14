@@ -10,6 +10,9 @@
 #include "HAL/PlatformMisc.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/CommandLine.h"
+#include "Misc/FileHelper.h"
+#include "HAL/IConsoleManager.h"
+#include "Misc/Paths.h"
 
 const TCHAR* UFirebirdSession::GameId = TEXT("firebird-coop");
 
@@ -25,10 +28,43 @@ UFirebirdArcadeLan* UFirebirdSession::Lan() const
     return GetGameInstance() ? GetGameInstance()->GetSubsystem<UFirebirdArcadeLan>() : nullptr;
 }
 
+static FString SettingsPath()
+{
+    return FPaths::Combine(FPlatformProcess::UserSettingsDir(), TEXT("FirebirdCoop"), TEXT("settings.ini"));
+}
+
+void UFirebirdSession::AdjustSensitivity(int32 Steps)
+{
+    const float Next = FMath::Clamp(FMath::RoundToFloat((MouseSensitivity + Steps * SensitivityStep) * 10.f) / 10.f, SensitivityMin, SensitivityMax);
+    if (FMath::IsNearlyEqual(Next, MouseSensitivity)) return;
+    MouseSensitivity = Next;
+    FFileHelper::SaveStringToFile(FString::Printf(TEXT("mouse_sensitivity=%.1f\r\n"), MouseSensitivity), *SettingsPath());
+}
+
+// fb.MouseSensitivity <0.2..3.0>: set it from the console or -ExecCmds (the same path as the menu and [ ])
+static FAutoConsoleCommandWithWorldAndArgs GSensitivityCmd(TEXT("fb.MouseSensitivity"), TEXT("Set the mouse sensitivity (0.2 to 3.0) and save it."),
+    FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+    {
+        UFirebirdSession* S = UFirebirdSession::Get(World);
+        if (!S) return;
+        if (Args.Num() > 0)
+            S->AdjustSensitivity(FMath::RoundToInt((FCString::Atof(*Args[0]) - S->MouseSensitivity) / UFirebirdSession::SensitivityStep));
+        UE_LOG(LogTemp, Display, TEXT("FB_SENSITIVITY %s"), *S->SensitivityText());
+    }));
+
 void UFirebirdSession::Initialize(FSubsystemCollectionBase& Collection)
 {
     Collection.InitializeDependency(UFirebirdArcadeLan::StaticClass());
     Super::Initialize(Collection);
+
+    // the player's own settings (mouse sensitivity), kept outside the game folder
+    FString Saved;
+    if (FFileHelper::LoadFileToString(Saved, *SettingsPath()))
+    {
+        FString Value;
+        if (FParse::Value(*Saved, TEXT("mouse_sensitivity="), Value))
+            MouseSensitivity = FMath::Clamp(FCString::Atof(*Value), SensitivityMin, SensitivityMax);
+    }
 
     // which copy this is: the same string on two computers exactly when the copy is the same
     int64 Order = 0;

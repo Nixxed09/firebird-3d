@@ -41,6 +41,16 @@ public:
     void BackToMenu(const FString& Why);
     TArray<FFirebirdLanRoom> Rooms() const;   // other computers' Firebird rooms, for the menu
 
+    // mouse sensitivity, a multiplier on the look speed (1.0 = the tuned default). Changed on the start
+    // menu (left/right arrows or the - and + buttons) or in play with [ and ]; saved per Windows user in
+    // %LOCALAPPDATA%/FirebirdCoop/settings.ini, so an arcade update (which replaces the game folder) keeps it.
+    static constexpr float SensitivityMin = 0.2f;
+    static constexpr float SensitivityMax = 3.0f;
+    static constexpr float SensitivityStep = 0.1f;
+    float MouseSensitivity = 1.f;
+    void AdjustSensitivity(int32 Steps);
+    FString SensitivityText() const { return FString::Printf(TEXT("%.1f"), MouseSensitivity); }
+
     FString Status;         // a line for the menu: joining..., or a refusal exactly as the contract words it
     FString BuildId;
     int32 SelectedItem = 0;

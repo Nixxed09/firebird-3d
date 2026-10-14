@@ -30,6 +30,7 @@ public:
     // were drawn (for mouse clicks), rebuilt every frame from the rooms heard on the network.
     struct FMenuItem { FString Label; FString Room; bool bEnabled = true; FString Why; FVector2D Min, Max; };
     TArray<FMenuItem> MenuItems;
+    FVector2D SensMinus[2], SensPlus[2];   // the mouse sensitivity - and + buttons, where they were drawn
     void DrawMenu(class UFirebirdSession* S);
 
 private:
@@ -38,7 +39,7 @@ private:
     FVector2D Measure(const FString& T, float Size, bool bBold = true) const;
     void Plate(float X, float Y, float W, float H, float Alpha = 0.82f, bool bRim = true);
     void Key(const FString& Cap, float X, float Y, float Alpha = 1.f);   // a keycap
-    void DrawControls(float X, float Y, float Alpha);
+    void DrawControls(float X, float Y, float Alpha, bool bMouseRow = false);   // bMouseRow: the [ ] sensitivity keys too (in play)
 
     float Sc = 1.f;              // screen height / 720
     float PlayT = 0.f;           // seconds since the menu last closed (the controls card fades out)

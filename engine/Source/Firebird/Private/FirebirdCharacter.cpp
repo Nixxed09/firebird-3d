@@ -197,6 +197,15 @@ void AFirebirdCharacter::ReadInput()
                     if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton)) Pick = i;
                 }
             }
+        // mouse sensitivity: left/right arrows, or the - and + buttons beside it
+        int32 SensSteps = (PC->WasInputKeyJustPressed(EKeys::Right) ? 1 : 0) - (PC->WasInputKeyJustPressed(EKeys::Left) ? 1 : 0);
+        if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton) && Hud)
+        {
+            auto In = [Mx, My](const FVector2D& Min, const FVector2D& Max) { return Mx >= Min.X && Mx <= Max.X && My >= Min.Y && My <= Max.Y; };
+            if (In(Hud->SensMinus[0], Hud->SensMinus[1])) SensSteps = -1;
+            if (In(Hud->SensPlus[0], Hud->SensPlus[1])) SensSteps = 1;
+        }
+        if (SensSteps != 0) { S->AdjustSensitivity(SensSteps); FB::Sound2D(this, TEXT("ui_tick")); }
         if (PC->WasInputKeyJustPressed(EKeys::Enter) || PC->WasInputKeyJustPressed(EKeys::SpaceBar)) Pick = S->SelectedItem;
         if (PC->WasInputKeyJustPressed(EKeys::Escape)) { PC->ConsoleCommand(TEXT("quit")); return; }
         if (Pick >= 0 && Pick < N)
@@ -215,7 +224,18 @@ void AFirebirdCharacter::ReadInput()
     I.Move.X = (PC->IsInputKeyDown(EKeys::D) ? 1.f : 0.f) - (PC->IsInputKeyDown(EKeys::A) ? 1.f : 0.f);
     float Mx = 0.f, My = 0.f;
     PC->GetInputMouseDelta(Mx, My);
-    const float Sens = 0.11f;
+    // [ and ] change the mouse sensitivity during play (saved; also on the start menu)
+    if (S)
+    {
+        const int32 Steps = (PC->WasInputKeyJustPressed(EKeys::RightBracket) ? 1 : 0) - (PC->WasInputKeyJustPressed(EKeys::LeftBracket) ? 1 : 0);
+        if (Steps != 0)
+        {
+            S->AdjustSensitivity(Steps);
+            if (AFirebirdHUD* Hud = Cast<AFirebirdHUD>(PC->GetHUD()))
+                Hud->Say(FString::Printf(TEXT("MOUSE: SENSITIVITY %s   ( [ slower   ] faster )"), *S->SensitivityText()), 2.5f, FLinearColor(1.f, 0.78f, 0.35f));
+        }
+    }
+    const float Sens = 0.11f * (S ? S->MouseSensitivity : 1.f);
     I.Look = FVector2D(Mx * Sens, My * Sens);
     I.bJump = PC->WasInputKeyJustPressed(EKeys::SpaceBar);
     I.bDash = PC->WasInputKeyJustPressed(EKeys::LeftShift);
