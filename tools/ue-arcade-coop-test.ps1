@@ -7,7 +7,7 @@
 #   3. both play the arena together until ARENA CLEAR (the co-op proofs).
 # The LAN beacon is moved off 27620 so a running Family Arcade can't interfere.
 #   .\tools\ue-arcade-coop-test.ps1 [-Packaged] [-GameDir <folder with Firebird.exe>]
-param([switch]$Packaged, [string]$GameDir = '', [int]$BeaconPort = 27597)
+param([switch]$Packaged, [string]$GameDir = '', [int]$BeaconPort = 27597, [switch]$Headless)
 . "$PSScriptRoot\ue-common.ps1"
 
 if ($Packaged) {
@@ -25,7 +25,10 @@ function Start-FB([string]$name, [string[]]$extra, [hashtable]$env) {
   $out = Join-Path $root $name
   New-Item -ItemType Directory -Force -Path $out | Out-Null
   $a = $base + $extra + @("-windowed", "-ResX=960", "-ResY=540", "-NoSplash", "-nosound", "-abslog=`"$(Join-Path $out 'game.log')`"",
-    "-ExecCmds=`"DisableAllScreenMessages, t.MaxFPS 30`"", "-FBAuto", "-FBScenario=coop", "-FBPlayers=2", "-FBOut=`"$out`"") + $lan
+    "-ExecCmds=`"DisableAllScreenMessages, t.MaxFPS 30`"", "-NoGamepad", "-FBAuto", "-FBScenario=coop", "-FBPlayers=2", "-FBOut=`"$out`"") + $lan
+  # Exercise the network and gameplay without two background render windows
+  # competing for the GPU and delaying the LAN heartbeat during shader work.
+  if ($Headless) { $a += @('-nullrhi', '-unattended') }
   $old = @{}
   foreach ($k in $env.Keys) { $old[$k] = [Environment]::GetEnvironmentVariable($k); [Environment]::SetEnvironmentVariable($k, $env[$k]) }
   try { return Start-Process -FilePath $exe -ArgumentList $a -PassThru -WindowStyle Hidden }
