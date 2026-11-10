@@ -1,0 +1,15 @@
+{
+  "file": "pickups/keycard_red.glb",
+  "type": "pickups",
+  "size_m": [
+    0.31,
+    0.204,
+    0.0395
+  ],
+  "triangles": 776,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Ground-level origin; rotate root for idle pickup spin."
+}

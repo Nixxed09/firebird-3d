@@ -1,0 +1,15 @@
+{
+  "file": "props/hanging_chain.glb",
+  "type": "props",
+  "size_m": [
+    0.244,
+    1.495,
+    0.244
+  ],
+  "triangles": 1536,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Origin at base; mount ceiling lamp by top extent."
+}

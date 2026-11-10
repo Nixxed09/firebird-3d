@@ -1,0 +1,2367 @@
+{
+  "validator": "2.0.0-dev.3.10",
+  "models": 31,
+  "errors": 0,
+  "warnings": 0,
+  "contract_failures": [],
+  "surface_maps": [
+    {
+      "file": "surfaces/brick_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/brick_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/brick_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/brick_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/ceiling_panel_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/ceiling_panel_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/ceiling_panel_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/ceiling_panel_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_blue_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_blue_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_blue_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_blue_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_red_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_red_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_red_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_red_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/door_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_grate_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_grate_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_grate_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_grate_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_slab_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_slab_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_slab_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/floor_slab_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/hellrock_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/hellrock_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/hellrock_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/hellrock_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/lava_floor_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/lava_floor_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/lava_floor_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/lava_floor_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/metal_panel_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/metal_panel_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/metal_panel_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/metal_panel_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/stone_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/stone_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/stone_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/stone_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_off_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_off_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_off_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_off_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_on_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_on_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_on_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/switch_on_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/tech_panel_albedo.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/tech_panel_emissive.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/tech_panel_normal.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    },
+    {
+      "file": "surfaces/tech_panel_roughness.png",
+      "width": 1024,
+      "height": 1024,
+      "edge_max_error": 0
+    }
+  ],
+  "results": [
+    {
+      "file": "demons/ember_knight.glb",
+      "triangles": 7984,
+      "budget": [
+        3000,
+        8000
+      ],
+      "bytes": 1166192,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "demons/gnasher.glb",
+      "triangles": 5204,
+      "budget": [
+        3000,
+        8000
+      ],
+      "bytes": 579772,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "demons/imp.glb",
+      "triangles": 5148,
+      "budget": [
+        3000,
+        8000
+      ],
+      "bytes": 706524,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "demons/riley.glb",
+      "triangles": 6824,
+      "budget": [
+        3000,
+        8000
+      ],
+      "bytes": 1075712,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/armour_vest.glb",
+      "triangles": 1512,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 330016,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/bullet_clip.glb",
+      "triangles": 480,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 145900,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/keycard_blue.glb",
+      "triangles": 668,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 245040,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/keycard_red.glb",
+      "triangles": 776,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 252572,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/medkit_large.glb",
+      "triangles": 1188,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 274040,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/medkit_small.glb",
+      "triangles": 972,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 247408,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/phoenix_orb.glb",
+      "triangles": 1384,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 222636,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/pickup_chaingun.glb",
+      "triangles": 5768,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 741436,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/pickup_pistol.glb",
+      "triangles": 4320,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 669452,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/pickup_rocket_launcher.glb",
+      "triangles": 5688,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 825544,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/pickup_shotgun.glb",
+      "triangles": 4356,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 679904,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/rocket_box.glb",
+      "triangles": 440,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 123648,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "pickups/shell_box.glb",
+      "triangles": 480,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 126876,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/ceiling_lamp.glb",
+      "triangles": 1044,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 170140,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/ceiling_lamp_broken.glb",
+      "triangles": 876,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 138564,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/explosive_barrel.glb",
+      "triangles": 1236,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 200984,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/hanging_chain.glb",
+      "triangles": 1536,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 162248,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/pipe_elbow.glb",
+      "triangles": 500,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 96600,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/pipe_straight.glb",
+      "triangles": 420,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 86660,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/pipe_valve.glb",
+      "triangles": 876,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 179236,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/standing_torch.glb",
+      "triangles": 984,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 197764,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "props/wooden_crate.glb",
+      "triangles": 1480,
+      "budget": [
+        200,
+        2000
+      ],
+      "bytes": 251764,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "weapons/chaingun.glb",
+      "triangles": 9720,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 1086844,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "weapons/fist.glb",
+      "triangles": 6032,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 593844,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "weapons/pistol.glb",
+      "triangles": 6060,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 817736,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "weapons/rocket_launcher.glb",
+      "triangles": 9640,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 1200196,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    },
+    {
+      "file": "weapons/shotgun.glb",
+      "triangles": 8308,
+      "budget": [
+        4000,
+        10000
+      ],
+      "bytes": 1023732,
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0,
+      "checks": [],
+      "issues": []
+    }
+  ]
+}

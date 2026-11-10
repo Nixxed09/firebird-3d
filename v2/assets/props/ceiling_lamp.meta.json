@@ -1,0 +1,15 @@
+{
+  "file": "props/ceiling_lamp.glb",
+  "type": "props",
+  "size_m": [
+    0.494,
+    0.82,
+    0.494
+  ],
+  "triangles": 1044,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Origin at base; mount ceiling lamp by top extent."
+}

@@ -1,0 +1,15 @@
+{
+  "file": "weapons/rocket_launcher.glb",
+  "type": "weapons",
+  "size_m": [
+    0.4825,
+    0.6987,
+    1.3806
+  ],
+  "triangles": 9640,
+  "budget": [
+    4000,
+    10000
+  ],
+  "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates."
+}

@@ -1,0 +1,15 @@
+{
+  "file": "pickups/armour_vest.glb",
+  "type": "pickups",
+  "size_m": [
+    0.45,
+    0.59,
+    0.279
+  ],
+  "triangles": 1512,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Ground-level origin; rotate root for idle pickup spin."
+}

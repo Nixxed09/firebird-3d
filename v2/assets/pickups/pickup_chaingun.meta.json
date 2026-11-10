@@ -1,0 +1,15 @@
+{
+  "file": "pickups/pickup_chaingun.glb",
+  "type": "pickups",
+  "size_m": [
+    0.6412,
+    0.55,
+    1.0662
+  ],
+  "triangles": 5768,
+  "budget": [
+    4000,
+    10000
+  ],
+  "notes": "Ground-level origin; rotate root for idle pickup spin."
+}

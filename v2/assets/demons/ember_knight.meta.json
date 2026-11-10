@@ -1,0 +1,15 @@
+{
+  "file": "demons/ember_knight.glb",
+  "type": "demons",
+  "size_m": [
+    1.6198,
+    2.6,
+    0.8193
+  ],
+  "triangles": 7984,
+  "budget": [
+    3000,
+    8000
+  ],
+  "notes": "Six in-place clips; windup precedes attack; no gore."
+}

@@ -1,0 +1,15 @@
+{
+  "file": "props/pipe_elbow.glb",
+  "type": "props",
+  "size_m": [
+    0.64,
+    1.19,
+    0.32
+  ],
+  "triangles": 500,
+  "budget": [
+    200,
+    2000
+  ],
+  "notes": "Origin at base; mount ceiling lamp by top extent."
+}

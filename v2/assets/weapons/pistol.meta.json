@@ -1,0 +1,15 @@
+{
+  "file": "weapons/pistol.glb",
+  "type": "weapons",
+  "size_m": [
+    0.305,
+    0.5687,
+    0.8377
+  ],
+  "triangles": 6060,
+  "budget": [
+    4000,
+    10000
+  ],
+  "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates."
+}

@@ -1,0 +1,7137 @@
+{
+  "schema": 1,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "assets": [
+    {
+      "file": "demons/ember_knight.glb",
+      "type": "demon",
+      "bytes": 1166192,
+      "size_m": [
+        1.6198,
+        2.6,
+        0.8193
+      ],
+      "triangles": 7984,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; windup precedes attack; no gore.",
+      "materials": [
+        "iron",
+        "black",
+        "brass",
+        "ember",
+        "bone",
+        "char"
+      ],
+      "preview": "previews/ember_knight.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "ember_knight"
+    },
+    {
+      "file": "demons/gnasher.glb",
+      "type": "demon",
+      "bytes": 579772,
+      "size_m": [
+        1.2585,
+        1.4,
+        0.977
+      ],
+      "triangles": 5204,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; windup precedes attack; no gore.",
+      "materials": [
+        "char",
+        "skin",
+        "black",
+        "bone",
+        "ember"
+      ],
+      "preview": "previews/gnasher.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "gnasher"
+    },
+    {
+      "file": "demons/imp.glb",
+      "type": "demon",
+      "bytes": 706524,
+      "size_m": [
+        1.0591,
+        1.7,
+        0.6734
+      ],
+      "triangles": 5148,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; windup precedes attack; no gore.",
+      "materials": [
+        "skin",
+        "bone",
+        "char",
+        "ember",
+        "black"
+      ],
+      "preview": "previews/imp.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "imp"
+    },
+    {
+      "file": "demons/riley.glb",
+      "type": "demon",
+      "bytes": 1075712,
+      "size_m": [
+        1.56,
+        1.9,
+        1.24
+      ],
+      "triangles": 6824,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig",
+        "shield"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; +Z forward. Riley tell material supports runtime white emissive flash.",
+      "materials": [
+        "holo",
+        "tell",
+        "brass",
+        "iron",
+        "cyan",
+        "edge",
+        "gold",
+        "shield"
+      ],
+      "preview": "previews/riley.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "riley"
+    },
+    {
+      "file": "pickups/armour_vest.glb",
+      "type": "pickup",
+      "bytes": 330016,
+      "size_m": [
+        0.45,
+        0.59,
+        0.279
+      ],
+      "triangles": 1512,
+      "animations": [],
+      "nodes": [
+        "armour_vest"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "cloth",
+        "iron",
+        "edge",
+        "brass",
+        "cyan"
+      ],
+      "preview": "previews/armour_vest.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "armour_vest"
+    },
+    {
+      "file": "pickups/bullet_clip.glb",
+      "type": "pickup",
+      "bytes": 145900,
+      "size_m": [
+        0.17,
+        0.33,
+        0.1
+      ],
+      "triangles": 480,
+      "animations": [],
+      "nodes": [
+        "bullet_clip"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "iron",
+        "brass",
+        "edge",
+        "black"
+      ],
+      "preview": "previews/bullet_clip.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "bullet_clip"
+    },
+    {
+      "file": "pickups/keycard_blue.glb",
+      "type": "pickup",
+      "bytes": 245040,
+      "size_m": [
+        0.31,
+        0.204,
+        0.0395
+      ],
+      "triangles": 668,
+      "animations": [],
+      "nodes": [
+        "keycard_blue"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "blue",
+        "brass",
+        "black",
+        "cyan",
+        "white",
+        "edge"
+      ],
+      "preview": "previews/keycard_blue.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "keycard_blue"
+    },
+    {
+      "file": "pickups/keycard_red.glb",
+      "type": "pickup",
+      "bytes": 252572,
+      "size_m": [
+        0.31,
+        0.204,
+        0.0395
+      ],
+      "triangles": 776,
+      "animations": [],
+      "nodes": [
+        "keycard_red"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "red",
+        "brass",
+        "black",
+        "ember",
+        "white",
+        "edge"
+      ],
+      "preview": "previews/keycard_red.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "keycard_red"
+    },
+    {
+      "file": "pickups/medkit_large.glb",
+      "type": "pickup",
+      "bytes": 274040,
+      "size_m": [
+        0.568,
+        0.4375,
+        0.3189
+      ],
+      "triangles": 1188,
+      "animations": [],
+      "nodes": [
+        "medkit_large"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "white",
+        "iron",
+        "brass",
+        "green",
+        "black"
+      ],
+      "preview": "previews/medkit_large.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "medkit_large"
+    },
+    {
+      "file": "pickups/medkit_small.glb",
+      "type": "pickup",
+      "bytes": 247408,
+      "size_m": [
+        0.328,
+        0.3075,
+        0.2049
+      ],
+      "triangles": 972,
+      "animations": [],
+      "nodes": [
+        "medkit_small"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "white",
+        "iron",
+        "brass",
+        "green",
+        "black"
+      ],
+      "preview": "previews/medkit_small.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "medkit_small"
+    },
+    {
+      "file": "pickups/phoenix_orb.glb",
+      "type": "pickup",
+      "bytes": 222636,
+      "size_m": [
+        0.9653,
+        0.6911,
+        0.42
+      ],
+      "triangles": 1384,
+      "animations": [],
+      "nodes": [
+        "phoenix_orb"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "ember",
+        "brass",
+        "gold",
+        "iron"
+      ],
+      "preview": "previews/phoenix_orb.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "phoenix_orb"
+    },
+    {
+      "file": "pickups/pickup_chaingun.glb",
+      "type": "pickup",
+      "bytes": 741436,
+      "size_m": [
+        0.6412,
+        0.55,
+        1.0662
+      ],
+      "triangles": 5768,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "barrels"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cyan",
+        "edge"
+      ],
+      "preview": "previews/pickup_chaingun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "pickup_chaingun"
+    },
+    {
+      "file": "pickups/pickup_pistol.glb",
+      "type": "pickup",
+      "bytes": 669452,
+      "size_m": [
+        0.274,
+        0.4735,
+        0.4968
+      ],
+      "triangles": 4320,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "slide"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cyan"
+      ],
+      "preview": "previews/pickup_pistol.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "pickup_pistol"
+    },
+    {
+      "file": "pickups/pickup_rocket_launcher.glb",
+      "type": "pickup",
+      "bytes": 825544,
+      "size_m": [
+        0.4505,
+        0.6035,
+        1.2377
+      ],
+      "triangles": 5688,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "tube"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cyan",
+        "edge",
+        "red"
+      ],
+      "preview": "previews/pickup_rocket_launcher.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "pickup_rocket_launcher"
+    },
+    {
+      "file": "pickups/pickup_shotgun.glb",
+      "type": "pickup",
+      "bytes": 679904,
+      "size_m": [
+        0.296,
+        0.4705,
+        1.0688
+      ],
+      "triangles": 4356,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "pump"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cyan",
+        "wood"
+      ],
+      "preview": "previews/pickup_shotgun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "pickup_shotgun"
+    },
+    {
+      "file": "pickups/rocket_box.glb",
+      "type": "pickup",
+      "bytes": 123648,
+      "size_m": [
+        0.42,
+        0.54,
+        0.292
+      ],
+      "triangles": 440,
+      "animations": [],
+      "nodes": [
+        "rocket_box"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "iron",
+        "brass",
+        "red"
+      ],
+      "preview": "previews/rocket_box.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "rocket_box"
+    },
+    {
+      "file": "pickups/shell_box.glb",
+      "type": "pickup",
+      "bytes": 126876,
+      "size_m": [
+        0.34,
+        0.26,
+        0.169
+      ],
+      "triangles": 480,
+      "animations": [],
+      "nodes": [
+        "shell_box"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "red",
+        "brass",
+        "white"
+      ],
+      "preview": "previews/shell_box.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "shell_box"
+    },
+    {
+      "file": "props/ceiling_lamp.glb",
+      "type": "prop",
+      "bytes": 170140,
+      "size_m": [
+        0.494,
+        0.82,
+        0.494
+      ],
+      "triangles": 1044,
+      "animations": [],
+      "nodes": [
+        "ceiling_lamp"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "black",
+        "gold"
+      ],
+      "preview": "previews/ceiling_lamp.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "ceiling_lamp"
+    },
+    {
+      "file": "props/ceiling_lamp_broken.glb",
+      "type": "prop",
+      "bytes": 138564,
+      "size_m": [
+        0.5692,
+        0.7747,
+        0.494
+      ],
+      "triangles": 876,
+      "animations": [],
+      "nodes": [
+        "ceiling_lamp_broken"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "black"
+      ],
+      "preview": "previews/ceiling_lamp_broken.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "ceiling_lamp_broken"
+    },
+    {
+      "file": "props/explosive_barrel.glb",
+      "type": "prop",
+      "bytes": 200984,
+      "size_m": [
+        0.698,
+        0.965,
+        0.698
+      ],
+      "triangles": 1236,
+      "animations": [],
+      "nodes": [
+        "explosive_barrel"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "black",
+        "green",
+        "brass"
+      ],
+      "preview": "previews/explosive_barrel.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "explosive_barrel"
+    },
+    {
+      "file": "props/hanging_chain.glb",
+      "type": "prop",
+      "bytes": 162248,
+      "size_m": [
+        0.244,
+        1.495,
+        0.244
+      ],
+      "triangles": 1536,
+      "animations": [],
+      "nodes": [
+        "hanging_chain"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron"
+      ],
+      "preview": "previews/hanging_chain.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "hanging_chain"
+    },
+    {
+      "file": "props/pipe_elbow.glb",
+      "type": "prop",
+      "bytes": 96600,
+      "size_m": [
+        0.64,
+        1.19,
+        0.32
+      ],
+      "triangles": 500,
+      "animations": [],
+      "nodes": [
+        "pipe_elbow"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/pipe_elbow.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "pipe_elbow"
+    },
+    {
+      "file": "props/pipe_straight.glb",
+      "type": "prop",
+      "bytes": 86660,
+      "size_m": [
+        0.32,
+        0.85,
+        0.32
+      ],
+      "triangles": 420,
+      "animations": [],
+      "nodes": [
+        "pipe_straight"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/pipe_straight.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "pipe_straight"
+    },
+    {
+      "file": "props/pipe_valve.glb",
+      "type": "prop",
+      "bytes": 179236,
+      "size_m": [
+        0.488,
+        0.85,
+        0.5208
+      ],
+      "triangles": 876,
+      "animations": [],
+      "nodes": [
+        "pipe_valve"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "edge",
+        "red"
+      ],
+      "preview": "previews/pipe_valve.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "pipe_valve"
+    },
+    {
+      "file": "props/standing_torch.glb",
+      "type": "prop",
+      "bytes": 197764,
+      "size_m": [
+        0.52,
+        1.8205,
+        0.52
+      ],
+      "triangles": 984,
+      "animations": [],
+      "nodes": [
+        "standing_torch"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "ember",
+        "gold"
+      ],
+      "preview": "previews/standing_torch.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "standing_torch"
+    },
+    {
+      "file": "props/wooden_crate.glb",
+      "type": "prop",
+      "bytes": 251764,
+      "size_m": [
+        1.032,
+        0.995,
+        1.059
+      ],
+      "triangles": 1480,
+      "animations": [],
+      "nodes": [
+        "whole",
+        "debris_1",
+        "debris_2",
+        "debris_3",
+        "debris_4",
+        "debris_5",
+        "debris_6"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Crate: hide debris_1..6 until break, then hide whole and scatter shards.",
+      "materials": [
+        "wood",
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/wooden_crate.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "wooden_crate"
+    },
+    {
+      "file": "weapons/chaingun.glb",
+      "type": "weapon",
+      "bytes": 1086844,
+      "size_m": [
+        0.6412,
+        0.6452,
+        1.4071
+      ],
+      "triangles": 9720,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "barrels"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cloth",
+        "edge"
+      ],
+      "preview": "previews/chaingun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "chaingun"
+    },
+    {
+      "file": "weapons/fist.glb",
+      "type": "weapon",
+      "bytes": 593844,
+      "size_m": [
+        0.59,
+        0.2897,
+        0.6369
+      ],
+      "triangles": 6032,
+      "animations": [],
+      "nodes": [
+        "fists"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "cloth",
+        "black",
+        "leather",
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/fist.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "fist"
+    },
+    {
+      "file": "weapons/pistol.glb",
+      "type": "weapon",
+      "bytes": 817736,
+      "size_m": [
+        0.305,
+        0.5687,
+        0.8377
+      ],
+      "triangles": 6060,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "slide"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cloth"
+      ],
+      "preview": "previews/pistol.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "pistol"
+    },
+    {
+      "file": "weapons/rocket_launcher.glb",
+      "type": "weapon",
+      "bytes": 1200196,
+      "size_m": [
+        0.4825,
+        0.6987,
+        1.3806
+      ],
+      "triangles": 9640,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "tube"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cyan",
+        "cloth",
+        "edge",
+        "red"
+      ],
+      "preview": "previews/rocket_launcher.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "rocket_launcher"
+    },
+    {
+      "file": "weapons/shotgun.glb",
+      "type": "weapon",
+      "bytes": 1023732,
+      "size_m": [
+        0.43,
+        0.5657,
+        1.4097
+      ],
+      "triangles": 8308,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "pump"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cloth",
+        "wood"
+      ],
+      "preview": "previews/shotgun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "id": "shotgun"
+    },
+    {
+      "id": "brick",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/brick_albedo.png",
+        "normal": "surfaces/brick_normal.png",
+        "roughness": "surfaces/brick_roughness.png",
+        "emissive": "surfaces/brick_emissive.png"
+      }
+    },
+    {
+      "id": "ceiling_panel",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/ceiling_panel_albedo.png",
+        "normal": "surfaces/ceiling_panel_normal.png",
+        "roughness": "surfaces/ceiling_panel_roughness.png",
+        "emissive": "surfaces/ceiling_panel_emissive.png"
+      }
+    },
+    {
+      "id": "door",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/door_albedo.png",
+        "normal": "surfaces/door_normal.png",
+        "roughness": "surfaces/door_roughness.png",
+        "emissive": "surfaces/door_emissive.png"
+      }
+    },
+    {
+      "id": "door_blue",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/door_blue_albedo.png",
+        "normal": "surfaces/door_blue_normal.png",
+        "roughness": "surfaces/door_blue_roughness.png",
+        "emissive": "surfaces/door_blue_emissive.png"
+      }
+    },
+    {
+      "id": "door_red",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/door_red_albedo.png",
+        "normal": "surfaces/door_red_normal.png",
+        "roughness": "surfaces/door_red_roughness.png",
+        "emissive": "surfaces/door_red_emissive.png"
+      }
+    },
+    {
+      "id": "floor_grate",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/floor_grate_albedo.png",
+        "normal": "surfaces/floor_grate_normal.png",
+        "roughness": "surfaces/floor_grate_roughness.png",
+        "emissive": "surfaces/floor_grate_emissive.png"
+      }
+    },
+    {
+      "id": "floor_slab",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/floor_slab_albedo.png",
+        "normal": "surfaces/floor_slab_normal.png",
+        "roughness": "surfaces/floor_slab_roughness.png",
+        "emissive": "surfaces/floor_slab_emissive.png"
+      }
+    },
+    {
+      "id": "hellrock",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/hellrock_albedo.png",
+        "normal": "surfaces/hellrock_normal.png",
+        "roughness": "surfaces/hellrock_roughness.png",
+        "emissive": "surfaces/hellrock_emissive.png"
+      }
+    },
+    {
+      "id": "lava_floor",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/lava_floor_albedo.png",
+        "normal": "surfaces/lava_floor_normal.png",
+        "roughness": "surfaces/lava_floor_roughness.png",
+        "emissive": "surfaces/lava_floor_emissive.png"
+      }
+    },
+    {
+      "id": "metal_panel",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/metal_panel_albedo.png",
+        "normal": "surfaces/metal_panel_normal.png",
+        "roughness": "surfaces/metal_panel_roughness.png",
+        "emissive": "surfaces/metal_panel_emissive.png"
+      }
+    },
+    {
+      "id": "stone",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/stone_albedo.png",
+        "normal": "surfaces/stone_normal.png",
+        "roughness": "surfaces/stone_roughness.png",
+        "emissive": "surfaces/stone_emissive.png"
+      }
+    },
+    {
+      "id": "switch_off",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/switch_off_albedo.png",
+        "normal": "surfaces/switch_off_normal.png",
+        "roughness": "surfaces/switch_off_roughness.png",
+        "emissive": "surfaces/switch_off_emissive.png"
+      }
+    },
+    {
+      "id": "switch_on",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/switch_on_albedo.png",
+        "normal": "surfaces/switch_on_normal.png",
+        "roughness": "surfaces/switch_on_roughness.png",
+        "emissive": "surfaces/switch_on_emissive.png"
+      }
+    },
+    {
+      "id": "tech_panel",
+      "type": "texture",
+      "filter": "linear",
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "pixels": [
+        1024,
+        1024
+      ],
+      "maps": {
+        "albedo": "surfaces/tech_panel_albedo.png",
+        "normal": "surfaces/tech_panel_normal.png",
+        "roughness": "surfaces/tech_panel_roughness.png",
+        "emissive": "surfaces/tech_panel_emissive.png"
+      }
+    }
+  ],
+  "files": [
+    {
+      "file": "demons/ember_knight.glb",
+      "type": "demons",
+      "bytes": 1166192,
+      "size_m": [
+        1.6198,
+        2.6,
+        0.8193
+      ],
+      "triangles": 7984,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; windup precedes attack; no gore.",
+      "materials": [
+        "iron",
+        "black",
+        "brass",
+        "ember",
+        "bone",
+        "char"
+      ],
+      "preview": "previews/ember_knight.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "demons/ember_knight.meta.json",
+      "type": "json",
+      "bytes": 252,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "demons/gnasher.glb",
+      "type": "demons",
+      "bytes": 579772,
+      "size_m": [
+        1.2585,
+        1.4,
+        0.977
+      ],
+      "triangles": 5204,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; windup precedes attack; no gore.",
+      "materials": [
+        "char",
+        "skin",
+        "black",
+        "bone",
+        "ember"
+      ],
+      "preview": "previews/gnasher.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "demons/gnasher.meta.json",
+      "type": "json",
+      "bytes": 246,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "demons/imp.glb",
+      "type": "demons",
+      "bytes": 706524,
+      "size_m": [
+        1.0591,
+        1.7,
+        0.6734
+      ],
+      "triangles": 5148,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; windup precedes attack; no gore.",
+      "materials": [
+        "skin",
+        "bone",
+        "char",
+        "ember",
+        "black"
+      ],
+      "preview": "previews/imp.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "demons/imp.meta.json",
+      "type": "json",
+      "bytes": 243,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "demons/riley.glb",
+      "type": "demons",
+      "bytes": 1075712,
+      "size_m": [
+        1.56,
+        1.9,
+        1.24
+      ],
+      "triangles": 6824,
+      "animations": [
+        "attack",
+        "attack_windup",
+        "death",
+        "idle",
+        "pain",
+        "walk"
+      ],
+      "nodes": [
+        "jaw",
+        "head",
+        "arm.L",
+        "arm.R",
+        "spine",
+        "leg.L",
+        "leg.R",
+        "root",
+        "body",
+        "rig",
+        "shield"
+      ],
+      "budget": [
+        3000,
+        8000
+      ],
+      "notes": "Six in-place clips; +Z forward. Riley tell material supports runtime white emissive flash.",
+      "materials": [
+        "holo",
+        "tell",
+        "brass",
+        "iron",
+        "cyan",
+        "edge",
+        "gold",
+        "shield"
+      ],
+      "preview": "previews/riley.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "demons/riley.meta.json",
+      "type": "json",
+      "bytes": 279,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/armour_vest.glb",
+      "type": "pickups",
+      "bytes": 330016,
+      "size_m": [
+        0.45,
+        0.59,
+        0.279
+      ],
+      "triangles": 1512,
+      "animations": [],
+      "nodes": [
+        "armour_vest"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "cloth",
+        "iron",
+        "edge",
+        "brass",
+        "cyan"
+      ],
+      "preview": "previews/armour_vest.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/armour_vest.meta.json",
+      "type": "json",
+      "bytes": 252,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/bullet_clip.glb",
+      "type": "pickups",
+      "bytes": 145900,
+      "size_m": [
+        0.17,
+        0.33,
+        0.1
+      ],
+      "triangles": 480,
+      "animations": [],
+      "nodes": [
+        "bullet_clip"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "iron",
+        "brass",
+        "edge",
+        "black"
+      ],
+      "preview": "previews/bullet_clip.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/bullet_clip.meta.json",
+      "type": "json",
+      "bytes": 249,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/keycard_blue.glb",
+      "type": "pickups",
+      "bytes": 245040,
+      "size_m": [
+        0.31,
+        0.204,
+        0.0395
+      ],
+      "triangles": 668,
+      "animations": [],
+      "nodes": [
+        "keycard_blue"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "blue",
+        "brass",
+        "black",
+        "cyan",
+        "white",
+        "edge"
+      ],
+      "preview": "previews/keycard_blue.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/keycard_blue.meta.json",
+      "type": "json",
+      "bytes": 254,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/keycard_red.glb",
+      "type": "pickups",
+      "bytes": 252572,
+      "size_m": [
+        0.31,
+        0.204,
+        0.0395
+      ],
+      "triangles": 776,
+      "animations": [],
+      "nodes": [
+        "keycard_red"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "red",
+        "brass",
+        "black",
+        "ember",
+        "white",
+        "edge"
+      ],
+      "preview": "previews/keycard_red.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/keycard_red.meta.json",
+      "type": "json",
+      "bytes": 253,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/medkit_large.glb",
+      "type": "pickups",
+      "bytes": 274040,
+      "size_m": [
+        0.568,
+        0.4375,
+        0.3189
+      ],
+      "triangles": 1188,
+      "animations": [],
+      "nodes": [
+        "medkit_large"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "white",
+        "iron",
+        "brass",
+        "green",
+        "black"
+      ],
+      "preview": "previews/medkit_large.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/medkit_large.meta.json",
+      "type": "json",
+      "bytes": 257,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/medkit_small.glb",
+      "type": "pickups",
+      "bytes": 247408,
+      "size_m": [
+        0.328,
+        0.3075,
+        0.2049
+      ],
+      "triangles": 972,
+      "animations": [],
+      "nodes": [
+        "medkit_small"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "white",
+        "iron",
+        "brass",
+        "green",
+        "black"
+      ],
+      "preview": "previews/medkit_small.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/medkit_small.meta.json",
+      "type": "json",
+      "bytes": 256,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/phoenix_orb.glb",
+      "type": "pickups",
+      "bytes": 222636,
+      "size_m": [
+        0.9653,
+        0.6911,
+        0.42
+      ],
+      "triangles": 1384,
+      "animations": [],
+      "nodes": [
+        "phoenix_orb"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "ember",
+        "brass",
+        "gold",
+        "iron"
+      ],
+      "preview": "previews/phoenix_orb.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/phoenix_orb.meta.json",
+      "type": "json",
+      "bytes": 255,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/pickup_chaingun.glb",
+      "type": "pickups",
+      "bytes": 741436,
+      "size_m": [
+        0.6412,
+        0.55,
+        1.0662
+      ],
+      "triangles": 5768,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "barrels"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cyan",
+        "edge"
+      ],
+      "preview": "previews/pickup_chaingun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/pickup_chaingun.meta.json",
+      "type": "json",
+      "bytes": 261,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/pickup_pistol.glb",
+      "type": "pickups",
+      "bytes": 669452,
+      "size_m": [
+        0.274,
+        0.4735,
+        0.4968
+      ],
+      "triangles": 4320,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "slide"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cyan"
+      ],
+      "preview": "previews/pickup_pistol.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/pickup_pistol.meta.json",
+      "type": "json",
+      "bytes": 260,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/pickup_rocket_launcher.glb",
+      "type": "pickups",
+      "bytes": 825544,
+      "size_m": [
+        0.4505,
+        0.6035,
+        1.2377
+      ],
+      "triangles": 5688,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "tube"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cyan",
+        "edge",
+        "red"
+      ],
+      "preview": "previews/pickup_rocket_launcher.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/pickup_rocket_launcher.meta.json",
+      "type": "json",
+      "bytes": 270,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/pickup_shotgun.glb",
+      "type": "pickups",
+      "bytes": 679904,
+      "size_m": [
+        0.296,
+        0.4705,
+        1.0688
+      ],
+      "triangles": 4356,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "pump"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cyan",
+        "wood"
+      ],
+      "preview": "previews/pickup_shotgun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/pickup_shotgun.meta.json",
+      "type": "json",
+      "bytes": 261,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/rocket_box.glb",
+      "type": "pickups",
+      "bytes": 123648,
+      "size_m": [
+        0.42,
+        0.54,
+        0.292
+      ],
+      "triangles": 440,
+      "animations": [],
+      "nodes": [
+        "rocket_box"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "iron",
+        "brass",
+        "red"
+      ],
+      "preview": "previews/rocket_box.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/rocket_box.meta.json",
+      "type": "json",
+      "bytes": 250,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "pickups/shell_box.glb",
+      "type": "pickups",
+      "bytes": 126876,
+      "size_m": [
+        0.34,
+        0.26,
+        0.169
+      ],
+      "triangles": 480,
+      "animations": [],
+      "nodes": [
+        "shell_box"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Ground-level origin; rotate root for idle pickup spin.",
+      "materials": [
+        "red",
+        "brass",
+        "white"
+      ],
+      "preview": "previews/shell_box.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "pickups/shell_box.meta.json",
+      "type": "json",
+      "bytes": 249,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "previews/armour_vest.png",
+      "type": "preview",
+      "bytes": 335046,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/bullet_clip.png",
+      "type": "preview",
+      "bytes": 324445,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/ceiling_lamp.png",
+      "type": "preview",
+      "bytes": 345327,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/ceiling_lamp_broken.png",
+      "type": "preview",
+      "bytes": 349908,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/chaingun.png",
+      "type": "preview",
+      "bytes": 335038,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/ember_knight.png",
+      "type": "preview",
+      "bytes": 343644,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/explosive_barrel.png",
+      "type": "preview",
+      "bytes": 337250,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/fist.png",
+      "type": "preview",
+      "bytes": 351018,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/gnasher.png",
+      "type": "preview",
+      "bytes": 365786,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/hanging_chain.png",
+      "type": "preview",
+      "bytes": 312643,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/imp.png",
+      "type": "preview",
+      "bytes": 346630,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/keycard_blue.png",
+      "type": "preview",
+      "bytes": 328278,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/keycard_red.png",
+      "type": "preview",
+      "bytes": 332683,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/medkit_large.png",
+      "type": "preview",
+      "bytes": 342907,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/medkit_small.png",
+      "type": "preview",
+      "bytes": 354894,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/phoenix_orb.png",
+      "type": "preview",
+      "bytes": 336833,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pickup_chaingun.png",
+      "type": "preview",
+      "bytes": 348787,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pickup_pistol.png",
+      "type": "preview",
+      "bytes": 351754,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pickup_rocket_launcher.png",
+      "type": "preview",
+      "bytes": 332206,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pickup_shotgun.png",
+      "type": "preview",
+      "bytes": 325267,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pipe_elbow.png",
+      "type": "preview",
+      "bytes": 306970,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pipe_straight.png",
+      "type": "preview",
+      "bytes": 311890,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pipe_valve.png",
+      "type": "preview",
+      "bytes": 348726,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/pistol.png",
+      "type": "preview",
+      "bytes": 332209,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/riley.png",
+      "type": "preview",
+      "bytes": 374450,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/rocket_box.png",
+      "type": "preview",
+      "bytes": 336484,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/rocket_launcher.png",
+      "type": "preview",
+      "bytes": 336823,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/shell_box.png",
+      "type": "preview",
+      "bytes": 358580,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/shotgun.png",
+      "type": "preview",
+      "bytes": 321869,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/standing_torch.png",
+      "type": "preview",
+      "bytes": 302982,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "previews/wooden_crate.png",
+      "type": "preview",
+      "bytes": 364277,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "proof/animation_poses.png",
+      "type": "texture",
+      "bytes": 1689314,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1536,
+        1024
+      ]
+    },
+    {
+      "file": "proof/model_catalogue.png",
+      "type": "texture",
+      "bytes": 2662858,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        2048,
+        1024
+      ]
+    },
+    {
+      "file": "proof/riley_tell.png",
+      "type": "texture",
+      "bytes": 141516,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        512,
+        256
+      ]
+    },
+    {
+      "file": "proof/roundtrip.json",
+      "type": "json",
+      "bytes": 4344,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "proof/visibility_20m.png",
+      "type": "texture",
+      "bytes": 688101,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        2048,
+        512
+      ]
+    },
+    {
+      "file": "props/ceiling_lamp.glb",
+      "type": "props",
+      "bytes": 170140,
+      "size_m": [
+        0.494,
+        0.82,
+        0.494
+      ],
+      "triangles": 1044,
+      "animations": [],
+      "nodes": [
+        "ceiling_lamp"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "black",
+        "gold"
+      ],
+      "preview": "previews/ceiling_lamp.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/ceiling_lamp.meta.json",
+      "type": "json",
+      "bytes": 245,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/ceiling_lamp_broken.glb",
+      "type": "props",
+      "bytes": 138564,
+      "size_m": [
+        0.5692,
+        0.7747,
+        0.494
+      ],
+      "triangles": 876,
+      "animations": [],
+      "nodes": [
+        "ceiling_lamp_broken"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "black"
+      ],
+      "preview": "previews/ceiling_lamp_broken.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/ceiling_lamp_broken.meta.json",
+      "type": "json",
+      "bytes": 254,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/explosive_barrel.glb",
+      "type": "props",
+      "bytes": 200984,
+      "size_m": [
+        0.698,
+        0.965,
+        0.698
+      ],
+      "triangles": 1236,
+      "animations": [],
+      "nodes": [
+        "explosive_barrel"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "black",
+        "green",
+        "brass"
+      ],
+      "preview": "previews/explosive_barrel.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/explosive_barrel.meta.json",
+      "type": "json",
+      "bytes": 250,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/hanging_chain.glb",
+      "type": "props",
+      "bytes": 162248,
+      "size_m": [
+        0.244,
+        1.495,
+        0.244
+      ],
+      "triangles": 1536,
+      "animations": [],
+      "nodes": [
+        "hanging_chain"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron"
+      ],
+      "preview": "previews/hanging_chain.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/hanging_chain.meta.json",
+      "type": "json",
+      "bytes": 247,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/pipe_elbow.glb",
+      "type": "props",
+      "bytes": 96600,
+      "size_m": [
+        0.64,
+        1.19,
+        0.32
+      ],
+      "triangles": 500,
+      "animations": [],
+      "nodes": [
+        "pipe_elbow"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/pipe_elbow.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/pipe_elbow.meta.json",
+      "type": "json",
+      "bytes": 240,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/pipe_straight.glb",
+      "type": "props",
+      "bytes": 86660,
+      "size_m": [
+        0.32,
+        0.85,
+        0.32
+      ],
+      "triangles": 420,
+      "animations": [],
+      "nodes": [
+        "pipe_straight"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/pipe_straight.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/pipe_straight.meta.json",
+      "type": "json",
+      "bytes": 243,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/pipe_valve.glb",
+      "type": "props",
+      "bytes": 179236,
+      "size_m": [
+        0.488,
+        0.85,
+        0.5208
+      ],
+      "triangles": 876,
+      "animations": [],
+      "nodes": [
+        "pipe_valve"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "edge",
+        "red"
+      ],
+      "preview": "previews/pipe_valve.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/pipe_valve.meta.json",
+      "type": "json",
+      "bytes": 243,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/standing_torch.glb",
+      "type": "props",
+      "bytes": 197764,
+      "size_m": [
+        0.52,
+        1.8205,
+        0.52
+      ],
+      "triangles": 984,
+      "animations": [],
+      "nodes": [
+        "standing_torch"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Origin at base; mount ceiling lamp by top extent.",
+      "materials": [
+        "iron",
+        "brass",
+        "ember",
+        "gold"
+      ],
+      "preview": "previews/standing_torch.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/standing_torch.meta.json",
+      "type": "json",
+      "bytes": 246,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "props/wooden_crate.glb",
+      "type": "props",
+      "bytes": 251764,
+      "size_m": [
+        1.032,
+        0.995,
+        1.059
+      ],
+      "triangles": 1480,
+      "animations": [],
+      "nodes": [
+        "whole",
+        "debris_1",
+        "debris_2",
+        "debris_3",
+        "debris_4",
+        "debris_5",
+        "debris_6"
+      ],
+      "budget": [
+        200,
+        2000
+      ],
+      "notes": "Crate: hide debris_1..6 until break, then hide whole and scatter shards.",
+      "materials": [
+        "wood",
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/wooden_crate.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "props/wooden_crate.meta.json",
+      "type": "json",
+      "bytes": 269,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "README.md",
+      "type": "md",
+      "bytes": 5862,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "surface_catalogue.png",
+      "type": "texture",
+      "bytes": 528849,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surface_validation.json",
+      "type": "json",
+      "bytes": 12802,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "surfaces/brick_albedo.png",
+      "type": "texture",
+      "bytes": 94927,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/brick_emissive.png",
+      "type": "texture",
+      "bytes": 3142,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/brick_normal.png",
+      "type": "texture",
+      "bytes": 1058550,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/brick_roughness.png",
+      "type": "texture",
+      "bytes": 42365,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/ceiling_panel_albedo.png",
+      "type": "texture",
+      "bytes": 70791,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/ceiling_panel_emissive.png",
+      "type": "texture",
+      "bytes": 3142,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/ceiling_panel_normal.png",
+      "type": "texture",
+      "bytes": 1043710,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/ceiling_panel_roughness.png",
+      "type": "texture",
+      "bytes": 2386,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_albedo.png",
+      "type": "texture",
+      "bytes": 74599,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_blue_albedo.png",
+      "type": "texture",
+      "bytes": 75866,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_blue_emissive.png",
+      "type": "texture",
+      "bytes": 3142,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_blue_normal.png",
+      "type": "texture",
+      "bytes": 1175059,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_blue_roughness.png",
+      "type": "texture",
+      "bytes": 2386,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_emissive.png",
+      "type": "texture",
+      "bytes": 3142,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_normal.png",
+      "type": "texture",
+      "bytes": 1172955,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_red_albedo.png",
+      "type": "texture",
+      "bytes": 75916,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_red_emissive.png",
+      "type": "texture",
+      "bytes": 3142,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_red_normal.png",
+      "type": "texture",
+      "bytes": 1175059,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_red_roughness.png",
+      "type": "texture",
+      "bytes": 2386,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/door_roughness.png",
+      "type": "texture",
+      "bytes": 2386,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/floor_grate_albedo.png",
+      "type": "texture",
+      "bytes": 5065,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/floor_grate_emissive.png",
+      "type": "texture",
+      "bytes": 4095,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/floor_grate_normal.png",
+      "type": "texture",
+      "bytes": 1235126,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/floor_grate_roughness.png",
+      "type": "texture",
+      "bytes": 2551,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/floor_slab_albedo.png",
+      "type": "texture",
+      "bytes": 102430,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/floor_slab_emissive.png",
+      "type": "texture",
+      "bytes": 3142,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/floor_slab_normal.png",
+      "type": "texture",
+      "bytes": 943995,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/floor_slab_roughness.png",
+      "type": "texture",
+      "bytes": 41576,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/hellrock_albedo.png",
+      "type": "texture",
+      "bytes": 222719,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/hellrock_emissive.png",
+      "type": "texture",
+      "bytes": 163256,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/hellrock_normal.png",
+      "type": "texture",
+      "bytes": 1074057,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/hellrock_roughness.png",
+      "type": "texture",
+      "bytes": 46059,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/lava_floor_albedo.png",
+      "type": "texture",
+      "bytes": 237858,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/lava_floor_emissive.png",
+      "type": "texture",
+      "bytes": 210318,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/lava_floor_normal.png",
+      "type": "texture",
+      "bytes": 1074057,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/lava_floor_roughness.png",
+      "type": "texture",
+      "bytes": 52219,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/metal_panel_albedo.png",
+      "type": "texture",
+      "bytes": 75026,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/metal_panel_emissive.png",
+      "type": "texture",
+      "bytes": 3142,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/metal_panel_normal.png",
+      "type": "texture",
+      "bytes": 1159322,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/metal_panel_roughness.png",
+      "type": "texture",
+      "bytes": 2386,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/stone_albedo.png",
+      "type": "texture",
+      "bytes": 105892,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/stone_emissive.png",
+      "type": "texture",
+      "bytes": 3142,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/stone_normal.png",
+      "type": "texture",
+      "bytes": 944446,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/stone_roughness.png",
+      "type": "texture",
+      "bytes": 41652,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/switch_off_albedo.png",
+      "type": "texture",
+      "bytes": 72794,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/switch_off_emissive.png",
+      "type": "texture",
+      "bytes": 3221,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/switch_off_normal.png",
+      "type": "texture",
+      "bytes": 1086898,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/switch_off_roughness.png",
+      "type": "texture",
+      "bytes": 2386,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/switch_on_albedo.png",
+      "type": "texture",
+      "bytes": 72754,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/switch_on_emissive.png",
+      "type": "texture",
+      "bytes": 3222,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/switch_on_normal.png",
+      "type": "texture",
+      "bytes": 1086918,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/switch_on_roughness.png",
+      "type": "texture",
+      "bytes": 2386,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/tech_panel_albedo.png",
+      "type": "texture",
+      "bytes": 73941,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/tech_panel_emissive.png",
+      "type": "texture",
+      "bytes": 4394,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/tech_panel_normal.png",
+      "type": "texture",
+      "bytes": 1135393,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "surfaces/tech_panel_roughness.png",
+      "type": "texture",
+      "bytes": 2386,
+      "size_m": [
+        2,
+        2,
+        0
+      ],
+      "triangles": 0,
+      "animations": [],
+      "nodes": [],
+      "pixels": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "validation.json",
+      "type": "json",
+      "bytes": 35321,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "validation.md",
+      "type": "md",
+      "bytes": 3287,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "weapons/chaingun.glb",
+      "type": "weapons",
+      "bytes": 1086844,
+      "size_m": [
+        0.6412,
+        0.6452,
+        1.4071
+      ],
+      "triangles": 9720,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "barrels"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cloth",
+        "edge"
+      ],
+      "preview": "previews/chaingun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "weapons/chaingun.meta.json",
+      "type": "json",
+      "bytes": 299,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "weapons/fist.glb",
+      "type": "weapons",
+      "bytes": 593844,
+      "size_m": [
+        0.59,
+        0.2897,
+        0.6369
+      ],
+      "triangles": 6032,
+      "animations": [],
+      "nodes": [
+        "fists"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "cloth",
+        "black",
+        "leather",
+        "iron",
+        "brass"
+      ],
+      "preview": "previews/fist.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "weapons/fist.meta.json",
+      "type": "json",
+      "bytes": 293,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "weapons/pistol.glb",
+      "type": "weapons",
+      "bytes": 817736,
+      "size_m": [
+        0.305,
+        0.5687,
+        0.8377
+      ],
+      "triangles": 6060,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "slide"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cloth"
+      ],
+      "preview": "previews/pistol.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "weapons/pistol.meta.json",
+      "type": "json",
+      "bytes": 296,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "weapons/rocket_launcher.glb",
+      "type": "weapons",
+      "bytes": 1200196,
+      "size_m": [
+        0.4825,
+        0.6987,
+        1.3806
+      ],
+      "triangles": 9640,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "tube"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "cyan",
+        "cloth",
+        "edge",
+        "red"
+      ],
+      "preview": "previews/rocket_launcher.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "weapons/rocket_launcher.meta.json",
+      "type": "json",
+      "bytes": 306,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    },
+    {
+      "file": "weapons/shotgun.glb",
+      "type": "weapons",
+      "bytes": 1023732,
+      "size_m": [
+        0.43,
+        0.5657,
+        1.4097
+      ],
+      "triangles": 8308,
+      "animations": [],
+      "nodes": [
+        "weapon",
+        "pump"
+      ],
+      "budget": [
+        4000,
+        10000
+      ],
+      "notes": "Grip origin; muzzle +Z. Gloved hands and sleeves. Animate named moving node in local coordinates.",
+      "materials": [
+        "leather",
+        "black",
+        "iron",
+        "brass",
+        "ember",
+        "edge",
+        "cloth",
+        "wood"
+      ],
+      "preview": "previews/shotgun.png",
+      "texture_sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ]
+    },
+    {
+      "file": "weapons/shotgun.meta.json",
+      "type": "json",
+      "bytes": 296,
+      "size_m": null,
+      "triangles": 0,
+      "animations": [],
+      "nodes": []
+    }
+  ]
+}

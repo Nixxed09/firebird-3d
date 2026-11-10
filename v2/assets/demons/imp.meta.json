@@ -1,0 +1,15 @@
+{
+  "file": "demons/imp.glb",
+  "type": "demons",
+  "size_m": [
+    1.0591,
+    1.7,
+    0.6734
+  ],
+  "triangles": 5148,
+  "budget": [
+    3000,
+    8000
+  ],
+  "notes": "Six in-place clips; windup precedes attack; no gore."
+}

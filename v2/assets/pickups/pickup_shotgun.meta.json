@@ -1,0 +1,15 @@
+{
+  "file": "pickups/pickup_shotgun.glb",
+  "type": "pickups",
+  "size_m": [
+    0.296,
+    0.4705,
+    1.0688
+  ],
+  "triangles": 4356,
+  "budget": [
+    4000,
+    10000
+  ],
+  "notes": "Ground-level origin; rotate root for idle pickup spin."
+}
