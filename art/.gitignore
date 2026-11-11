@@ -1,0 +1,11 @@
+*.log
+*.blend1
+*.blend2
+exports/*.fbm/
+animation-frames/
+
+# Rebuilt by art/source/build_firebird_art.py (large, so not in git)
+exports/
+renders/
+*.blend
+reviews/

@@ -8,7 +8,7 @@ public class Firebird : ModuleRules
         PublicDependencyModuleNames.AddRange(new[]
         {
             "Core", "CoreUObject", "Engine", "InputCore", "AIModule", "Slate", "SlateCore",
-            "Sockets", "Networking", "HTTP", "Json"
+            "Sockets", "Networking", "HTTP", "Json", "AnimGraphRuntime"
         });
     }
 }

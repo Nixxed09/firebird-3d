@@ -3,25 +3,36 @@
 # Family Arcade's updater and the LAN build check read.
 #   .\tools\ue-package.ps1 [-Configuration Development|Shipping]
 # -Commit: the source pin, when packaging from a plain source archive with no git (the Family Arcade's import)
-param([ValidateSet('Development', 'Shipping')][string]$Configuration = 'Development', [string]$Commit = '')
+param([ValidateSet('Development', 'Shipping')][string]$Configuration = 'Development', [string]$Commit = '', [int]$MaxParallelActions = 2)
 . "$PSScriptRoot\ue-common.ps1"
 $open = Get-FBProcesses
 if ($open.Count -gt 0) { throw "Close the Firebird editor/game first (PID $($open.ProcessId -join ', '))." }
 $stage = Join-Path $FBRoot "builds\stage"
 $out = Join-Path $FBRoot "builds\windows"
+# Keep recursive replacement confined to this project's two build directories.
+$buildRoot = [IO.Path]::GetFullPath((Join-Path $FBRoot 'builds'))
+$stage = [IO.Path]::GetFullPath($stage)
+$out = [IO.Path]::GetFullPath($out)
+if ((Split-Path $stage -Parent) -ne $buildRoot -or (Split-Path $out -Parent) -ne $buildRoot) {
+    throw 'Build destinations escaped the project builds directory.'
+}
 $uat = Join-Path $FBEngineRoot "Engine\Build\BatchFiles\RunUAT.bat"
 $log = Join-Path $FBRoot "captures\ue\package.log"
 New-Item -ItemType Directory -Force -Path (Split-Path $log) | Out-Null
-& $uat BuildCookRun "-project=$FBProject" -platform=Win64 "-clientconfig=$Configuration" -build -cook -stage -pak -iostore -archive "-archivedirectory=$stage" -nop4 -utf8output -unattended -NoP4 *>&1 | Tee-Object -FilePath $log | Select-String -Pattern "BUILD SUCCESSFUL|BUILD FAILED|Error:" | Select-Object -Last 10
+# This project's processes were checked above. A separate checkout can share the
+# target name and Live Coding mutex; packaging always builds ordinary binaries.
+& $uat BuildCookRun "-project=$FBProject" -platform=Win64 "-clientconfig=$Configuration" -build -cook -stage -pak -iostore -archive "-archivedirectory=$stage" "-ubtargs=-NoHotReloadFromIDE -MaxParallelActions=$MaxParallelActions" -nop4 -utf8output -unattended -NoP4 *>&1 | Tee-Object -FilePath $log | Select-String -Pattern "BUILD SUCCESSFUL|BUILD FAILED|Error:" | Select-Object -Last 10
 if ($LASTEXITCODE -ne 0) { throw "Packaging failed (exit $LASTEXITCODE); see $log" }
 # UAT archives into <stage>\Windows or straight into <stage> depending on what's already there
 $exeFound = Get-ChildItem $stage -Filter Firebird.exe -Recurse -Depth 1 | Select-Object -First 1
 if (!$exeFound) { throw "No Firebird.exe under $stage" }
 $built = $exeFound.DirectoryName
-if (Test-Path $out) { Remove-Item -Recurse -Force $out }
+$built = (Resolve-Path -LiteralPath $built).Path
+if ($built -ne $stage -and (Split-Path $built -Parent) -ne $stage) { throw "Unexpected archive source: $built" }
+if (Test-Path -LiteralPath $out) { Remove-Item -LiteralPath $out -Recurse -Force }
 New-Item -ItemType Directory -Force -Path (Split-Path $out) | Out-Null
-Move-Item $built $out
-if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }   # the next archive starts clean
+Move-Item -LiteralPath $built -Destination $out
+if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }   # the next archive starts clean
 # the build's fingerprint: the hash of the cooked content (same files -> same id on any computer)
 # the cooked content and the game program itself (a code change must change the id too)
 $paks = Get-ChildItem $out -Recurse -Include *.pak, *.utoc, *.ucas, Firebird*.exe | Sort-Object Name

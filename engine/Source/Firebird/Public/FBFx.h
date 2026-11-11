@@ -10,7 +10,7 @@ class UMaterialInstanceDynamic;
 
 // A short-lived glowing thing: a tracer, an impact flash, a mote of released
 // light, a flake of ash. It drifts, shrinks and fades its light, then goes.
-// (Art pass later: Niagara. This keeps the slice free of authored assets.)
+// Uses the authored ash shard, light seed and resonance ring meshes.
 UCLASS()
 class FIREBIRD_API AFBFx : public AActor
 {
@@ -25,6 +25,7 @@ public:
                         const FVector& Velocity = FVector::ZeroVector, float Gravity = 0.f, bool bSphere = false);
     // A burst of n motes outward and up from a point
     static void Burst(UWorld* World, const FVector& At, int32 N, const FLinearColor& Color, float Speed, float Life, float Size, float Gravity, float Emissive = 6.f);
+    static AFBFx* Resonance(UWorld* World, const FVector& At, const FLinearColor& Color, float Diameter, float Life = .65f, const FRotator& Rotation = FRotator::ZeroRotator);
 
 private:
     UPROPERTY() UStaticMeshComponent* Mesh;
@@ -32,4 +33,6 @@ private:
     UPROPERTY() UMaterialInstanceDynamic* Mat;
     float Life = 0.2f, Age = 0.f, Light0 = 0.f, Emissive0 = 1.f, Gravity = 0.f;
     FVector Velocity = FVector::ZeroVector, Scale0 = FVector::OneVector;
+    FRotator Spin = FRotator::ZeroRotator;
+    bool bExpanding = false;
 };

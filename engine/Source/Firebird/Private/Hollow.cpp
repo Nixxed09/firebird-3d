@@ -1,5 +1,9 @@
 #include "Hollow.h"
 #include "Firebird.h"
+#include "FBArt.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimSequence.h"
 #include "FBFx.h"
 #include "FirebirdCharacter.h"
 #include "EmberProjectile.h"
@@ -56,6 +60,32 @@ void AHollow::BeginPlay()
 // the shell: hunched cracked ash, with a crimson seam down the chest (style guide)
 void AHollow::BuildShell()
 {
+    if (USkeletalMesh* ArtMesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Firebird/ArtKitV01/Meshes/SK_FB_Hollow.SK_FB_Hollow")))
+    {
+        USkeletalMeshComponent* Visual = GetMesh();
+        Visual->SetSkeletalMesh(ArtMesh);
+        Visual->SetRelativeLocation(FVector(0, 0, -92));
+        Visual->SetRelativeRotation(FRotator(0, -90, 0));
+        Visual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Visual->SetCanEverAffectNavigation(false);
+        Visual->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+        auto Clip = [](const TCHAR* Name) {
+            const FString Asset = FString::Printf(TEXT("SK_FB_Hollow_Hollow_Rig_A_FB_Hollow_%s"), Name);
+            return LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("/Game/Firebird/ArtKitV01/Animations/%s.%s"), *Asset, *Asset));
+        };
+        ArtIdle = Clip(TEXT("Idle")); ArtWalk = Clip(TEXT("Walk")); ArtWindup = Clip(TEXT("Windup"));
+        ArtCracked = Clip(TEXT("Cracked")); ArtRelease = Clip(TEXT("Release"));
+        ShellMat = FBArt::Surface(this, TEXT("M_FB_AshShell"));
+        SeamMat = FBArt::Surface(this, TEXT("M_FB_Crimson"), FB::Crimson);
+        const int32 ShellSlot = Visual->GetMaterialIndex(TEXT("M_FB_AshShell"));
+        const int32 CoreSlot = Visual->GetMaterialIndex(TEXT("M_FB_Crimson"));
+        if (ShellSlot != INDEX_NONE) Visual->SetMaterial(ShellSlot, ShellMat);
+        if (CoreSlot != INDEX_NONE) Visual->SetMaterial(CoreSlot, SeamMat);
+        Visual->PlayAnimation(ArtIdle, true);
+        bArtShell = true;
+        UE_LOG(LogFirebird, Display, TEXT("FB_ART hollow skeleton=%d clips=%d"), ArtMesh->GetSkeleton() != nullptr, !!ArtIdle + !!ArtWalk + !!ArtWindup + !!ArtCracked + !!ArtRelease);
+        return;
+    }
     ShellMat = FB::MakeSurface(this, FB::Ash * 1.4f, 0.f, 0.95f);
     SeamMat = FB::MakeGlow(this, FB::Crimson, 6.f);
     USceneComponent* Root = GetCapsuleComponent();
@@ -122,7 +152,9 @@ void AHollow::Tick(float DeltaSeconds)
         // linger a moment so every computer gets the break before it disappears
         if (!bBrokenFx) { bBrokenFx = true; SetActorHiddenInGame(true); }
         GoneT += DeltaSeconds;
-        if (HasAuthority() && GoneT > 0.5f) Destroy();
+        if (bArtReleased && ShellMat) ShellMat->SetScalarParameterValue(TEXT("Dissolve"), FMath::Clamp((GoneT - .12f) / .5f, 0.f, 1.f));
+        if (bArtReleased && GoneT > .65f) SetActorHiddenInGame(true);
+        if (HasAuthority() && GoneT > (bArtReleased ? .85f : .5f)) Destroy();
         return;
     }
     Bob += DeltaSeconds;
@@ -197,6 +229,32 @@ void AHollow::Draw(float DeltaSeconds)
     if (!ShellMat) return;
     // the tell has a sound too: a rising rasp you can hear across the arena
     if (State == EHollowState::Windup && LastDrawnState != EHollowState::Windup) FB::Sound(this, TEXT("hollow_windup"), GetActorLocation());
+    if (bArtShell)
+    {
+        const bool bWalking = State == EHollowState::Chase && GetVelocity().Size2D() > 30.f;
+        if (State != LastDrawnState || bWalking != bArtWalking)
+        {
+            UAnimSequence* Anim = State == EHollowState::Windup ? ArtWindup : State == EHollowState::Cracked ? ArtCracked : bWalking ? ArtWalk : ArtIdle;
+            GetMesh()->PlayAnimation(Anim, State != EHollowState::Windup);
+        }
+        if (State == EHollowState::Windup)
+        {
+            const float K = FMath::Clamp(WindupT / WindupTime, 0.f, 1.f);
+            GetMesh()->SetPlayRate(0.f);
+            if (ArtWindup) GetMesh()->SetPosition(K * ArtWindup->GetPlayLength(), false);
+            SetSeams(FB::Crimson, 1.5f + 3.5f * K, 8.f + 22.f * K);
+        }
+        else
+        {
+            GetMesh()->SetPlayRate(bWalking ? FMath::Clamp(GetVelocity().Size2D() / 260.f, .55f, 1.65f) : 1.f);
+            const bool bCracked = State == EHollowState::Cracked;
+            SetSeams(bCracked ? FB::Amber : FB::Crimson, bCracked ? 2.5f + .7f * FMath::Sin(Bob * 12) : 1.3f, bCracked ? 12.f : 1.5f);
+        }
+        ShellMat->SetScalarParameterValue(TEXT("HitFlash"), 5.f * FMath::Clamp(FlashT / .08f, 0.f, 1.f));
+        bArtWalking = bWalking;
+        LastDrawnState = State;
+        return;
+    }
     LastDrawnState = State;
     ShellMat->SetVectorParameterValue(TEXT("Color"), FMath::Lerp(FB::Ash * 1.4f, FLinearColor(3.f, 2.6f, 2.2f), FlashT / 0.08f));
     switch (State)
@@ -304,7 +362,10 @@ void AHollow::Multi_Break_Implementation(bool bReleased)
         // the light inside goes up: a gold column of motes, and a flash that lights the room
         AFBFx::Burst(GetWorld(), At + FVector(0, 0, 20), 26, FB::Amber, 420.f, 1.4f, 7.f, -500.f, 4.f);
         AFBFx::Burst(GetWorld(), At + FVector(0, 0, 20), 10, FLinearColor(1.f, 0.95f, 0.8f), 250.f, 1.8f, 5.f, -700.f, 5.f);
-        AFBFx::Spawn(GetWorld(), At + FVector(0, 0, 40), FRotator::ZeroRotator, FVector(30.f), FB::Amber, 6.f, 0.35f, 400.f, 1000.f, FVector(0, 0, 200), 0.f, true);
+        AFBFx::Spawn(GetWorld(), At + FVector(0, 0, 40), FRotator::ZeroRotator, FVector(18.f), FB::Amber, 3.f, 0.35f, 55.f, 800.f, FVector(0, 0, 200), 0.f, true);
+        AFBFx::Resonance(GetWorld(), At - FVector(0, 0, 25), FB::Amber, 125.f, .72f);
+        AFBFx::Resonance(GetWorld(), At + FVector(0, 0, 30), FB::Amber, 85.f, .9f, FRotator(30, 0, 0));
+        AFBFx::Burst(GetWorld(), At, 12, FB::Ash, 180.f, .65f, 10.f, 700.f, .3f);
     }
     else
     {
@@ -313,5 +374,12 @@ void AHollow::Multi_Break_Implementation(bool bReleased)
         AFBFx::Burst(GetWorld(), At + FVector(0, 0, 30), 6, FB::Amber, 300.f, 0.9f, 6.f, -400.f, 8.f);
     }
     bBrokenFx = true;
-    SetActorHiddenInGame(true);
+    bArtReleased = bArtShell && bReleased;
+    if (bArtReleased)
+    {
+        GetMesh()->PlayAnimation(ArtRelease, false);
+        GetMesh()->SetPlayRate(1.4f);
+        SetSeams(FB::Amber, 3.f, 15.f);
+    }
+    else SetActorHiddenInGame(true);
 }

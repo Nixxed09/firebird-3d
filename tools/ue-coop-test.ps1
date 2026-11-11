@@ -5,8 +5,13 @@
 # -BENCHMARK: an unthrottled host would live through its wait before the
 # others arrive), capped at 30 fps so recorded frames line up with the video.
 #   .\tools\ue-coop-test.ps1 [-Players 2] [-Video]
-param([ValidateRange(2, 4)][int]$Players = 2, [switch]$Video, [switch]$CleanHostView, [int]$Port = 27705, [int]$ResX = 1280, [int]$ResY = 720)
+param([ValidateRange(2, 4)][int]$Players = 2, [switch]$Video, [switch]$CleanHostView, [switch]$Packaged, [int]$Port = 27705, [int]$ResX = 1280, [int]$ResY = 720)
 . "$PSScriptRoot\ue-common.ps1"
+$gameExe = $FBEditor
+if ($Packaged) {
+  $gameExe = Join-Path $FBRoot 'builds\windows\Firebird.exe'
+  if (!(Test-Path -LiteralPath $gameExe)) { throw "No packaged game at $gameExe" }
+}
 
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $root = Join-Path $FBRoot "captures\ue\coop-$stamp"
@@ -15,11 +20,17 @@ function Start-FB([string]$name, [string]$url, [bool]$record = $false) {
   $out = Join-Path $root $name
   New-Item -ItemType Directory -Force -Path $out | Out-Null
   $a = @("`"$FBProject`"", $url, "-game", "-windowed", "-ResX=$ResX", "-ResY=$ResY", "-NoSplash", "-nosound",
-         "-abslog=`"$(Join-Path $out 'game.log')`"", "-ExecCmds=`"DisableAllScreenMessages, t.MaxFPS 30`"",
+         "-abslog=`"$(Join-Path $out 'game.log')`"", "-ExecCmds=`"DisableAllScreenMessages, t.MaxFPS 30, t.IdleWhenNotForeground 0, tick.MinimizedSyncDrawToGPU 0`"",
          "-FBAuto", "-FBScenario=coop", "-FBPlayers=$Players", "-FBOut=`"$out`"")
   if ($record) { $a += "-FBFrames" }
   if ($name -eq "host" -and $CleanHostView) { $a = $a -replace 'DisableAllScreenMessages, t.MaxFPS 30', 'DisableAllScreenMessages, t.MaxFPS 30, showhud' }   # pictures without the HUD (covers)   # only one recorder: saving every frame slows a game down
-  Start-Process -FilePath $FBEditor -ArgumentList $a -PassThru -WindowStyle Hidden
+  if ($Packaged) {
+    $a = $a | Where-Object { $_ -ne "`"$FBProject`"" -and $_ -ne '-game' }
+    # Keep two automated clients independent of hidden Windows swapchains.
+    # Rendering and screenshot capture remain enabled, capped at 30 fps.
+    $a += '-RenderOffscreen'
+  }
+  Start-Process -FilePath $gameExe -ArgumentList $a -PassThru -WindowStyle Hidden
 }
 
 $procs = @()
@@ -50,7 +61,13 @@ foreach ($dir in Get-ChildItem $root -Directory) {
     $fps = [Math]::Max(2, [Math]::Round($j.frames / [Math]::Max(1, $j.seconds), 2))
     $mp4 = Join-Path $root "coop-view-$($dir.Name).mp4"
     & ffmpeg -y -loglevel error -framerate $fps -i (Join-Path $frames "f_%05d.png") -vf "fps=30,scale=1280:-2" -c:v libx264 -pix_fmt yuv420p -crf 22 $mp4
-    if (Test-Path $mp4) { Remove-Item -Recurse -Force $frames; Write-Output "FB_VIDEO $mp4 (recorded at $fps fps)" }
+    if (Test-Path $mp4) {
+      $resolvedFrames = (Resolve-Path -LiteralPath $frames).Path
+      if ((Split-Path $resolvedFrames -Parent) -ne $dir.FullName -or (Split-Path $resolvedFrames -Leaf) -ne 'frames' -or (Split-Path $dir.FullName -Parent) -ne $root) { throw "Unexpected capture frames path: $resolvedFrames" }
+      Remove-Item -LiteralPath $resolvedFrames -Recurse -Force
+      Write-Output "FB_VIDEO $mp4 (recorded at $fps fps)"
+    }
   }
 }
 Write-Output "FB_COOP $(if ($all) { 'PASS' } else { 'FAIL' }) $root"
+if (-not $all) { throw "Co-op checks failed; see $root" }

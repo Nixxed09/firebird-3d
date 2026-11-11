@@ -122,6 +122,8 @@ public:
     static constexpr float PadYawSpeed = 220.f;
     static constexpr float PadPitchSpeed = 150.f;
     float HorizontalSpeed() const;
+    uint32 GetBodyPunchSerial() const { return BodyPunchSerial; }
+    uint32 GetBodyShotSerial() const { return BodyShotSerial; }
     // the owning computer puts its Firebird somewhere (movement is owned there)
     void TeleportOwned(const FVector& To, float Yaw);
 
@@ -165,9 +167,6 @@ private:
     UPROPERTY() USceneComponent* ViewRig;
     // the figure other players see
     UPROPERTY() USceneComponent* Body;
-    UPROPERTY() UStaticMeshComponent* WingL;
-    UPROPERTY() UStaticMeshComponent* WingR;
-    UPROPERTY() UStaticMeshComponent* BodyFist;
     UPROPERTY() UPointLightComponent* BodyGlow;
 
     float JumpBuffer = 0.f;
@@ -178,7 +177,6 @@ private:
     float SparkCooldown = 0.f;
     float FistCooldown = 0.f;
     float FistAnim = 0.f;         // 1 -> 0 over a punch
-    float BodyPunch = 0.f;        // the same, on the figure others see
     float Recoil = 0.f;
     float FovKick = 0.f;
     float Shake = 0.f;
@@ -189,4 +187,6 @@ private:
     float DeadT = 0.f;
     bool bRespawnSent = false;
     bool bBuilt = false;
+    uint32 BodyPunchSerial = 0;
+    uint32 BodyShotSerial = 0;
 };

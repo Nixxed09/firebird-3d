@@ -8,6 +8,7 @@ class UPointLightComponent;
 class UStaticMeshComponent;
 class UMaterialInstanceDynamic;
 class AFirebirdCharacter;
+class UAnimSequence;
 
 UENUM()
 enum class EHollowState : uint8 { Idle, Chase, Windup, Cracked, Gone };
@@ -79,6 +80,14 @@ private:
     UPROPERTY() UPointLightComponent* Core;
     UPROPERTY() UMaterialInstanceDynamic* ShellMat;
     UPROPERTY() UMaterialInstanceDynamic* SeamMat;
+    UPROPERTY() UAnimSequence* ArtIdle;
+    UPROPERTY() UAnimSequence* ArtWalk;
+    UPROPERTY() UAnimSequence* ArtWindup;
+    UPROPERTY() UAnimSequence* ArtCracked;
+    UPROPERTY() UAnimSequence* ArtRelease;
+    bool bArtShell = false;
+    bool bArtWalking = false;
+    bool bArtReleased = false;
 
     float AttackCooldown = 1.5f;
     float StrafeT = 0.f;

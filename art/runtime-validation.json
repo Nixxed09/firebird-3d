@@ -1,0 +1,569 @@
+{
+  "build_info": [
+    "Game: firebird-coop",
+    "Built from: f4f36bdc32746bdfda7e2f73b9a52c0a7ed73dcf",
+    "Commit: f4f36bd",
+    "Build id: 94ca6d8177a27668",
+    "Build order: 1792961458",
+    "Configuration: Development",
+    "Built at: 2026-10-25T14:50:58.9196704-06:00"
+  ],
+  "runs": {
+    "packaged_art": {
+      "capture_directory": "captures/ue/art-20261025-144734",
+      "scenario": "art",
+      "all_ok": true,
+      "seconds": 35.23,
+      "frames": 0,
+      "proofs": {
+        "authored_hollow_loaded": {
+          "ok": true,
+          "detail": "rendered the gameplay Hollow skeletal mesh"
+        },
+        "art_views_captured": {
+          "ok": true,
+          "detail": "ten surface views plus shell release and restored arena"
+        }
+      },
+      "shots": [
+        "01-arrival-surfaces",
+        "02-furnace-pit",
+        "03-bronze-gate",
+        "04-bell-arena",
+        "05-arena-reverse",
+        "06-ceiling",
+        "07-hollow-detail",
+        "08-firebird-armor",
+        "09-mercury",
+        "10-weapon-clearance",
+        "11-shell-release",
+        "12-restored-arena"
+      ],
+      "build_id": "23c633628a282052",
+      "note": "Captured before the motion-review camera framing update; art and gameplay were unchanged."
+    },
+    "packaged_motion": {
+      "capture_directory": "captures/ue/motion-20261025-150452",
+      "scenario": "motion",
+      "all_ok": true,
+      "seconds": 9.1,
+      "frames": 261,
+      "proofs": {
+        "articulated_player_loaded": {
+          "ok": true,
+          "detail": "skeletal player with 23 bones and native blend graph"
+        },
+        "running_articulation": {
+          "ok": true,
+          "detail": "foot moved 28.9 cm in the rig at 1000 cm/s"
+        },
+        "crouch_pose": {
+          "ok": true,
+          "detail": "crouched head pivot 64.5 cm above the floor"
+        },
+        "air_pose": {
+          "ok": true,
+          "detail": "airborne foot offset 10.7 cm"
+        },
+        "jump_framing": {
+          "ok": true,
+          "detail": "head and both feet remain inside the review camera"
+        },
+        "fall_framing": {
+          "ok": true,
+          "detail": "head and both feet remain inside the review camera"
+        },
+        "layered_punch": {
+          "ok": true,
+          "detail": "punch hand extended 24.5 cm"
+        },
+        "motion_views": {
+          "ok": true,
+          "detail": "eleven poses captured from the native animation graph"
+        }
+      },
+      "shots": [
+        "01-idle",
+        "02-run",
+        "03-backpedal",
+        "04-strafe-left",
+        "05-strafe-right",
+        "06-crouch",
+        "07-jump",
+        "08-fall",
+        "09-punch",
+        "10-fire",
+        "11-down"
+      ]
+    },
+    "packaged_gameplay": {
+      "capture_directory": "captures/ue/feel-20261025-150452",
+      "scenario": "feel",
+      "all_ok": true,
+      "seconds": 12.91,
+      "frames": 382,
+      "proofs": {
+        "coyote_jump": {
+          "ok": true,
+          "detail": "jumped ~100 ms after leaving the edge, landed at x=2940 z=94"
+        },
+        "dash_gap": {
+          "ok": true,
+          "detail": "jump + air dash landed at x=4308 z=94"
+        },
+        "slide_gate": {
+          "ok": true,
+          "detail": "passed under the 110 cm gate in 0.97 s (crouch-walking would take 2.72 s)"
+        },
+        "crack_then_release": {
+          "ok": true,
+          "detail": "released: +20 health (now 75)"
+        },
+        "read_and_dodge": {
+          "ok": true,
+          "detail": "saw the windup, side-dashed; hits taken in the next 1.4 s: 0"
+        },
+        "arena_clear": {
+          "ok": true,
+          "detail": "releases 2, dashes 3, slides 1, hits taken 1"
+        }
+      },
+      "shots": [
+        "01-arrival",
+        "02-coyote-jump",
+        "03-dash",
+        "04-slide",
+        "05-cracked",
+        "06-release",
+        "07-windup-tell",
+        "08-clear"
+      ]
+    },
+    "no_dash_control": {
+      "capture_directory": "captures/ue/nodash-20261013-181119",
+      "scenario": "nodash",
+      "all_ok": true,
+      "seconds": 5.67,
+      "frames": 0,
+      "proofs": {
+        "coyote_jump": {
+          "ok": true,
+          "detail": "jumped ~100 ms after leaving the edge, landed at x=2940 z=94"
+        },
+        "gap_needs_dash": {
+          "ok": true,
+          "detail": "jump alone reached x=4066 (gap ends at 4100)"
+        }
+      },
+      "shots": [
+        "01-arrival",
+        "02-coyote-jump",
+        "03-no-dash"
+      ]
+    },
+    "coop_host": {
+      "capture_directory": "captures/ue/coop-20261025-150031/host",
+      "scenario": "coop",
+      "all_ok": true,
+      "seconds": 206.56,
+      "frames": 0,
+      "proofs": {
+        "sees_teammates": {
+          "ok": true,
+          "detail": "2 player(s) in this world, playing as P1"
+        },
+        "arena_clear": {
+          "ok": true,
+          "detail": "cleared together in 194 s (host clock)"
+        },
+        "hollows_replicated": {
+          "ok": true,
+          "detail": "up to 10 Hollows alive at once on this computer"
+        },
+        "my_hits_confirmed_by_host": {
+          "ok": true,
+          "detail": "37 hits, 0 broken by shots"
+        },
+        "my_releases_healed": {
+          "ok": true,
+          "detail": "18 releases"
+        },
+        "teammate_moving_here": {
+          "ok": true,
+          "detail": "the teammate travelled 865 m as seen on this computer"
+        },
+        "teammate_animation": {
+          "ok": true,
+          "detail": "remote skeletal foot accumulated 22600 cm of local pose movement"
+        },
+        "info": {
+          "ok": true,
+          "detail": "P1: knocked down 4 times, 98 dashes, 0 slides"
+        }
+      },
+      "shots": [
+        "01-together",
+        "02-fight",
+        "03-clear",
+        "04-restored-grid"
+      ],
+      "restoration_observed": true
+    },
+    "coop_joiner": {
+      "capture_directory": "captures/ue/coop-20261025-150031/p2",
+      "scenario": "coop",
+      "all_ok": true,
+      "seconds": 201.44,
+      "frames": 0,
+      "proofs": {
+        "sees_teammates": {
+          "ok": true,
+          "detail": "2 player(s) in this world, playing as P2"
+        },
+        "arena_clear": {
+          "ok": true,
+          "detail": "cleared together in 194 s (host clock)"
+        },
+        "hollows_replicated": {
+          "ok": true,
+          "detail": "up to 10 Hollows alive at once on this computer"
+        },
+        "my_hits_confirmed_by_host": {
+          "ok": true,
+          "detail": "47 hits, 1 broken by shots"
+        },
+        "my_releases_healed": {
+          "ok": true,
+          "detail": "10 releases"
+        },
+        "teammate_moving_here": {
+          "ok": true,
+          "detail": "the teammate travelled 1606 m as seen on this computer"
+        },
+        "teammate_animation": {
+          "ok": true,
+          "detail": "remote skeletal foot accumulated 775 cm of local pose movement"
+        },
+        "info": {
+          "ok": true,
+          "detail": "P2: knocked down 3 times, 72 dashes, 0 slides"
+        }
+      },
+      "shots": [
+        "01-together",
+        "02-fight",
+        "03-clear",
+        "04-restored-grid"
+      ],
+      "restoration_observed": true
+    }
+  },
+  "limitations": [
+    "Foot IK, dedicated slide/dash clips, skeletal LODs and hardware performance profiling remain.",
+    "Two-player networking was tested as two processes on one machine, not across separate computers.",
+    "Simultaneous rendering of two game instances can be slow; benchmark captures are not FPS measurements.",
+    "The no-dash control is retained from the earlier pass; movement tuning and geometry were unchanged."
+  ],
+  "earlier_attempts": [
+    {
+      "capture_directory": "captures/ue/coop-20261025-145103",
+      "results": {
+        "host": {
+          "scenario": "coop",
+          "all_ok": false,
+          "seconds": 66.68,
+          "frames": 0,
+          "proofs": {
+            "sees_teammates": {
+              "ok": true,
+              "detail": "2 player(s) in this world, playing as P1"
+            },
+            "arena_clear": {
+              "ok": true,
+              "detail": "cleared together in 55 s (host clock)"
+            },
+            "hollows_replicated": {
+              "ok": true,
+              "detail": "up to 7 Hollows alive at once on this computer"
+            },
+            "my_hits_confirmed_by_host": {
+              "ok": true,
+              "detail": "13 hits, 3 broken by shots"
+            },
+            "my_releases_healed": {
+              "ok": false,
+              "detail": "0 releases"
+            },
+            "teammate_moving_here": {
+              "ok": true,
+              "detail": "the teammate travelled 401 m as seen on this computer"
+            },
+            "teammate_animation": {
+              "ok": true,
+              "detail": "remote skeletal foot accumulated 1713 cm of local pose movement"
+            },
+            "info": {
+              "ok": true,
+              "detail": "P1: knocked down 0 times, 30 dashes, 0 slides"
+            }
+          },
+          "shots": [
+            "01-together",
+            "02-fight",
+            "03-clear",
+            "04-restored-grid"
+          ]
+        },
+        "p2": {
+          "scenario": "coop",
+          "all_ok": true,
+          "seconds": 58.97,
+          "frames": 0,
+          "proofs": {
+            "sees_teammates": {
+              "ok": true,
+              "detail": "2 player(s) in this world, playing as P2"
+            },
+            "arena_clear": {
+              "ok": true,
+              "detail": "cleared together in 55 s (host clock)"
+            },
+            "hollows_replicated": {
+              "ok": true,
+              "detail": "up to 7 Hollows alive at once on this computer"
+            },
+            "my_hits_confirmed_by_host": {
+              "ok": true,
+              "detail": "76 hits, 0 broken by shots"
+            },
+            "my_releases_healed": {
+              "ok": true,
+              "detail": "26 releases"
+            },
+            "teammate_moving_here": {
+              "ok": true,
+              "detail": "the teammate travelled 398 m as seen on this computer"
+            },
+            "teammate_animation": {
+              "ok": true,
+              "detail": "remote skeletal foot accumulated 10466 cm of local pose movement"
+            },
+            "info": {
+              "ok": true,
+              "detail": "P2: knocked down 0 times, 27 dashes, 0 slides"
+            }
+          },
+          "shots": [
+            "01-together",
+            "02-fight",
+            "03-clear",
+            "04-restored-grid"
+          ]
+        }
+      }
+    },
+    {
+      "capture_directory": "captures/ue/coop-20261025-145308",
+      "results": {
+        "host": {
+          "scenario": "coop",
+          "all_ok": false,
+          "seconds": 46.49,
+          "frames": 0,
+          "proofs": {
+            "sees_teammates": {
+              "ok": true,
+              "detail": "2 player(s) in this world, playing as P1"
+            },
+            "arena_clear": {
+              "ok": true,
+              "detail": "cleared together in 35 s (host clock)"
+            },
+            "hollows_replicated": {
+              "ok": true,
+              "detail": "up to 2 Hollows alive at once on this computer"
+            },
+            "my_hits_confirmed_by_host": {
+              "ok": true,
+              "detail": "3 hits, 2 broken by shots"
+            },
+            "my_releases_healed": {
+              "ok": false,
+              "detail": "0 releases"
+            },
+            "teammate_moving_here": {
+              "ok": true,
+              "detail": "the teammate travelled 350 m as seen on this computer"
+            },
+            "teammate_animation": {
+              "ok": true,
+              "detail": "remote skeletal foot accumulated 255 cm of local pose movement"
+            },
+            "info": {
+              "ok": true,
+              "detail": "P1: knocked down 0 times, 8 dashes, 0 slides"
+            }
+          },
+          "shots": [
+            "01-together",
+            "03-clear",
+            "04-restored-grid"
+          ]
+        },
+        "p2": {
+          "scenario": "coop",
+          "all_ok": true,
+          "seconds": 134.43,
+          "frames": 0,
+          "proofs": {
+            "sees_teammates": {
+              "ok": true,
+              "detail": "2 player(s) in this world, playing as P2"
+            },
+            "arena_clear": {
+              "ok": true,
+              "detail": "cleared together in 35 s (host clock)"
+            },
+            "hollows_replicated": {
+              "ok": true,
+              "detail": "up to 2 Hollows alive at once on this computer"
+            },
+            "my_hits_confirmed_by_host": {
+              "ok": true,
+              "detail": "103 hits, 18 broken by shots"
+            },
+            "my_releases_healed": {
+              "ok": true,
+              "detail": "8 releases"
+            },
+            "teammate_moving_here": {
+              "ok": true,
+              "detail": "the teammate travelled 371 m as seen on this computer"
+            },
+            "teammate_animation": {
+              "ok": true,
+              "detail": "remote skeletal foot accumulated 18258 cm of local pose movement"
+            },
+            "info": {
+              "ok": true,
+              "detail": "P2: knocked down 0 times, 16 dashes, 0 slides"
+            }
+          },
+          "shots": [
+            "01-together",
+            "03-clear",
+            "04-restored-grid"
+          ]
+        }
+      }
+    },
+    {
+      "capture_directory": "captures/ue/coop-20261025-145751",
+      "results": {
+        "host": {
+          "status": "stopped before completion"
+        },
+        "p2": {
+          "status": "stopped before completion"
+        }
+      }
+    }
+  ],
+  "packaged_missing_art_errors": [],
+  "blender_geometry_passed": true,
+  "unreal_reload_passed": true,
+  "asset_count": 24,
+  "animation_count": 16,
+  "static_mesh_lods": {
+    "SM_FB_Arch_4m": [
+      4420,
+      2430,
+      1238
+    ],
+    "SM_FB_Column_4m": [
+      3172,
+      1744,
+      888
+    ],
+    "SM_FB_Wall_4m": [
+      4320,
+      2376,
+      1210
+    ],
+    "SM_FB_Floor_4m": [
+      6684,
+      3676,
+      1872
+    ],
+    "SM_FB_Bell": [
+      8444,
+      4644,
+      2364
+    ],
+    "SM_FB_Lantern": [
+      2008,
+      1104,
+      562
+    ],
+    "SM_FB_Waystone": [
+      7688,
+      4228,
+      2152
+    ],
+    "SM_FB_MercuryCask": [
+      3976,
+      2186,
+      1114
+    ],
+    "SM_FB_SparkCaster": [
+      12100,
+      6654,
+      3387
+    ],
+    "SM_FB_Vault_10m": [
+      8640,
+      4752,
+      2420
+    ],
+    "SM_FB_ResonanceRing": [
+      2400,
+      1320,
+      672
+    ]
+  },
+  "player_animation_checks": {
+    "Run_travel_m": 0.6532875825380556,
+    "Punch_travel_m": 0.31549484802252936,
+    "Fire_travel_m": 0.041394221300682
+  },
+  "player_crouch_world_bounds_z_m": [
+    0.008962786436080932,
+    1.096329044342041
+  ],
+  "passed": true,
+  "screenshots": [
+    "renders/runtime/01-arrival-surfaces.png",
+    "renders/runtime/02-furnace-pit.png",
+    "renders/runtime/03-bronze-gate.png",
+    "renders/runtime/04-bell-arena.png",
+    "renders/runtime/05-arena-reverse.png",
+    "renders/runtime/06-ceiling.png",
+    "renders/runtime/07-hollow-detail.png",
+    "renders/runtime/08-firebird-armor.png",
+    "renders/runtime/09-mercury.png",
+    "renders/runtime/10-weapon-clearance.png",
+    "renders/runtime/11-shell-release.png",
+    "renders/runtime/12-restored-arena.png",
+    "renders/motion/01-idle.png",
+    "renders/motion/02-run.png",
+    "renders/motion/03-backpedal.png",
+    "renders/motion/04-strafe-left.png",
+    "renders/motion/05-strafe-right.png",
+    "renders/motion/06-crouch.png",
+    "renders/motion/07-jump.png",
+    "renders/motion/08-fall.png",
+    "renders/motion/09-punch.png",
+    "renders/motion/10-fire.png",
+    "renders/motion/11-down.png"
+  ]
+}

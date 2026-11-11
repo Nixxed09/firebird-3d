@@ -52,10 +52,16 @@ private:
     bool bDashedB = false;
     // co-op scenario (-FBScenario=coop -FBPlayers=N): each process plays its own Firebird
     void TickCoop(AFirebirdCharacter* P, float DeltaSeconds);
+    void TickMotion(AFirebirdCharacter* P, float DeltaSeconds);
+    UPROPERTY() AFirebirdCharacter* MotionModel = nullptr;
+    FVector MotionFoot = FVector::ZeroVector;
+    FVector MotionHand = FVector::ZeroVector;
     int32 WantPlayers = 1;
     int32 MaxHollowsSeen = 0;
     int32 MaxTeammatesSeen = 0;
     float TeammateTravel = 0.f;
+    float TeammateArtMotion = 0.f;
+    TMap<TWeakObjectPtr<AFirebirdCharacter>, FVector> TeammateFeet;
     FVector LastTeammatePos = FVector::ZeroVector;
     bool bTeammatePosSet = false;
     float StrafeT = 0.f;

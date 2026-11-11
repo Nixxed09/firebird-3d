@@ -23,7 +23,7 @@ AEmberProjectile::AEmberProjectile()
     Light->SetupAttachment(Mesh);
     Light->SetUsingAbsoluteScale(true);
     Light->SetIntensityUnits(ELightUnits::Candelas);
-    Light->SetIntensity(180.f);
+    Light->SetIntensity(24.f);
     Light->SetAttenuationRadius(450.f);
     Light->SetLightColor(FB::Crimson);
     Light->SetCastShadows(false);
@@ -54,7 +54,7 @@ void AEmberProjectile::BeginPlay()
 {
     Super::BeginPlay();
     Mesh->SetStaticMesh(FB::Sphere());
-    Mesh->SetMaterial(0, FB::MakeGlow(this, FB::Crimson, 14.f));
+    Mesh->SetMaterial(0, FB::MakeGlow(this, FB::Crimson, 4.f));
     FB::Sound(this, TEXT("ember_throw"), GetActorLocation());
 }
 

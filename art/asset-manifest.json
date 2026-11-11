@@ -1,0 +1,322 @@
+{
+  "version": 1,
+  "units": "meters",
+  "up": "Z",
+  "forward": "-Y",
+  "generator": "art/source/build_firebird_art.py",
+  "materials": {
+    "M_FB_Limestone": {
+      "base_color": [
+        0.6399999856948853,
+        0.5699999928474426,
+        0.4399999976158142,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.800000011920929,
+      "emission": 0.0
+    },
+    "M_FB_AshShell": {
+      "base_color": [
+        0.4300000071525574,
+        0.44999998807907104,
+        0.4300000071525574,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.8299999833106995,
+      "emission": 0.0
+    },
+    "M_FB_Basalt": {
+      "base_color": [
+        0.06499999761581421,
+        0.07900000363588333,
+        0.08500000089406967,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.7200000286102295,
+      "emission": 0.0
+    },
+    "M_FB_Bronze": {
+      "base_color": [
+        0.47999998927116394,
+        0.2549999952316284,
+        0.07500000298023224,
+        1.0
+      ],
+      "metallic": 0.8199999928474426,
+      "roughness": 0.3400000035762787,
+      "emission": 0.0
+    },
+    "M_FB_GoldEdge": {
+      "base_color": [
+        0.6800000071525574,
+        0.4399999976158142,
+        0.1599999964237213,
+        1.0
+      ],
+      "metallic": 0.8500000238418579,
+      "roughness": 0.28999999165534973,
+      "emission": 0.0
+    },
+    "M_FB_Obsidian": {
+      "base_color": [
+        0.02500000037252903,
+        0.02800000086426735,
+        0.035999998450279236,
+        1.0
+      ],
+      "metallic": 0.20000000298023224,
+      "roughness": 0.3799999952316284,
+      "emission": 0.0
+    },
+    "M_FB_Crimson": {
+      "base_color": [
+        0.47999998927116394,
+        0.0020000000949949026,
+        0.008999999612569809,
+        1.0
+      ],
+      "metallic": 0.20000000298023224,
+      "roughness": 0.23999999463558197,
+      "emission": 1.2000000476837158
+    },
+    "M_FB_Aether": {
+      "base_color": [
+        0.02500000037252903,
+        0.6200000047683716,
+        0.800000011920929,
+        1.0
+      ],
+      "metallic": 0.25,
+      "roughness": 0.25,
+      "emission": 2.200000047683716
+    },
+    "M_FB_Amber": {
+      "base_color": [
+        1.0,
+        0.2800000011920929,
+        0.02500000037252903,
+        1.0
+      ],
+      "metallic": 0.15000000596046448,
+      "roughness": 0.2800000011920929,
+      "emission": 3.0
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_FB_Arch_4m",
+      "description": "4m wide, 5m high bell-civic arch; open 2.9m passage",
+      "triangles": 4420,
+      "mesh_parts": 28,
+      "fbx": "exports/SM_FB_Arch_4m.fbx",
+      "glb": "exports/SM_FB_Arch_4m.glb"
+    },
+    {
+      "name": "SM_FB_Column_4m",
+      "description": "Octagonal civic pillar, 4m high, foot pivot",
+      "triangles": 3172,
+      "mesh_parts": 16,
+      "fbx": "exports/SM_FB_Column_4m.fbx",
+      "glb": "exports/SM_FB_Column_4m.glb"
+    },
+    {
+      "name": "SM_FB_Wall_4m",
+      "description": "4m limestone wall bay, 4m high, 0.4m thick",
+      "triangles": 4320,
+      "mesh_parts": 40,
+      "fbx": "exports/SM_FB_Wall_4m.fbx",
+      "glb": "exports/SM_FB_Wall_4m.glb"
+    },
+    {
+      "name": "SM_FB_Floor_4m",
+      "description": "4m basalt paving tile with eight-point brass star",
+      "triangles": 6684,
+      "mesh_parts": 39,
+      "fbx": "exports/SM_FB_Floor_4m.fbx",
+      "glb": "exports/SM_FB_Floor_4m.glb"
+    },
+    {
+      "name": "SM_FB_Bell",
+      "description": "Hollow bronze bell with modeled inner wall and clapper",
+      "triangles": 8444,
+      "mesh_parts": 16,
+      "fbx": "exports/SM_FB_Bell.fbx",
+      "glb": "exports/SM_FB_Bell.glb"
+    },
+    {
+      "name": "SM_FB_Lantern",
+      "description": "1.9m paired navigation lantern in bronze cage",
+      "triangles": 2008,
+      "mesh_parts": 17,
+      "fbx": "exports/SM_FB_Lantern.fbx",
+      "glb": "exports/SM_FB_Lantern.glb"
+    },
+    {
+      "name": "SM_FB_Waystone",
+      "description": "Restored waystone: cyan ring and floating faceted crystal",
+      "triangles": 7688,
+      "mesh_parts": 17,
+      "fbx": "exports/SM_FB_Waystone.fbx",
+      "glb": "exports/SM_FB_Waystone.glb"
+    },
+    {
+      "name": "SM_FB_MercuryCask",
+      "description": "Explosive ruby vessel in protective brass bands",
+      "triangles": 3976,
+      "mesh_parts": 15,
+      "fbx": "exports/SM_FB_MercuryCask.fbx",
+      "glb": "exports/SM_FB_MercuryCask.glb"
+    },
+    {
+      "name": "SM_FB_SparkCaster",
+      "description": "Open bronze resonance instrument; grip origin, muzzle -Y",
+      "triangles": 12244,
+      "mesh_parts": 75,
+      "fbx": "exports/SM_FB_SparkCaster.fbx",
+      "glb": "exports/SM_FB_SparkCaster.glb"
+    },
+    {
+      "name": "SK_FB_Hollow",
+      "description": "1.85m ash-shell enemy, rigid-weight armor rig and five animation actions",
+      "triangles": 11132,
+      "mesh_parts": 74,
+      "fbx": "exports/SK_FB_Hollow.fbx",
+      "glb": "exports/SK_FB_Hollow.glb",
+      "animations": [
+        "A_FB_Hollow_Idle",
+        "A_FB_Hollow_Walk",
+        "A_FB_Hollow_Windup",
+        "A_FB_Hollow_Cracked",
+        "A_FB_Hollow_Release"
+      ]
+    },
+    {
+      "name": "SM_FB_Vault_10m",
+      "description": "10m clear-span stone barrel vault, 4m long, spring pivot",
+      "triangles": 8640,
+      "mesh_parts": 80,
+      "fbx": "exports/SM_FB_Vault_10m.fbx",
+      "glb": "exports/SM_FB_Vault_10m.glb"
+    },
+    {
+      "name": "SM_FB_Cornice_4m",
+      "description": "4m molded limestone cornice with bronze edge",
+      "triangles": 432,
+      "mesh_parts": 4,
+      "fbx": "exports/SM_FB_Cornice_4m.fbx",
+      "glb": "exports/SM_FB_Cornice_4m.glb"
+    },
+    {
+      "name": "SM_FB_EmberGauntlet",
+      "description": "Armored left fist, wrist pivot, fingers toward -Y",
+      "triangles": 1396,
+      "mesh_parts": 14,
+      "fbx": "exports/SM_FB_EmberGauntlet.fbx",
+      "glb": "exports/SM_FB_EmberGauntlet.glb"
+    },
+    {
+      "name": "SM_FB_FirebirdHelmet",
+      "description": "Faceted Firebird helmet with swept phoenix crest",
+      "triangles": 488,
+      "mesh_parts": 8,
+      "fbx": "exports/SM_FB_FirebirdHelmet.fbx",
+      "glb": "exports/SM_FB_FirebirdHelmet.glb"
+    },
+    {
+      "name": "SM_FB_FirebirdTorso",
+      "description": "Layered bronze flight cuirass, chest-centered pivot",
+      "triangles": 840,
+      "mesh_parts": 15,
+      "fbx": "exports/SM_FB_FirebirdTorso.fbx",
+      "glb": "exports/SM_FB_FirebirdTorso.glb"
+    },
+    {
+      "name": "SM_FB_FeatherWing",
+      "description": "Articulated silhouette of five swept bronze phoenix feathers",
+      "triangles": 980,
+      "mesh_parts": 10,
+      "fbx": "exports/SM_FB_FeatherWing.fbx",
+      "glb": "exports/SM_FB_FeatherWing.glb"
+    },
+    {
+      "name": "SM_FB_FirebirdLeg",
+      "description": "Hip-pivot armored leg with articulated knee and plated boot",
+      "triangles": 724,
+      "mesh_parts": 11,
+      "fbx": "exports/SM_FB_FirebirdLeg.fbx",
+      "glb": "exports/SM_FB_FirebirdLeg.glb"
+    },
+    {
+      "name": "SM_FB_FirebirdArm",
+      "description": "Shoulder-pivot armored arm with bent forearm",
+      "triangles": 612,
+      "mesh_parts": 7,
+      "fbx": "exports/SM_FB_FirebirdArm.fbx",
+      "glb": "exports/SM_FB_FirebirdArm.glb"
+    },
+    {
+      "name": "SM_FB_RubbleCluster",
+      "description": "Low perimeter cluster of chipped limestone and basalt",
+      "triangles": 220,
+      "mesh_parts": 11,
+      "fbx": "exports/SM_FB_RubbleCluster.fbx",
+      "glb": "exports/SM_FB_RubbleCluster.glb"
+    },
+    {
+      "name": "SM_FB_StarPlaque",
+      "description": "Bronze eight-point civic seal on a dark octagonal plaque",
+      "triangles": 1024,
+      "mesh_parts": 4,
+      "fbx": "exports/SM_FB_StarPlaque.fbx",
+      "glb": "exports/SM_FB_StarPlaque.glb"
+    },
+    {
+      "name": "SM_FB_ResonanceRing",
+      "description": "One-meter open resonance halo for expanding release effects",
+      "triangles": 2400,
+      "mesh_parts": 9,
+      "fbx": "exports/SM_FB_ResonanceRing.fbx",
+      "glb": "exports/SM_FB_ResonanceRing.glb"
+    },
+    {
+      "name": "SM_FB_AshShard",
+      "description": "Angular one-meter ash-shell fragment for scaled runtime debris",
+      "triangles": 88,
+      "mesh_parts": 1,
+      "fbx": "exports/SM_FB_AshShard.fbx",
+      "glb": "exports/SM_FB_AshShard.glb"
+    },
+    {
+      "name": "SM_FB_LightMote",
+      "description": "Faceted rising light seed for amber releases and crimson embers",
+      "triangles": 8,
+      "mesh_parts": 1,
+      "fbx": "exports/SM_FB_LightMote.fbx",
+      "glb": "exports/SM_FB_LightMote.glb"
+    },
+    {
+      "name": "SK_FB_Firebird",
+      "description": "Articulated bronze Firebird, 21 bones and eleven in-place animation clips",
+      "triangles": 21276,
+      "mesh_parts": 185,
+      "fbx": "exports/SK_FB_Firebird.fbx",
+      "glb": "exports/SK_FB_Firebird.glb",
+      "animations": [
+        "A_FB_Firebird_Idle",
+        "A_FB_Firebird_Run",
+        "A_FB_Firebird_Back",
+        "A_FB_Firebird_StrafeL",
+        "A_FB_Firebird_StrafeR",
+        "A_FB_Firebird_Crouch",
+        "A_FB_Firebird_Jump",
+        "A_FB_Firebird_Fall",
+        "A_FB_Firebird_Down",
+        "A_FB_Firebird_Punch",
+        "A_FB_Firebird_Fire"
+      ]
+    }
+  ]
+}

@@ -1,5 +1,10 @@
 #include "FirebirdCharacter.h"
 #include "Firebird.h"
+#include "FBArt.h"
+#include "FBPlayerAnimInstance.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "FBFx.h"
 #include "Hollow.h"
 #include "FBAudio.h"
@@ -20,6 +25,10 @@ AFirebirdCharacter::AFirebirdCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
     GetCapsuleComponent()->InitCapsuleSize(34.f, 92.f);
+    // Crouch and network smoothing read the class-default mesh transform.
+    // Set the feet-to-capsule offset before those systems cache it.
+    GetMesh()->SetRelativeLocation(FVector(0, 0, -92));
+    GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
     bUseControllerRotationYaw = true;
     SetNetUpdateFrequency(60.f);
 
@@ -99,26 +108,26 @@ void AFirebirdCharacter::BeginPlay()
 // the Spark Caster and Ember Fist: only the player holding them sees them
 void AFirebirdCharacter::BuildViewModel()
 {
-    UMaterialInterface* BrassM = FB::MakeSurface(this, FB::Brass * 0.55f, 0.f, 0.3f, 1.f);
-    UMaterialInterface* CopperM = FB::MakeSurface(this, FLinearColor(0.75f, 0.32f, 0.16f), 0.f, 0.3f, 0.9f);
-    UMaterialInterface* DarkM = FB::MakeSurface(this, FB::Basalt * 2.f, 0.f, 0.8f);
+    Camera->SetEnableFirstPersonScale(true);
+    Camera->SetFirstPersonScale(.45f);
     TArray<UStaticMeshComponent*> Parts;
-    GunBody = FB::AddPart(this, ViewRig, TEXT("GunBody"), FVector(22, 3.2f, 4.2f), FVector(42, 13, -14), BrassM); Parts.Add(GunBody);
-    UStaticMeshComponent* Grip = FB::AddPart(this, ViewRig, TEXT("GunGrip"), FVector(5, 3, 8), FVector(34, 13, -19), DarkM);
-    Grip->SetRelativeRotation(FRotator(-15, 0, 0)); Parts.Add(Grip);
-    GunCoil = FB::AddPart(this, ViewRig, TEXT("Coil1"), FVector(1.5f, 5, 6), FVector(46, 13, -14), CopperM); Parts.Add(GunCoil);
-    Parts.Add(FB::AddPart(this, ViewRig, TEXT("Coil2"), FVector(1.5f, 5, 6), FVector(49, 13, -14), CopperM));
-    Parts.Add(FB::AddPart(this, ViewRig, TEXT("Coil3"), FVector(1.5f, 5, 6), FVector(52, 13, -14), CopperM));
-    GunCrystal = FB::AddPart(this, ViewRig, TEXT("Crystal"), FVector(6, 2, 2), FVector(55, 13, -12.5f), FB::MakeGlow(this, FB::Aether, 6.f)); Parts.Add(GunCrystal);
-    Fist = FB::AddPart(this, ViewRig, TEXT("Fist"), FVector(14, 11, 11), FVector(22, -18, -22), FB::MakeGlow(this, FB::Orange, 3.f)); Parts.Add(Fist);
+    GunBody = FBArt::Attach(this, ViewRig, TEXT("SM_FB_SparkCaster"), FVector(32, 14, -17), FRotator(0, -90, 0), FVector(.6f)); Parts.Add(GunBody);
+    // A closed gauntlet wraps the Caster grip and stays with its recoil rig.
+    Parts.Add(FBArt::Attach(this, ViewRig, TEXT("SM_FB_EmberGauntlet"), FVector(30, 14, -23), FRotator(-65, -90, 0), FVector(.62f)));
+    Fist = FBArt::Attach(this, ViewRig, TEXT("SM_FB_EmberGauntlet"), FVector(22, -18, -22), FRotator(0, -90, 0), FVector(1.2f)); Parts.Add(Fist);
     Fist->SetVisibility(false);
-    for (UStaticMeshComponent* C : Parts) { C->SetCastShadow(false); C->SetOnlyOwnerSee(true); }
+    for (UStaticMeshComponent* C : Parts)
+    {
+        C->SetCastShadow(false);
+        C->SetOnlyOwnerSee(true);
+        C->SetFirstPersonPrimitiveType(EFirstPersonPrimitiveType::FirstPerson);
+    }
     // a soft warm fill on the weapon, so it never reads as a black block in shadow
     UPointLightComponent* Fill = NewObject<UPointLightComponent>(this, TEXT("ViewFill"));
     Fill->SetupAttachment(ViewRig);
     Fill->SetRelativeLocation(FVector(25.f, 0.f, 5.f));
     Fill->SetIntensityUnits(ELightUnits::Candelas);
-    Fill->SetIntensity(0.6f);
+    Fill->SetIntensity(0.28f);
     Fill->SetAttenuationRadius(90.f);
     Fill->SetLightColor(FLinearColor(1.f, 0.75f, 0.5f));
     Fill->SetCastShadows(false);
@@ -129,25 +138,23 @@ void AFirebirdCharacter::BuildViewModel()
 void AFirebirdCharacter::BuildBody()
 {
     const FLinearColor C = PlayerColor(PlayerIndex);
-    UMaterialInterface* Suit = FB::MakeSurface(this, C * 0.7f, 0.08f, 0.6f);   // the colour must read, not glow white
-    UMaterialInterface* Dark = FB::MakeSurface(this, FB::Basalt * 2.f, 0.f, 0.7f);
-    UMaterialInterface* Glow = FB::MakeGlow(this, C, 2.f);
-    TArray<UStaticMeshComponent*> Parts;
-    Parts.Add(FB::AddPart(this, Body, TEXT("BTorso"), FVector(30, 44, 70), FVector(0, 0, 10), Suit));
-    Parts.Add(FB::AddPart(this, Body, TEXT("BHead"), FVector(28, 28, 28), FVector(2, 0, 64), Dark));
-    Parts.Add(FB::AddPart(this, Body, TEXT("BVisor"), FVector(4, 22, 7), FVector(16, 0, 66), Glow));
-    Parts.Add(FB::AddPart(this, Body, TEXT("BCrest"), FVector(22, 5, 18), FVector(-4, 0, 82), Glow));
-    Parts.Add(FB::AddPart(this, Body, TEXT("BLegL"), FVector(16, 16, 60), FVector(0, -12, -58), Dark));
-    Parts.Add(FB::AddPart(this, Body, TEXT("BLegR"), FVector(16, 16, 60), FVector(0, 12, -58), Dark));
-    Parts.Add(FB::AddPart(this, Body, TEXT("BGun"), FVector(40, 8, 10), FVector(30, 22, 20), FB::MakeSurface(this, FB::Brass, 0.f, 0.35f, 0.9f)));
-    BodyFist = FB::AddPart(this, Body, TEXT("BFist"), FVector(14, 12, 12), FVector(18, -24, 20), FB::MakeGlow(this, FB::Orange, 3.f)); Parts.Add(BodyFist);
-    // the wings: two flat ember blades swept up and back, like the emblem
-    WingL = FB::AddPart(this, Body, TEXT("BWingL"), FVector(6, 70, 34), FVector(-22, -48, 40), Glow);
-    WingR = FB::AddPart(this, Body, TEXT("BWingR"), FVector(6, 70, 34), FVector(-22, 48, 40), Glow);
-    WingL->SetRelativeRotation(FRotator(0.f, 20.f, -30.f));
-    WingR->SetRelativeRotation(FRotator(0.f, -20.f, 30.f));
-    Parts.Add(WingL); Parts.Add(WingR);
-    for (UStaticMeshComponent* P : Parts) P->SetOwnerNoSee(true);
+    USkeletalMeshComponent* Visual = GetMesh();
+    USkeletalMesh* Armor = LoadObject<USkeletalMesh>(nullptr,
+        TEXT("/Game/Firebird/ArtKitV01/Meshes/SK_FB_Firebird.SK_FB_Firebird"));
+    if (!Armor) UE_LOG(LogFirebird, Error, TEXT("FB_ART_MISSING articulated Firebird"));
+    Visual->SetSkeletalMesh(Armor);
+    Visual->SetRelativeLocation(FVector(0, 0, -92));
+    Visual->SetRelativeRotation(FRotator(0, -90, 0));
+    Visual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    Visual->SetCanEverAffectNavigation(false);
+    Visual->SetFirstPersonPrimitiveType(EFirstPersonPrimitiveType::WorldSpaceRepresentation);
+    Visual->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+    Visual->SetAnimInstanceClass(UFBPlayerAnimInstance::StaticClass());
+    const int32 SuitSlot = Visual->GetMaterialIndex(TEXT("M_FB_Bronze"));
+    if (SuitSlot != INDEX_NONE) Visual->SetMaterial(SuitSlot,
+        FBArt::Surface(this, TEXT("M_FB_Bronze"), C * .65f + FLinearColor(.2f, .2f, .2f)));
+    const int32 GlowSlot = Visual->GetMaterialIndex(TEXT("M_FB_Amber"));
+    if (GlowSlot != INDEX_NONE) Visual->SetMaterial(GlowSlot, FBArt::Surface(this, TEXT("M_FB_Amber"), C));
     BodyGlow = NewObject<UPointLightComponent>(this, TEXT("BodyGlow"));
     BodyGlow->SetupAttachment(Body);
     BodyGlow->SetRelativeLocation(FVector(-30.f, 0.f, 50.f));
@@ -253,7 +260,9 @@ void AFirebirdCharacter::ReadInput()
         // degrees per second at full tilt (x the same sensitivity setting); squared so small tilts aim finely
         const float Dt = GetWorld()->GetDeltaSeconds(), K = S ? S->MouseSensitivity : 1.f;
         const FVector2D Curved(RStick.X * FMath::Abs(RStick.X), RStick.Y * FMath::Abs(RStick.Y));
-        I.Look += FVector2D(Curved.X * PadYawSpeed, Curved.Y * PadPitchSpeed) * K * Dt;
+        // FSceneViewport negates Gamepad_RightY before PlayerInput receives it.
+        // Undo that viewport convention: stick up must increase our direct pitch.
+        I.Look += FVector2D(Curved.X * PadYawSpeed, -Curved.Y * PadPitchSpeed) * K * Dt;
     }
     auto Down = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->IsInputKeyDown(K)) return true; return false; };
     auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
@@ -309,7 +318,7 @@ void AFirebirdCharacter::Tick(float DeltaSeconds)
     // the figure and the weapon are built once we know who we are (PlayerIndex arrives by replication)
     // (replicated properties arrive before BeginPlay, but whether this one is ours can take a frame)
     if (!bBuilt) { bBuilt = true; BuildBody(); }
-    if (!GunBody && IsLocallyControlled()) BuildViewModel();
+    if (!GunBody && IsLocallyControlled() && Cast<APlayerController>(GetController())) BuildViewModel();
     UpdateBody(DeltaSeconds);
 
     HitMarker = FMath::Max(0.f, HitMarker - DeltaSeconds);
@@ -563,7 +572,7 @@ void AFirebirdCharacter::ShotFx(const FVector& Muzzle, const FVector& Impact, co
     else
     {
         AFBFx::Burst(GetWorld(), Impact + Normal * 5.f, 5, FB::Aether, 260.f, 0.25f, 3.f, 700.f, 10.f);
-        AFBFx::Spawn(GetWorld(), Impact + Normal * 2.f, Normal.Rotation(), FVector(1.f, 9.f, 9.f), FB::Orange, 4.f, 2.5f);   // a scorch that cools
+        AFBFx::Resonance(GetWorld(), Impact + Normal * 2.f, FB::Orange, 12.f, .3f, FRotationMatrix::MakeFromZ(Normal).Rotator());
     }
 }
 
@@ -586,7 +595,7 @@ void AFirebirdCharacter::FireSpark()
     SparkCooldown = SparkInterval;
     Recoil = 1.f;
     Shake += 0.25f;
-    MuzzleLight->SetIntensity(900.f);
+    if (GunBody) MuzzleLight->SetIntensity(900.f);
     const FVector Eye = Camera->GetComponentLocation();
     const FRotator Aim = GetControlRotation() + FRotator(FMath::FRandRange(-0.5f, 0.5f), FMath::FRandRange(-0.5f, 0.5f), 0.f);
     FHitResult Hit;
@@ -613,6 +622,7 @@ void AFirebirdCharacter::Server_Fire_Implementation(FVector_NetQuantize Eye, FRo
 
 void AFirebirdCharacter::Multi_ShotFx_Implementation(FVector_NetQuantize Muzzle, FVector_NetQuantize Impact, FVector_NetQuantizeNormal Normal, bool bHitHollow)
 {
+    ++BodyShotSerial;
     if (IsLocallyControlled()) return;   // the shooter already drew it
     ShotFx(Muzzle, Impact, Normal, bHitHollow);
 }
@@ -650,7 +660,7 @@ void AFirebirdCharacter::Punch()
 {
     FistCooldown = FistInterval;
     FistAnim = 1.f;
-    FistLight->SetIntensity(300.f);
+    if (GunBody) FistLight->SetIntensity(300.f);
     FB::Sound(this, TEXT("fist_swing"), GetActorLocation());
     const FVector Fwd = GetControlRotation().Vector();
     if (AHollow* Target = ReleaseTarget())
@@ -691,7 +701,7 @@ void AFirebirdCharacter::Server_Punch_Implementation(FVector_NetQuantize Eye, FV
 
 void AFirebirdCharacter::Multi_Punch_Implementation()
 {
-    BodyPunch = 1.f;   // teammates see the fist go out
+    ++BodyPunchSerial;   // the native blend graph layers this over locomotion
     if (!IsLocallyControlled()) FB::Sound(this, TEXT("fist_swing"), GetActorLocation(), 0.7f);
 }
 
@@ -755,17 +765,7 @@ void AFirebirdCharacter::Server_Respawned_Implementation()
 
 void AFirebirdCharacter::UpdateBody(float DeltaSeconds)
 {
-    if (!WingL) return;
-    // wings beat slowly, flare in a dash, fold when knocked down
-    const float T = GetWorld()->GetTimeSeconds() + PlayerIndex;
-    const float Speed = HorizontalSpeed() / RunSpeed;
-    const float Flap = bDead ? -60.f : 30.f + 10.f * FMath::Sin(T * 3.f) + 25.f * FMath::Clamp(Speed - 1.f, 0.f, 1.f);
-    WingL->SetRelativeRotation(FRotator(0.f, 20.f, -Flap));
-    WingR->SetRelativeRotation(FRotator(0.f, -20.f, Flap));
-    // the body leans with the aim; the fist punches out
-    Body->SetRelativeRotation(FRotator(bDead ? -70.f : 0.f, 0.f, 0.f));
-    BodyPunch = FMath::Max(0.f, BodyPunch - DeltaSeconds / 0.25f);
-    if (BodyFist) BodyFist->SetRelativeLocation(FVector(18.f + 50.f * FMath::Sin((1.f - BodyPunch) * PI) * (BodyPunch > 0.f ? 1.f : 0.f), -24.f, 20.f));
+    if (BodyGlow) BodyGlow->SetIntensity(bDead ? 1.f : 8.f + 2.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 2.f));
 }
 
 // ---- the view -------------------------------------------------------------------------------

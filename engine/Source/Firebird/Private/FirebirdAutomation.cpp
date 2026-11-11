@@ -5,7 +5,11 @@
 #include "Hollow.h"
 #include "FirebirdHUD.h"
 #include "FirebirdSession.h"
+#include "FBPlayerAnimInstance.h"
+#include "AIController.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "EngineUtils.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
@@ -16,6 +20,9 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "UnrealClient.h"
+#if WITH_EDITOR
+#include "ShaderCompiler.h"
+#endif
 
 static bool GRanThisProcess = false;
 
@@ -143,6 +150,83 @@ void UFirebirdAutomation::Tick(float DeltaSeconds)
                 Finish();
                 Stage = 200;
             }
+        }
+        return;
+    }
+
+    if (Scenario == TEXT("motion"))
+    {
+        TickMotion(P, DeltaSeconds);
+        if (bFrames && !bShotTaken)
+            FScreenshotRequest::RequestScreenshot(OutDir / FString::Printf(TEXT("frames/f_%05d.png"), Frame++), true, false);
+        return;
+    }
+
+    // Art review uses the real game world and first-person rig; no offline backdrop.
+    if (Scenario == TEXT("art"))
+    {
+        static const FVector Views[] = { FVector(200, 0, 100), FVector(3020, -180, 100), FVector(4300, 0, 100), FVector(5800, -450, 100), FVector(8250, 1050, 100), FVector(7000, 0, 100), FVector(6760, 0, 100), FVector(6700, -300, 100), FVector(3060, 0, 100), FVector(6370, -650, 100) };
+        static const FRotator Angles[] = { FRotator(6, 0, 0), FRotator(-20, 14, 0), FRotator(4, 0, 0), FRotator(8, 15, 0), FRotator(5, -145, 0), FRotator(65, 90, 0), FRotator(-10, 0, 0), FRotator(-10, 0, 0), FRotator(-65, 0, 0), FRotator(0, 0, 0) };
+        static const TCHAR* Names[] = { TEXT("01-arrival-surfaces"), TEXT("02-furnace-pit"), TEXT("03-bronze-gate"), TEXT("04-bell-arena"), TEXT("05-arena-reverse"), TEXT("06-ceiling"), TEXT("07-hollow-detail"), TEXT("08-firebird-armor"), TEXT("09-mercury"), TEXT("10-weapon-clearance") };
+        P->Input = FFirebirdInput();
+        for (TActorIterator<AHollow> It(GetWorld()); It; ++It)
+        {
+            It->bHoldFire = true;
+            It->GetCharacterMovement()->DisableMovement();
+        }
+        if (Stage < UE_ARRAY_COUNT(Views))
+        {
+            if (StageT <= DeltaSeconds * 1.5f)
+            {
+#if WITH_EDITOR
+                // Benchmark time runs faster than shader workers on a cold editor cache.
+                if (Stage == 0 && GShaderCompilingManager) GShaderCompilingManager->FinishAllCompilation();
+#endif
+                if (Stage == 7)
+                {
+                    AFirebirdCharacter* Model = GetWorld()->SpawnActor<AFirebirdCharacter>(AFirebirdCharacter::StaticClass(), FVector(7100, -300, 88), FRotator(0, 180, 0));
+                    if (Model) { Model->bAutoDriven = true; Model->GetCharacterMovement()->DisableMovement(); }
+                }
+                P->TeleportOwned(Views[Stage], Angles[Stage].Yaw);
+                if (AController* Controller = P->GetController()) Controller->SetControlRotation(Angles[Stage]);
+            }
+            if (StageT > (Stage == 0 ? 8.f : 2.f))
+            {
+                Shot(Names[Stage]);
+                Next(Stage + 1);
+            }
+        }
+        else if (Stage == 10)
+        {
+            if (StageT <= DeltaSeconds * 1.5f)
+            {
+                P->TeleportOwned(FVector(6680, 0, 100), 0);
+                if (AController* Controller = P->GetController()) Controller->SetControlRotation(FRotator(-6, 0, 0));
+                AHollow* H = HollowAt(0);
+                Proof(TEXT("authored_hollow_loaded"), H && H->GetMesh()->GetSkeletalMeshAsset(), TEXT("rendered the gameplay Hollow skeletal mesh"));
+                if (H)
+                {
+                    H->TakeHit(30, FVector::ForwardVector, false, P);
+                    H->TakeHit(1, FVector::ForwardVector, true, P);
+                    H->SetActorRotation(FRotator(0, 180, 0));
+                }
+            }
+            if (StageT > .33f) { Shot(TEXT("11-shell-release")); Next(11); }
+        }
+        else if (Stage == 11)
+        {
+            if (StageT <= DeltaSeconds * 1.5f)
+            {
+                P->TeleportOwned(FVector(5800, -450, 100), 15);
+                if (AController* Controller = P->GetController()) Controller->SetControlRotation(FRotator(8, 15, 0));
+                if (AFBRange* R = AFBRange::Get(GetWorld())) R->Multi_ArenaClear(42.f);
+            }
+            if (StageT > 8.5f) { Shot(TEXT("12-restored-arena")); Next(12); }
+        }
+        else if (Stage != 200)
+        {
+            Proof(TEXT("art_views_captured"), Shots.Num() == UE_ARRAY_COUNT(Views) + 2, TEXT("ten surface views plus shell release and restored arena"));
+            Finish(); Stage = 200;
         }
         return;
     }
@@ -379,6 +463,15 @@ void UFirebirdAutomation::TickCoop(AFirebirdCharacter* P, float DeltaSeconds)
         const FVector T = It->GetActorLocation();
         if (bTeammatePosSet) TeammateTravel += FVector::Dist(T, LastTeammatePos);
         LastTeammatePos = T; bTeammatePosSet = true;
+        USkeletalMeshComponent* Visual = It->GetMesh();
+        if (Visual->GetBoneIndex(TEXT("foot_L")) != INDEX_NONE && Cast<UFBPlayerAnimInstance>(Visual->GetAnimInstance()))
+        {
+            const FVector Foot = Visual->GetSocketTransform(TEXT("foot_L"), RTS_Component).GetLocation();
+            const TWeakObjectPtr<AFirebirdCharacter> Key(*It);
+            if (const FVector* Before = TeammateFeet.Find(Key))
+                if (It->HorizontalSpeed() > 50.f) TeammateArtMotion += FVector::Dist(Foot, *Before);
+            TeammateFeet.Add(Key, Foot);
+        }
     }
     MaxTeammatesSeen = FMath::Max(MaxTeammatesSeen, Mates);
     int32 HollowsHere = 0;
@@ -453,13 +546,17 @@ void UFirebirdAutomation::TickCoop(AFirebirdCharacter* P, float DeltaSeconds)
     }
 
     case 3:
-        if (StageT > 1.0f)
+        AimAt(P, FVector(FBCourse::ArenaEnd - 100, 0, 150));
+        if (StageT > 3.0f)
         {
+            Shot(TEXT("04-restored-grid"));
             Proof(TEXT("arena_clear"), Range && Range->bArenaClear, FString::Printf(TEXT("cleared together in %.0f s (host clock)"), Range ? Range->ClearTime : -1.f));
             Proof(TEXT("hollows_replicated"), MaxHollowsSeen >= 1, FString::Printf(TEXT("up to %d Hollows alive at once on this computer"), MaxHollowsSeen));
             Proof(TEXT("my_hits_confirmed_by_host"), P->ConfirmedHits > 0, FString::Printf(TEXT("%d hits, %d broken by shots"), P->ConfirmedHits, P->Breaks));
             Proof(TEXT("my_releases_healed"), P->Releases > 0, FString::Printf(TEXT("%d releases"), P->Releases));
             Proof(TEXT("teammate_moving_here"), WantPlayers < 2 || TeammateTravel > 500.f, FString::Printf(TEXT("the teammate travelled %.0f m as seen on this computer"), TeammateTravel / 100.f));
+            Proof(TEXT("teammate_animation"), WantPlayers < 2 || TeammateArtMotion > 10.f,
+                FString::Printf(TEXT("remote skeletal foot accumulated %.0f cm of local pose movement"), TeammateArtMotion));
             UE_LOG(LogFirebird, Display, TEXT("FB_AUTO coop P%d downs=%d dashes=%d"), P->PlayerIndex + 1, DownsSeen, P->Dashes);
             Proofs.Add(FString::Printf(TEXT("    \"info\": { \"ok\": true, \"detail\": \"P%d: knocked down %d times, %d dashes, %d slides\" }"), P->PlayerIndex + 1, DownsSeen, P->Dashes, P->Slides));
             Finish();
@@ -473,5 +570,101 @@ void UFirebirdAutomation::TickCoop(AFirebirdCharacter* P, float DeltaSeconds)
         Next(200);
         break;
     default: break;
+    }
+}
+
+// A camera watches a second pawn driven through the same input and movement
+// functions as a player. Bone measurements catch missing clips and frozen rigs.
+void UFirebirdAutomation::TickMotion(AFirebirdCharacter* P, float Dt)
+{
+    // A clean review camera only for this automation scenario.
+    P->Fov = 65.f;
+    if (APlayerController* PC = Cast<APlayerController>(P->GetController()))
+        if (AHUD* Hud = PC->GetHUD()) Hud->bShowHUD = false;
+    TInlineComponentArray<UPrimitiveComponent*> ObserverParts(P);
+    for (UPrimitiveComponent* Part : ObserverParts)
+        if (Part->FirstPersonPrimitiveType == EFirstPersonPrimitiveType::FirstPerson) Part->SetVisibility(false);
+    static const TCHAR* Names[] = { TEXT("01-idle"), TEXT("02-run"), TEXT("03-backpedal"),
+        TEXT("04-strafe-left"), TEXT("05-strafe-right"), TEXT("06-crouch"), TEXT("07-jump"),
+        TEXT("08-fall"), TEXT("09-punch"), TEXT("10-fire"), TEXT("11-down") };
+    if (Stage >= UE_ARRAY_COUNT(Names))
+    {
+        if (Stage != 200) { Proof(TEXT("motion_views"), Shots.Num() == UE_ARRAY_COUNT(Names), TEXT("eleven poses captured from the native animation graph")); Finish(); Stage = 200; }
+        return;
+    }
+    P->Input = FFirebirdInput();
+    for (TActorIterator<AHollow> It(GetWorld()); It; ++It)
+    {
+        It->bHoldFire = true;
+        It->GetCharacterMovement()->DisableMovement();
+    }
+    if (!MotionModel)
+    {
+#if WITH_EDITOR
+        if (GShaderCompilingManager) GShaderCompilingManager->FinishAllCompilation();
+#endif
+        MotionModel = GetWorld()->SpawnActor<AFirebirdCharacter>(FVector(7600, -300, 100), FRotator(0, 180, 0));
+        if (!MotionModel) { Proof(TEXT("player_spawn"), false, TEXT("could not spawn review pawn")); Finish(); Stage = 200; return; }
+        MotionModel->bAutoDriven = true;
+        AAIController* Driver = GetWorld()->SpawnActor<AAIController>();
+        Driver->Possess(MotionModel);
+        Driver->SetControlRotation(FRotator(0, 180, 0));
+        MotionModel->Checkpoint = FVector(7600, -300, 100);
+    }
+    if (StageT <= Dt * 1.5f)
+    {
+        MotionModel->bDead = false; MotionModel->Health = 100;
+        MotionModel->Input = FFirebirdInput();
+        MotionModel->TeleportOwned(FVector(7600, -300, Stage == 7 ? 360 : 100), 180);
+        if (Stage == 10) MotionModel->bDead = true;
+    }
+    FFirebirdInput& I = MotionModel->Input;
+    I.Move = Stage == 1 ? FVector2D(0, 1) : Stage == 2 ? FVector2D(0, -1) :
+        Stage == 3 ? FVector2D(-1, 0) : Stage == 4 ? FVector2D(1, 0) : FVector2D::ZeroVector;
+    I.bCrouchHeld = Stage == 5;
+    if (Stage == 6 && StageT > .10f && StageT < .14f) I.bJump = true;
+    if (Stage == 8 && StageT > .30f && StageT < .34f) I.bFist = true;
+    I.bFireHeld = Stage == 9 && StageT > .30f && StageT < .36f;
+    const FVector At = MotionModel->GetActorLocation();
+    const float CameraRise = FMath::Max(0.f, At.Z - 94.f);
+    P->TeleportOwned(FVector(At.X - 260, At.Y - 220, 100 + CameraRise), 0);
+    AimAt(P, FVector(At.X, At.Y, 95 + CameraRise));
+    const float CaptureTime = Stage == 0 ? 3.f : Stage == 6 || Stage == 8 || Stage == 9 ? .48f : Stage == 7 ? .3f : .7f;
+    if (StageT > CaptureTime)
+    {
+        USkeletalMeshComponent* Mesh = MotionModel->GetMesh();
+        const FVector Foot = Mesh->GetSocketTransform(TEXT("foot_L"), RTS_Component).GetLocation();
+        const FVector Hand = Mesh->GetSocketTransform(TEXT("hand_L"), RTS_Component).GetLocation();
+        if (Stage == 0)
+        {
+            Proof(TEXT("articulated_player_loaded"), Mesh->GetSkeletalMeshAsset() && Mesh->GetNumBones() >= 21 && Cast<UFBPlayerAnimInstance>(Mesh->GetAnimInstance()),
+                FString::Printf(TEXT("skeletal player with %d bones and native blend graph"), Mesh->GetNumBones()));
+            MotionFoot = Foot; MotionHand = Hand;
+        }
+        if (Stage == 1) Proof(TEXT("running_articulation"), FVector::Dist(Foot, MotionFoot) > 10.f && MotionModel->HorizontalSpeed() > 600.f,
+            FString::Printf(TEXT("foot moved %.1f cm in the rig at %.0f cm/s"), FVector::Dist(Foot, MotionFoot), MotionModel->HorizontalSpeed()));
+        if (Stage == 5)
+        {
+            const float HeadZ = Mesh->GetBoneLocation(TEXT("head")).Z;
+            Proof(TEXT("crouch_pose"), MotionModel->bIsCrouched && HeadZ < 125.f, FString::Printf(TEXT("crouched head pivot %.1f cm above the floor"), HeadZ));
+        }
+        if (Stage == 6) Proof(TEXT("air_pose"), MotionModel->GetCharacterMovement()->IsFalling() && FVector::Dist(Foot, MotionFoot) > 10.f,
+            FString::Printf(TEXT("airborne foot offset %.1f cm"), FVector::Dist(Foot, MotionFoot)));
+        if (Stage == 6 || Stage == 7)
+        {
+            APlayerController* PC = Cast<APlayerController>(P->GetController());
+            int32 Width = 0, Height = 0; PC->GetViewportSize(Width, Height);
+            bool bFramed = true;
+            for (FName Bone : { FName(TEXT("head")), FName(TEXT("foot_L")), FName(TEXT("foot_R")) })
+            {
+                FVector2D Screen;
+                bFramed &= PC->ProjectWorldLocationToScreen(Mesh->GetBoneLocation(Bone), Screen) &&
+                    Screen.X > 20 && Screen.X < Width - 20 && Screen.Y > 20 && Screen.Y < Height - 20;
+            }
+            Proof(Stage == 6 ? TEXT("jump_framing") : TEXT("fall_framing"), bFramed, TEXT("head and both feet remain inside the review camera"));
+        }
+        if (Stage == 8) Proof(TEXT("layered_punch"), FVector::Dist(Hand, MotionHand) > 20.f,
+            FString::Printf(TEXT("punch hand extended %.1f cm"), FVector::Dist(Hand, MotionHand)));
+        Shot(Names[Stage]); Next(Stage + 1);
     }
 }

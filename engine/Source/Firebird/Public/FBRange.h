@@ -6,6 +6,7 @@
 
 class AHollow;
 class UMaterialInterface;
+class UInstancedStaticMeshComponent;
 
 // Course landmarks (cm), shared by the range and the automation driver
 namespace FBCourse
@@ -31,7 +32,7 @@ namespace FBCourse
 //   E  the arena: one Hollow alone first (L3), then a second, then the forge
 //      wakes: three waves that grow with the number of players (co-op), a
 //      breather with a reward between them (E1), and ARENA CLEAR at the end
-// Built entirely in code from engine shapes, so it needs no editor work.
+// Built in code with authored modular art over the tested course colliders.
 // Multiplayer: every computer builds the same course; the host owns the
 // Hollows and the waves, and tells everyone what Riley says about them.
 UCLASS()
@@ -50,7 +51,7 @@ public:
     UPROPERTY(Replicated) int32 Wave = 0;          // 0 = the intro Hollows; 1..WaveCount
     UPROPERTY(Replicated) int32 WaveCount = 3;
     UPROPERTY(Replicated) int32 HollowsLeft = 0;
-    bool bArenaClear = false;                      // set everywhere by Multi_ArenaClear
+    UPROPERTY(Replicated) bool bArenaClear = false; // also reaches late joiners for the restored grid
     float ClearTime = 0.f;
 
     UFUNCTION(NetMulticast, Reliable) void Multi_Say(const FString& Line);
@@ -59,10 +60,18 @@ public:
     static AFBRange* Get(UWorld* World);
 
 private:
-    void Block(const FVector& Min, const FVector& Max, UMaterialInterface* Mat, bool bCollide = true);
+    class UStaticMeshComponent* Block(const FVector& Min, const FVector& Max, UMaterialInterface* Mat, bool bCollide = true);
     void Torch(const FVector& At);
-    void Lamp(const FVector& At, const FLinearColor& Color, float Candela, float Radius);
+    class UPointLightComponent* Lamp(const FVector& At, const FLinearColor& Color, float Candela, float Radius);
     void Atmosphere();
+    void DressArchitecture();
+    void Art(const TCHAR* Name, const FVector& At, const FRotator& Rotation = FRotator::ZeroRotator, const FVector& Scale = FVector::OneVector);
+    UPROPERTY() TMap<FName, TObjectPtr<UInstancedStaticMeshComponent>> ArtBatches;
+    UPROPERTY() class UMaterialInstanceDynamic* GridMaterial;
+    UPROPERTY() class UMaterialInstanceDynamic* WaystoneMaterial;
+    UPROPERTY() class UPointLightComponent* WaystoneLight;
+    float Restoration = 0.f;
+    bool bRestorationStarted = false;
     void Say(const FString& Line);
     void TickLocalRadio();
     void TickArena(float DeltaSeconds);     // host

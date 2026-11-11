@@ -1,0 +1,340 @@
+{
+  "destination": "/Game/Firebird/ArtKitV01",
+  "meshes": [
+    {
+      "name": "SM_FB_Arch_4m",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_Arch_4m.SM_FB_Arch_4m",
+      "slots": 2,
+      "class": "StaticMesh",
+      "lod_count": 3,
+      "lod_triangles": [
+        4420,
+        2430,
+        1238
+      ]
+    },
+    {
+      "name": "SM_FB_Column_4m",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_Column_4m.SM_FB_Column_4m",
+      "slots": 4,
+      "class": "StaticMesh",
+      "lod_count": 3,
+      "lod_triangles": [
+        3172,
+        1744,
+        888
+      ]
+    },
+    {
+      "name": "SM_FB_Wall_4m",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_Wall_4m.SM_FB_Wall_4m",
+      "slots": 3,
+      "class": "StaticMesh",
+      "lod_count": 3,
+      "lod_triangles": [
+        4320,
+        2376,
+        1210
+      ]
+    },
+    {
+      "name": "SM_FB_Floor_4m",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_Floor_4m.SM_FB_Floor_4m",
+      "slots": 2,
+      "class": "StaticMesh",
+      "lod_count": 3,
+      "lod_triangles": [
+        6684,
+        3676,
+        1872
+      ]
+    },
+    {
+      "name": "SM_FB_Bell",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_Bell.SM_FB_Bell",
+      "slots": 3,
+      "class": "StaticMesh",
+      "lod_count": 3,
+      "lod_triangles": [
+        8444,
+        4644,
+        2364
+      ]
+    },
+    {
+      "name": "SM_FB_Lantern",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_Lantern.SM_FB_Lantern",
+      "slots": 4,
+      "class": "StaticMesh",
+      "lod_count": 3,
+      "lod_triangles": [
+        2008,
+        1104,
+        562
+      ]
+    },
+    {
+      "name": "SM_FB_Waystone",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_Waystone.SM_FB_Waystone",
+      "slots": 5,
+      "class": "StaticMesh",
+      "lod_count": 3,
+      "lod_triangles": [
+        7688,
+        4228,
+        2152
+      ]
+    },
+    {
+      "name": "SM_FB_MercuryCask",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_MercuryCask.SM_FB_MercuryCask",
+      "slots": 3,
+      "class": "StaticMesh",
+      "lod_count": 3,
+      "lod_triangles": [
+        3976,
+        2186,
+        1114
+      ]
+    },
+    {
+      "name": "SM_FB_SparkCaster",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_SparkCaster.SM_FB_SparkCaster",
+      "slots": 4,
+      "class": "StaticMesh",
+      "lod_count": 3,
+      "lod_triangles": [
+        12100,
+        6654,
+        3387
+      ]
+    },
+    {
+      "name": "SK_FB_Hollow",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SK_FB_Hollow.SK_FB_Hollow",
+      "slots": 4,
+      "class": "SkeletalMesh",
+      "lod_count": 1
+    },
+    {
+      "name": "SM_FB_Vault_10m",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_Vault_10m.SM_FB_Vault_10m",
+      "slots": 2,
+      "class": "StaticMesh",
+      "lod_count": 3,
+      "lod_triangles": [
+        8640,
+        4752,
+        2420
+      ]
+    },
+    {
+      "name": "SM_FB_Cornice_4m",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_Cornice_4m.SM_FB_Cornice_4m",
+      "slots": 2,
+      "class": "StaticMesh",
+      "lod_count": 1,
+      "lod_triangles": [
+        432
+      ]
+    },
+    {
+      "name": "SM_FB_EmberGauntlet",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_EmberGauntlet.SM_FB_EmberGauntlet",
+      "slots": 4,
+      "class": "StaticMesh",
+      "lod_count": 1,
+      "lod_triangles": [
+        1396
+      ]
+    },
+    {
+      "name": "SM_FB_FirebirdHelmet",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_FirebirdHelmet.SM_FB_FirebirdHelmet",
+      "slots": 4,
+      "class": "StaticMesh",
+      "lod_count": 1,
+      "lod_triangles": [
+        488
+      ]
+    },
+    {
+      "name": "SM_FB_FirebirdTorso",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_FirebirdTorso.SM_FB_FirebirdTorso",
+      "slots": 4,
+      "class": "StaticMesh",
+      "lod_count": 1,
+      "lod_triangles": [
+        840
+      ]
+    },
+    {
+      "name": "SM_FB_FeatherWing",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_FeatherWing.SM_FB_FeatherWing",
+      "slots": 2,
+      "class": "StaticMesh",
+      "lod_count": 1,
+      "lod_triangles": [
+        980
+      ]
+    },
+    {
+      "name": "SM_FB_FirebirdLeg",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_FirebirdLeg.SM_FB_FirebirdLeg",
+      "slots": 3,
+      "class": "StaticMesh",
+      "lod_count": 1,
+      "lod_triangles": [
+        724
+      ]
+    },
+    {
+      "name": "SM_FB_FirebirdArm",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_FirebirdArm.SM_FB_FirebirdArm",
+      "slots": 3,
+      "class": "StaticMesh",
+      "lod_count": 1,
+      "lod_triangles": [
+        612
+      ]
+    },
+    {
+      "name": "SM_FB_RubbleCluster",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_RubbleCluster.SM_FB_RubbleCluster",
+      "slots": 2,
+      "class": "StaticMesh",
+      "lod_count": 1,
+      "lod_triangles": [
+        220
+      ]
+    },
+    {
+      "name": "SM_FB_StarPlaque",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_StarPlaque.SM_FB_StarPlaque",
+      "slots": 4,
+      "class": "StaticMesh",
+      "lod_count": 1,
+      "lod_triangles": [
+        1024
+      ]
+    },
+    {
+      "name": "SM_FB_ResonanceRing",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_ResonanceRing.SM_FB_ResonanceRing",
+      "slots": 1,
+      "class": "StaticMesh",
+      "lod_count": 3,
+      "lod_triangles": [
+        2400,
+        1320,
+        672
+      ]
+    },
+    {
+      "name": "SM_FB_AshShard",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_AshShard.SM_FB_AshShard",
+      "slots": 1,
+      "class": "StaticMesh",
+      "lod_count": 1,
+      "lod_triangles": [
+        88
+      ]
+    },
+    {
+      "name": "SM_FB_LightMote",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SM_FB_LightMote.SM_FB_LightMote",
+      "slots": 1,
+      "class": "StaticMesh",
+      "lod_count": 1,
+      "lod_triangles": [
+        8
+      ]
+    },
+    {
+      "name": "SK_FB_Firebird",
+      "path": "/Game/Firebird/ArtKitV01/Meshes/SK_FB_Firebird.SK_FB_Firebird",
+      "slots": 5,
+      "class": "SkeletalMesh",
+      "lod_count": 1
+    }
+  ],
+  "materials": [
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_Limestone",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_AshShell",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_Basalt",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_Bronze",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_GoldEdge",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_Obsidian",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_Crimson",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_Aether",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_Amber"
+  ],
+  "textures": [
+    "/Game/Firebird/ArtKitV01/Textures/AshShell_BaseColor.AshShell_BaseColor",
+    "/Game/Firebird/ArtKitV01/Textures/AshShell_Normal.AshShell_Normal",
+    "/Game/Firebird/ArtKitV01/Textures/AshShell_Roughness.AshShell_Roughness",
+    "/Game/Firebird/ArtKitV01/Textures/Basalt_BaseColor.Basalt_BaseColor",
+    "/Game/Firebird/ArtKitV01/Textures/Basalt_Normal.Basalt_Normal",
+    "/Game/Firebird/ArtKitV01/Textures/Basalt_Roughness.Basalt_Roughness",
+    "/Game/Firebird/ArtKitV01/Textures/Bronze_BaseColor.Bronze_BaseColor",
+    "/Game/Firebird/ArtKitV01/Textures/Bronze_Normal.Bronze_Normal",
+    "/Game/Firebird/ArtKitV01/Textures/Bronze_Roughness.Bronze_Roughness",
+    "/Game/Firebird/ArtKitV01/Textures/GoldEdge_BaseColor.GoldEdge_BaseColor",
+    "/Game/Firebird/ArtKitV01/Textures/GoldEdge_Normal.GoldEdge_Normal",
+    "/Game/Firebird/ArtKitV01/Textures/GoldEdge_Roughness.GoldEdge_Roughness",
+    "/Game/Firebird/ArtKitV01/Textures/Limestone_BaseColor.Limestone_BaseColor",
+    "/Game/Firebird/ArtKitV01/Textures/Limestone_Normal.Limestone_Normal",
+    "/Game/Firebird/ArtKitV01/Textures/Limestone_Roughness.Limestone_Roughness",
+    "/Game/Firebird/ArtKitV01/Textures/Obsidian_BaseColor.Obsidian_BaseColor",
+    "/Game/Firebird/ArtKitV01/Textures/Obsidian_Normal.Obsidian_Normal",
+    "/Game/Firebird/ArtKitV01/Textures/Obsidian_Roughness.Obsidian_Roughness"
+  ],
+  "errors": [],
+  "animations": [
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Firebird_A_FB_Firebird_Back.SK_FB_Firebird_A_FB_Firebird_Back",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Firebird_A_FB_Firebird_Crouch.SK_FB_Firebird_A_FB_Firebird_Crouch",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Firebird_A_FB_Firebird_Down.SK_FB_Firebird_A_FB_Firebird_Down",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Firebird_A_FB_Firebird_Fall.SK_FB_Firebird_A_FB_Firebird_Fall",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Firebird_A_FB_Firebird_Fire.SK_FB_Firebird_A_FB_Firebird_Fire",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Firebird_A_FB_Firebird_Idle.SK_FB_Firebird_A_FB_Firebird_Idle",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Firebird_A_FB_Firebird_Jump.SK_FB_Firebird_A_FB_Firebird_Jump",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Firebird_A_FB_Firebird_Punch.SK_FB_Firebird_A_FB_Firebird_Punch",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Firebird_A_FB_Firebird_Run.SK_FB_Firebird_A_FB_Firebird_Run",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Firebird_A_FB_Firebird_StrafeL.SK_FB_Firebird_A_FB_Firebird_StrafeL",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Firebird_A_FB_Firebird_StrafeR.SK_FB_Firebird_A_FB_Firebird_StrafeR",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Hollow_Hollow_Rig_A_FB_Hollow_Cracked.SK_FB_Hollow_Hollow_Rig_A_FB_Hollow_Cracked",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Hollow_Hollow_Rig_A_FB_Hollow_Idle.SK_FB_Hollow_Hollow_Rig_A_FB_Hollow_Idle",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Hollow_Hollow_Rig_A_FB_Hollow_Release.SK_FB_Hollow_Hollow_Rig_A_FB_Hollow_Release",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Hollow_Hollow_Rig_A_FB_Hollow_Walk.SK_FB_Hollow_Hollow_Rig_A_FB_Hollow_Walk",
+    "/Game/Firebird/ArtKitV01/Animations/SK_FB_Hollow_Hollow_Rig_A_FB_Hollow_Windup.SK_FB_Hollow_Hollow_Rig_A_FB_Hollow_Windup"
+  ],
+  "passed": true,
+  "world_materials": [
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_World_LimestoneBlocks",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_World_BasaltPavers",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_World_MudBrick",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_World_BronzePanels",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_World_CeilingStone",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_World_CutStone",
+    "/Game/Firebird/ArtKitV01/Materials/M_FB_MercuryFlow"
+  ],
+  "structural_textures": [
+    "/Game/Firebird/ArtKitV01/Textures/BasaltPavers_BaseColor",
+    "/Game/Firebird/ArtKitV01/Textures/BasaltPavers_Normal",
+    "/Game/Firebird/ArtKitV01/Textures/BasaltPavers_Roughness",
+    "/Game/Firebird/ArtKitV01/Textures/BronzePanels_BaseColor",
+    "/Game/Firebird/ArtKitV01/Textures/BronzePanels_Normal",
+    "/Game/Firebird/ArtKitV01/Textures/BronzePanels_Roughness",
+    "/Game/Firebird/ArtKitV01/Textures/CeilingStone_BaseColor",
+    "/Game/Firebird/ArtKitV01/Textures/CeilingStone_Normal",
+    "/Game/Firebird/ArtKitV01/Textures/CeilingStone_Roughness",
+    "/Game/Firebird/ArtKitV01/Textures/LimestoneBlocks_BaseColor",
+    "/Game/Firebird/ArtKitV01/Textures/LimestoneBlocks_Normal",
+    "/Game/Firebird/ArtKitV01/Textures/LimestoneBlocks_Roughness",
+    "/Game/Firebird/ArtKitV01/Textures/MudBrick_BaseColor",
+    "/Game/Firebird/ArtKitV01/Textures/MudBrick_Normal",
+    "/Game/Firebird/ArtKitV01/Textures/MudBrick_Roughness"
+  ],
+  "fresh_process_reload_passed": true,
+  "reload_errors": []
+}
