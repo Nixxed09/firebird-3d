@@ -1,5 +1,9 @@
 # FIREBIRD: the Unreal 5 rebuild
 
+> **Start with [../docs/REBOOT_PLAN.md](../docs/REBOOT_PLAN.md).** It is the current plan
+> (2026-11-10) and overrides the older roadmap. Levels are now built by hand in the editor
+> (`.\tools\ue-edit.ps1`); the code-built course below is only the test course.
+
 The production engine for FIREBIRD (UE 5.8 at `D:\Games\UE_5.8`). The WebGL v2
 in `../v2` stays as the design reference: its tuning numbers, Riley's brain
 (`../js/riley.js`), the level contract checks and the persona bots carry over.

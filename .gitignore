@@ -15,3 +15,9 @@ captures/ue/
 
 # packaged game (built by tools/ue-package.ps1)
 builds/
+
+# Fab and Megascans packs: large, re-downloadable, listed in docs/ASSETS.md
+engine/Content/Fab/
+engine/Content/Megascans/
+engine/Content/MSPresets/
+engine/Content/ThirdParty/

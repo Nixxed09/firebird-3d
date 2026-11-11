@@ -4,6 +4,17 @@
 #include "FirebirdCharacter.h"
 #include "FirebirdHUD.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
+#include "GameFramework/PlayerStart.h"
+
+// A map made in the editor is one of ours under /Game/ and has PlayerStarts. The
+// code-built test course runs on the engine's empty map (/Engine/Maps/Entry), which
+// has a PlayerStart of its own, so the map's path is checked as well.
+static bool FBMapIsHandBuilt(UWorld* World)
+{
+    if (!World || !World->GetOutermost()->GetName().StartsWith(TEXT("/Game/"))) return false;
+    return static_cast<bool>(TActorIterator<APlayerStart>(World));
+}
 
 AFirebirdGameMode::AFirebirdGameMode()
 {
@@ -13,8 +24,11 @@ AFirebirdGameMode::AFirebirdGameMode()
 
 void AFirebirdGameMode::StartPlay()
 {
-    // the course exists before the player is placed on it
-    GetWorld()->SpawnActor<AFBRange>(AFBRange::StaticClass(), FTransform::Identity);
+    // Hand-built maps bring their own level (docs/REBOOT_PLAN.md rule R4). Only the
+    // empty startup map gets the code-built test course, and it exists before the
+    // player is placed on it.
+    if (!FBMapIsHandBuilt(GetWorld()))
+        GetWorld()->SpawnActor<AFBRange>(AFBRange::StaticClass(), FTransform::Identity);
     Super::StartPlay();
 }
 
@@ -42,6 +56,13 @@ void AFirebirdGameMode::RestartPlayer(AController* NewPlayer)
     // the empty startup map has no PlayerStart: the range's arrival platform is the start,
     // and each player gets their own spot side by side
     const int32 Seat = SeatFor(NewPlayer);
+    if (FBMapIsHandBuilt(GetWorld()))
+    {
+        // a hand-built map: the engine picks one of the map's PlayerStarts
+        Super::RestartPlayer(NewPlayer);
+        if (AFirebirdCharacter* P = Cast<AFirebirdCharacter>(NewPlayer->GetPawn())) P->PlayerIndex = Seat;
+        return;
+    }
     RestartPlayerAtTransform(NewPlayer, FTransform(FRotator::ZeroRotator, FVector(0.f, -180.f + Seat * 120.f, 110.f)));
     if (AFirebirdCharacter* P = Cast<AFirebirdCharacter>(NewPlayer->GetPawn())) P->PlayerIndex = Seat;
 }
