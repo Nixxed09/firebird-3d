@@ -2,6 +2,16 @@
 
 Newest first. The plan is [REBOOT_PLAN.md](REBOOT_PLAN.md). The format is in its section 7.
 
+## 2026-11-12: a person graded the look-room pictures (Game Studio, rater "nix")
+Read from GamesOS `projects/firebird-coop/studio/raters/nix`. Pictures only, not a walk; no notes left.
+- Every picture of the old code-built course and arena he graded: **no** (11 of 11).
+- Look room: west window **yes**, under the hole **yes**; from the east door, from the gallery and
+  the waystone **almost**; stairs and south gallery not graded yet.
+This replaces the agent's verdict for those five views: the direction is right (the first cards
+of this game to get a yes), and the three widest views are not there yet. Those are the views that
+show the flat side walls, the closed roof slabs and the repeated floor. Next look work: those.
+Step 1E still needs him to walk the room.
+
 ## 2026-11-12: play records now say where
 Did: `FB_EVENT fell`, `hurt` and `death` now carry the place it happened and where it came from
 (the checkpoint left, or the attacker). `play-record.py report` lists the 5 m squares with the
