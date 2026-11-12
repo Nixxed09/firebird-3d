@@ -1,7 +1,7 @@
 # FIREBIRD reboot plan
 
-**Written:** 2026-11-10. **Owner:** Phoenix. **Status:** Step 0 mostly done. Step 1A is
-mostly done. Next is Step 1B and 1C, which need Phoenix at the Unreal editor.
+**Written:** 2026-11-10. **Owner:** Phoenix. **Status (2026-11-11):** Steps 0, 1B and 1C are
+done. The stone kit is in the project. Next is Step 1D: build the look room.
 
 This is the plan for making FIREBIRD look and play like a modern shooter that
 Phoenix plays over the home network with his brother and dad. It replaces the
@@ -171,7 +171,7 @@ end are still open.
 
 **Still to check, the first time a map exists:**
 
-- [ ] `.\tools\ue-edit.ps1` opens the editor with no plugin error.
+- [x] `.\tools\ue-edit.ps1` opens the editor with no plugin error (checked 2026-11-10).
 - [ ] `.\tools\ue-play.ps1 -Map ...` starts the player at a PlayerStart with no
   test course around it. This path has never run, because no map exists yet.
 
@@ -179,19 +179,35 @@ end are still open.
 
 #### 1B. Phoenix and agent: connect the agent to the editor
 
-With the editor open: **Edit > Editor Preferences > Model Context Protocol**,
-turn on auto-start, start the server, then generate the client config for
-Claude Code. Restart the agent session and confirm it can see the editor. Full
-steps: `D:\TE-Code\ProductOS\GamesOS\docs\UE5_AI_LEVEL_PRODUCTION_PATTERNS.md`
-section 1.
+**Done 2026-11-11 (checked).** The editor starts its MCP server by itself
+(`engine/Config/DefaultEditorPerProjectUserSettings.ini`, this PC only, port 8000) and
+the project file turns on the editor, UI, Niagara and config toolsets.
 
-If this does not work after two tries, skip it. The agent then writes
-instructions and Phoenix clicks. Do not spend a whole session on it.
+How an agent uses it:
+
+- A new Claude Code session started in this folder gets the tools from `.mcp.json`.
+- Any session can call it from PowerShell: `.\tools\ue-mcp.ps1 -Tool list_toolsets`,
+  then `-Tool describe_toolset -ArgsJson '{"toolset_name":"..."}'`, then
+  `-Tool call_tool -ArgsFile args.json`.
+- What it can do: place and move actors, load levels, make materials and material
+  instances, edit Niagara, take viewport and editor screenshots, click editor menus and
+  type in the editor's Cmd box (so `py "script.py"` runs editor Python).
+- What it cannot do: click inside the Fab window (it is a web page), or sign in.
+
+If the server does not answer: is the editor open? Type
+`ModelContextProtocol.StartServer` in the editor's Cmd box.
 
 #### 1C. Phoenix: get the assets (needs the Epic account)
 
-In the editor: **Window > Fab**, sign in, and add these to the project. All were
-free when this was written. **Check the price on each page before clicking.
+**Done 2026-11-11 for the stone kit (checked):** the Megascans "Historic Medieval
+Church Ruin" kit is imported under `/Game/Fab/Megascans`. It is one matching stone:
+arches, doors, windows, walls, columns, floors, stairs, trims, debris. Build the look
+room with this kit first. Fire effects and props are still to get.
+
+**To add more packs, follow `docs/ASSETS.md`, "How to add Megascans packs".** That
+route is proven and an agent can run it; Phoenix only signs in and accepts prompts.
+
+What to look for. All were free when this was written. **Check the price on each page before clicking.
 Ask dad before anything that costs money (R9).**
 
 | Need | Look for on Fab | Notes |
@@ -246,6 +262,22 @@ records it as human-played with the date. An agent may not pass this gate.
 
 **If it fails three times:** stop. Write what Phoenix disliked each time, and
 ask him whether to try a bold stylized look instead of a realistic one.
+
+#### 1F. After the gate passes: start the asset studio (Phoenix asked for this 2026-11-11)
+
+Not before the gate. The room shows which pieces are missing; build only those.
+
+1. Make `/Game/Firebird/Kit/`. Save each reusable chunk built for the room there as its
+   own asset (a doorway with steps, a broken wall corner, a brazier alcove). Use Packed
+   Level Actors or merged meshes made from the Megascans pieces.
+2. Make material variants as material instances in `/Game/Firebird/Kit/Materials/`:
+   scorched, mossy, ember-lit. Do not edit the imported Megascans materials themselves.
+3. New original props (braziers, altars, statues) are modelled by hand and textured with
+   the kit's stone so they match. Kid-safety rules apply (R7).
+4. Keep a catalogue: `docs/KIT.md`, one row per chunk with a screenshot and where it is used.
+5. When a second game needs the kit, move it to a shared folder then. Not earlier.
+
+Licence limits are in `docs/ASSETS.md`. The studio is for our own games only.
 
 ---
 

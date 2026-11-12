@@ -14,6 +14,20 @@ Phoenix said: has not seen it yet.
 Sessions since Phoenix last played: unknown.
 Next: close the editor, run ue-build.ps1 and the feel test; then Step 1C (Fab assets).
 
+## 2026-11-11: steps 1B and 1C, the editor is driveable and the stone kit is in
+Did: the editor's MCP server auto-starts and tools\ue-mcp.ps1 talks to it. Added
+the Megascans "Historic Medieval Church Ruin" kit to the Fab library, downloaded
+66 "_ue_high" zips from fab.com and imported them with
+tools\ue-import-megascans.ps1 (55 meshes, 11 surfaces, 4.8 GB under
+engine/Content/Fab, not in git). Parent materials copied into the project.
+Wrote the how-to into docs/ASSETS.md and step 1F (asset studio) into the plan.
+Proof: checked. Import result says 66 ok of 66. One mesh (arch 01) was looked at
+as a thumbnail. No piece has been placed in a level and nothing was played.
+Phoenix said: asked for an asset studio built from these packs; signed in to
+Epic and accepted the Fab licence himself.
+Sessions since Phoenix last played: unknown (no play session on record).
+Next: Step 1D, build L_LookRoom from the kit, then the look gate (1E).
+
 ## 2026-11-10: step 1A, the project accepts hand-built maps
 Did: the game mode now leaves hand-built maps alone (no code-built course, players
 start at the map's PlayerStarts). Added tools\ue-edit.ps1, a -Map option on
