@@ -56,6 +56,9 @@ private:
     UPROPERTY() AFirebirdCharacter* MotionModel = nullptr;
     FVector MotionFoot = FVector::ZeroVector;
     FVector MotionHand = FVector::ZeroVector;
+    void TickController(AFirebirdCharacter* P);
+    bool bControllerCaseStarted = false;
+    FVector ControllerStart = FVector::ZeroVector;
     int32 WantPlayers = 1;
     int32 MaxHollowsSeen = 0;
     int32 MaxTeammatesSeen = 0;

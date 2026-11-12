@@ -142,3 +142,44 @@ can play it together on the home network.
   the allow. Loopback tests can't see it; only a second computer can. Check `Get-NetFirewallRule -DisplayName firebird.exe`.
 - What each computer still has to do lives in ProductOS `GamesOS/projects/firebird-coop/PIN.md` (Status). SKYBOX's
   steps are in `GamesOS/projects/old-earth-world/living-quarry/BETWEEN-COMPUTERS.md`.
+
+### 2026-11-10: keep the victory menu instruction visible
+
+- After the last wave, the victory card now says "Press Esc to go to home menu" in larger cream text.
+  Controller users also see START. The arena-clear state keeps the card visible after its former eight-second timer.
+  Existing Escape/START handling still calls `BackToMenu`.
+- Local source: `D:/Phoenix/nix-code/games/firebird-controller-fix`, uncommitted HUD patch over `cf28ffb`.
+  Packaged successfully with UE 5.8; installed in ProductOS's `firebird-coop/builds/windows` adapter.
+  Previous installation retained at `D:/TE-Code/FamilyArcade/backups/firebird-victory-20261110`.
+- Rendered automated solo wave-clear checks passed in the editor and the installed package. Reviewed the installed
+  `03-clear.png`: `D:/TE-Code/FamilyArcade/closeout/firebird-victory-installed-20261110/`.
+  ProductOS build, type-check, tests (125 Jest passes plus 12 auth checks), and lint passed.
+  No new physical two-PC or human playtest claim; arcade channel/pin unchanged.
+
+### 2026-11-10: crouch on the right stick click
+
+- Moved both held and pressed crouch/slide inputs from L3 to R3. Controller controls now show
+  `B / R3` with `Crouch / slide`. B, keyboard controls, and the victory-menu change remain available.
+- UE 5.8 packaging passed. All packaged content containers and the launcher matched the prior install;
+  replaced only the game binary, matching symbols, and build information in ProductOS's local adapter.
+  Renamed the loaded binary into `D:/TE-Code/FamilyArcade/backups/firebird-r3-20261110` so the active
+  game session could continue. The new binding takes effect on the next launch.
+- Existing six viewport controller-direction checks passed against both the built and installed game.
+  ProductOS build, type-check, tests (125 Jest passes and 12 auth checks), and lint passed.
+  Crouch binding reviewed in both input paths; no physical-controller playtest claimed.
+
+### 2026-11-10: hold the left shoulder button to aim
+
+- LB/L1 now holds aim: smoothly narrows the view from 100 to 70 degrees, reduces look input to 60%,
+  and reduces walking bob. Releasing the button restores the normal view. RB/R1 still dashes;
+  LB no longer spends a dash. R3 crouch and the persistent victory-menu instruction remain.
+- Updated the controller controls card and dash label. Extended the existing viewport controller
+  check to verify aim FOV, no accidental dash, and normal FOV after release, with screenshots.
+  All nine checks passed in the editor and packaged game. Reviewed the aim and controller-menu images.
+  Source evidence: `D:/TE-Code/FamilyArcade/closeout/firebird-aim-source-20261110`.
+  Package evidence: `captures/ue/controller-20261110-203253`.
+- UE 5.8 packaging and ProductOS build, type-check, tests, and lint passed. Installed the exact tested
+  executable (SHA-256 verified) and matching symbols in the local ProductOS adapter; launcher and all
+  content containers matched the previous package. Prior binary and metadata retained at
+  `D:/TE-Code/FamilyArcade/backups/firebird-aim-20261110`. Active sessions continue; relaunch loads it.
+  Local uncommitted patch; no channel promotion or physical-controller/two-PC playtest claim.

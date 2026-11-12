@@ -81,8 +81,9 @@ void AFirebirdHUD::DrawControls(float X, float Y, float Alpha, bool bMouseRow)
         static const FRow Pad[] = {
             { TEXT("L STICK"), TEXT("Move") },          { TEXT("R STICK"), TEXT("Look and aim") },
             { TEXT("A"), TEXT("Jump") },                { TEXT("RT"), TEXT("Shoot sparks") },
-            { TEXT("LB / RB"), TEXT("Dash (2 charges)") }, { TEXT("LT  or  X"), TEXT("Fist: free a cracked Hollow") },
-            { TEXT("B"), TEXT("Slide (while running)") },  { TEXT("START"), TEXT("Back to the menu") },
+            { TEXT("RB"), TEXT("Dash (2 charges)") },    { TEXT("LT  or  X"), TEXT("Fist: free a cracked Hollow") },
+            { TEXT("B / R3"), TEXT("Crouch / slide") },          { TEXT("START"), TEXT("Back to the menu") },
+            { TEXT("LB"), TEXT("Aim (hold)") },
             { TEXT("D-PAD < >"), TEXT("Look slower / faster") },
         };
         const int32 PadCount = UE_ARRAY_COUNT(Pad) - (bMouseRow ? 0 : 1);
@@ -241,7 +242,7 @@ void AFirebirdHUD::DrawHUD()
     const float X3 = X2 + 162 * S;
     Plate(X3, Y0, 136 * S, PlH);
     const UFirebirdSession* PadSes = UFirebirdSession::Get(this);
-    Txt((PadSes && PadSes->bUsingPad) ? TEXT("DASH  [LB/RB]") : TEXT("DASH  [SHIFT]"), 13.f, FBUI::Brass, X3 + 16 * S, Y0 + 8 * S);
+    Txt((PadSes && PadSes->bUsingPad) ? TEXT("DASH  [RB]") : TEXT("DASH  [SHIFT]"), 13.f, FBUI::Brass, X3 + 16 * S, Y0 + 8 * S);
     for (int32 i = 0; i < P->DashCharges; ++i)
     {
         const float Fill = FMath::Clamp(P->DashCharge - i, 0.f, 1.f);
@@ -291,10 +292,11 @@ void AFirebirdHUD::DrawHUD()
         }
     }
 
-    // the big moment: ARENA CLEAR and the time
-    if (BigT > 0.f)
+    // Keep the victory and the way home visible until the player leaves the arena.
+    const bool bArenaClear = R && R->bArenaClear;
+    if (BigT > 0.f || bArenaClear)
     {
-        const float A = FMath::Min(1.f, BigT);
+        const float A = bArenaClear ? 1.f : FMath::Min(1.f, BigT);
         FString Head = BigText, Sub;
         BigText.Split(TEXT("  "), &Head, &Sub);
         DrawRect(FLinearColor(0.06f, 0.025f, 0.01f, 0.7f * A), 0, Cy - 110 * S, W, 170 * S);
@@ -302,7 +304,9 @@ void AFirebirdHUD::DrawHUD()
         DrawRect(FBUI::A(FBUI::Ember, A), 0, Cy + 57 * S, W, 3 * S);
         Txt(Head.IsEmpty() ? BigText : Head, 56.f, FBUI::A(FBUI::Gold, A), Cx, Cy - 96 * S, 1);
         if (!Sub.IsEmpty()) Txt(FString::Printf(TEXT("TIME  %s"), *Sub), 24.f, FBUI::A(FBUI::Cream, A), Cx, Cy - 12 * S, 1);
-        Txt(TEXT("Esc for the menu"), 15.f, FBUI::A(FBUI::Brass, A), Cx, Cy + 26 * S, 1, false);
+        const bool bUsingPad = PadSes && PadSes->bUsingPad;
+        Txt(bUsingPad ? TEXT("Press Esc or START to go to home menu") : TEXT("Press Esc to go to home menu"),
+            20.f, FBUI::A(FBUI::Cream, A), Cx, Cy + 24 * S, 1);
     }
 
     // Riley on the radio: a centred plate at the top, the speaker tagged

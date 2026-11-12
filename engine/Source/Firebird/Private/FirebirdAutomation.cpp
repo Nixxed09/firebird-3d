@@ -23,8 +23,99 @@
 #if WITH_EDITOR
 #include "ShaderCompiler.h"
 #endif
+#include "Engine/GameViewportClient.h"
+#include "Slate/SceneViewport.h"
+#include "Input/Events.h"
 
 static bool GRanThisProcess = false;
+
+// Inject device-space stick events through the actual viewport (including its
+// right-Y inversion), then let normal ReadInput and character ticks respond.
+void UFirebirdAutomation::TickController(AFirebirdCharacter* P)
+{
+    if (TotalT < 1.f) return;
+    APlayerController* PC = Cast<APlayerController>(P->GetController());
+    UGameViewportClient* Client = GetWorld()->GetGameViewport();
+    FSceneViewport* Viewport = Client ? Client->GetGameViewport() : nullptr;
+    if (!PC || !Viewport)
+    {
+        Proof(TEXT("controller_viewport"), false, TEXT("No local player viewport"));
+        Finish();
+        return;
+    }
+    struct FStickCase { FKey Key; float Value; const TCHAR* Name; bool bMove; };
+    const FStickCase Cases[] = {
+        { EKeys::Gamepad_RightY,  0.8f, TEXT("right_stick_up_looks_up"), false },
+        { EKeys::Gamepad_RightY, -0.8f, TEXT("right_stick_down_looks_down"), false },
+        { EKeys::Gamepad_RightX,  0.8f, TEXT("right_stick_right_looks_right"), false },
+        { EKeys::Gamepad_RightX, -0.8f, TEXT("right_stick_left_looks_left"), false },
+        { EKeys::Gamepad_LeftY,   0.8f, TEXT("left_stick_up_moves_forward"), true },
+        { EKeys::Gamepad_LeftY,  -0.8f, TEXT("left_stick_down_moves_backward"), true }
+    };
+    // Exercise the shoulder button through the same viewport as a real controller.
+    if (Stage >= UE_ARRAY_COUNT(Cases))
+    {
+        P->bAutoDriven = false;
+        const bool bHoldAim = Stage == UE_ARRAY_COUNT(Cases);
+        const bool bMenu = Stage == UE_ARRAY_COUNT(Cases) + 2;
+        if (!bControllerCaseStarted)
+        {
+            P->GetCharacterMovement()->StopMovementImmediately();
+            if (bMenu)
+            {
+                if (UFirebirdSession* Session = UFirebirdSession::Get(this)) Session->BackToMenu(FString());
+            }
+            else
+            {
+                const FKeyEvent Button(EKeys::Gamepad_LeftShoulder, FModifierKeysState(), 0u, false, 0, 0);
+                if (bHoldAim) Viewport->OnKeyDown(FGeometry(), Button);
+                else Viewport->OnKeyUp(FGeometry(), Button);
+            }
+            StageT = 0.f;
+            bControllerCaseStarted = true;
+        }
+        if (StageT < 0.6f) return;
+        if (bMenu)
+        {
+            Shot(TEXT("09-controller-menu"));
+            P->bAutoDriven = true;
+            P->Input = FFirebirdInput();
+            Finish();
+            return;
+        }
+        const float ExpectedFov = P->Fov * (bHoldAim ? 0.7f : 1.f);
+        Proof(bHoldAim ? TEXT("left_shoulder_aims") : TEXT("release_aim_restores_view"),
+            FMath::IsNearlyEqual(P->Camera->FieldOfView, ExpectedFov, 1.f),
+            FString::Printf(TEXT("FOV %.2f, expected %.2f"), P->Camera->FieldOfView, ExpectedFov));
+        if (bHoldAim) Proof(TEXT("left_shoulder_does_not_dash"), P->Dashes == 0, FString::Printf(TEXT("dashes %d"), P->Dashes));
+        Shot(bHoldAim ? TEXT("07-aim-held") : TEXT("08-aim-released"));
+        bControllerCaseStarted = false;
+        ++Stage;
+        return;
+    }
+    if (!bControllerCaseStarted)
+    {
+        ControllerStart = P->GetActorLocation();
+        PC->SetControlRotation(FRotator::ZeroRotator);
+        P->GetCharacterMovement()->StopMovementImmediately();
+        StageT = 0.f;
+        bControllerCaseStarted = true;
+    }
+    P->bAutoDriven = false;
+    const FStickCase& Test = Cases[Stage];
+    for (const FKey& Key : { EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY, EKeys::Gamepad_RightX, EKeys::Gamepad_RightY })
+    {
+        const float Value = StageT < 0.4f && Key == Test.Key ? Test.Value : 0.f;
+        Viewport->OnAnalogValueChanged(FGeometry(), FAnalogInputEvent(Key, FModifierKeysState(), 0u, false, 0, 0, Value));
+    }
+    if (StageT < 0.4f) return;
+    const FRotator Rotation = PC->GetControlRotation();
+    const float Actual = Test.bMove ? (P->GetActorLocation() - ControllerStart).X
+        : FRotator::NormalizeAxis(Test.Key == EKeys::Gamepad_RightY ? Rotation.Pitch : Rotation.Yaw);
+    Proof(Test.Name, Actual * FMath::Sign(Test.Value) > (Test.bMove ? 10.f : 1.f), FString::Printf(TEXT("observed %.2f"), Actual));
+    bControllerCaseStarted = false;
+    ++Stage;
+}
 
 void UFirebirdAutomation::OnWorldBeginPlay(UWorld& InWorld)
 {
@@ -120,6 +211,11 @@ void UFirebirdAutomation::Tick(float DeltaSeconds)
         return;
     }
     P->bAutoDriven = true;
+    if (Scenario == TEXT("controller"))
+    {
+        TickController(P);
+        return;
+    }
     // the start menu, as a kid sees it: a friend's room is listed, picking it joins
     if (Scenario == TEXT("menu"))
     {
