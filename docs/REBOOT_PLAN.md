@@ -79,11 +79,13 @@ art is allowed only for the Firebird, the Hollows and the weapons.
 **human-played** (Phoenix or family played it). Only human-played counts for
 "looks good", "feels good" and "is fun".
 
-**R7. Kid-safety stays.** No blood, no gore, no demons or occult symbols.
-Hits show light and sparks. Players in versus are tagged out and come back.
-Check every Fab pack against this before adding it. Real guns from the game's
-period (about 1870 to 1910) are allowed (Travis, 2026-11-11); before that date
-this rule banned them.
+**R7. It fits the realm, and the family plays it.** (Rewritten by Travis,
+2026-11-11. Before that it banned blood, real guns and demons.) Allowed: real
+guns of the period, blood, and etheric, demon-like enemies that are released
+into the light. Still out: real people as villains, any real group as the
+villains (the Rebuilders are made up), and using people who died in the real
+fires as decoration. How far blood and gore go is an open question in
+`docs/SETTING_BRIEF.md` section 7. Check every Fab pack against this.
 
 **R8. Small steps, saved often.** Commit after each task that works. Never leave
 a session with uncommitted work.

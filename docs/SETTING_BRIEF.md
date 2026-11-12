@@ -36,7 +36,7 @@ Rebuilder crews (first list, to be designed):
 | Foremen | Run a crew | Tougher, call other crews in |
 | Looters | Not Rebuilders. Townsfolk and drifters taking what is left. | Scatter and run. Often not a fight at all. |
 
-How the Hollows fit: an open question for Phoenix and Travis (section 7).
+Beside the crews there are etheric enemies: demon-like things of the old world, released into the light when beaten (section 7). The Hollows of Ashgate are the first of these.
 
 ## 3. The cities
 
@@ -79,18 +79,39 @@ Packs to look for on Fab (none are in the project yet):
 
 ## 5. Weapons
 
-**Real period guns are allowed** (Travis, 2026-11-11). Rule R7 has been changed
-to say so. The rest of R7 stays: no blood, no gore, no demons or occult symbols.
+Decided by Travis, 2026-11-11: real guns of the time are allowed, and we stretch
+them with the realm's lost science. Rule R7 has been rewritten to match.
 
-| Slot | Kind | Period examples |
+**Two families, both in every episode.**
+
+| Family | What it is | Examples |
 |---|---|---|
-| Sidearm | Revolver | Single-action and double-action revolvers |
-| Rifle | Lever-action or bolt-action | The main long gun |
-| Close | Pump or double shotgun | For streets and doorways |
-| Thrown | Fire-brigade and Rebuilder gear | Something that puts fire out or sets it |
-| The Firebird's own | Ember Fist, Spark Caster | Kept. This is what makes the hero a firebird and not a soldier. |
+| **Powder guns** | The real guns of 1870 to 1910 | Single-action revolver, lever-action rifle, bolt-action rifle, pump or double shotgun |
+| **Aether arms** | The old world's energy weapons, and new ones built from them | Knight's energy lance, coil rifle, arc thrower, resonance bell-gun |
 
-Hits on enemies still show light and sparks, not blood.
+**Where aether arms come from in the story (taken at face value as realm lore):**
+
+- The knights of the old world carried energy weapons. Plate armour was made to protect against them: a metal shell carries a charge around the body.
+- Lances, maces and sceptres were the emitters. Star forts and bell towers were the grid that fed them.
+- The Rebuilders strip this gear out of the burning cities. That is what the Strippers' wagons carry.
+- A Tesla-like inventor on our side works out how to rebuild it. Each episode can unlock one new weapon from what you recover.
+
+**Real 1890s to 1900s science to build the designs from** (real things, used as a look and a starting point):
+
+| Real thing | What it gives a weapon |
+|---|---|
+| Tesla coil and magnifying transmitter (New York 1895-98, Colorado Springs 1899, Wardenclyffe 1901) | Arcing bolts, a charge-up whine, wireless power from a tower in the level |
+| Leyden jars and Wimshurst machines | The "magazine": glass jars of stored charge you swap on reload |
+| Crookes and Geissler tubes | Glowing glass on the gun that shows charge |
+| Carbon arc lamps | A blinding white-violet beam |
+| Tesla's later "teleforce" beam idea (announced 1934, never built) | The end-of-game weapon |
+
+Research note (2026-11-11): one web search found no written source for the
+"electric knights" theory by that name, so its details above are from Travis's
+description. More research is a task of its own before the designs are final.
+
+The Firebird's own Ember Fist and Spark Caster stay. They are what makes the
+hero a firebird and not a soldier.
 
 ## 6. How it should feel to play
 
@@ -98,7 +119,7 @@ Target (Travis, 2026-11-11): close to a grounded 2005-era war shooter that he
 liked the feel of. We copy the feel and the genre's common moves, not that game's
 levels, weapons, sounds, names or look.
 
-What that means:
+**Build this first (the grounded kit):**
 
 1. **Aim down the sights.** Holding aim brings the gun up, slows you and tightens the shot.
 2. **Lean** left and right around corners.
@@ -107,19 +128,32 @@ What that means:
 5. **Cover matters.** Streets are read by sightlines.
 6. **Health comes back** if you stay out of fire for a few seconds.
 
-This is a change from today's kit (Ember Dash, slide, release-heal, fast arena
-movement). It needs a decision (section 7) and a new step in `REBOOT_PLAN.md`
-after the look gate. It is not started.
+**Then add:**
 
-## 7. Open questions
+7. **Dash and slide behind a setting.** The dash and slide Phoenix already built stay in the code, switched by one option in the settings menu, off by default. The family plays both ways and then decides.
+8. **Wings blaze.** A short powered state where the Firebird moves fast (dash and slide on, whatever the setting says) and every shot burns.
+
+It needs a new step in `REBOOT_PLAN.md` after the look gate. It is not started.
+
+## 7. Decided, and still open
+
+Decided 2026-11-11 (Travis):
+
+| Question | Answer |
+|---|---|
+| Who is the player? | The Firebird. It is the main character and it does the shooting. |
+| Blood? | Allowed. The no-blood rule is gone. |
+| What are the enemies? | Both kinds. Rebuilder crews are people. Some enemies are etheric, demon-like things, and those are released into the light when beaten. |
+| Dash and slide? | Start grounded. Dash and slide become a setting to try both. Fast movement when the wings blaze. |
+
+Still open:
 
 | # | Question | Who decides |
 |---|---|---|
-| 1 | Are the Rebuilder crews ordinary people, or Hollows (people the Overseers drained)? This sets whether enemies are "released into light" or just beaten. | Phoenix and Travis |
-| 2 | Does the Firebird keep the dash and slide, or does movement go fully grounded? A middle path: grounded with guns out, fast when the wings blaze. | Phoenix (it is his game feel) |
-| 3 | Is the player the Firebird holding a rifle, or a person the Firebird travels with? | Phoenix |
-| 4 | Do Riley, Odo and Cinder travel from city to city? | Phoenix |
-| 5 | Versus mode: are players tagged out as now? | Travis |
+| 1 | How far does blood go? A hit effect only, or wounds and gore too? | Travis |
+| 2 | Do Riley, Odo and Cinder travel from city to city? | Phoenix |
+| 3 | Versus mode: are players tagged out as now? | Travis |
+| 4 | Who is the Tesla-like inventor? A new character, or Odo the Bellwright? | Phoenix |
 
 ## 8. What changes in other docs (not done yet)
 
