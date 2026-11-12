@@ -1,7 +1,7 @@
 # FIREBIRD reboot plan
 
 **Written:** 2026-11-10. **Owner:** Phoenix. **Status (2026-11-11):** Steps 0, 1B and 1C are
-done. The stone kit is in the project. Next is Step 1D: build the look room.
+done. Step 1D has a first version of the look room. Next is Step 1E: Phoenix walks it and judges it.
 
 This is the plan for making FIREBIRD look and play like a modern shooter that
 Phoenix plays over the home network with his brother and dad. It replaces the

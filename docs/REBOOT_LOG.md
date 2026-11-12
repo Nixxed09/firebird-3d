@@ -2,6 +2,20 @@
 
 Newest first. The plan is [REBOOT_PLAN.md](REBOOT_PLAN.md). The format is in its section 7.
 
+## 2026-11-11: step 1D, first version of the look room
+Did: built /Game/Firebird/Maps/L_LookRoom from the church ruin kit with
+tools\editor\build_lookroom.py (338 actors): 32 m by 20 m hall, arcades with a
+gallery above, stairs, broken roof with a sunset shaft through the west window,
+niche lights, one cyan waystone, fog, locked exposure, four PlayerStarts. Added
+tools\ue-py.ps1 (run editor Python) and tools\ue-shot.ps1 (viewport picture).
+Proof: checked. Six editor screenshots in docs/evidence/look-gate/. The game
+started in the room with `ue-play.ps1 -Map` and loaded it without errors. Not
+confirmed: that the player stands on the floor, the stairs are walkable, or the
+frame rate. No Niagara embers yet (no fire pack). The layout was placed by a
+script, then is a normal editable map; the look gate is Phoenix's call.
+Phoenix said: "build the room". Has not judged it yet.
+Sessions since Phoenix last played: unknown (no play session on record).
+Next: Phoenix walks the room and answers the look-gate question (1E).
 ## 2026-11-11: step 0, one folder
 Did: merged Codex's controller branch (inverted look fix, hold LB to aim, crouch on R3,
 victory card keeps "Press Esc"), after saving its uncommitted work. Removed the
