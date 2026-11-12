@@ -112,7 +112,7 @@ def point_light(x, y, z, colour, intensity, radius, folder="Lights", shadows=Tru
     c.set_light_color(unreal.LinearColor(*colour))
     c.set_attenuation_radius(radius)
     c.set_cast_shadows(shadows)
-    setp(c, "volumetric_scattering_intensity", 1.5)
+    setp(c, "volumetric_scattering_intensity", 0.15)   # lamps light the stone, not the air
     return a
 
 
@@ -131,7 +131,7 @@ M_FLOOR = tiled("MI_LR_Floor", "floor_stone_01", 2.0)
 M_GALLERY = tiled("MI_LR_GalleryFloor", "floor_stone_02", 2.0)
 M_SMOOTH = tiled("MI_LR_Smooth", "texture_stone_smooth_01", 2.0)
 
-EXPOSURE = 1.5                     # manual exposure: higher is brighter
+EXPOSURE = 1.9                     # manual exposure: higher is brighter
 L, W, H = 3200, 2000, 800          # inside length (X), width (Y), wall height
 HX, HY = L // 2, W // 2
 T = 80                             # wall thickness
@@ -286,27 +286,27 @@ place(kit("pillar_stone_modular_01", 47, 100), 600, 0, 49, 0, "Waystone")
 sun = spawn(unreal.DirectionalLight, 0, 0, 1500, "Lights", yaw=4.0, pitch=-17.0)
 sc = sun.light_component
 sc.set_mobility(unreal.ComponentMobility.MOVABLE)
-sc.set_intensity(9.0)
+sc.set_intensity(13.0)
 sc.set_light_color(unreal.LinearColor(1.0, 0.56, 0.27))
 setp(sc, "atmosphere_sun_light", True)
-setp(sc, "volumetric_scattering_intensity", 2.5)
+setp(sc, "volumetric_scattering_intensity", 0.45)  # a faint shaft, not a wall of haze
 
 spawn(unreal.SkyAtmosphere, 0, 0, 0, "Lights")
 sky = spawn(unreal.SkyLight, 0, 0, 1200, "Lights")
 kc = sky.light_component
 kc.set_mobility(unreal.ComponentMobility.MOVABLE)
 setp(kc, "real_time_capture", True)
-kc.set_intensity(0.35)
+kc.set_intensity(0.6)
 
 fog = spawn(unreal.ExponentialHeightFog, 0, 0, 100, "Lights")
 fc = fog.component
-setp(fc, "fog_density", 0.035)
+setp(fc, "fog_density", 0.006)
 setp(fc, "fog_height_falloff", 0.05)
 setp(fc, "fog_inscattering_luminance", unreal.LinearColor(0.20, 0.11, 0.06))
 setp(fc, "enable_volumetric_fog", True)
 setp(fc, "volumetric_fog_scattering_distribution", 0.6)
 setp(fc, "volumetric_fog_albedo", unreal.Color(r=255, g=214, b=170, a=255))
-setp(fc, "volumetric_fog_extinction_scale", 1.4)
+setp(fc, "volumetric_fog_extinction_scale", 0.5)
 
 # Small warm lights with darkness between them: one under each gallery end and by the door.
 WARM = (1.0, 0.48, 0.16)
@@ -319,7 +319,7 @@ point_light(1480, 0, 230, WARM, 70.0, 1000)
 point_light(1400, 600, GAL_Z + 220, WARM, 40.0, 800)
 point_light(1400, -600, GAL_Z + 220, WARM, 40.0, 800)
 # The one cool light.
-point_light(600, 0, 190, (0.25, 0.85, 1.0), 45.0, 700)
+point_light(600, 0, 190, (0.25, 0.85, 1.0), 14.0, 450)
 
 ppv = spawn(unreal.PostProcessVolume, 0, 0, 200, "Lights")
 ppv.set_editor_property("unbound", True)
@@ -327,7 +327,7 @@ s = ppv.get_editor_property("settings")
 for name, value in [("auto_exposure_method", unreal.AutoExposureMethod.AEM_MANUAL),
                     ("auto_exposure_bias", EXPOSURE),
                     ("auto_exposure_apply_physical_camera_exposure", False),
-                    ("bloom_intensity", 0.9),
+                    ("bloom_intensity", 0.45),
                     ("vignette_intensity", 0.5)]:
     setp(s, "override_" + name, True)
     setp(s, name, value)
