@@ -17,6 +17,16 @@ captures/ue/
 builds/
 
 # Fab and Megascans packs: large, re-downloadable, listed in docs/ASSETS.md
+# Rule: everything in engine/Content is a downloaded pack unless it is listed here.
+# Packs must never be committed (Fab licence, and they are many gigabytes).
+engine/Content/*
+!engine/Content/Firebird/
+!engine/Content/__ExternalActors__/
+!engine/Content/__ExternalObjects__/
+engine/Content/__ExternalActors__/*
+engine/Content/__ExternalObjects__/*
+!engine/Content/__ExternalActors__/Firebird/
+!engine/Content/__ExternalObjects__/Firebird/
 engine/Content/Fab/
 engine/Content/Megascans/
 engine/Content/MSPresets/
