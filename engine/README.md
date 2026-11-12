@@ -68,7 +68,9 @@ with no audio device. Check every asset loads: run the game with
 | `jump` / `land` | jump starts / touchdown after a fall (scale volume by fall speed) | 3D |
 | `dash` | Ember Dash starts | 3D |
 | `slide` | a slide starts | 3D |
-| `spark_fire` | Spark Caster fires | 3D at the muzzle |
+| `spark_fire` | the sidearm (period revolver) fires: crack, black-powder boom, stone slapback (old asset name kept) | 2D for the shooter, 3D at the muzzle for everyone else |
+| `caster_open` / `caster_chamber` / `caster_close` | a reload: loading gate opens and the cylinder spins / each cartridge seats (six, rising pitch) / gate snaps shut and the hammer cocks | 3D |
+| `caster_dry` | trigger pulled with no sparks left at all | 3D |
 | `spark_hit_wall` / `spark_hit_hollow` | the spark hits stone / a Hollow | 3D at the impact |
 | `fist_swing` / `fist_hit` | every punch / a punch that connects (not a release) | 3D |
 | `crack` | a Hollow's shell cracks (the release window opens) | 3D |

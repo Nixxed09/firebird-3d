@@ -85,7 +85,7 @@ void UFirebirdAutomation::TickController(AFirebirdCharacter* P)
             Finish();
             return;
         }
-        const float ExpectedFov = P->Fov * (bHoldAim ? 0.7f : 1.f);
+        const float ExpectedFov = P->Fov * (bHoldAim ? P->AimZoom : 1.f);
         Proof(bHoldAim ? TEXT("left_shoulder_aims") : TEXT("release_aim_restores_view"),
             FMath::IsNearlyEqual(P->Camera->FieldOfView, ExpectedFov, 1.f),
             FString::Printf(TEXT("FOV %.2f, expected %.2f"), P->Camera->FieldOfView, ExpectedFov));
@@ -339,7 +339,7 @@ void UFirebirdAutomation::TickGun(AFirebirdCharacter* P, float Dt)
         It->GetCharacterMovement()->DisableMovement();
     }
     I.Move = FVector2D::ZeroVector;
-    I.bFirePressed = I.bReload = I.bFist = false;
+    I.bFirePressed = I.bReload = I.bFist = I.bAimHeld = false;
     I.bFireHeld = false;
     switch (Stage)
     {

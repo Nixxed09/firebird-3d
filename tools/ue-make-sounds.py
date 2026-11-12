@@ -228,12 +228,70 @@ def slide():
     return master(mix(scrape * 0.7, body, sparks), -5)
 
 
+def metal_click(dur=0.03, lo=2500, hi=8000, ring=2400, gain=1.0):
+    """a small steel part landing: a bright tick with a short ring"""
+    tick = filt(noise(dur), "band", (lo, hi)) * env(dur, 0.0003, curve=7)
+    ping = bell(ring, 0.12, 0.8, 4.0) * 0.25
+    return mix(tick, ping) * gain
+
+
+def echoes(x, taps=((0.085, 0.32, 2600), (0.16, 0.18, 1800), (0.27, 0.09, 1200))):
+    """slapback off stone walls: delayed, darker copies"""
+    out = x.copy()
+    for delay, g, tone in taps:
+        out = mix(out, at(filt(x, "low", tone) * g, delay))
+    return out
+
+
 def spark_fire():
-    crack = filt(noise(0.04), "high", 2200) * env(0.04, 0.0005, curve=6)
-    chirp = osc(2600, 820, 0.09, "sine") * env(0.09, 0.001, curve=2.2) * 0.7
-    shimmer = osc(5200, 1800, 0.06, "tri") * env(0.06, 0.001, curve=3) * 0.2
-    thump = osc(140, 55, 0.07) * env(0.07, 0.001, curve=3) * 0.8
-    return master(room(mix(crack, chirp, shimmer, thump), 0.35, 0.18, 7000), -1.5, 1.6)
+    # the sidearm, a period single-action revolver (SETTING_BRIEF section 5): a hard crack, a big
+    # black-powder boom with a rolling low end, a short hiss of smoke, then the shot slapping back
+    # off brick and stone and dying in the street. (The asset keeps its old name so code and
+    # packages need no rename.)
+    snap = filt(noise(0.004), "high", 1500) * env(0.004, 0.0001, curve=2) * 1.5
+    crack = filt(noise(0.035), "band", (1000, 8000)) * env(0.035, 0.0003, curve=4.5) * 1.0
+    bark = filt(noise(0.11), "band", (200, 1100)) * env(0.11, 0.0008, curve=3) * 1.0
+    boom = osc(95, 36, 0.32) * env(0.32, 0.0008, curve=2.2) * 1.3
+    roll = filt(noise(0.6, "brown"), "low", 220) * env(0.6, 0.004, curve=2.5) * 0.55
+    hiss = filt(noise(0.25), "high", 3500) * env(0.25, 0.01, curve=3) * 0.06
+    dry = mix(snap, crack, bark, boom, roll, at(hiss, 0.02), silence(1.1))
+    return master(room(echoes(dry), 1.0, 0.24, 4200), -1.0, 2.4)
+
+
+def caster_open():
+    # the loading gate flips open and the cylinder is spun to dump the empties: a latch, then a ratchet that speeds up
+    latch = metal_click(0.03, 1800, 7000, 1700, 1.0)
+    clicks = [latch]
+    t = 0.09
+    gap = 0.05
+    for _ in range(9):   # nine ratchet teeth, each a little sooner than the last
+        clicks.append(at(metal_click(0.012, 3000, 9000, 3100, 0.35), t))
+        t += gap
+        gap = max(0.022, gap * 0.85)
+    whir = swept_band(noise(0.35), 900, 2400, 0.4) * swell(0.35, 0.6) * 0.12
+    return master(room(mix(*clicks, at(whir, 0.08)), 0.3, 0.12), -6)
+
+
+def caster_chamber():
+    # one brass cartridge sliding into its chamber: a soft clink, then the cylinder clicks round a place
+    clink = bell(3600, 0.1, 1.0, 4.0) * 0.45
+    slide = filt(noise(0.03), "band", (2500, 7000)) * env(0.03, 0.004, curve=2) * 0.25
+    turn = at(metal_click(0.012, 2500, 8000, 2900, 0.6), 0.05)
+    return master(mix(slide, clink, turn), -9)
+
+
+def caster_close():
+    # the loading gate snaps shut and the hammer is thumbed back: snap, thunk, a ready ring
+    snap = metal_click(0.025, 1500, 8000, 1900, 1.0)
+    thunk = osc(190, 90, 0.08) * env(0.08, 0.0008, curve=4) * 0.8
+    cock = at(metal_click(0.018, 2500, 9000, 2600, 0.7), 0.11)
+    ring = at(bell(1250, 0.35, 0.6, 2.0) * 0.25, 0.11)
+    return master(room(mix(snap, thunk, cock, ring), 0.3, 0.12), -4)
+
+
+def caster_dry():
+    # the hammer falls on an empty chamber
+    return master(mix(metal_click(0.02, 2200, 8000, 2100, 1.0), osc(260, 140, 0.03) * env(0.03, 0.0005, curve=5) * 0.4), -8)
 
 
 def spark_hit_wall():
@@ -438,6 +496,7 @@ SOUNDS = {
     "footstep_1": lambda: footstep(0), "footstep_2": lambda: footstep(1), "footstep_3": lambda: footstep(2),
     "jump": jump, "land": land, "dash": dash, "slide": slide,
     "spark_fire": spark_fire, "spark_hit_wall": spark_hit_wall, "spark_hit_hollow": spark_hit_hollow,
+    "caster_open": caster_open, "caster_chamber": caster_chamber, "caster_close": caster_close, "caster_dry": caster_dry,
     "fist_swing": fist_swing, "fist_hit": fist_hit, "crack": crack, "release": release,
     "hollow_break": hollow_break, "hollow_windup": hollow_windup,
     "ember_throw": ember_throw, "ember_hit_player": ember_hit_player,

@@ -80,6 +80,12 @@ The weapons feel exactly like the Doom classics; only their fiction changes.
 | 3 | Bell Blaster | a Tartarian bell rung once: a spread of seven tones | BELL CHARGES (`BELL`) |
 
 - Built from brass, bronze and a crystal core. There are no magazines, and no rifle or pistol silhouettes taken from real guns.
+- Superseded for the sidearm (2026-11-11): real period guns are now allowed (`docs/SETTING_BRIEF.md`
+  section 5, R7 changed by Travis). The game's sidearm today is a period single-action revolver: a blued
+  barrel and cylinder, a case-hardened frame, a brass guard and backstrap, and a walnut grip. You can see
+  the six rounds at the front of the cylinder go dark as they fire, and it kicks, turns the cylinder,
+  cocks the hammer and reloads with a spin. It is built from parts as a stand-in until a modelled revolver
+  replaces it. A powder flash and smoke, sparks and stone chips on hits, never blood.
 - Spent spark cells still eject and tink, because the feel is worth keeping.
 - The flash is a star (cyan-white for the Caster, gold for the Blaster). Hits scorch walls and chip stone, and strikes on bronze throw sparks.
 

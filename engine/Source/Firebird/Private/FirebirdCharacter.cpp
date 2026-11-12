@@ -174,8 +174,8 @@ void AFirebirdCharacter::BuildViewModel()
     HammerPivot->SetupAttachment(GunPivot);
     HammerPivot->SetRelativeLocation(FVector(0.2f, 0.f, 4.6f));
     HammerPivot->RegisterComponent();
-    Part(HammerPivot, TEXT("RevolverHammer"), FVector(1.2f, 1.1f, 3.4f), FVector(-0.3f, 0.f, 1.6f), Steel);
-    Part(HammerPivot, TEXT("RevolverHammerSpur"), FVector(2.2f, 1.4f, 0.8f), FVector(-1.4f, 0.f, 3.2f), Steel);
+    Part(HammerPivot, TEXT("RevolverHammer"), FVector(1.2f, 1.1f, 2.0f), FVector(-0.3f, 0.f, 0.9f), Steel);
+    Part(HammerPivot, TEXT("RevolverHammerSpur"), FVector(2.f, 1.3f, 0.7f), FVector(-1.3f, 0.f, 1.6f), Steel);
     Part(GunPivot, TEXT("RevolverTrigger"), FVector(0.6f, 0.5f, 2.4f), FVector(4.2f, 0.f, -0.2f), Steel, nullptr, FRotator(-20.f, 0.f, 0.f));
     Part(GunPivot, TEXT("RevolverGuardFront"), FVector(0.6f, 0.8f, 3.2f), FVector(7.4f, 0.f, -0.2f), Brass, nullptr, FRotator(-15.f, 0.f, 0.f));
     Part(GunPivot, TEXT("RevolverGuardBottom"), FVector(5.4f, 0.8f, 0.6f), FVector(4.8f, 0.f, -1.7f), Brass);
@@ -738,7 +738,7 @@ void AFirebirdCharacter::ShotFx(const FVector& Muzzle, const FVector& Impact, co
     AFBFx::Spawn(GetWorld(), Muzzle, Dir + FRotator(0, 0, -45), FVector(2.5f, 11.f, 1.4f) * Fk, Flash, 45.f, 0.04f);
     AFBFx::Spawn(GetWorld(), Muzzle + Dir.Vector() * 4.f * Fk, Dir, FVector(9.f, 4.f, 4.f) * Fk, FLinearColor(1.f, 0.9f, 0.7f), 60.f, 0.03f, 0.f, 0.f, FVector::ZeroVector, 0.f, true);
     for (int32 k = 0; k < 3; ++k)
-        AFBFx::Spawn(GetWorld(), Muzzle + Dir.Vector() * (4.f + 5.f * k) * Fk, FRotator::ZeroRotator, FVector(6.f + 3.f * k) * Fk, FLinearColor(0.32f, 0.30f, 0.28f), 0.05f, 0.55f + 0.15f * k,
+        AFBFx::Spawn(GetWorld(), Muzzle + Dir.Vector() * (4.f + 5.f * k) * Fk, FRotator::ZeroRotator, FVector(3.f + 2.f * k) * Fk, FLinearColor(0.07f, 0.065f, 0.06f), 0.f, 0.45f + 0.12f * k,
                      0.f, 0.f, (Dir.Vector() * 60.f + FVector(0, 0, 25.f) + FMath::VRand() * 12.f) * Fk, -30.f * Fk, true);
     if (Normal.IsNearlyZero()) return;
     // hits show light and sparks, never blood (SETTING_BRIEF section 5)
@@ -1117,7 +1117,7 @@ void AFirebirdCharacter::UpdateWeapon(float DeltaSeconds)
     // the blade stands 2.15 cm taller over 21.4 cm of barrel, so the gun dips 5.74 degrees and its
     // sight line sits 6.31 cm over the grip (first-person scale keeps what lines up on screen lined up).
     const float A = FMath::SmoothStep(0.f, 1.f, AimBlend);
-    const FVector Hip = GripAt, Aimed(24.f, 0.f, -6.31f);
+    const FVector Hip = GripAt, Aimed(34.f, 0.f, -6.31f);
     FVector At = FMath::Lerp(Hip, Aimed, A);
     At += FVector(-KickBack * 0.25f, Sway.X * 0.25f, Sway.Y * 0.2f + Breathe - (1.f - Draw) * 18.f - Dash * 3.f);
     At += FVector(-2.f * Tip, -6.f * Tip, 3.f * Tip);

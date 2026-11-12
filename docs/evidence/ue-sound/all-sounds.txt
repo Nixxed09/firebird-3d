@@ -7,20 +7,24 @@ all-sounds.wav: every FIREBIRD sound in order, 0.6 s apart (loops cut to 4 s)
   3.59 s  dash
   4.61 s  slide
   5.96 s  spark_fire
-  6.65 s  spark_hit_wall
-  7.43 s  spark_hit_hollow
-  8.17 s  fist_swing
-  8.94 s  fist_hit
-  9.79 s  crack
- 10.77 s  release
- 13.57 s  hollow_break
- 14.97 s  hollow_windup
- 16.22 s  ember_throw
- 17.27 s  ember_hit_player
- 18.22 s  player_hurt
- 19.00 s  player_death
- 21.00 s  respawn
- 23.47 s  riley_radio
- 24.37 s  ui_tick
- 25.13 s  ambience_loop
- 29.73 s  music_loop
+  7.93 s  spark_hit_wall
+  8.71 s  spark_hit_hollow
+  9.45 s  caster_open
+ 10.51 s  caster_chamber
+ 11.28 s  caster_close
+ 12.34 s  caster_dry
+ 13.06 s  fist_swing
+ 13.83 s  fist_hit
+ 14.68 s  crack
+ 15.66 s  release
+ 18.46 s  hollow_break
+ 19.86 s  hollow_windup
+ 21.11 s  ember_throw
+ 22.16 s  ember_hit_player
+ 23.11 s  player_hurt
+ 23.89 s  player_death
+ 25.89 s  respawn
+ 28.37 s  riley_radio
+ 29.27 s  ui_tick
+ 30.03 s  ambience_loop
+ 34.63 s  music_loop

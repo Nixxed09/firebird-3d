@@ -2,6 +2,46 @@
 
 Newest first. The plan is [REBOOT_PLAN.md](REBOOT_PLAN.md). The format is in its section 7.
 
+## 2026-11-11: outside the steps (asked for directly), controls, the sidearm and its sound
+Did: asked for directly ("the mouse doesn't move it well, the shooting is off, better gun
+animations and sounds, old Colt-era guns"), so this went ahead of rule R1. Code is in 38a513a
+(the joint commit with the menus session) plus this commit.
+- Mouse: it read the engine's mouse value, which is scaled by a 0.07 axis setting and by the
+  field of view, so the look was about 5x slow and changed speed on every dash and zoom. It now
+  reads raw counts at 0.044 degrees per count x the sensitivity setting (1.0 = a common shooter
+  default). Down the sights the look slows by the same amount as the zoom. Invert look (a setting
+  nothing read) now works.
+- Controller: the engine's per-axis 0.25 dead zone was stacked under ours, so aim snapped to the
+  axes. Sticks are read raw with one round dead zone (0.12 right, 0.18 left); a held full turn
+  speeds up over a third of a second.
+- Binds: RIGHT MOUSE aims (was the fist), F / E / V / a side mouse button punch, R or Y reloads,
+  F5 restarts alone (was R). The controls card and the release prompt say so.
+- Shooting: the hit check was a thin line against the Hollow's narrow capsule, so shots on the
+  body's edge missed; it is now a 10 cm sweep up to the first wall. Spread is honest and shown by
+  the crosshair: none standing still or down the sights, wider running, in the air and fanning.
+  A click fires at once (0.14 s apart at most); holding fires every 0.30 s. Damage 13-18 a shot.
+- The sidearm: a period single-action revolver (SETTING_BRIEF section 5; R7 now allows period
+  guns), built from parts as a stand-in until a modelled revolver replaces it. Six rounds that go
+  dark as they fire, the cylinder turns a place a shot, the hammer falls and cocks, spring kick and
+  sway, a draw, an aim pose with the sights lined up on the crosshair, and a reload that tips the
+  gun and spins the cylinder while the rounds click in. Powder flash and smoke, sparks and stone
+  chips on hits.
+- Sound: new black-powder shot (crack, boom, rolling low end, slapback off stone), and new
+  caster_open / caster_chamber / caster_close / caster_dry for the reload and an empty trigger.
+  Still synthesized (tools/ue-make-sounds.py), against R5: replace with a Fab pack in Step 3.
+  Other sounds were left as they were (the generator shares one seed, so regenerating shifts them
+  slightly; only the gun sounds were re-imported).
+- New test: `ue-capture.ps1 -Scenario gun` (hip, aim, firing, reload, punch pictures).
+Proof: checked. Editor and game targets build. `gun` 3 of 3 (aim zooms, cylinder counts down,
+reload refills), `feel` 6 of 6, `nodash` passes, `ue-controller-test.ps1` 9 of 9 (on a scratch copy
+of the October package with the new program; the aim check now reads the zoom setting).
+Pictures: captures\ue\gun-20261111-191610 (not in git). Not run: a mouse or controller in a
+person's hands, sound with -nosound off, LAN co-op with the new firing.
+Phoenix said: has not seen it yet. Dash and slide are untouched pending his answer (brief section 7).
+Sessions since Phoenix last played: unknown (no play session on record).
+Next: Phoenix plays a round with mouse and controller and says whether the look speed (adjust with
+[ and ]), the aim and the revolver feel right.
+
 ## 2026-11-11: outside the steps (asked for directly), new menus and play HUD
 Did: the menus and the HUD were asked for directly in a session today, so this went ahead of rule R1.
 The title screen says FIREBIRD (the CO-OP badge is gone) with PLAY, MULTIPLAYER, SETTINGS,
