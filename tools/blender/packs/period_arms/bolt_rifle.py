@@ -306,8 +306,10 @@ prism("FrontSightRamp", [(0.923, BZ + 0.0080), (0.946, BZ + 0.0080), (0.944, BZ 
 prism("FrontSightBlade", [(0.927, BZ + 0.0115), (0.944, BZ + 0.0115), (0.942, BZ + 0.0190), (0.934, BZ + 0.0205)],
       0.0020, BLUED, bevel_w=0.0003)
 
-for ob, role in ((bolt, "bolt"), (trigger, "trigger")):
-    ob["forge_part"] = role
+# The bolt lifts a quarter turn, draws back 85 mm, returns and turns down. The trigger rocks.
+motion(bolt, "bolt", [{"t": 0}, {"t": 0.2, "rot": [-90, 0, 0]}, {"t": 0.45, "rot": [-90, 0, 0], "move": [-0.085, 0, 0]},
+                      {"t": 0.7, "rot": [-90, 0, 0]}, {"t": 0.85}, {"t": 1}])
+motion(trigger, "trigger", [{"t": 0}, {"t": 0.85}, {"t": 0.92, "rot": [0, 10, 0]}, {"t": 1}])
 
 finish(opt["out"], {"asset": "bolt_rifle", "pack": "period_arms",
                     "moving_parts": {"bolt": [0.030, 0.0, BZ], "trigger": [0.064, 0.0, 0.006]}})

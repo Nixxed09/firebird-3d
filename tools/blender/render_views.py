@@ -1,7 +1,8 @@
 # Job B2 "Look": render a built asset from fixed views on a neutral stage, so an
 # agent or a person can judge it. Run by forge.ps1:
 #   blender -b <asset.blend> --python render_views.py -- --out <folder> [--detail x0,x1] [--fp 1]
-# Writes side_right, side_left, top, quarter_front, quarter_rear, detail, (first_person)
+# Writes side_right, side_left, top, quarter_front, quarter_rear, detail, (first_person),
+# action_1..3 (the moving parts caught mid-motion, when a part declares one with fb_parts.motion)
 # and sheet.png (all views on one page).
 import math, os, sys
 import bpy
@@ -117,6 +118,41 @@ if opt.get("fp"):
     # the eye of a player holding it low on the right: behind, above, left of the gun
     eye = Vector((lo.x + 0.16 * size.x, 0.060, hi.z + 0.050))
     shots.append(shoot("first_person", eye, Vector((hi.x, -0.012, hi.z - 0.02)), lens=24))
+
+# ---- the mechanism mid-motion: every moving part posed at up to three key times of its cycle
+import json
+from mathutils import Matrix, Euler
+movers = [(o, json.loads(o["forge_motion"]), o.matrix_world.copy()) for o in objs if o.get("forge_motion")]
+if movers:
+    def pose_at(steps, t):
+        steps = sorted(steps, key=lambda s: s["t"])
+        a = max((s for s in steps if s["t"] <= t), key=lambda s: s["t"], default=steps[0])
+        b = min((s for s in steps if s["t"] >= t), key=lambda s: s["t"], default=steps[-1])
+        k = 0.0 if b["t"] == a["t"] else (t - a["t"]) / (b["t"] - a["t"])
+        mix = lambda key: [x + (y - x) * k for x, y in zip(a.get(key, (0, 0, 0)), b.get(key, (0, 0, 0)))]
+        return mix("rot"), mix("move")
+
+    times = sorted({s["t"] for _, steps, _ in movers for s in steps if 0 < s["t"] < 1})
+    if len(times) > 3:
+        times = [times[0], times[len(times) // 2], times[-1]]
+    if "detail" in opt:
+        x0, x1 = [float(v) for v in opt["detail"].split(",")]
+        c, d = Vector(((x0 + x1) / 2, mid.y, mid.z)), x1 - x0
+        c.z = hi.z - 0.35 * size.z          # the working parts sit high on the object
+        cam_pos, cam_at, lens = c + Vector((-0.55 * d, -1.35 * d, 0.75 * d)), c, 45
+    else:
+        cam_pos, cam_at, lens = mid + Vector((-1.05 * L, -0.75 * L, 0.42 * L)), mid, 75
+    for i, t in enumerate(times):
+        for o, steps, rest in movers:
+            rot, move = pose_at(steps, t)
+            p = rest.translation
+            r = Euler([math.radians(v) for v in rot], "XYZ").to_matrix().to_4x4()
+            o.matrix_world = Matrix.Translation(Vector(move)) @ Matrix.Translation(p) @ r @ Matrix.Translation(-p) @ rest
+        bpy.context.view_layer.update()
+        shots.append(shoot("action_%d" % (i + 1), cam_pos, cam_at, lens=lens))
+    for o, _, rest in movers:
+        o.matrix_world = rest
+    bpy.context.view_layer.update()
 
 # ---- one page with every view
 import numpy as np

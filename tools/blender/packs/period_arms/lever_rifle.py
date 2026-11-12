@@ -162,8 +162,15 @@ prism("FrontSightBase", [(0.780, top_flat - 0.0005), (0.800, top_flat - 0.0005),
 prism("FrontSightBlade", [(0.783, top_flat + 0.0018), (0.797, top_flat + 0.0018), (0.7955, top_flat + 0.0088),
                           (0.7895, top_flat + 0.0100)], 0.0020, BRASS, bevel_w=0.0003)
 
-for ob, role in ((lever, "lever"), (hammer, "hammer"), (trigger, "trigger"), (bolt, "bolt"), (carrier, "carrier")):
-    ob["forge_part"] = role
+# One cycle: the lever swings down and forward, which runs the bolt back over the hammer and cocks it and
+# lifts the carrier; closing it sends the bolt home and drops the carrier. Then the trigger lets the hammer fall.
+pivot(bolt, 0.034, 0.0, FRAME_TOP - 0.0082)
+pivot(carrier, 0.097, 0.0, 0.044)
+motion(lever, "lever", [{"t": 0}, {"t": 0.35, "rot": [0, -55, 0]}, {"t": 0.7}, {"t": 1}])
+motion(bolt, "bolt", [{"t": 0}, {"t": 0.35, "move": [-0.045, 0, 0]}, {"t": 0.7}, {"t": 1}])
+motion(carrier, "carrier", [{"t": 0}, {"t": 0.2}, {"t": 0.35, "move": [0, 0, 0.012]}, {"t": 0.6}, {"t": 1}])
+motion(hammer, "hammer", [{"t": 0}, {"t": 0.3, "rot": [0, -38, 0]}, {"t": 0.88, "rot": [0, -38, 0]}, {"t": 0.93}, {"t": 1}])
+motion(trigger, "trigger", [{"t": 0}, {"t": 0.82}, {"t": 0.88, "rot": [0, 10, 0]}, {"t": 1}])
 
 finish(opt["out"], {"asset": "lever_rifle", "pack": "period_arms",
                     "moving_parts": {"lever": list(LEVER_PIVOT), "hammer": [0.032, 0.0, 0.022], "trigger": [0.060, 0.0, 0.004]}})

@@ -318,6 +318,48 @@ def pivot(ob, x, y, z):
     return ob
 
 
+def motion(ob, role, steps):
+    """Declare how a part moves, so the forge can show it mid-action and export it rigged and animated.
+    Call after pivot(). steps are key poses over one cycle, relative to rest, turning about the hinge:
+        motion(bolt, "bolt", [{"t": 0}, {"t": 0.25, "rot": [-90, 0, 0]},
+                              {"t": 0.5, "rot": [-90, 0, 0], "move": [-0.085, 0, 0]}, {"t": 1}])
+    t runs 0 to 1, rot is degrees about world X, Y, Z, move is metres."""
+    ob["forge_part"] = role
+    ob["forge_motion"] = json.dumps(steps)
+    return ob
+
+
+def plate(name, outline_xz, width, mat, holes=(), y=0.0, bevel_w=0.0008):
+    """A flat forging: one side outline pushed out to `width`, with through holes (each a list of X,Z
+    points). Use it where two parts are really one piece of steel (a trigger guard that grows out of a
+    magazine, a lock plate, a bracket), so there is no seam between them. Round the outlines with fillet()."""
+    ob = prism(name, outline_xz, width, mat, y=y, bevel_w=0)
+    for i, h in enumerate(holes):
+        cut(ob, prism("c_hole%d" % i, h, width * 3, None, y=y, bevel_w=0))
+    if bevel_w:
+        bevel(ob, bevel_w)
+    return ob
+
+
+def inlet(wood, metal, gap=0.0005):
+    """Cut a seat for a metal part into a wood part, `gap` wider all round, so the joint shows as a dark
+    line instead of metal passing through wood. Call it after both are shaped; the wood's modifiers are
+    applied first."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    bm = bmesh.new()
+    bm.from_object(metal, dg)
+    bm.transform(metal.matrix_world)
+    bm.normal_update()
+    for v in bm.verts:
+        v.co += v.normal * gap
+    cutter = _obj("c_inlet", bm, None)
+    bpy.context.view_layer.objects.active = wood
+    for m in list(wood.modifiers):
+        bpy.ops.object.modifier_apply(modifier=m.name)
+    cut(wood, cutter)
+    return wood
+
+
 def mirror_y(ob):
     m = ob.modifiers.new("Mirror", "MIRROR")
     m.use_axis = (False, True, False)

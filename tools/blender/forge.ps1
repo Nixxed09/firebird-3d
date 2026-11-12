@@ -74,6 +74,12 @@ if ($Round -gt 0) {
     $rd = Join-Path $outDir "rounds\$Round"
     New-Item -ItemType Directory -Force $rd | Out-Null
     Copy-Item (Join-Path $views "*.png") $rd -Force
+    Copy-Item (Join-Path $outDir "$Asset.build.json") (Join-Path $rd "build.json") -Force
+    $brief = Join-Path $PSScriptRoot "packs\$Pack\$Asset.brief.md"
+    if (Test-Path $brief) { Copy-Item $brief (Join-Path $rd "BRIEF.md") -Force } else { Write-Warning "No brief: $brief. The critic will have nothing to compare with." }
+    $refs = Join-Path $outDir "refs"
+    if (Test-Path $refs) { Copy-Item $refs $rd -Recurse -Force } else { Write-Warning "No references in $refs. Run fetch_refs.py first." }
+    Copy-Item (Join-Path $PSScriptRoot "CRITIC_BRIEF.md") $rd -Force
     $ev = Join-Path $root "docs\evidence\pack-forge"
     New-Item -ItemType Directory -Force $ev | Out-Null
     Copy-Item (Join-Path $views "sheet.png") (Join-Path $ev "$Asset-round$Round-sheet.png") -Force
