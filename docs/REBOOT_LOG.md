@@ -56,8 +56,10 @@ Text sizes are measured once and cached. New test: `ue-capture.ps1 -Scenario fro
 The rules it was built to are GamesOS `docs/GAME_SHELL_STANDARD.md`.
 Proof: checked. The game target compiled; on a scratch copy of the October package with
 the new program, `frontend` passed 15 of 15 three times in a row and `feel` passed 6 of 6.
+Later the same evening the editor target was built (`FB_BUILD ok`, by the parallel session)
+and `ue-capture.ps1 -Scenario frontend` passed 15 of 15 on it at d2cd563.
 Ten pictures are in docs/evidence/menus and in the Game Studio under Menus. Not run: the
-editor target (`ue-build.ps1`, the editor was open), the two-copy join test with the new
+two-copy join test with the new
 multiplayer screen, a controller in a person's hands, the mouse on the menus, the volume
 setting with sound on, and the full-screen switch. No package was made.
 Phoenix said: has not seen it yet.
