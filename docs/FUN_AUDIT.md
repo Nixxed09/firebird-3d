@@ -166,7 +166,7 @@ DUSK or Prodeus, and on one unaided Nix playtest. Scripts passing does not count
 | Evidence (Gate 13) | 60 s gameplay video, 6 fixed-spot screenshots, a bot run through the UE automation driver, one human playtest write-up |
 
 **Carry over from v2 (worth it):**
-- **Riley's brain, `js/riley.js`:** the counters, the legal-move menu, the true-claim rule and the memory.
+- **Riley's brain, `archive/browser/js/riley.js`:** the counters, the legal-move menu, the true-claim rule and the memory.
   - Port the logic to C++/Blueprint as data-driven rules.
   - Keep `tests/riley.test.js`-style cases as UE automation tests.
   - Keep the honesty check (claims vs independently counted facts).

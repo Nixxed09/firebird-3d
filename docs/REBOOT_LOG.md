@@ -2,6 +2,18 @@
 
 Newest first. The plan is [REBOOT_PLAN.md](REBOOT_PLAN.md). The format is in its section 7.
 
+## 2026-11-11: step 0, one folder
+Did: merged Codex's controller branch (inverted look fix, hold LB to aim, crouch on R3,
+victory card keeps "Press Esc"), after saving its uncommitted work. Removed the
+firebird-controller-fix folder and four leftover worktrees. Moved the browser games into
+archive/browser and wrote a new README for the Unreal game. Dad re-checked the engine:
+Unreal stays. Nix's look grades now live in the GamesOS rating studio (game firebird-coop).
+Proof: checked. The game target compiles with the merge; the archived level contract test
+passes. Not run: ue-build.ps1 and the feel test, because the Unreal editor was open.
+Phoenix said: has not seen it yet.
+Sessions since Phoenix last played: unknown.
+Next: close the editor, run ue-build.ps1 and the feel test; then Step 1C (Fab assets).
+
 ## 2026-11-10: step 1A, the project accepts hand-built maps
 Did: the game mode now leaves hand-built maps alone (no code-built course, players
 start at the map's PlayerStarts). Added tools\ue-edit.ps1, a -Map option on

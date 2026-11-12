@@ -20,13 +20,12 @@ Do these in order, every time.
 1. Work only in `D:\Phoenix\nix-code\games\firebird-ue`, on branch `claude/firebird-ue`.
 2. Run `git status`. If there are changes you did not make, stop and ask Phoenix
    before touching them.
-3. Do not edit, build in, merge from or delete any other `firebird-*` folder
-   until you have checked nobody is using it:
-   `Get-Process codex,claude -ErrorAction SilentlyContinue` and the newest file
-   time in that folder. If something changed there in the last 24 hours, leave
-   it alone and say so.
+3. This is the only Firebird folder (since 2026-11-11). Do not create worktrees or
+   copies beside it. The browser games are in `archive/browser` and are not edited.
 4. Read the last entry in `docs/REBOOT_LOG.md` (create the file if it is
-   missing). It says what was done last and what is next.
+   missing). It says what was done last and what is next. Then read Nix's grades:
+   from `D:\TE-Code\ProductOS`, run
+   `node GamesOS/tools/studio/summary.mjs GamesOS/projects/firebird-coop`.
 5. Find the first step in section 5 whose "Done when" is not yet true. Work on
    that step only.
 6. At the end of the session, add an entry to `docs/REBOOT_LOG.md` (format in
@@ -46,6 +45,9 @@ Do these in order, every time.
 | Hero art | Original: the Firebird, Hollows, weapons | These are the game's identity. |
 | Levels | **Built by hand in the Unreal editor**, saved as map files | Hand placement and lighting is where the modern look comes from. |
 | Story, names, colours, kid-safety | Unchanged: `STYLE_GUIDE.md`, `docs/STORY_BIBLE.md` | Engine-independent and already good. |
+| Engine, re-checked | **Stay on Unreal** (dad asked, 2026-11-11) | Godot (the GamesOS default) would mean rewriting movement, weapons, LAN and controller for a weaker realistic look. Computers without Unreal get a packaged build. |
+| Browser versions | **Archived** in `archive/browser` (dad, 2026-11-11) | One game, one folder. They still open in a browser for reference. |
+| Look grades | **GamesOS rating studio**, game `firebird-coop` | Nix grades pictures of the game; the grades are the work list for art, level and UI work. They count as Phoenix looking (R2), not as playing. |
 
 ---
 
@@ -113,15 +115,9 @@ with `.\tools\ue-play.ps1`.
 | The code-built course | `FBRange.*` | Keep it only as the test course for `ue-capture.ps1 -Scenario feel`. Real maps never use it. Wave logic moves out of it in Step 3. |
 | The script-made art kit | `Content/Firebird/ArtKitV01`, `FBArt.*`, `art/` | Stop using it in new maps from Step 1. Delete after Step 2. The Hollow, Firebird and Spark Caster designs are the brief for the new hero art in Step 3. |
 
-**Other folders in `D:\Phoenix\nix-code\games`:**
-
-- `firebird-3d`: the browser games (the original retro one and the WebGL v2).
-  Not part of this plan. Leave it.
-- `firebird-controller-fix`: a Codex session was working here on 2026-11-10
-  (controller look fixes, 3 commits ahead plus unsaved changes). **Open task:**
-  once that work is committed, merge branch `codex/controller-up-20261014` into
-  `claude/firebird-ue`, build, run the `feel` test, then remove that folder with
-  `git worktree remove`. Follow section 1 rule 3 first.
+**Archived:** the browser games (the retro original and the WebGL v2) are in
+`archive/browser`. Not part of this plan. Riley's logic (`archive/browser/js/riley.js`)
+and the level contract test are still read from there.
 
 ---
 
@@ -131,9 +127,13 @@ with `.\tools\ue-play.ps1`.
 
 - [x] Unsaved October art work committed (`26b5279`).
 - [x] Old merged copies `firebird-ue-lan` and `firebird-ue-sound` removed.
-- [ ] Merge the controller branch (see the open task in section 4).
+- [x] Controller branch merged (`3deaddc`, 2026-11-11), `firebird-controller-fix` removed.
+  The game target compiles (checked). Still to run once the editor is closed:
+  `.\tools\ue-build.ps1` and `.\tools\ue-capture.ps1 -Scenario feel`.
+- [x] Browser games moved to `archive/browser`; the old `firebird-3d` folder is no
+  longer a checkout (2026-11-11).
 
-**Done when:** `git worktree list` shows no `firebird-controller-fix`, and
+**Done when:** `git worktree list` shows only this folder, and
 `.\tools\ue-build.ps1` prints `FB_BUILD ok`.
 This does not block Step 1.
 
@@ -329,7 +329,7 @@ For every level, in this order:
 5. Only then start the next level.
 
 Riley as the final boss, the story beats and the level order are in
-`docs/STORY_BIBLE.md`. Her logic is in `js/riley.js` and gets ported to C++
+`docs/STORY_BIBLE.md`. Her logic is in `archive/browser/js/riley.js` and gets ported to C++
 when her level comes up, not before.
 
 **Done when:** each level is logged as human-played before the next one starts.

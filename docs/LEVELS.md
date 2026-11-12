@@ -6,7 +6,7 @@ This game follows the shared [Level Design Contract](../../LEVEL_DESIGN_CONTRACT
 Check the maps after every change:
 
 ```
-node tests/levels.contract.test.js
+node archive/browser/tests/levels.contract.test.js
 ```
 
 ## Status
