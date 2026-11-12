@@ -14,8 +14,8 @@ opt = args_after_dashes()
 reset()
 
 BLUED = material("M_BluedSteel", (0.040, 0.046, 0.062), 1.0, 0.36, grain="metal")
-BRASS = material("M_Brass", (0.78, 0.53, 0.20), 1.0, 0.32, grain="metal")
-STEEL = material("M_CaseSteel", (0.20, 0.20, 0.22), 1.0, 0.44, grain="metal")
+BRASS = material("M_Brass", (0.66, 0.47, 0.19), 1.0, 0.42, grain="metal")
+STEEL = material("M_CaseSteel", (0.085, 0.085, 0.095), 1.0, 0.48, grain="metal")
 WALNUT = material("M_Walnut", (0.115, 0.046, 0.020), 0.0, 0.38, grain="wood")
 BLACK = material("M_Bore", (0.004, 0.004, 0.004), 0.0, 0.9)
 
@@ -43,11 +43,11 @@ def rounded(x0, x1, z0, z1, r, n=6):
 
 # ---- frame (brass): curved belly, concave sweep from the top down to the wrist
 frame = prism("Frame", [
-    (-0.006, 0.0040), (0.030, 0.0012), (0.080, -0.0004), (0.130, 0.0006), (0.170, 0.0030), (FRAME_X1, 0.0065),
-    (FRAME_X1, FRAME_TOP), (0.064, FRAME_TOP), (0.052, 0.0642), (0.040, 0.0603), (0.028, 0.0556), (0.014, 0.0520),
-    (0.000, 0.0500), (-0.006, 0.0470)], FRAME_W, BRASS, bevel_w=0.0026)
+    (-0.006, -0.0180), (0.020, -0.0100), (0.050, -0.0030), (0.080, -0.0004), (0.130, 0.0006), (0.170, 0.0030), (FRAME_X1, 0.0065),
+    (FRAME_X1, FRAME_TOP), (0.064, FRAME_TOP), (0.052, 0.0620), (0.040, 0.0550), (0.028, 0.0470), (0.014, 0.0400),
+    (0.000, 0.0340), (-0.006, 0.0310)], FRAME_W, BRASS, bevel_w=0.0026)
 frame.modifiers["Bevel"].segments = 4
-cut(frame, box("c1", -0.02, 0.050, -0.0050, 0.0050, 0.030, 0.09, None, 0))      # hammer slot
+cut(frame, box("c1", -0.02, 0.050, -0.0050, 0.0050, 0.012, 0.09, None, 0))      # hammer slot
 cut(frame, box("c2", 0.095, 0.172, -0.0088, 0.0088, 0.058, 0.09, None, 0))      # top opening
 
 for side, y in (("R", -FRAME_W / 2), ("L", FRAME_W / 2)):
@@ -66,13 +66,17 @@ for side, y in (("R", -FRAME_W / 2), ("L", FRAME_W / 2)):
 # ---- bolt, carrier, hammer
 bolt = tube("Bolt", 0.034, 0.178, FRAME_TOP - 0.0082, 0.0074, STEEL, sides=20, bevel_w=0.0005)
 carrier = box("Carrier", 0.097, 0.170, -0.0082, 0.0082, 0.038, 0.0500, BRASS, 0.0006)
-hammer = prism("Hammer", [
+def sh(pts, dx=0.012, dz=-0.018):      # hammer moved forward and down to where the reference photo has it
+    return [(x + dx, z + dz) for x, z in pts]
+
+
+hammer = prism("Hammer", sh([
     (0.008, 0.036), (0.033, 0.036), (0.033, 0.060), (0.0300, 0.0668), (0.0215, 0.0722), (0.0100, 0.0760),
-    (-0.0020, 0.0790), (-0.0080, 0.0776), (-0.0086, 0.0742), (0.0000, 0.0716), (0.0058, 0.0662), (0.0060, 0.0500)],
+    (-0.0020, 0.0790), (-0.0080, 0.0776), (-0.0086, 0.0742), (0.0000, 0.0716), (0.0058, 0.0662), (0.0060, 0.0500)]),
     0.0090, STEEL, bevel_w=0.0011)
-pivot(hammer, 0.020, 0.0, 0.040)
-pad = prism("HammerPad", [(-0.0092, 0.0772), (-0.0020, 0.0793), (0.0040, 0.0780), (0.0040, 0.0764), (-0.0020, 0.0774),
-                          (-0.0092, 0.0754)], 0.0128, STEEL, bevel_w=0.0005)
+pivot(hammer, 0.032, 0.0, 0.022)
+pad = prism("HammerPad", sh([(-0.0092, 0.0772), (-0.0020, 0.0793), (0.0040, 0.0780), (0.0040, 0.0764), (-0.0020, 0.0774),
+                          (-0.0092, 0.0754)]), 0.0128, STEEL, bevel_w=0.0005)
 pad.parent = hammer
 pad.matrix_parent_inverse = hammer.matrix_world.inverted()
 
@@ -96,20 +100,23 @@ cap = loft("ForendCap", 0.4515, 0.4655, [(0, BARREL_Z + 0.0016)], [(0, 0.0140)],
            steps=1, power=2.6, subsurf=0, soften=0)
 bevel(cap, 0.0008)
 
-stock_top = [(-0.345, 0.0300), (-0.110, 0.0388), (-0.060, 0.0372), (0.004, 0.0490)]
-stock_bot = [(-0.345, -0.1040), (-0.100, -0.0090), (-0.055, -0.0020), (0.004, 0.0040)]
+# stock lines read off the reference photo with tools/blender/ref_trace.py (art/reference/period_arms/lever_rifle/side_right_a.jpg)
+stock_top = [(-0.345, -0.0290), (-0.318, -0.0275), (-0.259, -0.0175), (-0.172, -0.0040), (-0.118, 0.0045), (-0.100, 0.0030),
+             (-0.084, -0.0030), (-0.055, 0.0040), (-0.026, 0.0160), (0.004, 0.0310)]
+stock_bot = [(-0.345, -0.1620), (-0.318, -0.1600), (-0.259, -0.1425), (-0.172, -0.1085), (-0.113, -0.0845), (-0.084, -0.0725),
+             (-0.045, -0.0440), (0.004, -0.0180)]
 stock_w = [(-0.345, 0.0400), (-0.120, 0.0375), (-0.065, 0.0300), (0.004, 0.0308)]
 stock = loft("Stock", -0.338, 0.002, stock_top, stock_bot, stock_w, WALNUT, steps=40, sides=32, power=2.3, soften=2)
 
 
 def crescent(z):         # how far the butt curves forward at height z: deep in the middle, pointed heel and toe
-    return 0.020 * (1 - ((z + 0.037) / 0.069) ** 2) - 0.008
+    return 0.020 * (1 - ((z + 0.0955) / 0.068) ** 2) - 0.008
 
 
 for v in stock.data.vertices:
     if v.co.x < -0.320:
         v.co.x += crescent(v.co.z) * (-0.320 - v.co.x) / 0.018
-butt = loft("ButtPlate", -0.3470, -0.3375, [(-0.35, 0.0318), (-0.33, 0.0308)], [(-0.35, -0.1065), (-0.33, -0.1030)],
+butt = loft("ButtPlate", -0.3470, -0.3375, [(-0.35, -0.0272), (-0.33, -0.0265)], [(-0.35, -0.1645), (-0.33, -0.1600)],
             [(0, 0.0410)], BRASS, steps=2, sides=32, power=2.3, subsurf=0, soften=0)
 bevel(butt, 0.0012)
 for v in butt.data.vertices:
@@ -133,9 +140,9 @@ strap("LowerTang", stock_bot, -0.052, 0.000, 0.0105, -1)
 # forward along the bottom and up to meet itself behind the trigger bow.
 LEVER_PIVOT = (0.150, 0.0, 0.004)
 lever = sweep("Lever", fillet([
-    (0.153, -0.0020), (0.092, -0.0020), (0.083, -0.0330), (0.028, -0.0330), (0.016, -0.0050),
-    (-0.050, -0.0052), (-0.104, -0.0138), (-0.122, -0.0440), (-0.090, -0.0590), (-0.004, -0.0540), (0.0185, -0.0180)],
-    [0, 0.008, 0.011, 0.011, 0.007, 0.03, 0.016, 0.017, 0.016, 0.014, 0]), 0.0040, 0.0118, STEEL)
+    (0.153, -0.0040), (0.100, -0.0040), (0.094, -0.0470), (0.042, -0.0500), (0.024, -0.0150),
+    (-0.036, -0.0450), (-0.050, -0.0670), (-0.038, -0.0800), (0.034, -0.0500)],
+    [0, 0.008, 0.012, 0.012, 0.007, 0.012, 0.010, 0.010, 0]), 0.0080, 0.0118, STEEL)
 pivot(lever, *LEVER_PIVOT)
 tube("LeverPin", -FRAME_W / 2 - 0.0006, FRAME_W / 2 + 0.0006, 0.0085, 0.0024, STEEL, y=0.150, sides=14, axis="Y")
 
@@ -159,4 +166,4 @@ for ob, role in ((lever, "lever"), (hammer, "hammer"), (trigger, "trigger"), (bo
     ob["forge_part"] = role
 
 finish(opt["out"], {"asset": "lever_rifle", "pack": "period_arms",
-                    "moving_parts": {"lever": list(LEVER_PIVOT), "hammer": [0.020, 0.0, 0.040], "trigger": [0.060, 0.0, 0.004]}})
+                    "moving_parts": {"lever": list(LEVER_PIVOT), "hammer": [0.032, 0.0, 0.022], "trigger": [0.060, 0.0, 0.004]}})

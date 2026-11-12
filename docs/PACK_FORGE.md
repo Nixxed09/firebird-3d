@@ -237,3 +237,56 @@ makers only produce tubes, pushed-out profiles and lofts; a forged receiver or a
 grows out of a magazine needs a maker that blends two shapes (a fillet between solids), and
 the wood-to-metal gap line needs an inletting cut. Those two makers, then the texture bake,
 are the next work on the forge itself, before a third asset.
+
+## 8. Build toward a measured reference (2026-11-12, evening)
+
+The biggest gain so far came from one tool, not from more critic rounds: **measure the model
+against a reference photo.** `tools/blender/ref_trace.py` does two things:
+
+1. **Trace.** Give it a side-view photo on a plain light background and the object's real
+   length. It levels the photo and prints the outline's top and bottom edge in metres at 41
+   stations. The builder types those numbers into the script's tables instead of guessing.
+2. **Compare.** Give it the built `.blend` too. It writes an overlap score (0 to 1), the error
+   in millimetres at each station, and `ref_overlay.png`: grey where both agree, red where the
+   reference has something the model lacks, blue where the model has something extra.
+
+```powershell
+$b = "C:\Program Files\Blender Foundation\Blender 4.5\blender.exe"
+$o = "engine\Saved\PackForge\period_arms\lever_rifle"
+& $b -b "$o\lever_rifle.blend" --python-exit-code 1 --python tools\blender\ref_trace.py -- `
+  --ref art\reference\period_arms\lever_rifle\side_right_a.jpg --length 1.168 --out "$o\ref" --compare 1 --window "0,0.56"
+```
+
+On the rifle (rear half, butt to frame front): overlap **0.36** as built from memory, **0.82**
+after two passes with the traced numbers. The stock had been 40 to 100 mm too high and too
+straight; no critic had said so. Picture: `docs/evidence/pack-forge/lever_rifle-vs-reference-overlay.png`.
+The 1.168 m length is my figure for this type of musket from memory, not looked up; the
+frame length it gives (216 mm) is believable.
+
+References live in `art/reference/<pack>/<asset>/` with a `SOURCES.md` (where each came from,
+licence, author). They are for looking and measuring only: never used as a texture, never shipped.
+
+**The order of work for any new asset** (this replaces steps 1 to 4 of the prompt in section 4):
+
+1. Find 3 to 6 reference photos: one true side view on a plain background, one three-quarter,
+   one close-up of the busiest part. Write `SOURCES.md`.
+2. Run the trace. Build the big shapes from its numbers.
+3. Run the compare. Fix the worst stations first. Repeat until the overlap is above 0.85 or
+   two passes in a row gain less than 0.02. Read the overlay picture every time: red and blue
+   say exactly where.
+4. Only then start critic rounds, for what an outline cannot show: thickness, cross-sections,
+   small parts, materials. Give the critic the reference photos and `GamesOS/toolkit/blender/CRITIC_BRIEF.md`.
+5. Bake textures (section 7), look at the result, fix the materials.
+6. A person sees it only when the numbers and the critic have nothing big left (see the Game
+   Studio rule below).
+
+**Still wrong on the rifle after round 4** (`docs/evidence/pack-forge/lever_rifle-round4-textured-sheet.png`):
+the lever is a thin wire where the photo shows a thick forged bar, and its loop does not close;
+the frame lacks the stepped front block and the drooping rear corner; brass is striped, steel is
+chrome, wood is orange. It is not in front of a person and should not be yet.
+
+**What goes to a person.** The Game Studio for Firebird now opens on one department, "Game look"
+(`GamesOS/projects/firebird-coop/studio/asks.json`). Order of human decisions: (1) the look of the
+whole game, (2) peak moments once levels are rebuilt in that look, (3) core assets. Work in
+progress, like this rifle, stays under "Firebird · everything" and is graded by the AI until it
+has nothing big left wrong.
