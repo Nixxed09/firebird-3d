@@ -23,6 +23,9 @@ struct FFirebirdInput
     bool bCrouchHeld = false;
     bool bCrouchPressed = false;
     bool bFireHeld = false;
+    bool bFirePressed = false; // pressed this frame (a click fires at once; holding fans slower)
+    bool bAimHeld = false;     // right mouse / LB: down the sights
+    bool bReload = false;      // pressed this frame
     bool bFist = false;        // pressed this frame
 };
 
@@ -69,7 +72,15 @@ public:
     UPROPERTY(EditAnywhere, Category = "Feel") float SlideMaxTime = 1.1f;
     UPROPERTY(EditAnywhere, Category = "Feel") float Fov = 100.f;
 
-    UPROPERTY(EditAnywhere, Category = "Combat") float SparkInterval = 0.28f;
+    // The Spark Caster is an old-world sixgun: a turning drum of six aether crystals.
+    // Click as fast as you like (ClickInterval); hold to fan it at SparkInterval.
+    UPROPERTY(EditAnywhere, Category = "Combat") float SparkInterval = 0.30f;
+    UPROPERTY(EditAnywhere, Category = "Combat") float ClickInterval = 0.14f;
+    UPROPERTY(EditAnywhere, Category = "Combat") int32 DrumSize = 6;
+    UPROPERTY(EditAnywhere, Category = "Combat") float ReloadTime = 1.05f;
+    UPROPERTY(EditAnywhere, Category = "Combat") float HipSpread = 0.9f;      // degrees, running from the hip
+    UPROPERTY(EditAnywhere, Category = "Combat") float BloomPerShot = 0.55f;  // degrees added by each quick shot
+    UPROPERTY(EditAnywhere, Category = "Combat") float AimZoom = 0.72f;       // FOV multiplier down the sights
     UPROPERTY(EditAnywhere, Category = "Combat") float FistInterval = 0.42f;
     UPROPERTY(EditAnywhere, Category = "Combat") float FistRange = 190.f;
     UPROPERTY(EditAnywhere, Category = "Combat") float ReleaseHeal = 20.f;
@@ -84,6 +95,11 @@ public:
     int32 MaxSparks = 200;
 
     // ---- local state the HUD and automation read ------------------------------
+    int32 Drum = 6;                   // crystals loaded in the drum (drawn from Sparks)
+    float ReloadT = 0.f;              // >0 while reloading (seconds left)
+    float SpreadDeg = 0.f;            // current cone, for the crosshair
+    float AimBlend = 0.f;             // 0 hip .. 1 down the sights
+    bool IsReloading() const { return ReloadT > 0.f; }
     float DashCharge = 2.f;           // fractional: 1.6 = one ready, the second 60% back
     bool bSliding = false;
     float DamageFlash = 0.f;
@@ -117,10 +133,12 @@ public:
     AHollow* ReleaseTarget() const;
     AHollow* ReleaseTargetFrom(const FVector& From, const FVector& Look) const;
     // a game controller: stick dead zone, which device is in use, right-stick look speed (degrees/second at full tilt)
-    static FVector2D PadStick(class APlayerController* PC, const FKey& X, const FKey& Y);
+    static FVector2D PadStick(class APlayerController* PC, const FKey& X, const FKey& Y, float Dead = 0.18f);
     void NotePadUse(class APlayerController* PC, class UFirebirdSession* S);
-    static constexpr float PadYawSpeed = 220.f;
-    static constexpr float PadPitchSpeed = 150.f;
+    static constexpr float PadYawSpeed = 230.f;
+    static constexpr float PadPitchSpeed = 160.f;
+    // degrees per mouse count at sensitivity 1.0 (0.022 x 2: a common shooter default)
+    static constexpr float MouseDegPerCount = 0.044f;
     float HorizontalSpeed() const;
     uint32 GetBodyPunchSerial() const { return BodyPunchSerial; }
     uint32 GetBodyShotSerial() const { return BodyShotSerial; }
@@ -151,6 +169,10 @@ private:
     void StartSlide();
     void EndSlide();
     void FireSpark();
+    void StartReload();
+    void FinishReload();
+    void UpdateWeapon(float DeltaSeconds);
+    void SetChamberLit(int32 Index, bool bLit);
     void Punch();
     void UpdateView(float DeltaSeconds);
     void UpdateBody(float DeltaSeconds);
@@ -159,9 +181,14 @@ private:
     void BuildViewModel();
     void BuildBody();
 
-    UPROPERTY() UStaticMeshComponent* GunBody;
-    UPROPERTY() UStaticMeshComponent* GunCoil;
-    UPROPERTY() UStaticMeshComponent* GunCrystal;
+    UPROPERTY() UStaticMeshComponent* GunBody;     // the frame (non-null once the viewmodel is built)
+    UPROPERTY() USceneComponent* GunPivot;          // the grip: recoil and sway turn around it
+    UPROPERTY() USceneComponent* DrumPivot;         // turns one chamber per shot
+    UPROPERTY() USceneComponent* HammerPivot;
+    UPROPERTY() USceneComponent* MuzzlePoint;
+    UPROPERTY() TArray<UStaticMeshComponent*> Chambers;
+    UPROPERTY() class UMaterialInstanceDynamic* ChamberLitMat;
+    UPROPERTY() class UMaterialInstanceDynamic* ChamberSpentMat;
     UPROPERTY() UStaticMeshComponent* Fist;
     UPROPERTY() UPointLightComponent* MuzzleLight;
     UPROPERTY() UPointLightComponent* FistLight;
@@ -179,12 +206,27 @@ private:
     float FistCooldown = 0.f;
     float FistAnim = 0.f;         // 1 -> 0 over a punch
     float Recoil = 0.f;
+    // weapon animation springs (degrees / cm and their velocities)
+    float KickPitch = 0.f, KickPitchV = 0.f;
+    float KickBack = 0.f, KickBackV = 0.f;
+    FVector2f Sway = FVector2f::ZeroVector, SwayV = FVector2f::ZeroVector;
+    float DrumAngle = 0.f, DrumTarget = 0.f;
+    float HammerT = 1.f;          // 0 just fell .. 1 cocked
+    float DrawT = 0.f;            // 0 -> 1 as the gun comes up
+    float Bloom = 0.f;
+    float PadTurnBoost = 0.f;     // grows while the right stick is held at full tilt
+    int32 ReloadClicks = 0;
+    int32 NextChamber = 0;
+    float FireQueued = 0.f;       // a click that came a moment early fires the instant it can
+    bool bFireWasHeld = false;
     float FovKick = 0.f;
     float Shake = 0.f;
     float CamZ = 70.f;            // camera height over the capsule centre, smoothed
     float CamRoll = 0.f;
     float BobPhase = 0.f;
     float HitstopReal = 0.f;
+    float MenuRepeatT = 0.f;                          // how long left or right has been held in a menu
+    FVector2D LastMenuMouse = FVector2D::ZeroVector;  // where the mouse was last frame in a menu
     float DeadT = 0.f;
     bool bRespawnSent = false;
     bool bBuilt = false;

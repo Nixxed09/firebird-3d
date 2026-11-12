@@ -109,7 +109,7 @@ with `.\tools\ue-play.ps1`.
 | Hollow enemy (tell, crack, release) | `Hollow.*`, `EmberProjectile.*` | |
 | LAN host and join, 1 to 4 players, UDP 27705 | `FirebirdSession.*`, `FirebirdGameMode.*` | Tested only as two copies on one PC. Never on two real PCs. |
 | Family Arcade rooms | `FirebirdArcadeLan.*` | Leave alone until R10 allows. |
-| Start menu, HUD | `FirebirdHUD.*` | The HUD is a placeholder. Restyle in Step 3. |
+| Title menu, pause menu, play HUD | `FirebirdHUD.*` draws, `FirebirdSession.*` holds the screen, the settings and what each item does | Redone 2026-11-11 on a direct request, ahead of R1. Rules: GamesOS `docs/GAME_SHELL_STANDARD.md`. Test: `ue-capture.ps1 -Scenario frontend`. Co-op is a choice under MULTIPLAYER, not the game's name. No results screen yet. |
 | Scripted test runs | `FirebirdAutomation.*`, `tools\ue-capture.ps1` | Keep the `feel` and `nodash` runs passing. |
 | Sounds | `FBAudio.*`, `Content/Firebird/Sounds` | Synthesized placeholders. Replace in Step 3. |
 

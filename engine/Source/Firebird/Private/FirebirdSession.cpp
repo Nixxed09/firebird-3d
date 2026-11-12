@@ -9,6 +9,9 @@
 #include "GameFramework/PlayerState.h"
 #include "HAL/PlatformMisc.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "GameFramework/GameUserSettings.h"
+#include "AudioDevice.h"
 #include "Misc/CommandLine.h"
 #include "Misc/FileHelper.h"
 #include "HAL/IConsoleManager.h"
@@ -33,12 +36,129 @@ static FString SettingsPath()
     return FPaths::Combine(FPlatformProcess::UserSettingsDir(), TEXT("FirebirdCoop"), TEXT("settings.ini"));
 }
 
+void UFirebirdSession::SaveSettings() const
+{
+    if (!bPersist) return;
+    FFileHelper::SaveStringToFile(FString::Printf(TEXT("mouse_sensitivity=%.1f\r\ninvert_look=%d\r\nvolume=%d\r\nfullscreen=%d\r\n"),
+        MouseSensitivity, bInvertLook ? 1 : 0, Volume, bFullscreen ? 1 : 0), *SettingsPath());
+}
+
 void UFirebirdSession::AdjustSensitivity(int32 Steps)
 {
     const float Next = FMath::Clamp(FMath::RoundToFloat((MouseSensitivity + Steps * SensitivityStep) * 10.f) / 10.f, SensitivityMin, SensitivityMax);
     if (FMath::IsNearlyEqual(Next, MouseSensitivity)) return;
     MouseSensitivity = Next;
-    FFileHelper::SaveStringToFile(FString::Printf(TEXT("mouse_sensitivity=%.1f\r\n"), MouseSensitivity), *SettingsPath());
+    SaveSettings();
+}
+
+void UFirebirdSession::SetVolume(int32 To)
+{
+    Volume = FMath::Clamp(To, 0, 10);
+    ApplyVolume();
+    SaveSettings();
+}
+
+void UFirebirdSession::ApplyVolume()
+{
+    // the audio device's own level (the app's focus multiplier is the engine's to set every frame)
+    if (UWorld* W = GetGameInstance() ? GetGameInstance()->GetWorld() : nullptr)
+        if (FAudioDeviceHandle Device = W->GetAudioDevice())
+            Device->SetTransientPrimaryVolume(Volume / 10.f);
+}
+
+void UFirebirdSession::SetFullscreen(bool bOn)
+{
+    bFullscreen = bOn;
+    bDisplayApplied = true;
+    if (UGameUserSettings* GS = GEngine ? GEngine->GetGameUserSettings() : nullptr)
+    {
+        GS->SetFullscreenMode(bOn ? EWindowMode::WindowedFullscreen : EWindowMode::Windowed);
+        GS->SetScreenResolution(bOn ? GS->GetDesktopResolution() : FIntPoint(1600, 900));
+        GS->ApplyResolutionSettings(false);
+    }
+    SaveSettings();
+}
+
+// ---- the menus ------------------------------------------------------------------------------
+
+void UFirebirdSession::Go(EFirebirdScreen To)
+{
+    if (To == Screen) return;
+    Remembered[(int32)Screen] = SelectedItem;
+    Screen = To;
+    // a question always starts on the safe answer; the other screens come back to where you were
+    SelectedItem = (To == EFirebirdScreen::Quit || To == EFirebirdScreen::Leave) ? 0 : Remembered[(int32)To];
+}
+
+void UFirebirdSession::Back()
+{
+    switch (Screen)
+    {
+    case EFirebirdScreen::Main: Go(EFirebirdScreen::Quit); break;   // Esc never quits without asking
+    case EFirebirdScreen::Pause: ClosePause(); break;
+    case EFirebirdScreen::Leave: Go(EFirebirdScreen::Pause); break;
+    default: Go(bPaused ? EFirebirdScreen::Pause : EFirebirdScreen::Main); break;
+    }
+}
+
+float UFirebirdSession::WorldSpeed() const
+{
+    const UWorld* W = GetGameInstance() ? GetGameInstance()->GetWorld() : nullptr;
+    // alone, pausing stops the world; in a network game the others keep playing, so it keeps running
+    return (bPaused && W && W->GetNetMode() == NM_Standalone) ? 0.0001f : 1.f;
+}
+
+void UFirebirdSession::ApplyWorldSpeed()
+{
+    if (UWorld* W = GetGameInstance() ? GetGameInstance()->GetWorld() : nullptr)
+        UGameplayStatics::SetGlobalTimeDilation(W, WorldSpeed());
+}
+
+void UFirebirdSession::OpenPause()
+{
+    if (InMenu() || bPaused) return;
+    bPaused = true;
+    Remembered[(int32)EFirebirdScreen::Pause] = 0;
+    Screen = EFirebirdScreen::Count;   // so Go() sees a change
+    Go(EFirebirdScreen::Pause);
+    ApplyWorldSpeed();
+}
+
+void UFirebirdSession::ClosePause()
+{
+    if (!bPaused) return;
+    bPaused = false;
+    Screen = EFirebirdScreen::Main;
+    SelectedItem = 0;
+    ApplyWorldSpeed();
+}
+
+void UFirebirdSession::Activate(FName Action, const FString& Room, int32 Dir)
+{
+    static const FName Play("play"), Multiplayer("multiplayer"), Settings("settings"), Controls("controls"), Quit("quit"), QuitYes("quit_yes"),
+        HostIt("host"), JoinIt("join"), BackIt("back"), Resume("resume"), Leave("leave"), LeaveYes("leave_yes"),
+        Sens("sens"), Invert("invert"), Vol("volume"), Display("display");
+    if (Action == Sens) { if (Dir != 0) AdjustSensitivity(Dir); }
+    else if (Action == Vol) { if (Dir != 0) SetVolume(Volume + Dir); }
+    else if (Action == Invert) { bInvertLook = !bInvertLook; SaveSettings(); }
+    else if (Action == Display) SetFullscreen(!bFullscreen);
+    else if (Dir != 0) return;   // only settings answer to left and right
+    else if (Action == Play) PlayAlone();
+    else if (Action == Multiplayer) Go(EFirebirdScreen::Multiplayer);
+    else if (Action == Settings) Go(EFirebirdScreen::Settings);
+    else if (Action == Controls) Go(EFirebirdScreen::Controls);
+    else if (Action == Quit) Go(EFirebirdScreen::Quit);
+    else if (Action == QuitYes)
+    {
+        UWorld* W = GetGameInstance() ? GetGameInstance()->GetWorld() : nullptr;
+        if (W) UKismetSystemLibrary::QuitGame(W, GetGameInstance()->GetFirstLocalPlayerController(), EQuitPreference::Quit, false);
+    }
+    else if (Action == HostIt) Host();
+    else if (Action == JoinIt) Join(Room);
+    else if (Action == BackIt) Back();
+    else if (Action == Resume) ClosePause();
+    else if (Action == Leave) Go(EFirebirdScreen::Leave);
+    else if (Action == LeaveYes) BackToMenu(FString());
 }
 
 // fb.MouseSensitivity <0.2..3.0>: set it from the console or -ExecCmds (the same path as the menu and [ ])
@@ -64,13 +184,18 @@ void UFirebirdSession::Initialize(FSubsystemCollectionBase& Collection)
     Collection.InitializeDependency(UFirebirdArcadeLan::StaticClass());
     Super::Initialize(Collection);
 
-    // the player's own settings (mouse sensitivity), kept outside the game folder
+    // the player's own settings, kept outside the game folder; a test run reads them but never writes
+    bPersist = !FParse::Param(FCommandLine::Get(), TEXT("FBAuto"));
     FString Saved;
     if (FFileHelper::LoadFileToString(Saved, *SettingsPath()))
     {
         FString Value;
+        int32 Number = 0;
         if (FParse::Value(*Saved, TEXT("mouse_sensitivity="), Value))
             MouseSensitivity = FMath::Clamp(FCString::Atof(*Value), SensitivityMin, SensitivityMax);
+        if (FParse::Value(*Saved, TEXT("invert_look="), Number)) bInvertLook = Number != 0;
+        if (FParse::Value(*Saved, TEXT("volume="), Number)) Volume = FMath::Clamp(Number, 0, 10);
+        if (FParse::Value(*Saved, TEXT("fullscreen="), Number)) bFullscreen = Number != 0;
     }
 
     // which copy this is: the same string on two computers exactly when the copy is the same
@@ -82,7 +207,7 @@ void UFirebirdSession::Initialize(FSubsystemCollectionBase& Collection)
     const FString Cmd = FCommandLine::Get();
     if (Cmd.Contains(TEXT("?listen"))) Mode = EFirebirdSessionMode::Hosting;
     else if (!FPlatformMisc::GetEnvironmentVariable(TEXT("ARCADE_JOIN")).IsEmpty()) Mode = EFirebirdSessionMode::Menu;   // joins at once (Tick)
-    else if (FParse::Param(*Cmd, TEXT("FBAuto")) && !Cmd.Contains(TEXT("FBScenario=menu"))) Mode = EFirebirdSessionMode::Solo;
+    else if (FParse::Param(*Cmd, TEXT("FBAuto")) && !Cmd.Contains(TEXT("FBScenario=menu")) && !Cmd.Contains(TEXT("FBScenario=frontend"))) Mode = EFirebirdSessionMode::Solo;
     else
     {
         // a bare address to join (e.g. 192.168.1.20:27705) as the first word
@@ -135,7 +260,7 @@ void UFirebirdSession::PlayAlone()
 void UFirebirdSession::Host()
 {
     Mode = EFirebirdSessionMode::Hosting;
-    Status = TEXT("OPENING YOUR GAME...");
+    Status = TEXT("STARTING YOUR GAME...");
     UGameplayStatics::OpenLevel(GetGameInstance(), TEXT("/Engine/Maps/Entry"), true, TEXT("listen"));
 }
 
@@ -180,6 +305,12 @@ void UFirebirdSession::BackToMenu(const FString& Why)
     const bool bWasNetworked = Mode == EFirebirdSessionMode::Hosting || Mode == EFirebirdSessionMode::Joined;
     Mode = EFirebirdSessionMode::Menu;
     Status = Why;
+    // the title menu, from the top; a pause ends with the game it paused
+    bPaused = false;
+    ApplyWorldSpeed();
+    Screen = EFirebirdScreen::Count;
+    Remembered[(int32)EFirebirdScreen::Main] = 0;
+    Go(EFirebirdScreen::Main);
     UE_LOG(LogFirebird, Display, TEXT("FB_SESSION menu: %s"), *Why);
     if (bWasNetworked) UGameplayStatics::OpenLevel(GetGameInstance(), TEXT("/Engine/Maps/Entry"), true);
 }
@@ -188,6 +319,13 @@ bool UFirebirdSession::Tick(float DeltaTime)
 {
     UWorld* W = GetGameInstance() ? GetGameInstance()->GetWorld() : nullptr;
     UFirebirdArcadeLan* L = Lan();
+    // the saved full-screen choice, once there is a window to change (never in a test run)
+    if (W) ApplyVolume();   // cheap, and right again after the audio device changes
+    if (!bDisplayApplied && W && GEngine && GEngine->GameViewport)
+    {
+        bDisplayApplied = true;
+        if (bPersist && bFullscreen) SetFullscreen(true);
+    }
     if (!W || !L) return true;
 
     // hosting: keep a Family Arcade room open while this computer is the listen server

@@ -1,9 +1,11 @@
 # Plays a scripted run of the feel range and collects the evidence:
 # key shots, summary.json (each move's proof) and, with -Video, an MP4 from
 # every frame at a fixed 30 fps.
-#   .\tools\ue-capture.ps1 [-Scenario feel|nodash|art|motion] [-Packaged] [-Video] [-Visible]
+#   .\tools\ue-capture.ps1 [-Scenario feel|nodash|art|motion|frontend] [-Packaged] [-Video] [-Visible]
+# frontend walks the title menu and the pause menu (a picture of every screen).
+# gun holds the sidearm still in front of a Hollow: hip, aim, firing, reload, punch.
 param(
-  [ValidateSet('feel', 'nodash', 'art', 'motion')][string]$Scenario = 'feel',
+  [ValidateSet('feel', 'nodash', 'art', 'motion', 'frontend', 'gun')][string]$Scenario = 'feel',
   [switch]$Video,
   [switch]$Visible,
   [switch]$Packaged,

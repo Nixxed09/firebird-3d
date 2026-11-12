@@ -26,6 +26,8 @@
 #include "Engine/GameViewportClient.h"
 #include "Slate/SceneViewport.h"
 #include "Input/Events.h"
+#include "Misc/App.h"
+#include "GameFramework/WorldSettings.h"
 
 static bool GRanThisProcess = false;
 
@@ -117,6 +119,132 @@ void UFirebirdAutomation::TickController(AFirebirdCharacter* P)
     ++Stage;
 }
 
+// The menus, end to end (-FBScenario=frontend): every title screen, a setting changed and put
+// back, Esc asking before it quits, then into play and the pause menu. Keys go through the real
+// viewport where a key is the thing under test; a picture of every screen is kept.
+void UFirebirdAutomation::TickFrontend(AFirebirdCharacter* P)
+{
+    UFirebirdSession* S = UFirebirdSession::Get(P);
+    APlayerController* PC = Cast<APlayerController>(P->GetController());
+    AFirebirdHUD* Hud = PC ? Cast<AFirebirdHUD>(PC->GetHUD()) : nullptr;
+    UGameViewportClient* Client = GetWorld()->GetGameViewport();
+    FSceneViewport* Viewport = Client ? Client->GetGameViewport() : nullptr;
+    if (!S || !Hud || !Viewport) return;
+    P->bAutoDriven = false;   // the character reads the keys itself, as it does for a player
+    FrontT += FApp::GetDeltaTime();   // real time: the world is stopped for part of this run
+    // a key goes down on one frame and comes up two frames later, as a finger does (down and up
+    // inside one frame is sometimes not seen as a press)
+    if (FrontKeyFrames > 0 && --FrontKeyFrames == 0)
+        Viewport->OnKeyUp(FGeometry(), FKeyEvent(FrontKey, FModifierKeysState(), 0u, false, 0, 0));
+    auto Tap = [this, Viewport](const FKey& K)
+    {
+        FrontKey = K;
+        FrontKeyFrames = 2;
+        Viewport->OnKeyDown(FGeometry(), FKeyEvent(K, FModifierKeysState(), 0u, false, 0, 0));
+    };
+    auto Step = [this](float After) { if (FrontT < After) return false; FrontT = 0.f; ++Stage; return true; };
+    auto Labels = [Hud]() { FString All; for (const AFirebirdHUD::FMenuItem& It : Hud->MenuItems) All += (All.IsEmpty() ? TEXT("") : TEXT(", ")) + It.Label; return All; };
+    const float Speed = GetWorld()->GetWorldSettings()->GetEffectiveTimeDilation();
+    switch (Stage)
+    {
+    case 0:   // the title screen
+        if (S->Mode != EFirebirdSessionMode::Menu || Hud->MenuItems.Num() == 0 || !Step(3.f)) break;
+        Proof(TEXT("title_items"), Labels() == TEXT("PLAY, MULTIPLAYER, SETTINGS, CONTROLS, QUIT"), Labels());
+        Shot(TEXT("01-title"));
+        break;
+    case 1: if (Step(0.3f)) Tap(EKeys::Down); break;
+    case 2:
+        if (!Step(0.4f)) break;
+        Proof(TEXT("down_key_moves_the_choice"), S->SelectedItem == 1, FString::Printf(TEXT("chosen item %d"), S->SelectedItem));
+        Tap(EKeys::Enter);
+        break;
+    case 3:
+        if (!Step(0.6f)) break;
+        Proof(TEXT("enter_opens_multiplayer"), S->Screen == EFirebirdScreen::Multiplayer && Hud->MenuItems.Num() >= 2 && Hud->MenuItems[0].Action == FName("host"), Labels());
+        Shot(TEXT("02-multiplayer"));
+        break;
+    case 4: if (Step(0.3f)) Tap(EKeys::Escape); break;
+    case 5:
+        if (!Step(0.4f)) break;
+        Proof(TEXT("esc_goes_back_one_screen"), S->Screen == EFirebirdScreen::Main && S->SelectedItem == 1, FString::Printf(TEXT("screen %d item %d"), (int32)S->Screen, S->SelectedItem));
+        S->Activate(FName("settings"));
+        break;
+    case 6:
+    {
+        if (!Step(0.4f)) break;
+        const float Before = S->MouseSensitivity;
+        const int32 Step1 = Before < UFirebirdSession::SensitivityMax - 0.05f ? 1 : -1;
+        Tap(Step1 > 0 ? EKeys::Right : EKeys::Left);
+        FrontValue = Before;
+        break;
+    }
+    case 7:
+    {
+        if (!Step(0.3f)) break;
+        Proof(TEXT("arrow_key_changes_sensitivity"), !FMath::IsNearlyEqual(S->MouseSensitivity, FrontValue, 0.01f), FString::Printf(TEXT("%.1f -> %.1f"), FrontValue, S->MouseSensitivity));
+        S->AdjustSensitivity(FMath::RoundToInt((FrontValue - S->MouseSensitivity) / UFirebirdSession::SensitivityStep));
+        const bool bWas = S->bInvertLook;
+        S->Activate(FName("invert"));
+        const bool bFlipped = S->bInvertLook != bWas;
+        S->Activate(FName("invert"));
+        Proof(TEXT("invert_look_toggles"), bFlipped && S->bInvertLook == bWas, bFlipped ? TEXT("on and back") : TEXT("did not change"));
+        const int32 Vol = S->Volume;
+        S->Activate(FName("volume"), FString(), Vol > 0 ? -1 : 1);
+        const bool bVolChanged = S->Volume != Vol;
+        S->SetVolume(Vol);
+        Proof(TEXT("volume_changes"), bVolChanged && S->Volume == Vol, FString::Printf(TEXT("back at %d"), S->Volume));
+        break;
+    }
+    case 8: if (Step(0.4f)) Shot(TEXT("03-settings")); break;
+    case 9: if (Step(0.3f)) { S->Back(); S->Activate(FName("controls")); } break;
+    case 10: if (Step(0.6f)) Shot(TEXT("04-controls")); break;
+    case 11: if (Step(0.3f)) { S->Back(); Tap(EKeys::Escape); } break;
+    case 12:
+        if (!Step(0.6f)) break;
+        Proof(TEXT("esc_on_title_asks_before_quitting"), S->Screen == EFirebirdScreen::Quit && S->SelectedItem == 0 && Hud->MenuItems.Num() == 2, Labels());
+        Shot(TEXT("05-quit"));
+        break;
+    case 13: if (Step(0.3f)) { Tap(EKeys::Enter); } break;   // KEEP PLAYING
+    case 14:
+        if (!Step(0.4f)) break;
+        Proof(TEXT("keep_playing_returns_to_title"), S->Screen == EFirebirdScreen::Main && S->Mode == EFirebirdSessionMode::Menu, FString::Printf(TEXT("screen %d"), (int32)S->Screen));
+        S->Activate(FName("play"));
+        break;
+    case 15:
+        if (!Step(1.5f)) break;
+        Proof(TEXT("play_starts_the_game"), S->Mode == EFirebirdSessionMode::Solo && !S->MenuOpen(), FString::Printf(TEXT("mode %d"), (int32)S->Mode));
+        Tap(EKeys::Escape);
+        break;
+    case 16:
+        if (!Step(0.8f)) break;
+        Proof(TEXT("esc_in_play_opens_pause"), S->bPaused && S->Screen == EFirebirdScreen::Pause && S->Mode == EFirebirdSessionMode::Solo, Labels());
+        Proof(TEXT("pause_stops_the_world_alone"), Speed < 0.01f, FString::Printf(TEXT("world speed %.4f"), Speed));
+        Shot(TEXT("06-pause"));
+        break;
+    case 17: if (Step(0.3f)) Tap(EKeys::Escape); break;
+    case 18:
+        if (!Step(0.4f)) break;
+        Proof(TEXT("esc_resumes"), !S->bPaused && FMath::IsNearlyEqual(Speed, 1.f, 0.01f), FString::Printf(TEXT("world speed %.4f"), Speed));
+        S->OpenPause();
+        S->Activate(FName("leave"));
+        break;
+    case 19:
+        if (!Step(0.6f)) break;
+        Proof(TEXT("leave_asks_first"), S->Screen == EFirebirdScreen::Leave && S->SelectedItem == 0 && S->Mode == EFirebirdSessionMode::Solo, Labels());
+        Shot(TEXT("07-leave"));
+        break;
+    case 20: if (Step(0.3f)) S->Activate(FName("leave_yes")); break;
+    case 21:
+        if (!Step(0.6f)) break;
+        Proof(TEXT("leaving_returns_to_title"), S->Mode == EFirebirdSessionMode::Menu && S->Screen == EFirebirdScreen::Main && !S->bPaused && FMath::IsNearlyEqual(Speed, 1.f, 0.01f),
+            FString::Printf(TEXT("mode %d screen %d speed %.4f"), (int32)S->Mode, (int32)S->Screen, Speed));
+        Finish();
+        Stage = 200;
+        break;
+    default: break;
+    }
+}
+
 void UFirebirdAutomation::OnWorldBeginPlay(UWorld& InWorld)
 {
     Super::OnWorldBeginPlay(InWorld);
@@ -196,6 +324,82 @@ void UFirebirdAutomation::Finish()
     FinishT = (Scenario == TEXT("coop") && GetWorld()->GetNetMode() == NM_ListenServer) ? 8.f : 1.f;
 }
 
+// The sidearm, held still in front of a Hollow so a person can judge it: at the hip, down the
+// sights, the frame it fires (from the sights and from the hip), the reload (tipped over, then
+// spinning), reloaded, and a punch. It checks that the cylinder counts down and refills and that
+// aiming zooms. How it looks and feels is a person's call (R2); these pictures are for that.
+void UFirebirdAutomation::TickGun(AFirebirdCharacter* P, float Dt)
+{
+    FFirebirdInput& I = P->Input;
+    const bool bFirstFrame = StageT <= Dt * 1.5f;
+    auto At = [&](float T) { return StageT >= T && StageT < T + Dt; };   // true on exactly one frame
+    for (TActorIterator<AHollow> It(GetWorld()); It; ++It)
+    {
+        It->bHoldFire = true;
+        It->GetCharacterMovement()->DisableMovement();
+    }
+    I.Move = FVector2D::ZeroVector;
+    I.bFirePressed = I.bReload = I.bFist = false;
+    I.bFireHeld = false;
+    switch (Stage)
+    {
+    case 0:
+        if (bFirstFrame)
+        {
+#if WITH_EDITOR
+            if (GShaderCompilingManager) GShaderCompilingManager->FinishAllCompilation();
+#endif
+            P->TeleportOwned(FVector(6450, 0, 100), 0);
+        }
+        if (AHollow* H = HollowAt(0)) AimAt(P, H->GetActorLocation() + FVector(0, 0, 30));
+        if (StageT > 4.f) { Shot(TEXT("01-hip")); Next(1); }
+        break;
+    case 1:
+        I.bAimHeld = true;
+        if (StageT > 0.8f)
+        {
+            Shot(TEXT("02-aim"));
+            Proof(TEXT("aim_zooms"), P->AimBlend > 0.9f, FString::Printf(TEXT("aim blend %.2f"), P->AimBlend));
+            Next(2);
+        }
+        break;
+    case 2:
+        I.bAimHeld = true;
+        if (At(0.1f)) I.bFirePressed = true;
+        if (At(0.1f + 2.f * Dt)) Shot(TEXT("03-fire-aimed"));
+        if (StageT > 0.8f) Next(3);
+        break;
+    case 3:
+        if (At(0.4f)) I.bFirePressed = true;
+        if (At(0.8f)) I.bFirePressed = true;
+        if (At(0.8f + 2.f * Dt)) Shot(TEXT("04-fire-hip"));
+        if (StageT > 1.4f)
+        {
+            Proof(TEXT("cylinder_counts_down"), P->Drum == P->DrumSize - 3, FString::Printf(TEXT("%d of %d left after 3 shots"), P->Drum, P->DrumSize));
+            Next(4);
+        }
+        break;
+    case 4:
+        if (bFirstFrame) I.bReload = true;
+        if (At(0.25f)) Shot(TEXT("05-reload-tip"));
+        if (At(0.6f)) Shot(TEXT("06-reload-spin"));
+        if (StageT > 1.4f)
+        {
+            Shot(TEXT("07-reloaded"));
+            Proof(TEXT("reload_refills"), P->Drum == P->DrumSize && !P->IsReloading(), FString::Printf(TEXT("%d of %d after reloading"), P->Drum, P->DrumSize));
+            Next(5);
+        }
+        break;
+    case 5:
+        if (At(0.1f)) I.bFist = true;
+        if (At(0.2f)) Shot(TEXT("08-fist"));
+        if (StageT > 0.6f) { Finish(); Next(200); }
+        break;
+    default:
+        break;
+    }
+}
+
 void UFirebirdAutomation::Tick(float DeltaSeconds)
 {
     if (!bActive) return;
@@ -216,6 +420,16 @@ void UFirebirdAutomation::Tick(float DeltaSeconds)
         TickController(P);
         return;
     }
+    if (Scenario == TEXT("frontend"))
+    {
+        TickFrontend(P);
+        return;
+    }
+    if (Scenario == TEXT("gun"))
+    {
+        TickGun(P, DeltaSeconds);
+        return;
+    }
     // the start menu, as a kid sees it: a friend's room is listed, picking it joins
     if (Scenario == TEXT("menu"))
     {
@@ -225,12 +439,14 @@ void UFirebirdAutomation::Tick(float DeltaSeconds)
         if (!S || !Hud) return;
         if (S->Mode == EFirebirdSessionMode::Menu && Stage == 0)
         {
-            if (Hud->MenuItems.Num() >= 3 && TotalT > 2.f)
+            if (S->Screen != EFirebirdScreen::Multiplayer) S->Activate(FName("multiplayer"));
+            const int32 Room = Hud->MenuItems.IndexOfByPredicate([](const AFirebirdHUD::FMenuItem& It) { return It.Action == FName("join"); });
+            if (S->Screen == EFirebirdScreen::Multiplayer && Room != INDEX_NONE && TotalT > 2.f)
             {
                 Shot(TEXT("01-menu"));
-                Proof(TEXT("menu_lists_friends_game"), true, Hud->MenuItems[2].Label);
-                S->SelectedItem = 2;
-                S->Join(Hud->MenuItems[2].Room);   // what clicking it does
+                Proof(TEXT("menu_lists_friends_game"), true, Hud->MenuItems[Room].Label);
+                S->SelectedItem = Room;
+                S->Activate(FName("join"), Hud->MenuItems[Room].Room);   // what choosing it does
                 Stage = 1;
             }
             else if (TotalT > 30.f) { Shot(TEXT("99-no-room")); Proof(TEXT("menu_lists_friends_game"), false, TEXT("no room listed after 30 s")); Finish(); Stage = 200; }

@@ -45,6 +45,7 @@ namespace FB
         static const TArray<FName> Names = {
             TEXT("footstep_1"), TEXT("footstep_2"), TEXT("footstep_3"), TEXT("jump"), TEXT("land"), TEXT("dash"), TEXT("slide"),
             TEXT("spark_fire"), TEXT("spark_hit_wall"), TEXT("spark_hit_hollow"), TEXT("fist_swing"), TEXT("fist_hit"),
+            TEXT("caster_open"), TEXT("caster_chamber"), TEXT("caster_close"), TEXT("caster_dry"),
             TEXT("crack"), TEXT("release"), TEXT("hollow_break"), TEXT("hollow_windup"), TEXT("ember_throw"),
             TEXT("ember_hit_player"), TEXT("player_hurt"), TEXT("player_death"), TEXT("respawn"), TEXT("riley_radio"),
             TEXT("ui_tick"), TEXT("ambience_loop"), TEXT("music_loop")

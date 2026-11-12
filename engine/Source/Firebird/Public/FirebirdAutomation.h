@@ -57,6 +57,12 @@ private:
     FVector MotionFoot = FVector::ZeroVector;
     FVector MotionHand = FVector::ZeroVector;
     void TickController(AFirebirdCharacter* P);
+    void TickFrontend(AFirebirdCharacter* P);   // -FBScenario=frontend: the title menu and the pause menu
+    void TickGun(AFirebirdCharacter* P, float DeltaSeconds);   // -FBScenario=gun: the sidearm's poses, for a person to judge
+    float FrontT = 0.f;
+    float FrontValue = 0.f;
+    FKey FrontKey;
+    int32 FrontKeyFrames = 0;
     bool bControllerCaseStarted = false;
     FVector ControllerStart = FVector::ZeroVector;
     int32 WantPlayers = 1;

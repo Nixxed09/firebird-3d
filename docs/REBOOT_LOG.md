@@ -2,6 +2,29 @@
 
 Newest first. The plan is [REBOOT_PLAN.md](REBOOT_PLAN.md). The format is in its section 7.
 
+## 2026-11-11: outside the steps (asked for directly), new menus and play HUD
+Did: the menus and the HUD were asked for directly in a session today, so this went ahead of rule R1.
+The title screen says FIREBIRD (the CO-OP badge is gone) with PLAY, MULTIPLAYER, SETTINGS,
+CONTROLS, QUIT. Multiplayer is its own screen: host a game, or join one found on the
+network. Settings: look sensitivity, invert look, volume, window or full screen, saved in
+%LOCALAPPDATA%\FirebirdCoop\settings.ini. Esc on the title asks before quitting. Esc or
+START in play opens a pause menu (resume, settings, controls, leave) instead of dropping
+to the title; alone the world stops, in a network game it keeps running. The play HUD has
+no boxes now: health with a "just lost" trail and the dash pips bottom left, sparks and the
+drum beside the weapon bottom right, the wave top right, LIGHT RELEASED near the top.
+Text sizes are measured once and cached. New test: `ue-capture.ps1 -Scenario frontend`.
+The rules it was built to are GamesOS `docs/GAME_SHELL_STANDARD.md`.
+Proof: checked. The game target compiled; on a scratch copy of the October package with
+the new program, `frontend` passed 15 of 15 three times in a row and `feel` passed 6 of 6.
+Ten pictures are in docs/evidence/menus and in the Game Studio under Menus. Not run: the
+editor target (`ue-build.ps1`, the editor was open), the two-copy join test with the new
+multiplayer screen, a controller in a person's hands, the mouse on the menus, the volume
+setting with sound on, and the full-screen switch. No package was made.
+Phoenix said: has not seen it yet.
+Sessions since Phoenix last played: unknown (no play session on record).
+Next: Phoenix opens the game, tries every menu with keyboard, mouse and controller, and
+grades the Menus pictures in the Game Studio. Then back to step 1E.
+
 ## 2026-11-11: step 1D, first version of the look room
 Did: built /Game/Firebird/Maps/L_LookRoom from the church ruin kit with
 tools\editor\build_lookroom.py (338 actors): 32 m by 20 m hall, arcades with a
