@@ -1,7 +1,7 @@
 # Pack forge: making our own asset packs in Blender
 
-Started 2026-11-12. Status: **one asset built as a proof** (a lever-action rifle,
-section 6). Nothing here has passed a person's look verdict yet.
+Started 2026-11-12. Status: **two assets built** (a lever-action rifle, section 6; a
+bolt-action rifle, section 7). Nothing here has passed a person's look verdict yet.
 
 This is Firebird's working copy of the Blender harness that GamesOS planned the same
 day (`GamesOS/toolkit/blender/README.md`: jobs B2 "Look", B3 "Critic loop", B4 "Parts
@@ -189,3 +189,51 @@ first-person views, the Unreal import) should be offered to GamesOS, not kept he
 GamesOS critic brief; (2) fix the metal surfaces (brass, case-hardened steel, blued steel as
 their own kinds); (3) import the textured GLB into Unreal and hold it in first person;
 (4) the grades from the Game Studio decide whether a second asset is worth making this way.
+
+## 7. Second asset: the bolt-action rifle
+
+Built 2026-11-12 from the section 4 prompt, in four rounds with a new critic each round.
+Stopped on the 90-minute limit, not on the scores. 28,596 triangles (budget 30,000), 72 parts,
+six materials; the bolt (with its handle, knob, shroud and cocking piece) and the trigger are
+separate meshes on their own hinges. Exported as FBX and GLB (3 meshes).
+Script: `tools/blender/packs/period_arms/bolt_rifle.py`.
+
+Scores are out of 3, from a critic agent that saw only the renders.
+
+| Round | Sheet (`docs/evidence/pack-forge/`) | Side views | Other six views | Silhouette | Part shapes | Proportions | Materials | Small detail |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `bolt_rifle-round1-sheet.png` | 1 | 1 | 1 | 1 | 1 | 1 | 0 |
+| 2 | `bolt_rifle-round2-sheet.png` | 1 | 1 | 2 | 1 | 1 | 1 | 1 |
+| 3 | `bolt_rifle-round3-sheet.png` | 2 | 1, rear quarter 2 | 2 | 1 | 2 | 1 | 1 |
+| 4 | `bolt_rifle-round4-sheet.png` | 2 | 1, rear quarter 2 | 2 | 1 | 2 | 1 | 1 |
+
+What each round changed:
+
+1. First build. The critic: the action sat on the stock instead of in it, the forend stopped
+   short with the rod in the air, the guard was a wire, the bands were pipe collars.
+2. Barrel channel cut so the wood meets the metal at the bore line, forend carried to a nose
+   cap, half-shell handguard, thin bands, wire sling loops, screws and cross-bolts, a tangent
+   sight. The critic: butt too long for the barrel, magazine a shallow wedge, sagging butt.
+3. Butt 60 mm shorter and barrel 60 mm longer, magazine 48 mm deep, oval guard bow, darker wood.
+   The critic: receiver reads as a thin shell, guard and magazine should be one piece, butt
+   lines still curve, stock a plank from above.
+4. Straight toe line and comb with a comb nose, new widths, ribbed magazine with a flange,
+   narrower sight with curved ramps. The fourth critic's scores did not move.
+
+Not fixed (the fourth critic's list, most visible first): the receiver still reads as sleeves
+on a tube in first person; the guard is not one forging with the magazine; the bolt's rear is
+stacked cylinders; the rear sight is still read as a block; metal sits on the wood with no gap
+line; the nose cap and bayonet lug are blocks; the metal finishes do not match each other.
+
+Checked: build, render and export run from one command; I looked at every round's sheet; the
+rifle imports into Unreal as `/Game/Firebird/Packs/PeriodArms/SM_bolt_rifle`, 126.2 cm long,
+28,528 triangles, six materials, and stands in the look room in front of the lever rifle
+(`docs/evidence/pack-forge/bolt_rifle-in-lookroom.png`, flat colours). Not checked: held in first
+person in the game; seen by a person.
+
+What the two assets say about the method: the critic loop takes a silhouette and proportions
+from 1 to 2 in three rounds and then stops paying. Part shapes stay at 1 because the part
+makers only produce tubes, pushed-out profiles and lofts; a forged receiver or a guard that
+grows out of a magazine needs a maker that blends two shapes (a fillet between solids), and
+the wood-to-metal gap line needs an inletting cut. Those two makers, then the texture bake,
+are the next work on the forge itself, before a third asset.
