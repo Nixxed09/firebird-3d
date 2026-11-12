@@ -108,3 +108,33 @@ zip route above is for Megascans surface and mesh zips only.
 Still missing (no good free pack found): 1870s to 1900s brick and stone city
 street buildings, a lever-action or bolt-action rifle, a period shotgun, burned
 and collapsed building pieces. These probably cost money (rule R9: ask first).
+
+## In the project (added through the editor's Fab window, 2026-11-11)
+
+All in `engine/Content/<folder>`, all ignored by git (`.gitignore` ignores everything
+in `engine/Content` except `Firebird`). About 16 GB. Only Vefects has been used so far.
+
+| Folder | Pack | Has | Used yet |
+|---|---|---|---|
+| `Vefects` | Perfect Fire VFX | 15 Niagara fires | Yes: the fires in `L_LookRoom` |
+| `Fire_EXP_Vol01_Free` | Realistic Fire & Explosion VFX Vol.1 | 10 Niagara fires and explosions | No |
+| `M5VFXVOL2` | M5 VFX Vol2 Fire and Flames | 110 Niagara and 112 older effects | No |
+| `HS_WeaponPack_03` | Weapon Pack 03, animated revolver | Revolver and shoulder stock, rigged. Its page says "Allows usage with AI: No". | No |
+| `M1911` | M1911 pistol | One rigged pistol (a 1911 design, the late edge of our period) | No |
+| `Atris_axes` | Axes | 8 axe meshes | No |
+| `Gothic_props_1` | Gothic props (pack 1) | 21 props | No |
+| `Gothic_Environment` | Dark Fantasy Gothic sample | 1 mesh, materials | No |
+| `AbandonedPowerPlant` | Modular Old Power Plant | 65 meshes | No |
+| `Scene_Saloon` | Megascans Saloon Interior | 94 meshes | No |
+| `Scene_OldMine` | Megascans Old Mine | 97 meshes | No |
+| `UndergroundTunnel` | Underground tunnel | 317 meshes | No |
+
+Not yet in the project from the library list above: the six Old West volumes,
+Wild West Town, Bandit.
+
+A full list of every pack's maps, effects and rigged meshes is written by
+`tools\editor\pack_inventory.py` to `engine/Saved/FabDownloads/pack-inventory.json`.
+
+Adding these packs made the editor change two files: `Firebird.uproject` (turns on
+the ApexDestruction plugin, which one pack needs) and `Config/DefaultEngine.ini`
+(Windows settings written out, shader model 6 added). Both are committed.

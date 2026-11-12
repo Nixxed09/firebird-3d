@@ -131,7 +131,7 @@ M_FLOOR = tiled("MI_LR_Floor", "floor_stone_01", 2.0)
 M_GALLERY = tiled("MI_LR_GalleryFloor", "floor_stone_02", 2.0)
 M_SMOOTH = tiled("MI_LR_Smooth", "texture_stone_smooth_01", 2.0)
 
-EXPOSURE = 1.9                     # manual exposure: higher is brighter
+EXPOSURE = 1.1                     # manual exposure: higher is brighter
 L, W, H = 3200, 2000, 800          # inside length (X), width (Y), wall height
 HX, HY = L // 2, W // 2
 T = 80                             # wall thickness
@@ -296,7 +296,7 @@ sky = spawn(unreal.SkyLight, 0, 0, 1200, "Lights")
 kc = sky.light_component
 kc.set_mobility(unreal.ComponentMobility.MOVABLE)
 setp(kc, "real_time_capture", True)
-kc.set_intensity(0.6)
+kc.set_intensity(0.3)
 
 fog = spawn(unreal.ExponentialHeightFog, 0, 0, 100, "Lights")
 fc = fog.component
@@ -332,6 +332,28 @@ for name, value in [("auto_exposure_method", unreal.AutoExposureMethod.AEM_MANUA
     setp(s, "override_" + name, True)
     setp(s, name, value)
 ppv.set_editor_property("settings", s)
+
+# ---------------------------------------------------------------- fire
+# Real flames, so every warm glow has a source you can see. Effects are from the
+# Vefects "Perfect Fire VFX" pack; if the pack is missing the room still builds.
+def fire(name, x, y, z, light=0.0, radius=1200, scale=1.0):
+    path = "/Game/Vefects/Free_Fire/Shared/Particles/" + name
+    if not eal.does_asset_exist(path):
+        log("WARN fire effect missing: " + name)
+        return
+    a = eas.spawn_actor_from_object(unreal.load_asset(path), unreal.Vector(x, y, z), unreal.Rotator(0, 0, 0))
+    _finish(a, "Fire", (scale, scale, scale))
+    if light:
+        point_light(x, y, z + 90, (1.0, 0.42, 0.12), light, radius, "Fire")
+
+
+for x, y in [(-1000, 1), (200, 1), (-1000, -1), (200, -1), (1050, -1)]:
+    fire("NS_Fire_Small", x, y * (HY - 42), 158, scale=0.6)          # a flame in each wall niche
+fire("NS_Fire_Big_Smoke", -1010, 170, 70, light=40.0, radius=1500)   # the fallen roof burns
+fire("NS_Fire_Floor_01", -820, -410, 6, light=14.0)
+fire("NS_Fire_Medium_Smoke", -1310, 320, 10, light=18.0)
+fire("NS_Fire_Floor_02", -520, 80, 6, light=8.0, radius=800)
+fire("NS_Fire_Small", -380, -430, 20)
 
 # Four starts, spread out, all facing the middle.
 for x, y, yaw in [(1300, 500, 200), (1300, -500, 160), (-200, 700, -90), (-200, -700, 90)]:

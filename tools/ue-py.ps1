@@ -21,10 +21,13 @@ $S = "SlateInspectorToolset.SlateInspectorToolset"
 Add-Type -Name FbWin -Namespace Fb -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool ShowWindow(System.IntPtr h, int c);
 [DllImport("user32.dll")] public static extern bool IsIconic(System.IntPtr h);
+[DllImport("user32.dll")] public static extern bool SetForegroundWindow(System.IntPtr h);
 '@ -ErrorAction SilentlyContinue
-$ed = Get-Process UnrealEditor -ErrorAction SilentlyContinue | Select-Object -First 1
+$ed = Get-Process UnrealEditor -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -match "Unreal Editor" } | Select-Object -First 1
 if (-not $ed) { throw "The Unreal editor is not running. Start it with .\tools\ue-edit.ps1" }
 if ([Fb.FbWin]::IsIconic($ed.MainWindowHandle)) { [Fb.FbWin]::ShowWindow($ed.MainWindowHandle, 9) | Out-Null; Start-Sleep 2 }
+# Typing needs the editor in front: its Cmd box cannot take focus from behind another window.
+[Fb.FbWin]::SetForegroundWindow($ed.MainWindowHandle) | Out-Null; Start-Sleep -Milliseconds 600
 
 @{ toolset_name = $S; tool_name = "Snapshot"; arguments = @{ ref = ""; maxDepth = 40 } } |
     ConvertTo-Json -Depth 6 | Set-Content $argsFile -Encoding UTF8
@@ -37,8 +40,8 @@ $before = (Get-Content $log).Count
 $cmd = "py `"$py`"" + $(if ($ScriptArgs) { " $ScriptArgs" } else { "" })
 @{ toolset_name = $S; tool_name = "Type"; arguments = @{ ref = $ref; text = $cmd; submit = $true } } |
     ConvertTo-Json -Depth 6 | Set-Content $argsFile -Encoding UTF8
-try { & $mcp -Tool call_tool -ArgsFile $argsFile -TimeoutSec $TimeoutSec | Out-Null }
-catch { Write-Host "The editor is busy; waiting on its log." }
+try { $typed = "$(& $mcp -Tool call_tool -ArgsFile $argsFile -TimeoutSec $TimeoutSec)"; if ($typed -match '"isError":true|Could not') { throw "TYPEFAIL $typed" } }
+catch { if ("$_" -match "TYPEFAIL") { throw "Could not type into the editor Cmd box: $_" }; Write-Host "The editor is busy; waiting on its log." }
 
 $deadline = (Get-Date).AddSeconds($TimeoutSec)
 do {
