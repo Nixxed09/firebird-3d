@@ -290,3 +290,6 @@ chrome, wood is orange. It is not in front of a person and should not be yet.
 whole game, (2) peak moments once levels are rebuilt in that look, (3) core assets. Work in
 progress, like this rifle, stays under "Firebird · everything" and is graded by the AI until it
 has nothing big left wrong.
+
+Round 5 (same evening): lever made a thick bar and its loop closed; overlap 0.827. Picture without the baked textures: `docs/evidence/pack-forge/lever_rifle-round5-sheet.png`. The forge's own Blender materials look better than the first bake, so the bake's metal and wood settings are the next thing to fix.
+
