@@ -2,6 +2,29 @@
 
 Newest first. The plan is [REBOOT_PLAN.md](REBOOT_PLAN.md). The format is in its section 7.
 
+## 2026-11-12: outside the steps (asked for directly), GamesOS trial T9: the look room checked through the editor's MCP server
+Did: GamesOS workflow trial T9 asks whether an agent can do a Firebird task through Unreal's own
+MCP server with no hand in the editor. Asked for directly, so it went ahead of R1 and R3. It was
+run on 5.8 (the engine decision stands; 5.9 is a preview and is not installed). The task was the
+open check from step 1A and 1D: does the hand-built map start the player at a PlayerStart, on the
+floor, with no test course. Nothing in the project was changed and nothing was saved: the editor
+showed "19 Unsaved" from an earlier session before and after, and the five changed sound files
+in git are not from this session and were left alone.
+Proof: checked, through `tools\ue-mcp.ps1` only. L_LookRoom was the open level. The four
+PlayerStarts are at z 110 and a straight-down trace finds the floor 110 below each. A play
+session started in the editor (StartPIE): the game mode, HUD and FirebirdCharacter exist, no
+FBRange actor exists, the character is at PlayerStart_2 (-200, 700) standing at z 94.15, the
+title menu draws over the room, LogFirebird shows `FB_SESSION start` and `player_joined seat=P1`,
+no new errors. The session was stopped again. Picture: docs/evidence/mcp-trial/lookroom-play-20261112.png.
+Not run: the same check through `ue-play.ps1 -Map` (the 1A box stays open, it names that path),
+a walk of the stairs, and the frame rate. The frame rate cannot be read this way: an editor in
+the background ticks 3 times a second. Measure it with the game in front (step 1E.4).
+What was learned about the server is in the GamesOS skill `ue5-gamesos-mcp`,
+`references/native-mcp-5-8-and-5-9.md` (call shape, eight traps, what 5.9 changes).
+Phoenix said: has not seen it yet. Nothing visible changed.
+Sessions since Phoenix last played: unknown (no play session on record). R3 applies to the next session.
+Next: unchanged. Step 1E: Phoenix walks the look room and judges it.
+
 ## 2026-11-11: outside the steps (asked for directly), controls, the sidearm and its sound
 Did: asked for directly ("the mouse doesn't move it well, the shooting is off, better gun
 animations and sounds, old Colt-era guns"), so this went ahead of rule R1. Code is in 38a513a
