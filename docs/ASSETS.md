@@ -74,3 +74,37 @@ Our own maps, materials and hero art stay under `engine/Content/Firebird/` and
 
 Maps point at these packs, so after every session that changes a map, copy
 `engine\Content` to `C:\FirebirdBackup\<date>`.
+
+## In the Fab library, not yet in the project (added 2026-11-11)
+
+All free, all Unreal-format. Picked for the Great Fires setting (`docs/SETTING_BRIEF.md`).
+None has been opened or looked at in the engine yet, so quality and fit are unknown.
+
+| Pack | Seller | For |
+|---|---|---|
+| Old West VOL 1 Interior Furniture | Dekogon Studios | Period rooms |
+| Old West VOL 2 Tradesmen Tools and Props | Dekogon Studios | Workshops, Rebuilder gear |
+| Old West VOL 3 Travel Supplies and Goods | Dekogon Studios | Wagons' loads, street clutter |
+| Old West VOL 4 Goods and Supplies | Dekogon Studios | Crates, barrels, sacks |
+| Old West VOL 5 Town Props | Dekogon Studios | Street props |
+| Old West VOL 6 Town and Industrial | Dekogon Studios | Town and works |
+| Wild West Town | Nimikko | Period buildings |
+| Modular Old Power Plant (65 assets) | Nimikko | Brick and iron industry, coil halls |
+| Saloon Interior | Quixel Megascans | Period interior |
+| Old Mine | Quixel Megascans | Timber and rock, under-city |
+| Gothic props (pack 1) | E.Bolday | Old-world stone detail |
+| Free Sample Dark Fantasy Gothic Environment | Oleg Ushenok | Old-world stone |
+| Weapon Pack 03 (Animated Revolver Handgun) | Horizon Store | The revolver |
+| Realistic Fire & Explosion VFX Vol.1 | DeepBlues | Building fires |
+| M5 VFX Vol2 Fire and Flames (Niagara) | M5VFX | Fire, embers |
+| Perfect Fire VFX | Vefects | Fire |
+| Bandit | AlexN | A first human enemy to try |
+
+How these get into the project: they are Unreal-format packs, not zips. In the
+open editor: Window > Fab > My Library > the pack > Add to Project. The editor's
+Fab window must be signed in (Phoenix or Travis confirms in the browser). The
+zip route above is for Megascans surface and mesh zips only.
+
+Still missing (no good free pack found): 1870s to 1900s brick and stone city
+street buildings, a lever-action or bolt-action rifle, a period shotgun, burned
+and collapsed building pieces. These probably cost money (rule R9: ask first).
