@@ -136,11 +136,56 @@ held in first person; nobody but me has seen it.
 
 What is still missing before it is a game asset, let alone a product:
 
-1. **Textures.** Colour and wear are Blender-only patterns. The engine needs them baked
-   to images (base colour, roughness, metal, normal). No bake job is written yet. Until
-   then the rifle arrives in Unreal as flat colours.
+1. **Textures: first bake done, not good yet.** See section 7. The baked rifle is not in
+   Unreal yet (the import script still brings in the flat-colour FBX).
 2. **A skeleton** so the lever, hammer and bolt animate in Unreal, and the animations.
 3. **LODs and collision.**
 4. **A person's verdict**, in the game, beside the bought revolver. Rule R5 in
    `REBOOT_PLAN.md` says world art comes from pro packs; a forged asset earns its place
    only by winning that comparison.
+
+## 7. Textures, the Game Studio, and what "from scripts" must not mean (2026-11-12, later)
+
+**The worry:** "built from scripts" is how our games got their rough look before. That was
+shapes glued together by game code at run time, with no reference picture, no textures and
+nobody checking. The method here is different only if these five things are all true for an
+asset. For the rifle, two are:
+
+| What makes it better than code-drawn art | Rifle today |
+|---|---|
+| A reference picture to build toward (concept art or photos, each view named) | **no**: built from memory of the type |
+| Measured checks that overrule the critic (size, floating parts, closed solids, budget) | partly: triangles and size only |
+| A separate critic every round, keep the best round | round 2 only |
+| Baked textures that travel to the engine | **yes, first try** |
+| A person's grade in the Game Studio | **cards are up, not graded** |
+
+**Textures.** GamesOS wrote the texture job the same day (`GamesOS/toolkit/blender/texture_object.py`,
+job B10). It runs on a forge `.blend` unchanged:
+
+```powershell
+pwsh -File D:\TE-Code\ProductOS\GamesOS\toolkit\blender\blender_job.ps1 -Job texture -Name lever_rifle `
+  -In engine\Saved\PackForge\period_arms\lever_rifle\lever_rifle.blend `
+  -Out engine\Saved\PackForge\period_arms\lever_rifle\textured -Surface "M_Walnut=wood,M_Bore=flat,M_*=metal"
+```
+
+Result: one 2048 atlas (colour and normal map), 5 of 5 checks, 97 seconds, a 9 MB GLB.
+Picture: `docs/evidence/pack-forge/lever_rifle-textured-sheet.png`. My own look at it: the wood
+is better; the brass has stripes like bamboo; the lever and hammer came out chrome white instead
+of dark case-hardened steel; the barrel is too scratched. This was the first run of that job's
+metal and wood surfaces on anything. No critic and no person has judged it.
+
+**Game Studio.** Six cards are in the Game Studio under Firebird, department **Forged weapons**
+(`GamesOS/projects/firebird-coop/studio/cards/06-Forged weapons/`): four textured views, one
+before textures, one in the look room. Read the grades before the next round:
+`node GamesOS/tools/studio/summary.mjs GamesOS/projects/firebird-coop`.
+
+**Use one harness, not two.** GamesOS's harness now has what this forge lacks: checks that
+fail the build, camera poses given to the critic, a written critic brief, the texture job.
+The next asset should be built with `GamesOS/toolkit/blender` (`bl_parts.py`, `-Job round`),
+and what the forge has that it lacks (the `loft`, `sweep` and `fillet` makers, the detail and
+first-person views, the Unreal import) should be offered to GamesOS, not kept here as a copy.
+
+**Next, in order:** (1) reference pictures for the rifle, and rebuild toward them with the
+GamesOS critic brief; (2) fix the metal surfaces (brass, case-hardened steel, blued steel as
+their own kinds); (3) import the textured GLB into Unreal and hold it in first person;
+(4) the grades from the Game Studio decide whether a second asset is worth making this way.
