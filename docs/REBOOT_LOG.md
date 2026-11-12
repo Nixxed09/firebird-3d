@@ -2,6 +2,46 @@
 
 Newest first. The plan is [REBOOT_PLAN.md](REBOOT_PLAN.md). The format is in its section 7.
 
+## 2026-11-12: step 1E judged by the agent (told to: "you judge it and keep going"), three passes on the look room
+Did: the gate says an agent may not pass it. In this session the person at the keyboard said
+"you judge it and keep going", so the agent judged, and the verdicts below are labelled
+agent-judged. They are not human-played and do not replace Phoenix walking the room.
+- First verdict, on the 2026-11-11 pictures: **does not pass.** Real stone and fire, but the sky
+  was a blank cream card, no shafts or haze showed, the roof and west wall were flat slabs, the
+  waystone was a bare cylinder, the wall lamps threw black frames, and sunlit patches burnt out.
+- Pass 1: dusk sky dimmed and tinted (the sky is never brighter than the fires), haze thick
+  enough to show shafts, timber tie beams under the roof with burnt ones left over the hole and
+  fallen below (Megascans saloon pack), barrels, chests and a cart wheel, a glowing orb on the
+  waystone with a smaller cyan pool.
+- Pass 2: stronger shafts, cloud for the low sun to catch, a skirt, string courses and buttresses
+  on the west wall, fire bowls on the gallery, no shadow from the wall niches.
+- Pass 3: weaker and redder sun so patches hold detail, niche flames moved onto the lip and
+  dimmed, no shadow halo round the east door, three burnt building fronts outside the west wall
+  (Gothic sample pack) seen through the window and over the broken roof.
+- Verdict after pass 3: **passes, with reservations** (agent-judged). From the east door, the
+  cross gallery and the waystone it would not look out of place in a mid-budget shooter. Still
+  weak: the side walls and the closed roof are flat tiled faces, the floor is one repeated scan,
+  the wall niches read as lit tablets, there are no drifting embers, and the sky has no smoke
+  columns. Those are the list for step 1F and for anyone placing by hand.
+- All of it is in `tools\editor\build_lookroom.py`; the five mood numbers (shafts, haze, sky) are
+  named at its top. Running it again still replaces only what it placed.
+- Tools: `tools\ue-fps.ps1` measures frame rate in the real game (engine CSV profiler);
+  `tools\editor\mesh_inventory.py` lists every pack mesh and effect with sizes;
+  `tools\ue-py.ps1` now clicks the Cmd box before typing (typing failed from a background window).
+Proof: checked. Build script: 415 actors, no warnings. Pictures: docs/evidence/look-gate
+(01 to 07, retaken; the views are close to the old ones, not identical). Play session through the
+MCP server: character at a PlayerStart at z 94.15, no test course, no new errors. Frame rate with
+`ue-fps.ps1` at 1920x1080 from the first PlayerStart behind the title menu: 104 and 110 fps
+average, worst 1% about 80, GPU about 7 ms, on two runs; one earlier run read 53 fps while other
+GPU work was running on this PC (the GPU sat near 60% busy before the game started, so these
+numbers are a floor, not a clean reading). Not run: a walk of the stairs and gallery, a person
+looking at it, the room in a packaged build, `ue-play.ps1 -Map` by hand.
+Also in the level, not from this session: one rifle preview actor the pack-forge session placed.
+Phoenix said: has not seen it yet.
+Sessions since Phoenix last played: unknown (no play session on record). R3 still applies.
+Next: Phoenix walks it (`.\tools\ue-play.ps1 -Map /Game/Firebird/Maps/L_LookRoom`) and says what
+he thinks; his word replaces the agent's verdict. Then step 1F from the weak list above.
+
 ## 2026-11-12: outside the steps (asked for directly), GamesOS trial T9: the look room checked through the editor's MCP server
 Did: GamesOS workflow trial T9 asks whether an agent can do a Firebird task through Unreal's own
 MCP server with no hand in the editor. Asked for directly, so it went ahead of R1 and R3. It was

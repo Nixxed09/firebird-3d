@@ -37,6 +37,13 @@ if ($snap -notmatch 'Cmd[\s\S]*?textbox (?:\[[^\]]*\] )*?\[ref=(\w+)\]') {
 }
 $ref = $Matches[1]
 $before = (Get-Content $log).Count
+# Click the box first. Windows often refuses to bring the editor to the front for a background
+# script, and then typing fails with "Could not focus widget"; a click through the UI tools works
+# from behind any window (found 2026-11-12).
+@{ toolset_name = $S; tool_name = "Click"; arguments = @{ ref = $ref; button = "left"; doubleClick = $false
+        modifiers = @{ bShift = $false; bCtrl = $false; bAlt = $false; bCmd = $false } } } |
+    ConvertTo-Json -Depth 6 | Set-Content $argsFile -Encoding UTF8
+try { & $mcp -Tool call_tool -ArgsFile $argsFile | Out-Null } catch { Write-Host "Click on the Cmd box failed; trying to type anyway." }
 $cmd = "py `"$py`"" + $(if ($ScriptArgs) { " $ScriptArgs" } else { "" })
 @{ toolset_name = $S; tool_name = "Type"; arguments = @{ ref = $ref; text = $cmd; submit = $true } } |
     ConvertTo-Json -Depth 6 | Set-Content $argsFile -Encoding UTF8

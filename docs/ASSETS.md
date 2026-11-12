@@ -123,9 +123,9 @@ in `engine/Content` except `Firebird`). About 16 GB. Only Vefects has been used 
 | `M1911` | M1911 pistol | One rigged pistol (a 1911 design, the late edge of our period) | No |
 | `Atris_axes` | Axes | 8 axe meshes | No |
 | `Gothic_props_1` | Gothic props (pack 1) | 21 props | No |
-| `Gothic_Environment` | Dark Fantasy Gothic sample | 1 mesh, materials | No |
+| `Gothic_Environment` | Dark Fantasy Gothic sample | 1 mesh, materials | Yes: the burnt building fronts outside `L_LookRoom` |
 | `AbandonedPowerPlant` | Modular Old Power Plant | 65 meshes | No |
-| `Scene_Saloon` | Megascans Saloon Interior | 94 meshes | No |
+| `Scene_Saloon` | Megascans Saloon Interior | 94 meshes | Yes: roof timbers, planks, barrels, chests and a cart wheel in `L_LookRoom` |
 | `Scene_OldMine` | Megascans Old Mine | 97 meshes | No |
 | `UndergroundTunnel` | Underground tunnel | 317 meshes | No |
 

@@ -1,7 +1,9 @@
 # FIREBIRD reboot plan
 
-**Written:** 2026-11-10. **Owner:** Phoenix. **Status (2026-11-11):** Steps 0, 1B and 1C are
-done. Step 1D has a first version of the look room. Next is Step 1E: Phoenix walks it and judges it.
+**Written:** 2026-11-10. **Owner:** Phoenix. **Status (2026-11-12):** Steps 0, 1B and 1C are
+done. Step 1D: the look room has had three more passes. Step 1E: judged by an agent on a direct
+instruction, "passes, with reservations" (see the log); frame rate measured at over 100 fps.
+Phoenix has still not walked it. Next: Phoenix walks it and says what he thinks, then Step 1F.
 
 This is the plan for making FIREBIRD look and play like a modern shooter that
 Phoenix plays over the home network with his brother and dad. It replaces the
