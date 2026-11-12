@@ -3,6 +3,7 @@
 # Run by forge.ps1. Muzzle points down +X, up is +Z, the shooter's right is -Y.
 # Origin: bottom rear corner of the frame, just ahead of the grip.
 import os, sys, math
+sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 import bpy
 from mathutils import Matrix

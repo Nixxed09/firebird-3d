@@ -31,3 +31,5 @@ engine/Content/Fab/
 engine/Content/Megascans/
 engine/Content/MSPresets/
 engine/Content/ThirdParty/
+
+__pycache__/

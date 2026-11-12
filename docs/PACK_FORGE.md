@@ -127,10 +127,12 @@ The round 2 critic scored it, out of 3: silhouette 2, part shapes 1, materials 1
 first-person view 1. Its top items were the lever in two pieces, the frame a plain box, the
 barrel too thin, the hammer a flat fin and blotchy brass. Round 3 changed all five.
 
-Checked: the build, the renders and the export run from one command, and I looked at the
-round 3 renders. Not checked: round 3 has had no critic; the Unreal import
-(`tools/editor/import_forge_asset.py`) is written but has not run, because the editor was
-busy with another session; nobody has seen the rifle in the game.
+Checked: the build, the renders and the export run from one command; I looked at the
+round 3 renders; the rifle imports into Unreal (`tools/editor/import_forge_asset.py`) as
+`/Game/Firebird/Packs/PeriodArms/SM_lever_rifle`, 116.9 cm long, 26,342 triangles, five
+materials, and stands in the look room (`docs/evidence/pack-forge/lever_rifle-in-lookroom.png`,
+flat colours, lit from behind). Not checked: round 3 has had no critic; it has not been
+held in first person; nobody but me has seen it.
 
 What is still missing before it is a game asset, let alone a product:
 
