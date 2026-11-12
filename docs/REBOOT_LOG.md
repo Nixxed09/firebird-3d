@@ -151,3 +151,17 @@ Phoenix said: the original retro game looked best; wants co-op and versus on
 LAN with his brother and dad; all three PCs are gaming PCs.
 Sessions since Phoenix last played: unknown. No play session is on record for the Unreal build.
 Next: Step 1A (get the project ready for hand-built maps).
+
+## 2026-11-12: pack forge, first proof (outside the numbered steps)
+
+Asked by Phoenix: can we make our own packs in Blender, with a prompt, as a system.
+Built `tools/blender` (build, render, export from one command) and one asset with it,
+a lever-action rifle, in three rounds with one critic agent. Details, the prompt and
+the Fab selling facts: `docs/PACK_FORGE.md`.
+
+- Checked: the forge command builds, renders and exports; round 3 renders looked at.
+- Not checked: the rifle in Unreal (import script written, editor was busy); no
+  textures are baked; no person has judged it.
+- Also since the last entry (2026-11-11, later the same day): the look room's haze was
+  cut and real fires added from the Vefects pack; 12 packs are in the project and git
+  ignores them; the setting brief and rule R7 were rewritten (`docs/SETTING_BRIEF.md`).
