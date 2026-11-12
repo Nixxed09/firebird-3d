@@ -46,6 +46,7 @@ Do these in order, every time.
 | Levels | **Built by hand in the Unreal editor**, saved as map files | Hand placement and lighting is where the modern look comes from. |
 | Story, names, colours, kid-safety | Unchanged: `STYLE_GUIDE.md`, `docs/STORY_BIBLE.md` | Engine-independent and already good. |
 | Engine, re-checked | **Stay on Unreal** (dad asked, 2026-11-11) | Godot (the GamesOS default) would mean rewriting movement, weapons, LAN and controller for a weaker realistic look. Computers without Unreal get a packaged build. |
+| Setting | **The Great Fires, about 1870 to 1910**: `docs/SETTING_BRIEF.md` (Phoenix and Travis, 2026-11-11) | Fits the realm's world docs. Bad guys: the Rebuilders, under the Overseers. A grounded shooting feel is the target, after the look gate. |
 | Browser versions | **Archived** in `archive/browser` (dad, 2026-11-11) | One game, one folder. They still open in a browser for reference. |
 | Look grades | **GamesOS rating studio**, game `firebird-coop` | Nix grades pictures of the game; the grades are the work list for art, level and UI work. They count as Phoenix looking (R2), not as playing. |
 
@@ -78,9 +79,11 @@ art is allowed only for the Firebird, the Hollows and the weapons.
 **human-played** (Phoenix or family played it). Only human-played counts for
 "looks good", "feels good" and "is fun".
 
-**R7. Kid-safety stays.** No blood, no gore, no demons or occult symbols, no
-real-world guns. Enemies are released into light. Players in versus are tagged
-out and come back. Check every Fab pack against this before adding it.
+**R7. Kid-safety stays.** No blood, no gore, no demons or occult symbols.
+Hits show light and sparks. Players in versus are tagged out and come back.
+Check every Fab pack against this before adding it. Real guns from the game's
+period (about 1870 to 1910) are allowed (Travis, 2026-11-11); before that date
+this rule banned them.
 
 **R8. Small steps, saved often.** Commit after each task that works. Never leave
 a session with uncommitted work.
