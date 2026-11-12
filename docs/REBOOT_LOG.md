@@ -2,6 +2,25 @@
 
 Newest first. The plan is [REBOOT_PLAN.md](REBOOT_PLAN.md). The format is in its section 7.
 
+## 2026-11-12: play records, so we can see where a player gets stuck
+Asked: is the newest Firebird ready for Nix, and are we tracking his play. Found: nothing recorded
+who played or what happened to them; the game only wrote `FB_EVENT` lines to its log.
+Did (no game code changed, so the open editor was not disturbed):
+- `Play-Firebird.cmd` in the repo root starts the newest source build (`look` for the look room).
+- `tools\ue-play.ps1` now waits for the game to close and writes a play record
+  (`-NoRecord` keeps the old start-and-return). `-Player` says who; default is the arcade's
+  player name, else guest.
+- `tools\play-record.py record|report`: deaths, falls, hits taken, moves used, arena clear
+  times, and the hard stretches (45 s or more between two steps forward, or any death or fall
+  between them). Records stay on this computer in `%LOCALAPPDATA%\FamilyArcade\firebird-play`.
+  A name is tied to a family member only through the family file and its consent value.
+Proof: checked on a made-up log (2 deaths, 1 fall, 2 hard stretches found); bot-played once
+through the whole chain (`-FBAuto`, feel scenario, record written). Not human-played.
+Not done: the game does not log WHERE a death or fall happened, so "stuck" is a time and what
+came before and after, not a place. That needs two lines of C++ and a rebuild with the editor
+closed. The look room has nothing to fight, so it produces almost no events. Nothing is sent to
+ProfileEngine (its host accepts Living Quarry only, and this computer has no family file).
+
 ## 2026-11-12: step 1E judged by the agent (told to: "you judge it and keep going"), three passes on the look room
 Did: the gate says an agent may not pass it. In this session the person at the keyboard said
 "you judge it and keep going", so the agent judged, and the verdicts below are labelled
