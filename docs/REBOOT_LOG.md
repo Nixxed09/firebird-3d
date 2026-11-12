@@ -2,6 +2,16 @@
 
 Newest first. The plan is [REBOOT_PLAN.md](REBOOT_PLAN.md). The format is in its section 7.
 
+## 2026-11-12: play records now say where
+Did: `FB_EVENT fell`, `hurt` and `death` now carry the place it happened and where it came from
+(the checkpoint left, or the attacker). `play-record.py report` lists the 5 m squares with the
+most deaths and falls, per map.
+Proof: game target compiled with the editor open; bot-played in a scratch copy of the package
+(`nodash`: `fell at (4066, 31) from (2410, -51)`, shown as a place in the report). Not human-played.
+Not done: `Play-Firebird.cmd` runs the editor's copy of the game code, which cannot be rebuilt
+while the editor is open. Until someone closes the editor and runs `tools\ue-build.ps1`, records
+from it have times but no places (the report counts those as "no place recorded").
+
 ## 2026-11-12: play records, so we can see where a player gets stuck
 Asked: is the newest Firebird ready for Nix, and are we tracking his play. Found: nothing recorded
 who played or what happened to them; the game only wrote `FB_EVENT` lines to its log.

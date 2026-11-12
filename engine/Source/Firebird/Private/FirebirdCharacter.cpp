@@ -499,7 +499,9 @@ void AFirebirdCharacter::Tick(float DeltaSeconds)
     // fell into the pit: back to the checkpoint
     if (GetActorLocation().Z < -700.f)
     {
-        UE_LOG(LogFirebird, Display, TEXT("FB_EVENT fell"));
+        // where it happened, for the play record (tools/play-record.py): the pit spot and the checkpoint left behind
+        UE_LOG(LogFirebird, Display, TEXT("FB_EVENT fell at (%.0f, %.0f) from (%.0f, %.0f)"),
+            GetActorLocation().X, GetActorLocation().Y, Checkpoint.X, Checkpoint.Y);
         TeleportOwned(Checkpoint, GetControlRotation().Yaw);
         Server_Fell();
         return;
@@ -965,12 +967,15 @@ void AFirebirdCharacter::Hurt(float Amount, const FVector& From)
 {
     if (!HasAuthority() || bDead) return;
     Health -= Amount;
-    UE_LOG(LogFirebird, Display, TEXT("FB_EVENT hurt P%d amount=%.0f health=%.0f"), PlayerIndex + 1, Amount, Health);
+    const FVector At = GetActorLocation();
+    UE_LOG(LogFirebird, Display, TEXT("FB_EVENT hurt P%d amount=%.0f health=%.0f at (%.0f, %.0f) from (%.0f, %.0f)"),
+        PlayerIndex + 1, Amount, Health, At.X, At.Y, From.X, From.Y);
     if (Health <= 0.f)
     {
         Health = 0.f;
         bDead = true;
-        UE_LOG(LogFirebird, Display, TEXT("FB_EVENT death P%d"), PlayerIndex + 1);
+        UE_LOG(LogFirebird, Display, TEXT("FB_EVENT death P%d at (%.0f, %.0f) from (%.0f, %.0f)"),
+            PlayerIndex + 1, At.X, At.Y, From.X, From.Y);
     }
     Client_Hurt(Amount, From);
 }

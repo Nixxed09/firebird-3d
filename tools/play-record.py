@@ -81,8 +81,31 @@ def parse(log_path):
             at = re.search(r"at \((-?[\d.]+), (-?[\d.]+)\)", rest)
             if at:
                 ev["x"], ev["y"] = float(at.group(1)), float(at.group(2))
+            src = re.search(r"from \((-?[\d.]+), (-?[\d.]+)\)", rest)
+            if src:
+                ev["from_x"], ev["from_y"] = float(src.group(1)), float(src.group(2))
             events.append(ev)
     return events, first, last, build, bot
+
+
+CELL = 500.0  # a place is a 5 m square of the map
+
+
+def places(recs):
+    """Where deaths and falls happened, per map, in 5 m squares, most first.
+    Records made before the game logged positions have none and are counted as unplaced."""
+    cells, unplaced = {}, 0
+    for r in recs:
+        for e in r["events"]:
+            if e["kind"] not in ("death", "fell"):
+                continue
+            if "x" not in e:
+                unplaced += 1
+                continue
+            key = (r["map"], e["kind"], round(e["x"] / CELL) * CELL, round(e["y"] / CELL) * CELL)
+            cells[key] = cells.get(key, 0) + 1
+    rows = [{"map": k[0], "kind": k[1], "x": k[2], "y": k[3], "times": n} for k, n in cells.items()]
+    return sorted(rows, key=lambda p: -p["times"])[:8], unplaced
 
 
 def stretches(events, total):
@@ -168,7 +191,9 @@ def report(args):
         hard = sorted((dict(s, started_at=r["started_at"], map=r["map"]) for r in rs for s in r["hard_stretches"]),
                       key=lambda s: -s["seconds"])
         clears = [s for r in rs for s in r["arena_clear_seconds"] if s is not None]
+        where, unplaced = places(rs)
         out[who] = {
+            "places": where, "deaths_and_falls_without_a_place": unplaced,
             "sessions": len(rs), "minutes": round(minutes, 1),
             "first": rs[0]["started_at"], "last": rs[-1]["started_at"],
             "member_id": rs[-1].get("member_id"),
@@ -196,6 +221,10 @@ def report(args):
         if p["arena_clear_seconds"]:
             print("  Arena clear times, oldest first (s): " + ", ".join("%.0f" % s for s in p["arena_clear_seconds"]))
         print("  Sessions that stopped during a hard stretch: %d of %d" % (p["sessions_that_ended_in_a_hard_stretch"], p["sessions"]))
+        for w in p["places"]:
+            print("  Place: %s %d times near (%.0f, %.0f), %s" % (w["kind"], w["times"], w["x"], w["y"], w["map"]))
+        if p["deaths_and_falls_without_a_place"]:
+            print("  Deaths and falls with no place recorded (older build): %d" % p["deaths_and_falls_without_a_place"])
         for s in p["hardest_stretches"]:
             print("  Hard stretch %s, %s: %.0fs between %s and %s, deaths %d, falls %d, hits %d" % (
                 s["started_at"][:10], s["map"], s["seconds"], s["after"], s["before"], s["death"], s["fell"], s["hurt"]))
