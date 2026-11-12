@@ -259,11 +259,12 @@ void AFirebirdCharacter::ReadInput()
     }
     auto Down = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->IsInputKeyDown(K)) return true; return false; };
     auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
-    // the controller: A jump, LB / RB dash, B or L3 slide, RT shoot, LT or X fist, START menu
+    // LB holds aim; RB dashes. A jumps, B/R3 crouches, RT shoots, LT/X punches, START opens the menu.
+    if (IsAiming()) I.Look *= 0.6f;
     I.bJump = Pressed({ EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom });
-    I.bDash = Pressed({ EKeys::LeftShift, EKeys::Gamepad_LeftShoulder, EKeys::Gamepad_RightShoulder });
-    I.bCrouchHeld = Down({ EKeys::LeftControl, EKeys::C, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_LeftThumbstick });
-    I.bCrouchPressed = Pressed({ EKeys::LeftControl, EKeys::C, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_LeftThumbstick });
+    I.bDash = Pressed({ EKeys::LeftShift, EKeys::Gamepad_RightShoulder });
+    I.bCrouchHeld = Down({ EKeys::LeftControl, EKeys::C, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_RightThumbstick });
+    I.bCrouchPressed = Pressed({ EKeys::LeftControl, EKeys::C, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_RightThumbstick });
     I.bFireHeld = Down({ EKeys::LeftMouseButton, EKeys::Gamepad_RightTrigger }) || PC->GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.35f;
     I.bFist = Pressed({ EKeys::F, EKeys::RightMouseButton, EKeys::Gamepad_LeftTrigger, EKeys::Gamepad_FaceButton_Left });
     Input = I;
@@ -271,6 +272,13 @@ void AFirebirdCharacter::ReadInput()
     if (PC->WasInputKeyJustPressed(EKeys::R) && GetNetMode() == NM_Standalone) PC->RestartLevel();
     // Esc: back to the start menu (leaving a hosted or joined game); Esc there quits
     if ((PC->WasInputKeyJustPressed(EKeys::Escape) || PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Right)) && S) S->BackToMenu(FString());
+}
+
+bool AFirebirdCharacter::IsAiming() const
+{
+    const APlayerController* PC = Cast<APlayerController>(GetController());
+    const UFirebirdSession* Session = UFirebirdSession::Get(this);
+    return !bDead && PC && Session && !Session->InMenu() && PC->IsInputKeyDown(EKeys::Gamepad_LeftShoulder);
 }
 
 // a stick's two axes with a radial dead zone, rescaled so just past the dead zone is a small value
@@ -790,14 +798,15 @@ void AFirebirdCharacter::UpdateView(float DeltaSeconds)
             FB::Sound(this, Steps[FMath::Abs(Before) % 3], GetActorLocation() - FVector(0, 0, 80), 0.5f);
         }
     }
-    const float BobAmt = M->IsMovingOnGround() && !bSliding ? FMath::Clamp(Speed / RunSpeed, 0.f, 1.f) : 0.f;
+    const float BobAmt = M->IsMovingOnGround() && !bSliding ? FMath::Clamp(Speed / RunSpeed, 0.f, 1.f) * (IsAiming() ? 0.25f : 1.f) : 0.f;
     Shake *= FMath::Exp(-DeltaSeconds * 9.f);
     const FVector ShakeV = FMath::VRand() * Shake * 2.f;
     Camera->SetRelativeLocation(FVector(0.f, 0.f, CamZ + FMath::Sin(BobPhase * 2.f) * 1.6f * BobAmt) + ShakeV);
 
-    // FOV: wider in a dash, a kick on a release, easing back
+    // Hold LB for a closer, steadier view; releasing it smoothly restores the normal view.
     FovKick *= FMath::Exp(-DeltaSeconds * 7.f);
-    Camera->SetFieldOfView(Fov + FovKick + (DashT > 0.f ? 6.f : 0.f));
+    const float TargetFov = Fov * (IsAiming() ? 0.7f : 1.f) + FovKick + (DashT > 0.f ? 6.f : 0.f);
+    Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, TargetFov, DeltaSeconds, 12.f));
 
     // a lean into slides and strafes
     const float Strafe = FVector::DotProduct(GetVelocity(), FRotationMatrix(GetControlRotation()).GetScaledAxis(EAxis::Y)) / RunSpeed;

@@ -11,7 +11,7 @@ try {
   $null = $process.Handle
   if (-not $process.WaitForExit(90000)) { $process.Kill(); throw "Controller check timed out; see $out" }
   $summary = Get-Content -LiteralPath (Join-Path $out 'summary.json') -Raw | ConvertFrom-Json
-  if ($process.ExitCode -ne 0 -or -not $summary.all_ok -or @($summary.proofs.PSObject.Properties).Count -ne 6) { throw "Controller direction check failed; see $out" }
+  if ($process.ExitCode -ne 0 -or -not $summary.all_ok -or @($summary.proofs.PSObject.Properties).Count -ne 9) { throw "Controller input check failed; see $out" }
   $summary.proofs | ConvertTo-Json -Depth 4
-  Write-Output "FB_CONTROLLER_OK 6 viewport-to-game direction checks; evidence $out"
+  Write-Output "FB_CONTROLLER_OK 9 viewport-to-game direction and aim checks; evidence $out"
 } finally { $process.Dispose() }

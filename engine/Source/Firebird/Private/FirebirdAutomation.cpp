@@ -45,6 +45,47 @@ void UFirebirdAutomation::TickController(AFirebirdCharacter* P)
         { EKeys::Gamepad_LeftY,   0.8f, TEXT("left_stick_up_moves_forward"), true },
         { EKeys::Gamepad_LeftY,  -0.8f, TEXT("left_stick_down_moves_backward"), true }
     };
+    // Exercise the shoulder button through the same viewport as a real controller.
+    if (Stage >= UE_ARRAY_COUNT(Cases))
+    {
+        P->bAutoDriven = false;
+        const bool bHoldAim = Stage == UE_ARRAY_COUNT(Cases);
+        const bool bMenu = Stage == UE_ARRAY_COUNT(Cases) + 2;
+        if (!bControllerCaseStarted)
+        {
+            P->GetCharacterMovement()->StopMovementImmediately();
+            if (bMenu)
+            {
+                if (UFirebirdSession* Session = UFirebirdSession::Get(this)) Session->BackToMenu(FString());
+            }
+            else
+            {
+                const FKeyEvent Button(EKeys::Gamepad_LeftShoulder, FModifierKeysState(), 0u, false, 0, 0);
+                if (bHoldAim) Viewport->OnKeyDown(FGeometry(), Button);
+                else Viewport->OnKeyUp(FGeometry(), Button);
+            }
+            StageT = 0.f;
+            bControllerCaseStarted = true;
+        }
+        if (StageT < 0.6f) return;
+        if (bMenu)
+        {
+            Shot(TEXT("09-controller-menu"));
+            P->bAutoDriven = true;
+            P->Input = FFirebirdInput();
+            Finish();
+            return;
+        }
+        const float ExpectedFov = P->Fov * (bHoldAim ? 0.7f : 1.f);
+        Proof(bHoldAim ? TEXT("left_shoulder_aims") : TEXT("release_aim_restores_view"),
+            FMath::IsNearlyEqual(P->Camera->FieldOfView, ExpectedFov, 1.f),
+            FString::Printf(TEXT("FOV %.2f, expected %.2f"), P->Camera->FieldOfView, ExpectedFov));
+        if (bHoldAim) Proof(TEXT("left_shoulder_does_not_dash"), P->Dashes == 0, FString::Printf(TEXT("dashes %d"), P->Dashes));
+        Shot(bHoldAim ? TEXT("07-aim-held") : TEXT("08-aim-released"));
+        bControllerCaseStarted = false;
+        ++Stage;
+        return;
+    }
     if (!bControllerCaseStarted)
     {
         ControllerStart = P->GetActorLocation();
@@ -66,12 +107,7 @@ void UFirebirdAutomation::TickController(AFirebirdCharacter* P)
         : FRotator::NormalizeAxis(Test.Key == EKeys::Gamepad_RightY ? Rotation.Pitch : Rotation.Yaw);
     Proof(Test.Name, Actual * FMath::Sign(Test.Value) > (Test.bMove ? 10.f : 1.f), FString::Printf(TEXT("observed %.2f"), Actual));
     bControllerCaseStarted = false;
-    if (++Stage == UE_ARRAY_COUNT(Cases))
-    {
-        P->bAutoDriven = true;
-        P->Input = FFirebirdInput();
-        Finish();
-    }
+    ++Stage;
 }
 
 void UFirebirdAutomation::OnWorldBeginPlay(UWorld& InWorld)

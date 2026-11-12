@@ -142,6 +142,7 @@ public:
 
 private:
     void ReadInput();
+    bool IsAiming() const;
     void DoJump();
     void StartDash();
     void EndDash();
