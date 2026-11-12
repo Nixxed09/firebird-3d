@@ -43,6 +43,8 @@ def material(name, colour, metallic=0.0, roughness=0.5, grain=None):
     b.inputs["Metallic"].default_value = metallic
     b.inputs["Roughness"].default_value = roughness
     m.diffuse_color = (*colour, 1.0)
+    # what the texture bake paints it as (GamesOS toolkit/blender/texture_object.py)
+    m["surface"] = "wood" if grain == "wood" else ("metal" if metallic > 0.5 else "flat")
     m.metallic = metallic
     m.roughness = roughness
     if grain == "wood":

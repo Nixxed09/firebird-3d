@@ -51,7 +51,8 @@ for o in col.objects:
 fbx = os.path.join(out, name + ".fbx")
 bpy.ops.export_scene.fbx(filepath=fbx, use_selection=True, apply_scale_options="FBX_SCALE_UNITS",
                          axis_forward="-Y", axis_up="Z", mesh_smooth_type="FACE", use_mesh_modifiers=True,
-                         bake_space_transform=False, object_types={"MESH"})
+                         bake_space_transform=False, object_types={"MESH"},
+                         path_mode="COPY", embed_textures=True)     # baked textures travel inside the FBX
 glb = os.path.join(out, name + ".glb")
 bpy.ops.export_scene.gltf(filepath=glb, use_selection=True, export_apply=True)
 with open(os.path.join(out, name + ".export.json"), "w") as f:
