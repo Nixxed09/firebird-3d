@@ -1,7 +1,10 @@
 # Pack forge: making our own asset packs in Blender
 
-Started 2026-11-12. Status: **two assets built** (a lever-action rifle, section 6; a
-bolt-action rifle, section 7). Nothing here has passed a person's look verdict yet.
+Started 2026-11-12. Status: **two assets built** (a lever-action rifle, sections 6 to 8; a
+bolt-action rifle, section 9). The whole chain now runs: brief, reference photographs, build,
+baked textures, working parts, a critic given the references, and Unreal import as a textured
+static mesh and as a rigged mesh with an animation (section 9). Nothing here has passed a
+person's look verdict yet, and the last critic still scored part shapes 1 of 3.
 
 This is Firebird's working copy of the Blender harness that GamesOS planned the same
 day (`GamesOS/toolkit/blender/README.md`: jobs B2 "Look", B3 "Critic loop", B4 "Parts
@@ -36,6 +39,24 @@ that did not build it criticises the renders. The builder fixes the script. Repe
 | `tools/blender/render_views.py` | the fixed views and `sheet.png` |
 | `tools/blender/export_asset.py` | joins fixed parts, keeps moving parts separate on their hinges, writes FBX and GLB |
 | `tools/blender/packs/<pack>/<asset>.py` | one build script per asset |
+| `tools/blender/packs/<pack>/<asset>.brief.md` | the research brief: real sizes with their source, parts, how each moving part moves (model: `period_arms/bolt_rifle.brief.md`) |
+| `tools/blender/fetch_refs.py` | fetches free-licence photographs from Wikimedia Commons into `engine/Saved/PackForge/<pack>/<asset>/refs/`, with page, author and licence in `refs.json` |
+| `tools/blender/ref_trace.py` | measures a build against a side-view photograph (section 8) |
+| `tools/blender/CRITIC_BRIEF.md` | what a critic is told; copied into every round folder |
+| `tools/editor/import_forge_asset.py`, `import_forge_rig.py` | Unreal import: `SM_<asset>` and `SK_<asset>` wearing `M_<asset>` built from the baked images |
+
+More part makers since the first asset: `plate` (a flat forging: one outline with through
+holes, for parts that are really one piece of steel), `inlet` (cuts a seat for a metal part
+into a wood part, a hair wider, so the joint is a dark line), `motion` (declares how a part
+moves over one cycle; it drives the action views, the bones and the animation). `material`
+also tells the bake what to paint (wood, metal, flat).
+
+More switches on `forge.ps1`: `-Texture` (bake one 2048 atlas: albedo, normal, and a packed
+open-air / roughness / metal image, then render the views again from the baked model; needs
+GamesOS at or after commit `3b76808a`, or `GAMESOS_BLENDER` pointing at one), `-Round N`
+(stage `rounds/N` for a critic: renders, brief, references, measured facts, critic brief),
+`-Export` (also writes `<asset>_rig.fbx`: one skinned mesh, a bone per moving part, the
+animation `<asset>_operate`).
 
 Output: `engine/Saved/PackForge/<pack>/<asset>/` (`.blend`, `views/`, `*.build.json`).
 Needs Blender 4.5 (`C:\Program Files\Blender Foundation\Blender 4.5`, or `BLENDER_PATH`).
@@ -190,7 +211,9 @@ GamesOS critic brief; (2) fix the metal surfaces (brass, case-hardened steel, bl
 their own kinds); (3) import the textured GLB into Unreal and hold it in first person;
 (4) the grades from the Game Studio decide whether a second asset is worth making this way.
 
-## 7. Second asset: the bolt-action rifle
+## 9. Second asset: the bolt-action rifle
+
+(Kept below section 8 in the file; the first four rounds came before sections 7 and 8.)
 
 Built 2026-11-12 from the section 4 prompt, in four rounds with a new critic each round.
 Stopped on the 90-minute limit, not on the scores. 28,596 triangles (budget 30,000), 72 parts,
@@ -231,12 +254,61 @@ rifle imports into Unreal as `/Game/Firebird/Packs/PeriodArms/SM_bolt_rifle`, 12
 (`docs/evidence/pack-forge/bolt_rifle-in-lookroom.png`, flat colours). Not checked: held in first
 person in the game; seen by a person.
 
-What the two assets say about the method: the critic loop takes a silhouette and proportions
-from 1 to 2 in three rounds and then stops paying. Part shapes stay at 1 because the part
-makers only produce tubes, pushed-out profiles and lofts; a forged receiver or a guard that
-grows out of a magazine needs a maker that blends two shapes (a fillet between solids), and
-the wood-to-metal gap line needs an inletting cut. Those two makers, then the texture bake,
-are the next work on the forge itself, before a third asset.
+What those four rounds said about the method: a critic with no reference takes silhouette and
+proportions from 1 to 2 in three rounds and then stops paying, and can be wrong. One asked for
+a magazine 50 mm deep with a near-vertical wall; the museum photograph fetched afterwards shows
+one long shallow piece that sweeps up into the stock.
+
+**Rounds 6 and 7: brief, references, and a critic who can see them.** The brief
+(`tools/blender/packs/period_arms/bolt_rifle.brief.md`) gives the real sizes and their source;
+`fetch_refs.py` brought a museum photograph of both sides. The rifle was rebuilt from it: the
+barrel as an even jacket tube, guard and magazine as one `plate()` let into the stock with
+`inlet()`, the bolt and trigger declared with `motion()`.
+
+Round 6 (`docs/evidence/pack-forge/bolt_rifle-round6-sheet.png`), critic given the brief and the
+references: silhouette 2, parts 1, fit 1, surface 1, first-person 1, mechanism 1. It measured
+against the photograph and confirmed: overall length and where receiver, sight and muzzle fall;
+the even jacket tube; the butt's depth and straight toe line; guard and magazine as one piece;
+the straight handle standing up when lifted. Its eight issues were specific, and one was a
+fault in the forge itself: the action views showed the bolt lifted twice and never drawn back.
+
+Round 7 (`bolt_rifle-round7-sheet.png`) fixed four: the action views now show every distinct
+pose (lifted, drawn back, trigger pulled); the handle sits ahead of the rear bridge and passes
+back through a slot in it; the finger grooves the photograph does not have are gone and the
+rear sling loop is where the photograph has it; the render stage was about twice too bright,
+which is why a dark walnut had been judged orange. 28,404 triangles, 69 parts.
+**Round 7 has had no critic.**
+
+Not fixed from round 6's list: the guard bow is still a thick plate with a long opening (should
+be a thin strap round a 50 mm oval); a strip of wood shows below the guard and the closed bolt
+knob touches the stock; no comb nose and the wrist is too long; the receiver ring, bridge and
+rear sight are plain cylinders and boxes in first person; the bayonet bar is under the nose cap
+instead of on its right side, and the cleaning rod barely shows; the wood has one fine grain
+and no broad figure or handling wear.
+
+**In Unreal.** `SM_bolt_rifle` (28,312 triangles, 126.2 cm) and `SK_bolt_rifle` (bones `root`,
+`bolt`, `trigger`; animation 1.00 s), and the same for the lever rifle (`lever`, `hammer`,
+`bolt`, `carrier`, `trigger`), all wearing the material built from the baked images.
+`import_forge_rig.py -ScriptArgs "pose 0.45"` stands the rigged ones in the level held
+mid-cycle: `docs/evidence/pack-forge/rifles-rigged-midcycle-in-lookroom.png` shows the bolt
+rifle's handle up and bolt back. The lever rifle in that picture has a pale patch on its frame
+that I have not explained.
+
+Checked: every step ran on this asset from the commands in section 2; I looked at every sheet
+and the Unreal picture. Not checked: the animation played at speed; held in first person;
+collision and LODs (Unreal's automatic hull only); `ref_trace.py` (section 8) has not been run
+on this rifle; a person's eye.
+
+**Two ways of keeping references now exist** and should become one: section 8 keeps them in
+`art/reference/<pack>/<asset>/` with `SOURCES.md`; `fetch_refs.py` keeps them in
+`engine/Saved/PackForge/.../refs/` with `refs.json`, out of git. Both record source, author
+and licence. Section 8's "one harness, not two" still stands for the GamesOS move.
+
+**What the forge still lacks**, most costly first: part shapes (a maker that blends two solids
+with a fillet, and bevels that survive a boolean cut); a critic per part, with the receiver in
+first person judged alone against close references; broad wood figure and wear in the bake;
+LODs and collision; a ranking of fetched references (keyword search gave two useful pictures in
+six); hands and a first-person rig to hold the weapon.
 
 ## 8. Build toward a measured reference (2026-11-12, evening)
 
