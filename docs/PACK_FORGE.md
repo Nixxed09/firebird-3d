@@ -75,7 +75,7 @@ Ranked by how much the game needs them and whether a bought pack can fill the ga
 
 ## 4. The prompt
 
-Paste this to a Fable session in this repo, with the three bracketed lines filled in.
+Paste this to a Fable session in this repo, with the bracketed parts filled in.
 It is the "parts and critics" method from the Bugatti post
 (`GamesOS/docs/research/2026-11-xikhar-ai-game-and-blender-posts.md`), fitted to our tools.
 
@@ -83,29 +83,42 @@ It is the "parts and critics" method from the Bugatti post
 Build [ASSET, e.g. "a double-barrel side-by-side shotgun of the 1880s with exposed hammers"]
 for the pack [PACK, e.g. period_arms], as tools/blender/packs/[PACK]/[ASSET_NAME].py.
 
-Read docs/PACK_FORGE.md and tools/blender/packs/period_arms/lever_rifle.py first and
-follow the same pattern: one script, named parts built with fb_parts.py, metres, muzzle
+Read docs/PACK_FORGE.md first, then tools/blender/packs/period_arms/bolt_rifle.brief.md and
+bolt_rifle.py as the pattern: one script, named parts built with fb_parts.py, metres, muzzle
 (or front) down +X, up +Z, origin where the hand holds it. No maker's names or marks.
-Reference images, if any: [PATHS, each with its view named: side, top, three-quarter].
 
-1. Write the parts list first: every part, its material, its rough size in millimetres,
-   and which parts move and where their hinge is.
-2. Build it. Run .\tools\blender\forge.ps1 -Pack [PACK] -Asset [ASSET_NAME] -FirstPerson
-   and look at the renders yourself.
-3. Start a separate critic agent. Give it only the renders (and the references) and what
-   the object is meant to be. Ask for a 0 to 3 score per view and a list of what is wrong,
-   most visible first, with a fix for each in terms of shape. The critic must not see the script.
-4. Fix what the critic listed, shapes before materials. Re-render. Send the new renders
-   to a NEW critic. Stop when every score is 2 or more and the last round changed nothing
-   important, or after 5 rounds, or after 90 minutes. Say which.
-5. Check the budget: a first-person weapon under 30,000 triangles, a street prop under
-   8,000, a kit piece under 3,000. Moving parts keep their own hinge.
-6. Run with -Export, import into Unreal under /Game/Firebird/Packs/[PACK], place it in
-   L_LookRoom, and take a screenshot with tools\ue-shot.ps1.
-7. Report: the renders of every round, what each critic said, what you did not fix, and
-   the in-game screenshot. Do not call it done. A person decides if it looks good.
+1. RESEARCH. Find the real object's sizes (overall, the main parts) and how it works, from a
+   source you can name. Write tools/blender/packs/[PACK]/[ASSET_NAME].brief.md: what it is in
+   the game, a table of real sizes with the source, the parts with their materials, and for
+   every moving part where its hinge is and how far it moves.
+2. REFERENCES. Run tools\blender\fetch_refs.py with two or three queries. Open every picture.
+   Fill in "view" in refs.json, and write into the brief what each picture teaches and a
+   numbered list of the shapes it shows that are easy to get wrong. If no picture is a side
+   view of the whole object, search again before building.
+3. BUILD from the side view, not from memory. Run tools\blender\ref_trace.py on it for the
+   outline in metres (section 8) and type those numbers into the script. One part per real
+   part; where the real thing is one piece of steel use plate(), where metal sits in wood use
+   inlet(), and give every moving part pivot() and motion().
+4. Run .\tools\blender\forge.ps1 -Pack [PACK] -Asset [ASSET_NAME] -Detail "x0,x1" -FirstPerson
+   and look at the renders yourself beside the references. Run the ref_trace compare. Fix what
+   you can see before spending a critic on it. Check every action view: each part moves, far
+   enough, through nothing.
+5. CRITIC. Run again with -Texture -Round N. Start a fresh agent, give it only the folder
+   engine\Saved\PackForge\[PACK]\[ASSET_NAME]\rounds\N and tell it to follow CRITIC_BRIEF.md
+   in that folder. It must not see the script.
+6. Fix what the critic listed, shapes before surface. A new critic every round. Stop when
+   every score is 2 or more and the last round changed nothing important, or after 5 rounds,
+   or after 90 minutes. Say which.
+7. Budget: a first-person weapon under 30,000 triangles, a street prop under 8,000, a kit
+   piece under 3,000.
+8. Run with -Texture -Export, then tools\ue-py.ps1 with tools\editor\import_forge_asset.py and
+   with import_forge_rig.py -ScriptArgs "pose 0.45", and take a picture with tools\ue-shot.ps1.
+9. Report: the sheet of every round, each critic's scores, what you did not fix, the picture
+   from the game, and what is checked and not checked. Do not call it done. A person decides
+   if it looks good.
 
-Rules: never copy geometry, textures or materials from any downloaded pack. Never feed a
+Rules: a reference teaches shape and proportion. Never use it as a texture or put it in a pack.
+Never copy geometry, textures or materials from any downloaded pack. Never feed a
 downloaded pack to an AI tool. Ask before anything that costs money or needs a login.
 ```
 
