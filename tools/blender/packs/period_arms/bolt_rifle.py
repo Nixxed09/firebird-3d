@@ -3,11 +3,13 @@
 # Run by forge.ps1. Muzzle points down +X, up is +Z, the shooter's right is -Y.
 # Origin: under the rear of the action, where the trigger hand closes on the wrist.
 #
+# Brief, references and real sizes: bolt_rifle.brief.md (read it first).
+#
 # Parts list (rough sizes in millimetres)
 #   Stock          walnut   one piece, butt to nose cap, 1145 long, straight wrist 44 x 38,
 #                           52 wide at the action, barrel channel cut to the bore line, finger grooves,
 #                           heel 50 below the bore line
-#   Handguard      walnut   half-round shell over the barrel, rear sight to lower band, 230 long
+#   BarrelJacket   blued    an even tube 25 across over the barrel (the type has no wooden handguard)
 #   ButtPlate      steel    128 x 49, slightly curved, top tang, two screws
 #   Receiver       blued    tube 34 across, open on top and to the right; RearBridge and ReceiverRing 37
 #   Barrel         blued    755 long, 30 at the chamber, a step, then 25 down to 16
@@ -16,8 +18,8 @@
 #     collar, round handle root, tapered handle, 21 ball knob, extractor, shroud, safety spindle
 #     and wing, cocking piece and flange ride on it
 #   FloorStrap     blued    strap let into the belly, a screw at each end
-#   Magazine       blued    box 22 wide, 84 long, stands 48 below the stock; side ribs, flange, floorplate
-#   TriggerGuard   blued    flat strap 15 x 3 in an oval bow that meets the magazine
+#   GuardAndMagazine  blued  ONE forging 280 long: rear tang, guard bow, and a magazine that hangs 38 below
+#                           the stock and sweeps forward and up into it; let into the wood; clip hole below
 #   Trigger        steel    MOVES: hinge at its top
 #   LowerBand, NoseCap      blued, 2 thick round the wood and the barrel; band springs; bayonet lug
 #   RearSight      blued    base 83 long with curved ramp walls, leaf, slider, notch plate
@@ -39,17 +41,18 @@ BLUED = material("M_BluedSteel", (0.040, 0.046, 0.062), 1.0, 0.36, grain="metal"
 FITTING = material("M_BluedSteelWorn", (0.060, 0.064, 0.074), 1.0, 0.48, grain="metal")
 STEEL = material("M_GreySteel", (0.11, 0.11, 0.12), 1.0, 0.52, grain="metal")
 BRIGHT = material("M_SatinSteel", (0.30, 0.30, 0.32), 1.0, 0.50, grain="metal")
-WALNUT = material("M_WalnutOiled", (0.090, 0.036, 0.016), 0.0, 0.62, grain="wood")
+WALNUT = material("M_WalnutOiled", (0.070, 0.024, 0.011), 0.0, 0.62, grain="wood")   # dark red-brown, as the reference
 BLACK = material("M_Bore", (0.004, 0.004, 0.004), 0.0, 0.9)
 for n in WALNUT.node_tree.nodes:          # tighter grain than the shared default
     if n.type == "MAPPING":
         n.inputs["Scale"].default_value = (7.0, 300.0, 300.0)
     if n.type == "VALTORGB":              # a third of the default grain contrast
-        n.color_ramp.elements[0].color = (0.090 * 0.72, 0.036 * 0.72, 0.016 * 0.72, 1.0)
+        n.color_ramp.elements[0].color = (0.070 * 0.72, 0.024 * 0.72, 0.011 * 0.72, 1.0)
     if n.type == "BSDF_PRINCIPLED":       # an oil finish has no bright rim
         n.inputs["Specular IOR Level"].default_value = 0.2
 
 BZ = 0.050            # bore line
+JACKET_R = 0.0125     # the sheet-steel jacket tube round the barrel: what you see is an even tube
 FLAT = BZ + 0.001     # the stock's top edge beside the barrel
 MUZZLE_X = 0.966
 STOCK_X0, STOCK_X1 = -0.285, 0.860
@@ -125,8 +128,8 @@ def strap(name, table, x0, x1, width, side, mat, thick=0.0026, sink=0.0020, n=12
 
 
 # ---------------------------------------------------------------- wood
-stock_top = [(-0.290, 0.006), (-0.108, 0.042), (-0.090, 0.035), (0.000, 0.036), (0.040, 0.051),
-             (0.075, 0.064), (0.860, 0.064)]                       # straight comb, a comb nose, a level wrist
+stock_top = [(-0.290, 0.006), (-0.108, 0.042), (-0.090, 0.035), (0.000, 0.036), (0.040, 0.049),
+             (0.075, 0.056), (0.860, 0.056)]                       # straight comb, a comb nose, a level wrist
 stock_bot = [(-0.290, -0.120), (-0.060, -0.012), (-0.030, -0.008), (0.000, -0.001), (0.020, 0.000),
              (0.210, 0.000), (0.300, 0.014), (0.560, 0.021), (0.860, 0.026)]   # the toe line is dead straight
 stock_w = [(-0.290, 0.048), (-0.140, 0.045), (-0.070, 0.037), (0.000, 0.038), (0.060, 0.046), (0.110, 0.048),
@@ -155,15 +158,9 @@ for v in stock.data.vertices:
     if v.co.x < STOCK_X0 + 0.018:
         v.co.x += butt_curve(v.co.z) * (STOCK_X0 + 0.018 - v.co.x) / 0.018
 solid(stock)
-cut(stock, box("c_channel", 0.000, 0.900, -0.1, 0.1, FLAT, 0.2, None, 0))          # barrel channel: flat top edges
-for s in (-1, 1):                                                                 # finger grooves
-    yc = s * (half_w(0.30) + 0.0022)
-    cut(stock, loft("c_groove", 0.232, 0.368,
-                    [(0.232, 0.0365), (0.250, 0.0405), (0.350, 0.0405), (0.368, 0.0365)],
-                    [(0.232, 0.0355), (0.250, 0.0315), (0.350, 0.0315), (0.368, 0.0355)],
-                    [(0.232, 0.002), (0.250, 0.012), (0.350, 0.012), (0.368, 0.002)], None,
-                    steps=14, sides=14, power=2.0, subsurf=0, soften=1, y=yc))
-bevel(stock, 0.0007)
+cut(stock, tube("c_action", 0.000, 0.2165, BZ, 0.0188, None, sides=28))             # the receiver's seat
+cut(stock, tube("c_barrel", 0.200, 0.900, BZ, JACKET_R + 0.0004, None, sides=28))    # the jacket's channel
+cut(stock, box("c_port", 0.040, 0.200, -0.1, 0.0, BZ - 0.002, 0.2, None, 0))         # open to the right for the bolt handle
 
 butt = loft("ButtPlate", STOCK_X0 - 0.0080, STOCK_X0 + 0.0005, [(0, 0.0070)], [(0, -0.1215)], [(0, 0.0492)], FITTING,
             steps=2, sides=24, power=POWER, subsurf=0, soften=0)
@@ -179,13 +176,7 @@ for i, z in enumerate((-0.028, -0.095)):
     slot.data.transform(Matrix.Translation((x, 0.0, z)))
     cut(s, slot)
 
-HG0, HG1 = 0.345, 0.563
-CREST = 0.0135
-hg = loft("Handguard", HG0, HG1, [(0, FLAT + CREST)], [(0, FLAT - CREST)],
-          [(x, 2 * half_w(x, FLAT)) for x in (HG0, 0.42, 0.50, HG1)], WALNUT, steps=10, sides=24, power=2.3, soften=0)
-solid(hg)
-cut(hg, box("c_hg", 0.30, 0.60, -0.1, 0.1, -0.1, FLAT + 0.0006, None, 0))         # a half shell, a hair above the stock
-bevel(hg, 0.0006)
+CREST = JACKET_R        # no wooden handguard on this type: the jacket is the hand hold
 
 # ---------------------------------------------------------------- receiver and barrel
 receiver = tube("Receiver", 0.040, 0.215, BZ, 0.0170, BLUED, sides=28, bevel_w=0.0006)
@@ -193,33 +184,34 @@ cut(receiver, tube("c_bore", 0.030, 0.200, BZ, 0.0101, None, sides=22))
 cut(receiver, box("c_port", 0.078, 0.168, -0.030, 0.0098, BZ + 0.0035, BZ + 0.030, None, 0))
 bridge = tube("RearBridge", 0.040, 0.077, BZ, 0.0186, BLUED, sides=28, bevel_w=0.0015)
 cut(bridge, tube("c_bore2", 0.030, 0.090, BZ, 0.0101, None, sides=22))
-cut(bridge, box("c_guide", 0.030, 0.090, -0.0045, 0.0045, BZ + 0.0125, BZ + 0.030, None, 0))   # charger guide slot
+cut(bridge, box("c_guide", 0.030, 0.090, -0.0070, 0.0070, BZ + 0.0090, BZ + 0.030, None, 0))   # the split bridge: the lifted handle passes back through it
 tube("ReceiverRing", 0.168, 0.216, BZ, 0.0186, BLUED, sides=28, bevel_w=0.0015)
 tube("GasHole", 0.0170, 0.01875, BZ + 0.003, 0.0018, BLACK, y=0.192, sides=10, axis="Y")
 prism("BoltStop", [(0.042, BZ - 0.005), (0.080, BZ - 0.004), (0.080, BZ + 0.004), (0.052, BZ + 0.006), (0.038, BZ + 0.013),
                    (0.034, BZ + 0.009), (0.042, BZ + 0.004)], 0.0040, BLUED, y=0.0200, bevel_w=0.0008)
 tube("BoltStopPin", 0.0195, 0.0228, BZ, 0.0024, STEEL, y=0.072, sides=12, axis="Y", bevel_w=0.0003)
 
-R = [(0.200, 0.0150), (0.285, 0.0148), (0.300, 0.0125), (0.963, 0.0078)]
-loft("Barrel", 0.205, 0.960, [(x, BZ + r) for x, r in R], [(x, BZ - r) for x, r in R], [(x, 2 * r) for x, r in R],
-     BLUED, steps=40, sides=20, power=2.0, subsurf=0, soften=0)
+tube("BarrelJacket", 0.214, 0.905, BZ, JACKET_R, BLUED, sides=24, bevel_w=0.0008)
+tube("JacketCollar", 0.899, 0.911, BZ, JACKET_R + 0.0012, BLUED, sides=24, bevel_w=0.0008)
+tube("Barrel", 0.900, 0.960, BZ, 0.0078, BLUED, sides=20)
 muzzle = tube("Muzzle", 0.958, MUZZLE_X, BZ, 0.0079, BLUED, sides=20, bevel_w=0.0012)
 cut(muzzle, tube("c_muz", 0.940, 0.975, BZ, 0.0040, None, sides=18))
 tube("Bore", 0.9602, 0.9615, BZ, 0.0042, BLACK, sides=18)
 
 # ---------------------------------------------------------------- bolt (one moving group)
+HX = 0.088            # the handle turns down ahead of the rear bridge, as the reference shows
 bolt = tube("Bolt", 0.012, 0.198, BZ, 0.0100, BRIGHT, sides=22, bevel_w=0.0005)
 pivot(bolt, 0.030, 0.0, BZ)
 HR = [(0.004, 0.0062), (0.018, 0.0056), (0.056, 0.0046)]
 handle = loft("BoltHandle", 0.004, 0.056, [(x, r) for x, r in HR], [(x, -r) for x, r in HR], [(x, 2 * r) for x, r in HR],
               BRIGHT, steps=8, sides=16, power=2.0, subsurf=0, soften=0)
 handle.data.transform(Matrix.Rotation(math.radians(-90), 4, "Z"))
-handle.data.transform(Matrix.Translation((0.030, 0.0, BZ)))
+handle.data.transform(Matrix.Translation((HX, 0.0, BZ)))
 for part in (
-    tube("BoltCollar", 0.022, 0.038, BZ, 0.0118, BRIGHT, sides=22, bevel_w=0.0006),
-    tube("BoltHandleRoot", -0.0185, -0.0080, BZ, 0.0078, BRIGHT, y=0.030, sides=18, axis="Y", bevel_w=0.0010),
+    tube("BoltCollar", HX - 0.008, HX + 0.008, BZ, 0.0118, BRIGHT, sides=22, bevel_w=0.0006),
+    tube("BoltHandleRoot", -0.0185, -0.0080, BZ, 0.0078, BRIGHT, y=HX, sides=18, axis="Y", bevel_w=0.0010),
     handle,
-    ball("BoltKnob", 0.030, -0.0645, BZ, 0.0105, BRIGHT),
+    ball("BoltKnob", HX, -0.0645, BZ, 0.0105, BRIGHT),
     box("Extractor", 0.046, 0.197, -0.0116, -0.0088, BZ - 0.0045, BZ + 0.0045, BRIGHT, 0.0006),
     tube("BoltShroud", -0.012, 0.014, BZ, 0.0112, BLUED, sides=22, bevel_w=0.0010),
     tube("SafetySpindle", -0.012, 0.014, BZ + 0.0118, 0.0040, BLUED, sides=14, bevel_w=0.0005),
@@ -232,19 +224,25 @@ for part in (
     ride(part, bolt)
 
 # ---------------------------------------------------------------- floor strap, magazine, guard, trigger
-box("FloorStrap", -0.050, 0.202, -0.0078, 0.0078, -0.0004, 0.0040, FITTING, 0.0005)
-box("MagazineFlange", 0.100, 0.193, -0.0130, 0.0130, -0.0014, 0.0030, FITTING, 0.0006)
-vscrew("GuardScrewRear", -0.040, 0.0, -0.0014)
-vscrew("GuardScrewFront", 0.198, 0.0, -0.0014, turn=75.0)
-MAG = [(0.104, 0.008), (0.104, -0.048), (0.188, -0.048), (0.188, 0.008)]
-prism("Magazine", fillet(MAG, [0.0004, 0.004, 0.016, 0.0004], closed=True, n=7), 0.0220, FITTING, bevel_w=0.0016)
-prism("MagazineRib", fillet([(0.111, -0.004), (0.111, -0.041), (0.181, -0.041), (0.181, -0.004)],
-                            [0.003, 0.003, 0.011, 0.003], closed=True, n=5), 0.0236, FITTING, bevel_w=0.0008)
-prism("MagazineFloor", [(0.1035, -0.0472), (0.1035, -0.0505), (0.1720, -0.0505), (0.1720, -0.0472)],
-      0.0236, FITTING, bevel_w=0.0008)
-tube("MagazinePin", -0.0122, 0.0122, -0.0440, 0.0018, STEEL, y=0.108, sides=12, axis="Y", bevel_w=0.0003)
-sweep("TriggerGuard", fillet([(0.105, -0.014), (0.104, -0.039), (0.028, -0.039), (0.008, 0.001)],
-                             [0, 0.019, 0.021, 0], n=14), 0.0034, 0.0150, FITTING)
+GUARD = fillet([(-0.046, 0.005), (-0.046, -0.0035), (0.004, -0.0040), (0.014, -0.0330), (0.040, -0.0420), (0.086, -0.0420),
+                (0.108, -0.0380), (0.152, -0.0320), (0.200, -0.0150), (0.236, -0.0010), (0.236, 0.005)],
+               [0.0003, 0.0003, 0.006, 0.012, 0.012, 0.010, 0.010, 0.02, 0.02, 0.004, 0.0003], closed=True, n=6)
+BOW = fillet([(0.019, -0.0045), (0.025, -0.0290), (0.044, -0.0375), (0.084, -0.0375), (0.097, -0.0300), (0.099, -0.0045)],
+             [0.004, 0.010, 0.010, 0.008, 0.006, 0.004], closed=True, n=6)
+guard = plate("GuardAndMagazine", GUARD, 0.0145, FITTING, holes=[BOW], bevel_w=0.0012)
+cheeks = prism("MagazineCheeks", fillet([(0.103, 0.005), (0.103, -0.0350), (0.110, -0.0388), (0.152, -0.0325), (0.200, -0.0155),
+                                         (0.233, -0.0015), (0.233, 0.005)],
+                                        [0.0003, 0.004, 0.006, 0.02, 0.02, 0.004, 0.0003], closed=True, n=6),
+               0.0215, FITTING, bevel_w=0.0016)
+cut(cheeks, box("c_clip", 0.122, 0.150, -0.0060, 0.0060, -0.06, -0.020, None, 0))    # the hole the empty clip drops through
+solid(guard)
+solid(cheeks)
+inlet(stock, guard)
+inlet(stock, cheeks)
+bevel(stock, 0.0007)
+vscrew("GuardScrewRear", -0.036, 0.0, -0.0047)
+vscrew("GuardScrewFront", 0.226, 0.0, -0.0060, turn=75.0)
+tube("MagazinePin", -0.0118, 0.0118, -0.0240, 0.0018, STEEL, y=0.112, sides=12, axis="Y", bevel_w=0.0003)
 trigger = prism("Trigger", [(0.060, 0.004), (0.0615, -0.008), (0.059, -0.016), (0.055, -0.0225), (0.0575, -0.024),
                             (0.062, -0.017), (0.0665, -0.008), (0.068, 0.004)], 0.0060, STEEL, bevel_w=0.0012)
 pivot(trigger, 0.064, 0.0, 0.006)
@@ -253,7 +251,7 @@ for i, (x, z) in enumerate(((0.195, 0.028), (0.014, 0.020))):
         yscrew("CrossBolt%d%s" % (i, "R" if side < 0 else "L"), x, z, side * half_w(x, z), side, turn=20 + 60 * i)
 
 # ---------------------------------------------------------------- bands, nose cap, rod, sling loops
-BAND_X0, BAND_X1 = 0.553, 0.566
+BAND_X0, BAND_X1 = 0.500, 0.513
 BX = (BAND_X0 + BAND_X1) / 2
 band = loft("LowerBand", BAND_X0, BAND_X1, [(0, FLAT + CREST + 0.0018)], [(0, _interp(stock_bot, BX) - 0.0018)],
             [(0, 2 * half_w(BX) + 0.0036)], FITTING, steps=1, sides=28, power=2.5, subsurf=0, soften=0)
@@ -263,7 +261,7 @@ tube("BandScrew", -0.0052, 0.0052, 0.0155, 0.0022, STEEL, y=BX, sides=12, axis="
 loop("SlingLoopFront", BX, 0.0155, 0.0190, 0.0240, FITTING)
 
 NOSE_X0, NOSE_X1 = 0.830, 0.866
-nose = loft("NoseCap", NOSE_X0, NOSE_X1, [(0, BZ + 0.0103)], [(0, _interp(stock_bot, 0.85) - 0.0020)],
+nose = loft("NoseCap", NOSE_X0, NOSE_X1, [(0, BZ + JACKET_R + 0.0020)], [(0, _interp(stock_bot, 0.85) - 0.0020)],
             [(0, 2 * half_w(0.85) + 0.0040)], FITTING, steps=1, sides=28, power=2.5, subsurf=0, soften=0)
 bevel(nose, 0.0008)
 tube("NoseScrew", -half_w(0.85) - 0.0026, half_w(0.85) + 0.0026, 0.0370, 0.0026, STEEL, y=0.850, sides=12, axis="Y", bevel_w=0.0003)
@@ -277,7 +275,7 @@ tube("CleaningRod", 0.840, 0.908, 0.0345, 0.0030, STEEL, sides=12)
 rod = tube("CleaningRodHead", 0.908, 0.920, 0.0345, 0.0042, STEEL, sides=14, bevel_w=0.0005)
 cut(rod, box("c_rod", 0.915, 0.930, -0.0007, 0.0007, 0.02, 0.05, None, 0))
 
-SX = -0.223
+SX = -0.100           # 190 from the butt plate, as the reference shows
 strap("SlingPlate", stock_bot, SX - 0.017, SX + 0.017, 0.0160, -1, FITTING, thick=0.0034, sink=0.0024)
 zr = _interp(stock_bot, SX)
 box("SlingPost", SX - 0.004, SX + 0.004, -0.0030, 0.0030, zr - 0.0080, zr - 0.0005, FITTING, 0.0008)

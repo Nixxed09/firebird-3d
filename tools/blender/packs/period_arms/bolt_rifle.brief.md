@@ -1,6 +1,7 @@
 # Brief: bolt-action infantry rifle (period_arms / bolt_rifle)
 
-Written 2026-11-12, after the model's first four rounds, which were built without it. Read section 5.
+Written 2026-11-12, after the model's first four rounds, which were built without it (section 5).
+The model was rebuilt from it in rounds 6 and 7.
 
 ## 1. What it is in the game
 
@@ -18,9 +19,9 @@ Source: https://en.wikipedia.org/wiki/Gewehr_1888 (read 2026-11-12).
 | Overall length | 1,245 mm | 1,262 mm |
 | Barrel length | 740 mm | 755 mm |
 | Weight | 3.9 kg | not used |
-| Magazine | 5 rounds in a steel clip, pushed in from the top; the empty clip drops out of a hole in the bottom | a box, no hole yet |
-| Barrel | sits inside a thin sheet-steel jacket tube, so what you see is a plain tube about 20 mm across with no taper | modelled as a tapered bare barrel: wrong for the type |
-| Receiver | split bridge: the bolt handle passes through the rear bridge and turns down in front of it | handle sits behind the bridge |
+| Magazine | 5 rounds in a steel clip, pushed in from the top; the empty clip drops out of a hole in the bottom | one piece with the guard, clip hole below |
+| Barrel | sits inside a thin sheet-steel jacket tube, so what you see is a plain tube about 20 mm across with no taper | an even 25 mm jacket tube |
+| Receiver | split bridge: the bolt handle passes through the rear bridge and turns down in front of it | handle ahead of the bridge, passing back through a slot in it |
 
 Not stated on that page, taken from the reference photographs instead: sights, stock shape, bands, bayonet
 lug, cleaning rod, the guard and magazine.
@@ -39,7 +40,7 @@ python -I tools\blender\fetch_refs.py --pack period_arms --asset bolt_rifle --qu
 | `Rifles1905 2` (public domain) | side drawings of several rifles | how this type differs from its neighbours |
 | `Mannlicher M1895 night sights` (CC BY-SA 4.0) | sights, close | the rear sight's ramp and leaf |
 
-What the side photograph shows that the model does not have:
+What the side photograph shows that is easy to get wrong (1, 3 and 5 are now in the model; 2 and 4 in part):
 
 1. **Guard and magazine are one piece of steel**, about 230 mm long. The magazine hangs only about 25 mm
    below the stock and its bottom edge runs forward and up in one sweep into the stock. The guard bow is the

@@ -22,8 +22,26 @@ Add-Type -Name FbWin -Namespace Fb -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool ShowWindow(System.IntPtr h, int c);
 [DllImport("user32.dll")] public static extern bool IsIconic(System.IntPtr h);
 [DllImport("user32.dll")] public static extern bool SetForegroundWindow(System.IntPtr h);
+public delegate bool EnumProc(System.IntPtr h, System.IntPtr l);
+[DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc f, System.IntPtr l);
+[DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(System.IntPtr h, out uint p);
+[DllImport("user32.dll")] public static extern int GetWindowText(System.IntPtr h, System.Text.StringBuilder s, int n);
+[DllImport("user32.dll")] public static extern bool IsWindowVisible(System.IntPtr h);
+// The editor's own window, found by title among ALL the process's windows. Its "main window" stops being
+// the level editor as soon as an asset editor or a settings window is open (2026-11-12).
+public static System.IntPtr EditorWindow(uint pid) {
+    System.IntPtr found = System.IntPtr.Zero;
+    EnumWindows((h, l) => { uint p; GetWindowThreadProcessId(h, out p);
+        if (p == pid && IsWindowVisible(h)) { var s = new System.Text.StringBuilder(256); GetWindowText(h, s, 256);
+            if (s.ToString().Contains("Unreal Editor")) { found = h; return false; } }
+        return true; }, System.IntPtr.Zero);
+    return found; }
 '@ -ErrorAction SilentlyContinue
-$ed = Get-Process UnrealEditor -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -match "Unreal Editor" } | Select-Object -First 1
+$ed = $null
+foreach ($proc in @(Get-Process UnrealEditor -ErrorAction SilentlyContinue)) {
+    $h = [Fb.FbWin]::EditorWindow([uint32]$proc.Id)
+    if ($h -ne [IntPtr]::Zero) { $ed = [pscustomobject]@{ MainWindowHandle = $h }; break }
+}
 if (-not $ed) { throw "The Unreal editor is not running. Start it with .\tools\ue-edit.ps1" }
 if ([Fb.FbWin]::IsIconic($ed.MainWindowHandle)) { [Fb.FbWin]::ShowWindow($ed.MainWindowHandle, 9) | Out-Null; Start-Sleep 2 }
 # Typing needs the editor in front: its Cmd box cannot take focus from behind another window.

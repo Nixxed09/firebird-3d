@@ -58,7 +58,7 @@ def light(name, loc, energy, size_m, colour=(1, 1, 1)):
     return o
 
 
-E = 60.0 * L * L
+E = 26.0 * L * L          # calibrated 2026-11-12 so dark walnut reads dark; 60 washed colours out
 light("Key", mid + Vector((0.5 * L, -0.9 * L, 1.0 * L)), E * 1.6, 0.8 * L, (1.0, 0.96, 0.9))
 light("Fill", mid + Vector((-0.6 * L, 0.9 * L, 0.5 * L)), E * 0.7, 1.2 * L, (0.85, 0.9, 1.0))
 light("Rim", mid + Vector((-0.2 * L, 0.3 * L, -0.8 * L)), E * 0.35, 1.0 * L)
@@ -132,9 +132,15 @@ if movers:
         mix = lambda key: [x + (y - x) * k for x, y in zip(a.get(key, (0, 0, 0)), b.get(key, (0, 0, 0)))]
         return mix("rot"), mix("move")
 
-    times = sorted({s["t"] for _, steps, _ in movers for s in steps if 0 < s["t"] < 1})
-    if len(times) > 3:
-        times = [times[0], times[len(times) // 2], times[-1]]
+    # every key time at which the parts stand somewhere new: not at rest, and not a pose already shown
+    # (round 6's critic was given the bolt lifted twice and never drawn back)
+    times, seen = [], set()
+    for t in sorted({s["t"] for _, steps, _ in movers for s in steps if 0 < s["t"] < 1}):
+        sig = tuple(round(v, 4) for _, steps, _ in movers for part in pose_at(steps, t) for v in part)
+        if any(sig) and sig not in seen:
+            seen.add(sig)
+            times.append(t)
+    times = times[:4]
     if "detail" in opt:
         x0, x1 = [float(v) for v in opt["detail"].split(",")]
         c, d = Vector(((x0 + x1) / 2, mid.y, mid.z)), x1 - x0

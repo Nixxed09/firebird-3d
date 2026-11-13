@@ -47,6 +47,7 @@ def build_material(dest, asset, tex):
     if not mat:
         mat = tools.create_asset("M_" + asset, dest, unreal.Material, unreal.MaterialFactoryNew())
     mel.delete_all_material_expressions(mat)
+    mat.set_editor_property("used_with_skeletal_mesh", True)   # the rigged copy (SK_<asset>) wears it too
     P = unreal.MaterialProperty
     S = unreal.MaterialSamplerType
     spec = (("albedo", S.SAMPLERTYPE_COLOR, (("RGB", P.MP_BASE_COLOR),)),
@@ -68,6 +69,10 @@ for fbx in sorted(glob.glob(os.path.join(root, "*", "*", "*.fbx"))):
     asset = os.path.splitext(os.path.basename(fbx))[0]
     pack = os.path.basename(os.path.dirname(os.path.dirname(fbx)))
     dest = "/Game/Firebird/Packs/" + "".join(w.capitalize() for w in pack.split("_"))
+    if asset.endswith("_rig"):       # the skinned file belongs to import_forge_rig.py
+        if eal.does_asset_exist(dest + "/SM_" + asset):
+            eal.delete_asset(dest + "/SM_" + asset)   # made by mistake by an earlier version of this script
+        continue
     baked = {k: os.path.join(os.path.dirname(fbx), "textured", "%s_%s.png" % (asset, k)) for k in ("albedo", "normal", "orm")}
     has_bake = all(os.path.exists(p) for p in baked.values())
     ui = unreal.FbxImportUI()
